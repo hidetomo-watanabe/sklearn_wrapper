@@ -1,6 +1,7 @@
 import math
 import json
 import configparser
+import myfuncs
 # import numpy as np
 import pandas as pd
 from IPython.display import display
@@ -100,6 +101,7 @@ if __name__ == '__main__':
     base_model = get_base_model(cp.get('model', 'base'))
     scoring = cp.get('model', 'scoring')
     params = json.loads(cp.get('model', 'params'))
+    trans_adhoc = json.loads(cp.get('translate', 'adhoc'))
     trans_replace = json.loads(cp.get('translate', 'replace'))
     trans_del = json.loads(cp.get('translate', 'del'))
     trans_category = json.loads(cp.get('translate', 'category'))
@@ -116,6 +118,9 @@ if __name__ == '__main__':
 
     # translate df
     print('### DATA TRANSLATION')
+    # adhoc
+    for value in trans_adhoc:
+        eval('myfuncs.%s' % value)([test_df], train_df)
     # replace
     for key, value in trans_replace.items():
         # mean
@@ -149,9 +154,9 @@ if __name__ == '__main__':
     for value in train_df.columns:
         if value == pred_col or value == id_col:
             continue
-        print('##### value: %s' % value)
         if train_df.dtypes[value] == 'object':
             continue
+        print('##### value: %s' % value)
         g = sns.FacetGrid(train_df, col=pred_col)
         g.map(plt.hist, value, bins=20)
         print(train_df.groupby(pred_col)[value].mean())
