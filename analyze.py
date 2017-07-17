@@ -176,7 +176,7 @@ if __name__ == '__main__':
     X_test = ss.transform(X_test)
 
     # fit and predict
-    gs = GridSearchCV(base_model, params, scoring=scoring)
+    gs = GridSearchCV(base_model, params, scoring=scoring, n_jobs=-1)
     gs.fit(X_train, Y_train)
     best_model = gs.best_estimator_
     Y_pred = best_model.predict(X_test)
