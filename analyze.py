@@ -150,12 +150,11 @@ if __name__ == '__main__':
         if value == pred_col or value == id_col:
             continue
         print('##### value: %s' % value)
-        try:
-            g = sns.FacetGrid(train_df, col=pred_col)
-            g.map(plt.hist, value, bins=20)
-            print(train_df.groupby(pred_col)[value].mean())
-        except Exception as e:
-            print(e)
+        if train_df.dtypes[value] == 'object':
+            continue
+        g = sns.FacetGrid(train_df, col=pred_col)
+        g.map(plt.hist, value, bins=20)
+        print(train_df.groupby(pred_col)[value].mean())
     """
 
     # create ndarray
