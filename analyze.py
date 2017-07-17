@@ -52,7 +52,7 @@ def display_dfs(dfs):
         display(df.describe())
 
 
-def translate_dfs(dfs, target, config):
+def translate_dfs(dfs, target, config, *, mean=None):
     """
         config is dict
     """
@@ -62,7 +62,7 @@ def translate_dfs(dfs, target, config):
             for key, value2 in config.items():
                 # mean
                 if value2 == 'mean':
-                    value2 = df[target].mean()
+                    value2 = mean
                 # translate
                 if key == 'isnan':
                     if math.isnan(value1):
@@ -116,13 +116,21 @@ if __name__ == '__main__':
 
     # translate df
     print('### DATA TRANSLATION')
+    # replace
     for key, value in trans_replace.items():
-        translate_dfs([train_df, test_df], key, value)
+        # mean
+        if train_df.dtypes[key] == 'object':
+            key_mean = None
+        else:
+            key_mean = train_df[key].mean()
+        translate_dfs([train_df, test_df], key, value, mean=key_mean)
         print('##### %s' % key)
         display_dfs([train_df[key], test_df[key]])
+    # del
     for value in trans_del:
         del train_df[value]
         del test_df[value]
+    # category
     for key, values in trans_category.items():
         categorize_dfs([train_df, test_df], key, values)
         print('##### %s' % key)
