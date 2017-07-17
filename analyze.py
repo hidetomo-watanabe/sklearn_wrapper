@@ -178,9 +178,11 @@ if __name__ == '__main__':
     # fit and predict
     gs = GridSearchCV(base_model, params, scoring=scoring, n_jobs=-1)
     gs.fit(X_train, Y_train)
+    display(gs.best_params_)
+    display(gs.best_score_)
     best_model = gs.best_estimator_
+    display(best_model)
     Y_pred = best_model.predict(X_test)
-    display(best_model.score(X_train, Y_train))
 
     # create output
     f = open('outputs/tmp.csv', 'w')
