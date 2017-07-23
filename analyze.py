@@ -126,9 +126,6 @@ if __name__ == '__main__':
 
     # translate df
     print('### DATA TRANSLATION')
-    # adhoc
-    for value in trans_adhoc:
-        eval('myfuncs.%s' % value)([train_df, test_df], train_df)
     # replace
     for key, value in trans_replace.items():
         # mean
@@ -139,10 +136,9 @@ if __name__ == '__main__':
         translate_dfs([train_df, test_df], key, value, mean=key_mean)
         print('##### %s' % key)
         display_dfs([train_df[key], test_df[key]])
-    # del
-    for value in trans_del:
-        del train_df[value]
-        del test_df[value]
+    # adhoc
+    for value in trans_adhoc:
+        eval('myfuncs.%s' % value)([train_df, test_df], train_df)
     # category
     for key, values in trans_category.items():
         categorize_dfs([train_df, test_df], key, values)
@@ -151,6 +147,10 @@ if __name__ == '__main__':
             display_dfs([
                 train_df['%s_%s' % (key, val)],
                 test_df['%s_%s' % (key, val)]])
+    # del
+    for value in trans_del:
+        del train_df[value]
+        del test_df[value]
 
     # translation overview
     print('### TRANSLATION OVERVIEW')

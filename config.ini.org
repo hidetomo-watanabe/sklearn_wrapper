@@ -12,12 +12,12 @@ params = {
     }
 
 [translate]
-adhoc = ["hoge.translate_hoge"]
 replace = {
     "Hoge": {"hoge1": 1, "hoge2": -1},
     "Bar": {"isnan": "mean"}
     }
-del = ["Hoge", "Foo"]
+adhoc = ["hoge.translate_hoge"]
 category = {
     "Hoge": [1, 2, 3],
     }
+del = ["Hoge", "Foo"]
