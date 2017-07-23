@@ -124,7 +124,7 @@ if __name__ == '__main__':
     print('### INIT OVERVIEW')
     display_dfs([train_df, test_df])
 
-    # translate df
+    # data translation
     print('### DATA TRANSLATION')
     # replace
     for key, value in trans_replace.items():
@@ -171,6 +171,7 @@ if __name__ == '__main__':
     """
 
     # create ndarray
+    print('### CREATE NDARRAY')
     Y_train = train_df[pred_col].values
     id_pred = test_df[id_col].values
     del train_df[pred_col]
@@ -188,19 +189,24 @@ if __name__ == '__main__':
     X_train = ss.transform(X_train)
     X_test = ss.transform(X_test)
 
-    # fit and predict
+    # fit
+    print('### FIT')
     gs = GridSearchCV(base_model, params, scoring=scoring, n_jobs=-1)
     if train_num:
+        print('train num: %s' % train_num)
         gs.fit(X_train[:train_num], Y_train[:train_num])
     else:
+        print('train num: ALL(%s)' % len(X_train))
         gs.fit(X_train, Y_train)
+    print('X train shape: %s' % str(X_train.shape))
+    print('Y train shape: %s' % str(Y_train.shape))
     display(gs.best_params_)
     display(gs.best_score_)
     best_model = gs.best_estimator_
     display(best_model)
-    Y_pred = best_model.predict(X_test)
 
-    # create output
+    # predict and create output
+    Y_pred = best_model.predict(X_test)
     f = open('outputs/tmp.csv', 'w')
     f.write('%s,%s' % (id_col, pred_col))
     for i in range(len(id_pred)):
