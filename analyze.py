@@ -95,12 +95,20 @@ if __name__ == '__main__':
     # definition
     cp = configparser.SafeConfigParser()
     cp.read('./config.ini')
+    # data
     data_path = cp.get('data', 'path')
     pred_col = cp.get('data', 'pred_col')
     id_col = cp.get('data', 'id_col')
+    train_num = cp.get('data', 'train_num')
+    if train_num:
+        train_num = int(train_num)
+    else:
+        train_num = None
+    # model
     base_model = get_base_model(cp.get('model', 'base'))
     scoring = cp.get('model', 'scoring')
     params = json.loads(cp.get('model', 'params'))
+    # traslate
     trans_adhoc = json.loads(cp.get('translate', 'adhoc'))
     trans_replace = json.loads(cp.get('translate', 'replace'))
     trans_del = json.loads(cp.get('translate', 'del'))
@@ -182,7 +190,10 @@ if __name__ == '__main__':
 
     # fit and predict
     gs = GridSearchCV(base_model, params, scoring=scoring, n_jobs=-1)
-    gs.fit(X_train, Y_train)
+    if train_num:
+        gs.fit(X_train[:train_num], Y_train[:train_num])
+    else:
+        gs.fit(X_train, Y_train)
     display(gs.best_params_)
     display(gs.best_score_)
     best_model = gs.best_estimator_
