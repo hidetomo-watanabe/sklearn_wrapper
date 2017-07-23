@@ -120,7 +120,7 @@ if __name__ == '__main__':
     print('### DATA TRANSLATION')
     # adhoc
     for value in trans_adhoc:
-        eval('myfuncs.%s' % value)([test_df], train_df)
+        eval('myfuncs.%s' % value)([train_df, test_df], train_df)
     # replace
     for key, value in trans_replace.items():
         # mean
