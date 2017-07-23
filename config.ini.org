@@ -24,4 +24,7 @@ category = {
     "Hoge": [1, 2, 3],
     "Fuga": ["a", "b", "c"]
     }
-del = ["Hoge", "Foo"]
+del = [
+    "Hoge",
+    "Foo"
+    ]
