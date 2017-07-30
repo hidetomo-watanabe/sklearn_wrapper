@@ -133,15 +133,17 @@ if __name__ == '__main__':
             key_mean = None
         else:
             key_mean = train_df[key].mean()
-        translate_dfs([train_df, test_df], key, value, mean=key_mean)
+        train_df, test_df = translate_dfs(
+            [train_df, test_df], key, value, mean=key_mean)
         print('##### %s' % key)
         display_dfs([train_df[key], test_df[key]])
     # adhoc
     for value in trans_adhoc:
-        eval('myfuncs.%s' % value)([train_df, test_df], train_df)
+        train_df, test_df = eval(
+            'myfuncs.%s' % value)([train_df, test_df], train_df)
     # category
     for key, values in trans_category.items():
-        categorize_dfs([train_df, test_df], key, values)
+        train_df, test_df = categorize_dfs([train_df, test_df], key, values)
         print('##### %s' % key)
         for val in values:
             display_dfs([
