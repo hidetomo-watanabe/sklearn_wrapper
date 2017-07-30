@@ -1,5 +1,4 @@
 __pycache__
 config.ini
 configs/*.ini
-myfuncs/*.py
 outputs/*.csv
