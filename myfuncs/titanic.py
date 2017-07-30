@@ -39,7 +39,7 @@ def translate_fare(dfs, train_df):
                 df['Fare'].values[i] = \
                     train_df.groupby('Pclass')['Fare'].mean()[
                         df['Pclass'].values[i]]
-    return df
+    return dfs
 
 
 def translate_familystatus(dfs, train_df):
