@@ -1,3 +1,4 @@
+import sys
 import math
 import json
 import configparser
@@ -92,9 +93,14 @@ def categorize_dfs(dfs, target, config):
     return output
 
 if __name__ == '__main__':
+    # input
+    if len(sys.argv) > 1:
+        config_path = sys.argv[1]
+    else:
+        config_path = './config.ini'
     # definition
     cp = configparser.SafeConfigParser()
-    cp.read('./config.ini')
+    cp.read(config_path)
     # data
     data_path = cp.get('data', 'path')
     pred_col = cp.get('data', 'pred_col')
