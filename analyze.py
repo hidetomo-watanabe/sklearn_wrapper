@@ -109,6 +109,7 @@ if __name__ == '__main__':
         config_path = sys.argv[1]
     else:
         config_path = './config.ini'
+
     # definition
     cp = configparser.SafeConfigParser()
     cp.read(config_path)
@@ -142,7 +143,6 @@ if __name__ == '__main__':
     display_dfs([train_df, test_df])
 
     # data translation
-    print('### DATA TRANSLATION')
     # replace
     for key, value in trans_replace.items():
         # mean
@@ -176,13 +176,11 @@ if __name__ == '__main__':
     for key in train_df.keys():
         if key == pred_col or key == id_col:
             continue
-        print('##### key: %s' % key)
         g = sns.FacetGrid(train_df, col=pred_col)
         g.map(plt.hist, key, bins=20)
     """
 
     # create ndarray
-    print('### CREATE NDARRAY')
     Y_train = train_df[pred_col].values
     id_pred = test_df[id_col].values
     del train_df[pred_col]
