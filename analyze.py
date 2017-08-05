@@ -54,7 +54,7 @@ def display_dfs(dfs):
         display(df.describe())
 
 
-def translate_dfs(dfs, target, config, *, mean=None):
+def replace_dfs(dfs, target, config, *, mean=None):
     """
         config is dict
     """
@@ -89,6 +89,17 @@ def categorize_dfs(dfs, target, config):
                 if value1 == value2:
                     df['%s_%s' % (target, value2)].values[i] = 1
         del df[target]
+        output.append(df)
+    return output
+
+
+def to_float_dfs(dfs, pred_col, id_col):
+    output = []
+    for df in dfs:
+        for key in df.keys():
+            if key == pred_col or key == id_col:
+                continue
+            df[key] = df[key].astype(float)
         output.append(df)
     return output
 
@@ -139,7 +150,7 @@ if __name__ == '__main__':
             key_mean = None
         else:
             key_mean = train_df[key].mean()
-        train_df, test_df = translate_dfs(
+        train_df, test_df = replace_dfs(
             [train_df, test_df], key, value, mean=key_mean)
         print('##### %s' % key)
         display_dfs([train_df[key], test_df[key]])
@@ -159,6 +170,8 @@ if __name__ == '__main__':
     for value in trans_del:
         del train_df[value]
         del test_df[value]
+    # float
+    train_df, test_df = to_float_dfs([train_df, test_df], pred_col, id_col)
 
     # translation overview
     print('### TRANSLATION OVERVIEW')
@@ -167,15 +180,13 @@ if __name__ == '__main__':
     """
     # simple visualization
     print('### SIMPLE VISUALIZATION')
-    for value in train_df.columns:
-        if value == pred_col or value == id_col:
+    for key in train_df.keys():
+        if key == pred_col or key == id_col:
             continue
-        if train_df.dtypes[value] == 'object':
-            continue
-        print('##### value: %s' % value)
+        print('##### key: %s' % key)
         g = sns.FacetGrid(train_df, col=pred_col)
-        g.map(plt.hist, value, bins=20)
-        print(train_df.groupby(pred_col)[value].mean())
+        g.map(plt.hist, key, bins=20)
+        print(train_df.groupby(pred_col)[key].mean())
     """
 
     # create ndarray
@@ -185,10 +196,6 @@ if __name__ == '__main__':
     del train_df[pred_col]
     del train_df[id_col]
     del test_df[id_col]
-    for key in train_df.keys():
-        train_df[key] = train_df[key].astype(float)
-    for key in test_df.keys():
-        test_df[key] = test_df[key].astype(float)
     X_train = train_df.values
     X_test = test_df.values
     display(X_train)
