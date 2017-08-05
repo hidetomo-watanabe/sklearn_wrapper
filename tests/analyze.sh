@@ -1,6 +1,6 @@
 #!/bin/bash
-python -u analyze.py configs/titanic.ini > /dev/null
-diff_msg=$(diff outputs/tmp.csv tests/titanic_output.csv)
+python -u analyze.py tests/titanic/config.ini > /dev/null
+diff_msg=$(diff outputs/tmp.csv tests/titanic/output.csv)
 if [ -n "${diff_msg}" ];then
   echo 'INTEGRATION TEST ERROR'
   echo -e "${diff_msg}"
