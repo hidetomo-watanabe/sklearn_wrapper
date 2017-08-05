@@ -179,7 +179,6 @@ if __name__ == '__main__':
         print('##### key: %s' % key)
         g = sns.FacetGrid(train_df, col=pred_col)
         g.map(plt.hist, key, bins=20)
-        print(train_df.groupby(pred_col)[key].mean())
     """
 
     # create ndarray
