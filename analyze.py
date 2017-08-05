@@ -152,8 +152,6 @@ if __name__ == '__main__':
             key_mean = train_df[key].mean()
         train_df, test_df = replace_dfs(
             [train_df, test_df], key, value, mean=key_mean)
-        print('##### %s' % key)
-        display_dfs([train_df[key], test_df[key]])
     # adhoc
     for value in trans_adhoc:
         train_df, test_df = eval(
@@ -161,11 +159,6 @@ if __name__ == '__main__':
     # category
     for key, values in trans_category.items():
         train_df, test_df = categorize_dfs([train_df, test_df], key, values)
-        print('##### %s' % key)
-        for val in values:
-            display_dfs([
-                train_df['%s_%s' % (key, val)],
-                test_df['%s_%s' % (key, val)]])
     # del
     for value in trans_del:
         del train_df[value]
