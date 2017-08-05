@@ -190,9 +190,6 @@ if __name__ == '__main__':
     del test_df[id_col]
     X_train = train_df.values
     X_test = test_df.values
-    display(X_train)
-    display(Y_train)
-    display(X_test)
 
     # translate ndarray to standard
     ss = StandardScaler()
