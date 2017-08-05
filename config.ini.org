@@ -7,8 +7,12 @@ id_col = Id
 base = gbdt_clf
 scoring = accuracy
 params = {
-    "n_estimators": [1, 5, 10, 20, 100],
-    "max_depth": [1, 3, 5, 10, 20, 100]
+# "penalty": ["l1", "l2"],
+# "C": [1, 2, 3, 4, 5]
+# "degree": [1, 2, 3, 4, 5],
+# "kernel": ["rbf", "linear", "poly", "sigmoid"]
+    "n_estimators": [1, 2, 3, 4, 5, 10],
+    "max_depth": [1, 2, 3, 4, 5, 10]
     }
 
 [translate]
