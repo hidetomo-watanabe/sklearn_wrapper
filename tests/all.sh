@@ -1,3 +1,3 @@
 #!/bin/bash
-sh tests/test_flake8.sh
-sh tests/test_analyze.sh
+sh tests/flake8.sh
+sh tests/analyze.sh
