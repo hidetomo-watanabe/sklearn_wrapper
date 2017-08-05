@@ -179,6 +179,10 @@ if __name__ == '__main__':
     del train_df[pred_col]
     del train_df[id_col]
     del test_df[id_col]
+    for key in train_df.keys():
+        train_df[key] = train_df[key].astype(float)
+    for key in test_df.keys():
+        test_df[key] = test_df[key].astype(float)
     X_train = train_df.values
     X_test = test_df.values
     display(X_train)
