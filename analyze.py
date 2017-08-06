@@ -206,10 +206,14 @@ if __name__ == '__main__':
         gs.fit(X_train, Y_train)
     print('X train shape: %s' % str(X_train.shape))
     print('Y train shape: %s' % str(Y_train.shape))
-    display(gs.best_params_)
-    display(gs.best_score_)
+    print('best params: %s' % gs.best_params_)
+    print('best score of trained grid search: %s' % gs.best_score_)
+    if train_num:
+        print(
+            'best score of not trained data: %s' %
+            gs.score(X_train[train_num:], Y_train[train_num:]))
     best_model = gs.best_estimator_
-    display(best_model)
+    print('best model: %s' % best_model)
 
     # predict and create output
     Y_pred = best_model.predict(X_test)
