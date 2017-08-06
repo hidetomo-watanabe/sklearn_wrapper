@@ -8,9 +8,9 @@ base = gbdt_clf
 scoring = accuracy
 params = {
 # "penalty": ["l1", "l2"],
-# "C": [1, 2, 3, 4, 5]
+# "C": [1, 2, 3, 4, 5],
 # "degree": [1, 2, 3, 4, 5],
-# "kernel": ["rbf", "linear", "poly", "sigmoid"]
+# "kernel": ["rbf", "linear", "poly", "sigmoid"],
     "n_estimators": [1, 2, 3, 4, 5, 10],
     "max_depth": [1, 2, 3, 4, 5, 10]
     }
