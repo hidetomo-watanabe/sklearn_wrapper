@@ -4,8 +4,6 @@ import math
 def translate_age(dfs, train_df):
     #######################################
     # no age => mean grouped Mr, Mrs, Miss
-    # age => age range
-    # categorize after
     #######################################
     # get honorific title
     train_df['HonorificTitle'] = [''] * len(train_df['Name'].values)
@@ -18,12 +16,10 @@ def translate_age(dfs, train_df):
         t2m[key] = tmp.mean()[key]
     # age range
     for df in dfs:
-        df['AgeRange'] = [0] * len(df['Age'].values)
         for i, val in enumerate(df['Age'].values):
             if math.isnan(val):
                 val = t2m[df['Name'].values[i].split(',')[1].split('.')[0]]
-            df['AgeRange'].values[i] = val // 10 * 10
-        del df['Age']
+                df['Age'].values[i] = val
     # del honorific title
     del train_df['HonorificTitle']
     return dfs
