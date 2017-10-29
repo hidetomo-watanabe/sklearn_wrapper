@@ -125,6 +125,7 @@ if __name__ == '__main__':
     # model
     base_model = get_base_model(cp.get('model', 'base'))
     scoring = cp.get('model', 'scoring')
+    cv = cp.getint('model', 'cv')
     params = json.loads(cp.get('model', 'params'))
     # traslate
     trans_adhoc = json.loads(cp.get('translate', 'adhoc'))
@@ -197,7 +198,7 @@ if __name__ == '__main__':
 
     # fit
     print('### FIT')
-    gs = GridSearchCV(base_model, params, scoring=scoring, n_jobs=-1)
+    gs = GridSearchCV(base_model, params, cv=cv, scoring=scoring, n_jobs=-1)
     if train_num:
         print('train num: %s' % train_num)
         gs.fit(X_train[:train_num], Y_train[:train_num])

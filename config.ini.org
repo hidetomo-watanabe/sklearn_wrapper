@@ -6,6 +6,7 @@ id_col = Id
 [model]
 base = gbdt_clf
 scoring = accuracy
+cv = 3
 params = {
 # "penalty": ["l1", "l2"],
 # "C": [1, 2, 3, 4, 5],
