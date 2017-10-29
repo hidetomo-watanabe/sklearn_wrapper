@@ -135,8 +135,8 @@ if __name__ == '__main__':
     # data list
     print('### DATA LIST')
     print(check_output(['ls', data_path]).decode('utf8'))
-    train_df = pd.read_csv('%strain.csv' % data_path)
-    test_df = pd.read_csv('%stest.csv' % data_path)
+    train_df = pd.read_csv('%s/train.csv' % data_path)
+    test_df = pd.read_csv('%s/test.csv' % data_path)
 
     # init overview
     print('### INIT OVERVIEW')
