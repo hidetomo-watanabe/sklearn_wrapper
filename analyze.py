@@ -196,15 +196,16 @@ if __name__ == '__main__':
     X_train = ss.transform(X_train)
     X_test = ss.transform(X_test)
 
+    # data validation
+    if train_num:
+        X_train = X_train[:train_num]
+        Y_train = Y_train[:train_num]
+    print('train num: %s' % len(X_train))
+
     # fit
     print('### FIT')
     gs = GridSearchCV(base_model, params, cv=cv, scoring=scoring, n_jobs=-1)
-    if train_num:
-        print('train num: %s' % train_num)
-        gs.fit(X_train[:train_num], Y_train[:train_num])
-    else:
-        print('train num: ALL(%s)' % len(X_train))
-        gs.fit(X_train, Y_train)
+    gs.fit(X_train, Y_train)
     print('X train shape: %s' % str(X_train.shape))
     print('Y train shape: %s' % str(Y_train.shape))
     print('best params: %s' % gs.best_params_)
