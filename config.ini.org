@@ -2,7 +2,13 @@
 path = /path/
 pred_col = Hoge
 id_col = Id
-train_num =
+adversarial = {
+    "model": log_reg,
+    "params" : {
+            "penalty": ["l1", "l2"],
+            "C": [1, 2, 3, 4, 5]
+        }
+    }
 
 [model]
 base = gbdt_clf

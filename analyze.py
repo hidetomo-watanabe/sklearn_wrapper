@@ -3,7 +3,7 @@ import math
 import json
 import configparser
 import myfuncs
-# import numpy as np
+import numpy as np
 import pandas as pd
 from IPython.display import display
 from subprocess import check_output
@@ -117,11 +117,9 @@ if __name__ == '__main__':
     data_path = cp.get('data', 'path')
     pred_col = cp.get('data', 'pred_col')
     id_col = cp.get('data', 'id_col')
-    train_num = cp.get('data', 'train_num')
-    if train_num:
-        train_num = int(train_num)
-    else:
-        train_num = None
+    adversarial = cp.get('data', 'adversarial')
+    if adversarial:
+        adversarial = json.loads(adversarial)
     # model
     base_model = get_base_model(cp.get('model', 'base'))
     scoring = cp.get('model', 'scoring')
@@ -197,10 +195,38 @@ if __name__ == '__main__':
     X_test = ss.transform(X_test)
 
     # data validation
-    if train_num:
+    def _get_adversarial_score(train_num, X_train, X_test, adversarial):
+        # create data
+        tmp_X_train = X_train[:train_num]
+        X_adv = np.concatenate((tmp_X_train, X_test), axis=0)
+        target_adv = np.concatenate(
+            (np.zeros(train_num), np.ones(len(X_test))), axis=0)
+        # fit
+        gs = GridSearchCV(
+            get_base_model(adversarial['model']),
+            adversarial['params'],
+            cv=adversarial['cv'],
+            scoring=adversarial['scoring'], n_jobs=-1)
+        gs.fit(X_adv, target_adv)
+        return gs.best_score_
+
+    print('### DATA VALIDATION')
+    if adversarial:
+        print('with adversarial')
+        data_unit = 100
+        adv_scores = []
+        for i in range(0, len(X_train) // data_unit):
+            tmp_train_num = len(X_train) - i * 100
+            adv_score = _get_adversarial_score(
+                tmp_train_num, X_train, X_test, adversarial)
+            print('train num: %s, adv score: %s' % (tmp_train_num, adv_score))
+            adv_scores.append(adv_score)
+        train_num = len(X_train) - np.argmax(adv_scores) * 100
         X_train = X_train[:train_num]
         Y_train = Y_train[:train_num]
-    print('train num: %s' % len(X_train))
+    else:
+        print('no data validation')
+    print('adopted train num: %s' % len(X_train))
 
     # fit
     print('### FIT')
@@ -210,10 +236,6 @@ if __name__ == '__main__':
     print('Y train shape: %s' % str(Y_train.shape))
     print('best params: %s' % gs.best_params_)
     print('best score of trained grid search: %s' % gs.best_score_)
-    if train_num:
-        print(
-            'best score of not trained data: %s' %
-            gs.score(X_train[train_num:], Y_train[train_num:]))
     best_model = gs.best_estimator_
     print('best model: %s' % best_model)
 
