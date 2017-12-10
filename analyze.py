@@ -117,6 +117,7 @@ if __name__ == '__main__':
     data_path = cp.get('data', 'path')
     pred_col = cp.get('data', 'pred_col')
     id_col = cp.get('data', 'id_col')
+    with_random = cp.getboolean('data', 'random')
     adversarial = cp.get('data', 'adversarial')
     if adversarial:
         adversarial = json.loads(adversarial)
@@ -180,12 +181,18 @@ if __name__ == '__main__':
     """
 
     # create ndarray
+    # random
+    if with_random:
+        train_df = train_df.iloc[np.random.permutation(len(train_df))]
+    # Y_train
     Y_train = train_df[pred_col].values
-    id_pred = test_df[id_col].values
+    # X_train
     del train_df[pred_col]
     del train_df[id_col]
-    del test_df[id_col]
     X_train = train_df.values
+    # X_test
+    id_pred = test_df[id_col].values
+    del test_df[id_col]
     X_test = test_df.values
 
     # translate ndarray to standard

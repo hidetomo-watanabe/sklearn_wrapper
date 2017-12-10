@@ -239,6 +239,7 @@
     "data_path = cp.get('data', 'path')\n",
     "pred_col = cp.get('data', 'pred_col')\n",
     "id_col = cp.get('data', 'id_col')\n",
+    "with_random = cp.getboolean('data', 'random')\n",
     "adversarial = cp.get('data', 'adversarial')\n",
     "if adversarial:\n",
     "    adversarial = json.loads(adversarial)\n",
@@ -372,12 +373,18 @@
    "outputs": [],
    "source": [
     "# create ndarray\n",
+    "# random\n",
+    "if with_random:\n",
+    "    train_df = train_df.iloc[np.random.permutation(len(train_df))]\n",
+    "# Y_train\n",
     "Y_train = train_df[pred_col].values\n",
-    "id_pred = test_df[id_col].values\n",
+    "# X_train\n",
     "del train_df[pred_col]\n",
     "del train_df[id_col]\n",
-    "del test_df[id_col]\n",
     "X_train = train_df.values\n",
+    "# X_test\n",
+    "id_pred = test_df[id_col].values\n",
+    "del test_df[id_col]\n",
     "X_test = test_df.values"
    ]
   },

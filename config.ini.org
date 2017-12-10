@@ -2,6 +2,7 @@
 path = /path/
 pred_col = Hoge
 id_col = Id
+random = True
 adversarial = {
     "model": log_reg,
     "params" : {
