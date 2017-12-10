@@ -1,6 +1,7 @@
 import math
 import json
 import configparser
+import pickle
 import myfuncs
 import numpy as np
 import pandas as pd
@@ -220,7 +221,7 @@ class Analyzer(object):
         self.Y_train = Y_train
         return self.X_train, self.Y_train
 
-    def calc_best_model(self):
+    def calc_best_model(self, filename):
         print('### FIT')
         base_model = self.get_base_model(self.cp.get('model', 'base'))
         scoring = self.cp.get('model', 'scoring')
@@ -235,16 +236,17 @@ class Analyzer(object):
         print('best score of trained grid search: %s' % gs.best_score_)
         self.best_model = gs.best_estimator_
         print('best model: %s' % self.best_model)
+        with open('outputs/%s' % filename, 'wb') as f:
+            pickle.dump(self.best_model, f)
         return self.best_model
 
     def calc_output(self, filename):
         Y_pred = self.best_model.predict(self.X_test)
-        f = open('outputs/%s' % filename, 'w')
-        f.write('%s,%s' % (self.id_col, self.pred_col))
-        for i in range(len(self.id_pred)):
-            f.write('\n')
-            f.write('%s,%s' % (self.id_pred[i], Y_pred[i]))
-        f.close()
+        with open('outputs/%s' % filename, 'w') as f:
+            f.write('%s,%s' % (self.id_col, self.pred_col))
+            for i in range(len(self.id_pred)):
+                f.write('\n')
+                f.write('%s,%s' % (self.id_pred[i], Y_pred[i]))
         return filename
 
     def visualize(self):

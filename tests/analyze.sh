@@ -1,4 +1,5 @@
 #!/bin/bash
+rm outputs/tmp.csv
 python -u analyze.py tests/titanic/test_config.ini > /dev/null
 diff_msg=$(diff outputs/tmp.csv tests/titanic/output.csv)
 if [ -n "${diff_msg}" ];then

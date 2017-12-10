@@ -457,9 +457,8 @@
    },
    "outputs": [],
    "source": [
-    "analyzer_obj.calc_best_model()\n",
-    "filename = 'tmp.csv'\n",
-    "analyzer_obj.calc_output(filename)"
+    "analyzer_obj.calc_best_model('tmp.pickle')\n",
+    "analyzer_obj.calc_output('tmp.csv')"
    ]
   }
  ],
