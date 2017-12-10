@@ -2,6 +2,7 @@
 path = /path/
 pred_col = Hoge
 id_col = Id
+train_num =
 
 [model]
 base = gbdt_clf
