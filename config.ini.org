@@ -4,7 +4,9 @@ pred_col = Hoge
 id_col = Id
 random = True
 adversarial = {
-    "model": log_reg,
+    "model": "log_reg",
+    "scoring": "accuracy",
+    "cv": 3,
     "params" : {
             "penalty": ["l1", "l2"],
             "C": [1, 2, 3, 4, 5]
