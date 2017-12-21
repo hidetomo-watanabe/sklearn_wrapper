@@ -194,7 +194,16 @@ class Analyzer(object):
                 cv=adversarial['cv'],
                 scoring=adversarial['scoring'], n_jobs=-1)
             gs.fit(X_adv, target_adv)
-            return gs.best_estimator_.predict(tmp_X_train)
+            est = gs.best_estimator_
+            return est.predict(tmp_X_train), est.predict(X_test)
+
+        def _is_ok_pred_nums(tr0, tr1, te0, te1):
+            if tr0 == 0 and te0 == 0:
+                return False
+            if tr1 == 0 and te1 == 0:
+                return False
+            if tr1 == 0 and te0 == 0:
+                return False
 
         print('### DATA VALIDATION')
         X_train = self.X_train
@@ -202,14 +211,24 @@ class Analyzer(object):
         if adversarial:
             print('with adversarial')
             adversarial = json.loads(adversarial)
-            adv_preds = _get_adversarial_preds(
+            adv_pred_train, adv_pred_test = _get_adversarial_preds(
                 X_train, self.X_test, adversarial)
-            if len(np.unique(adv_preds)) == 1:
+            adv_pred_train_num_0 = len(np.where(adv_pred_train == 0)[0])
+            adv_pred_train_num_1 = len(np.where(adv_pred_train == 1)[0])
+            adv_pred_test_num_0 = len(np.where(adv_pred_test == 0)[0])
+            adv_pred_test_num_1 = len(np.where(adv_pred_test == 1)[0])
+            print('pred train num 0: %s' % adv_pred_train_num_0)
+            print('pred train num 1: %s' % adv_pred_train_num_1)
+            print('pred test num 0: %s' % adv_pred_test_num_0)
+            print('pred test num 1: %s' % adv_pred_test_num_1)
+            if _is_ok_pred_nums(
+                adv_pred_train_num_0,
+                adv_pred_train_num_1,
+                adv_pred_test_num_0,
+                adv_pred_test_num_1,
+            ):
                 raise Exception(
                     '[ERROR] TRAIN AND TEST MAY BE HAVE DIFFERENT FEATURES')
-            else:
-                print('pred train num: %s' % len(np.where(adv_preds == 0)[0]))
-                print('pred test num: %s' % len(np.where(adv_preds == 1)[0]))
         else:
             print('[WARN] NO DATA VALIDATION')
             return True
