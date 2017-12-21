@@ -159,6 +159,7 @@ class Analyzer(object):
         test_df = self.test_df
         # random
         if self.cp.getboolean('data', 'random'):
+            print('randomize train data')
             train_df = train_df.iloc[np.random.permutation(len(train_df))]
         # Y_train
         self.Y_train = train_df[self.pred_col].values
@@ -179,13 +180,13 @@ class Analyzer(object):
         self.X_test = ss.transform(self.X_test)
         return self.X_train, self.X_test
 
-    def extract_fitting_data_with_adversarial_validation(self):
-        def _get_adversarial_score(train_num, X_train, X_test, adversarial):
+    def is_ok_with_adversarial_validation(self):
+        def _get_adversarial_preds(X_train, X_test, adversarial):
             # create data
-            tmp_X_train = X_train[:train_num]
+            tmp_X_train = X_train[:len(X_test)]
             X_adv = np.concatenate((tmp_X_train, X_test), axis=0)
             target_adv = np.concatenate(
-                (np.zeros(train_num), np.ones(len(X_test))), axis=0)
+                (np.zeros(len(X_test)), np.ones(len(X_test))), axis=0)
             # fit
             gs = GridSearchCV(
                 self.get_base_model(adversarial['model']),
@@ -193,33 +194,25 @@ class Analyzer(object):
                 cv=adversarial['cv'],
                 scoring=adversarial['scoring'], n_jobs=-1)
             gs.fit(X_adv, target_adv)
-            return gs.best_score_
+            return gs.best_estimator_.predict(tmp_X_train)
 
         print('### DATA VALIDATION')
         X_train = self.X_train
-        Y_train = self.Y_train
         adversarial = self.cp.get('data', 'adversarial')
         if adversarial:
             print('with adversarial')
             adversarial = json.loads(adversarial)
-            data_unit = 100
-            adv_scores = []
-            for i in range(0, len(X_train) // data_unit):
-                tmp_train_num = len(X_train) - i * 100
-                adv_score = _get_adversarial_score(
-                    tmp_train_num, X_train, self.X_test, adversarial)
-                print('train num: %s, adv score: %s' % (
-                    tmp_train_num, adv_score))
-                adv_scores.append(adv_score)
-            train_num = len(X_train) - np.argmax(adv_scores) * 100
-            X_train = X_train[:train_num]
-            Y_train = Y_train[:train_num]
+            adv_preds = _get_adversarial_preds(
+                X_train, self.X_test, adversarial)
+            if len(np.unique(adv_preds)) == 1:
+                raise Exception(
+                    '[ERROR] TRAIN AND TEST MAY BE HAVE DIFFERENT FEATURES')
+            else:
+                print('pred train num: %s' % len(np.where(adv_preds == 0)[0]))
+                print('pred test num: %s' % len(np.where(adv_preds == 1)[0]))
         else:
-            print('no data validation')
-        print('adopted train num: %s' % len(X_train))
-        self.X_train = X_train
-        self.Y_train = Y_train
-        return self.X_train, self.Y_train
+            print('[WARN] NO DATA VALIDATION')
+            return True
 
     def calc_best_model(self, filename):
         print('### FIT')

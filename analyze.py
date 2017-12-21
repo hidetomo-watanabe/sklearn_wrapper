@@ -20,7 +20,7 @@ if __name__ == '__main__':
 
     analyzer_obj.get_fitting_data()
     analyzer_obj.normalize_fitting_data()
-    analyzer_obj.extract_fitting_data_with_adversarial_validation()
+    analyzer_obj.is_ok_with_adversarial_validation()
 
     analyzer_obj.calc_best_model('tmp.pickle')
     analyzer_obj.calc_output('tmp.csv')
