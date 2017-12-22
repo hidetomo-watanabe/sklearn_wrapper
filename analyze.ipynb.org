@@ -350,7 +350,15 @@
     "pred_col = Hoge\n",
     "id_col = Id\n",
     "random = False\n",
-    "adversarial =\n",
+    "adversarial = {\n",
+    "    \"model\": \"log_reg\",\n",
+    "    \"scoring\": \"accuracy\",\n",
+    "    \"cv\": 3,\n",
+    "    \"params\" : {\n",
+    "    \"penalty\": [\"l1\", \"l2\"],\n",
+    "    \"C\": [1, 2, 3, 4, 5]\n",
+    "        }\n",
+    "    }\n",
     "\n",
     "[model]\n",
     "base = gbdt_clf\n",
@@ -446,7 +454,7 @@
    "source": [
     "analyzer_obj.get_fitting_data()\n",
     "analyzer_obj.normalize_fitting_data()\n",
-    "analyzer_obj.extract_fitting_data_with_adversarial_validation()"
+    "analyzer_obj.is_ok_with_adversarial_validation()"
    ]
   },
   {
