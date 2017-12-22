@@ -236,10 +236,10 @@ class Analyzer(object):
 
     def calc_best_model(self, filename):
         print('### FIT')
-        base_model = self.get_base_model(self.cp.get('model', 'base'))
-        scoring = self.cp.get('model', 'scoring')
-        cv = self.cp.getint('model', 'cv')
-        params = json.loads(self.cp.get('model', 'params'))
+        base_model = self.get_base_model(self.cp.get('fit', 'model'))
+        scoring = self.cp.get('fit', 'scoring')
+        cv = self.cp.getint('fit', 'cv')
+        params = json.loads(self.cp.get('fit', 'params'))
         gs = GridSearchCV(
             base_model, params, cv=cv, scoring=scoring, n_jobs=-1)
         gs.fit(self.X_train, self.Y_train)

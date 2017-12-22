@@ -13,8 +13,8 @@ adversarial = {
         }
     }
 
-[model]
-base = gbdt_clf
+[fit]
+model = gbdt_clf
 scoring = accuracy
 cv = 3
 params = {
