@@ -204,6 +204,7 @@ class Analyzer(object):
                 return False
             if tr1 == 0 and te0 == 0:
                 return False
+            return True
 
         print('### DATA VALIDATION')
         X_train = self.X_train
@@ -221,7 +222,7 @@ class Analyzer(object):
             print('pred train num 1: %s' % adv_pred_train_num_1)
             print('pred test num 0: %s' % adv_pred_test_num_0)
             print('pred test num 1: %s' % adv_pred_test_num_1)
-            if _is_ok_pred_nums(
+            if not _is_ok_pred_nums(
                 adv_pred_train_num_0,
                 adv_pred_train_num_1,
                 adv_pred_test_num_0,
