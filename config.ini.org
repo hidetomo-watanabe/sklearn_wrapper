@@ -1,5 +1,6 @@
 [data]
-path = /path/
+train_path = /path/
+test_path = /path/
 pred_col = Hoge
 id_col = Id
 random = True

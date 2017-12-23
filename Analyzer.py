@@ -112,10 +112,10 @@ class Analyzer(object):
 
     def get_raw_data(self):
         print('### DATA LIST')
-        data_path = self.cp.get('data', 'path')
-        print(check_output(['ls', data_path]).decode('utf8'))
-        self.train_df = pd.read_csv('%s/train.csv' % data_path)
-        self.test_df = pd.read_csv('%s/test.csv' % data_path)
+        train_path = self.cp.get('data', 'train_path')
+        test_path = self.cp.get('data', 'test_path')
+        self.train_df = pd.read_csv(train_path)
+        self.test_df = pd.read_csv(test_path)
         return self.train_df, self.test_df
 
     def trans_raw_data(self):
