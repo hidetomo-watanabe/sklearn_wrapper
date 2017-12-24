@@ -147,6 +147,12 @@ class Analyzer(object):
         for value in trans_del:
             del train_df[value]
             del test_df[value]
+        # del std=0
+        for column in test_df.columns:
+            if np.std(train_df[column].values) == 0:
+                if np.std(test_df[column].values) == 0:
+                    del train_df[column]
+                    del test_df[column]
         # float
         train_df, test_df = self.to_float_dfs(
             [train_df, test_df], self.pred_col, self.id_col)
