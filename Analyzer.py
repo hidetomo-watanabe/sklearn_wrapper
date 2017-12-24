@@ -203,7 +203,8 @@ class Analyzer(object):
                 self.get_base_model(adversarial['model']),
                 adversarial['params'],
                 cv=adversarial['cv'],
-                scoring=adversarial['scoring'], n_jobs=-1)
+                scoring=adversarial['scoring'],
+                n_jobs=adversarial['n_jobs'])
             gs.fit(X_adv, target_adv)
             est = gs.best_estimator_
             return est.predict(tmp_X_train), est.predict(X_test)
@@ -250,9 +251,10 @@ class Analyzer(object):
         base_model = self.get_base_model(self.cp.get('fit', 'model'))
         scoring = self.cp.get('fit', 'scoring')
         cv = self.cp.getint('fit', 'cv')
+        n_jobs = self.cp.getint('fit', 'n_jobs')
         params = json.loads(self.cp.get('fit', 'params'))
         gs = GridSearchCV(
-            base_model, params, cv=cv, scoring=scoring, n_jobs=-1)
+            base_model, params, cv=cv, scoring=scoring, n_jobs=n_jobs)
         gs.fit(self.X_train, self.Y_train)
         print('X train shape: %s' % str(self.X_train.shape))
         print('Y train shape: %s' % str(self.Y_train.shape))
