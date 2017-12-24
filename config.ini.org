@@ -44,3 +44,4 @@ del = [
     "Hoge",
     "Foo"
     ]
+del_std0 = False
