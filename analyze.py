@@ -1,5 +1,6 @@
 import sys
 from Analyzer import Analyzer
+from Notifier import Notifier
 
 if __name__ == '__main__':
     if len(sys.argv) > 1:
@@ -24,3 +25,7 @@ if __name__ == '__main__':
 
     analyzer_obj.calc_best_model('tmp.pickle')
     analyzer_obj.calc_output('tmp.csv')
+
+    notifier_obj = Notifier()
+    notifier_obj.read_config_file(config_path)
+    notifier_obj.notify_slack()
