@@ -13,5 +13,6 @@ def extract_features_with_vgg16(img_path):
     features = model.predict(x)
     return features
 
+
 if __name__ == '__main__':
     pass

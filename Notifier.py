@@ -16,5 +16,6 @@ class Notifier(object):
             self.cp.get('notify', 'slack'),
             data=json.dumps({'text': text}))
 
+
 if __name__ == '__main__':
     pass

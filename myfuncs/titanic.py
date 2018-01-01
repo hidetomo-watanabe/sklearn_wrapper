@@ -74,5 +74,6 @@ def translate_familystatus(dfs, train_df):
     del train_df['FamilyName']
     return dfs
 
+
 if __name__ == '__main__':
     pass

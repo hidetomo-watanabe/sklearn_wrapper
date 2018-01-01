@@ -283,5 +283,6 @@ class Analyzer(object):
             g = sns.FacetGrid(self.train_df, col=self.pred_col)
             g.map(plt.hist, key, bins=20)
 
+
 if __name__ == '__main__':
     pass
