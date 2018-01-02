@@ -1,7 +1,7 @@
 import os
 import numpy as np
 from PIL import Image
-import image_controller
+from ImageController import ImageController
 
 N = 28
 
@@ -29,7 +29,7 @@ def extract_features(dfs):
                 ndarray.append(df['pixel%s' % j].values[i])
             ndarray = np.array(ndarray)
             img_path = _save_tmp_png(ndarray, i)
-            features = image_controller.extract_features_with_vgg16(img_path)
+            features = ImageController.extract_features_with_vgg16(img_path)
             for j in range(len(features)):
                 if 'feature%s' % j not in df.columns:
                     df['feature%s' % j] = [0] * len(df)
