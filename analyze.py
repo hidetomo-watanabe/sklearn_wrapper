@@ -7,25 +7,28 @@ if __name__ == '__main__':
         config_path = sys.argv[1]
     else:
         config_path = './config.ini'
-    analyzer_obj = Analyzer()
-    analyzer_obj.read_config_file(config_path)
+    try:
+        analyzer_obj = Analyzer()
+        analyzer_obj.read_config_file(config_path)
 
-    analyzer_obj.get_raw_data()
-    print('### INIT OVERVIEW')
-    analyzer_obj.display_raw_data()
-    analyzer_obj.trans_raw_data()
+        analyzer_obj.get_raw_data()
+        print('### INIT OVERVIEW')
+        analyzer_obj.display_raw_data()
+        analyzer_obj.trans_raw_data()
 
-    print('### TRANSLATION OVERVIEW')
-    analyzer_obj.display_raw_data()
-    # analyzer_obj.visualize()
+        print('### TRANSLATION OVERVIEW')
+        analyzer_obj.display_raw_data()
+        # analyzer_obj.visualize()
 
-    analyzer_obj.get_fitting_data()
-    analyzer_obj.normalize_fitting_data()
-    analyzer_obj.is_ok_with_adversarial_validation()
+        analyzer_obj.get_fitting_data()
+        analyzer_obj.normalize_fitting_data()
+        analyzer_obj.is_ok_with_adversarial_validation()
 
-    analyzer_obj.calc_best_model('tmp.pickle')
-    analyzer_obj.calc_output('tmp.csv')
-
-    notifier_obj = Notifier()
-    notifier_obj.read_config_file(config_path)
-    notifier_obj.notify_slack()
+        analyzer_obj.calc_best_model('tmp.pickle')
+        analyzer_obj.calc_output('tmp.csv')
+    except Exception as e:
+        print('[ERROR] %s' % e)
+    finally:
+        notifier_obj = Notifier()
+        notifier_obj.read_config_file(config_path)
+        notifier_obj.notify_slack()
