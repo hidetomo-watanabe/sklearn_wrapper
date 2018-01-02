@@ -29,7 +29,9 @@ def extract_features(dfs, _):
                 ndarray.append(df['pixel%s' % j].values[i])
             ndarray = np.array(ndarray)
             img_path = _save_tmp_png(ndarray, i)
-            features = ImageController.extract_features_with_vgg16(img_path)
+            image_controller_obj = ImageController()
+            features = image_controller_obj.extract_features_with_vgg16(
+                img_path)
             for j in range(len(features)):
                 if 'feature%s' % j not in df.columns:
                     df['feature%s' % j] = [0] * len(df)
