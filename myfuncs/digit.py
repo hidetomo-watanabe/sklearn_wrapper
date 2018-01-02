@@ -21,7 +21,7 @@ def _rm_tmp_png(img_path):
     os.remove(img_path)
 
 
-def extract_features(dfs):
+def extract_features(dfs, _):
     for df in dfs:
         for i in range(len(df)):
             ndarray = []
