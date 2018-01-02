@@ -39,7 +39,6 @@ def extract_features(dfs, _):
             _rm_tmp_png(img_path)
         for j in range(784):
             del df['pixel%s' % j]
-        print(df.columns)
     return dfs
 
 
