@@ -22,6 +22,7 @@ def _rm_tmp_png(img_path):
 
 
 def extract_features(dfs, _):
+    image_controller_obj = ImageController()
     for df in dfs:
         for i in range(len(df)):
             ndarray = []
@@ -29,7 +30,6 @@ def extract_features(dfs, _):
                 ndarray.append(df['pixel%s' % j].values[i])
             ndarray = np.array(ndarray)
             img_path = _save_tmp_png(ndarray, i)
-            image_controller_obj = ImageController()
             features = image_controller_obj.extract_features_with_vgg16(
                 img_path)
             for j in range(len(features)):
