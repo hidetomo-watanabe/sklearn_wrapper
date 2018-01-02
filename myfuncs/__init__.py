@@ -1,2 +1,2 @@
-from . import image_controller
 from . import titanic
+from . import digit

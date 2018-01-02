@@ -10,7 +10,7 @@ def extract_features_with_vgg16(img_path):
     x = image.img_to_array(img)
     x = np.expand_dims(x, axis=0)
     x = preprocess_input(x)
-    features = model.predict(x)
+    features = model.predict(x).flatten()
     return features
 
 
