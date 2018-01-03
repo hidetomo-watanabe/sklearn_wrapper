@@ -27,7 +27,7 @@ def extract_features(dfs, _):
     for df in dfs:
         for i in range(len(df)):
             pixels = []
-            for j in range(784):
+            for j in range(N * N):
                 pixels.append(df['pixel%s' % j].values[i])
             img_path = _save_tmp_png(pixels, i)
             features = image_controller_obj.extract_features_with_vgg16(
@@ -41,8 +41,6 @@ def extract_features(dfs, _):
             del pixels
             del features
             gc.collect()
-        for j in range(784):
-            del df['pixel%s' % j]
     return dfs
 
 
