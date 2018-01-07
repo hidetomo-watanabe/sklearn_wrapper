@@ -9,6 +9,7 @@ from IPython.display import display
 from subprocess import check_output
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import GridSearchCV
+from sklearn.ensemble import VotingClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.svm import SVC, LinearSVC
 from sklearn.ensemble import RandomForestClassifier
@@ -251,26 +252,35 @@ class Analyzer(object):
 
     def calc_best_model(self, filename):
         print('### FIT')
-        base_model = self._get_base_model(self.cp.get('fit', 'model'))
-        scoring = self.cp.get('fit', 'scoring')
-        cv = self.cp.getint('fit', 'cv')
-        n_jobs = self.cp.getint('fit', 'n_jobs')
-        params = json.loads(self.cp.get('fit', 'params'))
-        gs = GridSearchCV(
-            base_model, params, cv=cv, scoring=scoring, n_jobs=n_jobs)
-        gs.fit(self.X_train, self.Y_train)
-        print('X train shape: %s' % str(self.X_train.shape))
-        print('Y train shape: %s' % str(self.Y_train.shape))
-        print('best params: %s' % gs.best_params_)
-        print('best score of trained grid search: %s' % gs.best_score_)
-        self.best_model = gs.best_estimator_
-        print('best model: %s' % self.best_model)
+        estimators = []
+        for i, modelname in enumerate(
+            json.loads(self.cp.get('fit', 'models'))
+        ):
+            base_model = self._get_base_model(modelname)
+            scoring = self.cp.get('fit', 'scoring')
+            cv = self.cp.getint('fit', 'cv')
+            n_jobs = self.cp.getint('fit', 'n_jobs')
+            params = json.loads(self.cp.get('fit', 'params'))[i]
+            gs = GridSearchCV(
+                base_model, params, cv=cv, scoring=scoring, n_jobs=n_jobs)
+            gs.fit(self.X_train, self.Y_train)
+            print('  modelname: %s' % modelname)
+            print('  X train shape: %s' % str(self.X_train.shape))
+            print('  Y train shape: %s' % str(self.Y_train.shape))
+            print('  best params: %s' % gs.best_params_)
+            print('  best score of trained grid search: %s' % gs.best_score_)
+            estimators.append((modelname, gs.best_estimator_))
+        self.voting_model = VotingClassifier(
+            estimators=estimators,
+            weights=[1] * len(estimators), voting='soft')
+        self.voting_model.fit(self.X_train, self.Y_train)
+        print('voting model: %s' % self.voting_model)
         with open('outputs/%s' % filename, 'wb') as f:
-            pickle.dump(self.best_model, f)
-        return self.best_model
+            pickle.dump(self.voting_model, f)
+        return self.voting_model
 
     def calc_output(self, filename):
-        Y_pred = self.best_model.predict(self.X_test)
+        Y_pred = self.voting_model.predict(self.X_test)
         with open('outputs/%s' % filename, 'w') as f:
             f.write('%s,%s' % (self.id_col, self.pred_col))
             for i in range(len(self.id_pred)):
