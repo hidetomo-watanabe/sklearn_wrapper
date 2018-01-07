@@ -36,7 +36,7 @@ class Analyzer(object):
         self.id_col = self.cp.get('data', 'id_col')
         self.pred_col = self.cp.get('data', 'pred_col')
 
-    def get_base_model(self, modelname):
+    def _get_base_model(self, modelname):
         if modelname == 'log_reg':
             return LogisticRegression()
         elif modelname == 'svc':
@@ -58,12 +58,12 @@ class Analyzer(object):
         elif modelname == 'dt_clf':
             return DecisionTreeClassifier()
 
-    def display_raw_data(self):
+    def display_data(self):
         for df in [self.train_df, self.test_df]:
             display(df.head())
             display(df.describe())
 
-    def replace_dfs(self, dfs, target, config, *, mean=None):
+    def _replace_dfs(self, dfs, target, config, *, mean=None):
         """
             config is dict
         """
@@ -84,7 +84,7 @@ class Analyzer(object):
             output.append(df)
         return output
 
-    def categorize_dfs(self, dfs, target, config):
+    def _categorize_dfs(self, dfs, target, config):
         """
             config is list
         """
@@ -100,7 +100,7 @@ class Analyzer(object):
             output.append(df)
         return output
 
-    def to_float_dfs(self, dfs, pred_col, id_col):
+    def _to_float_dfs(self, dfs, pred_col, id_col):
         output = []
         for df in dfs:
             for key in df.keys():
@@ -133,7 +133,7 @@ class Analyzer(object):
                 key_mean = None
             else:
                 key_mean = train_df[key].mean()
-            train_df, test_df = self.replace_dfs(
+            train_df, test_df = self._replace_dfs(
                 [train_df, test_df], key, value, mean=key_mean)
         # adhoc
         for value in trans_adhoc:
@@ -141,7 +141,7 @@ class Analyzer(object):
                 'myfuncs.%s' % value)([train_df, test_df], train_df)
         # category
         for key, values in trans_category.items():
-            train_df, test_df = self.categorize_dfs(
+            train_df, test_df = self._categorize_dfs(
                 [train_df, test_df], key, values)
         # del
         for value in trans_del:
@@ -155,7 +155,7 @@ class Analyzer(object):
                         del train_df[column]
                         del test_df[column]
         # float
-        train_df, test_df = self.to_float_dfs(
+        train_df, test_df = self._to_float_dfs(
             [train_df, test_df], self.pred_col, self.id_col)
         self.train_df = train_df
         self.test_df = test_df
@@ -200,7 +200,7 @@ class Analyzer(object):
                 (np.zeros(len(X_test)), np.ones(len(X_test))), axis=0)
             # fit
             gs = GridSearchCV(
-                self.get_base_model(adversarial['model']),
+                self._get_base_model(adversarial['model']),
                 adversarial['params'],
                 cv=adversarial['cv'],
                 scoring=adversarial['scoring'],
@@ -248,7 +248,7 @@ class Analyzer(object):
 
     def calc_best_model(self, filename):
         print('### FIT')
-        base_model = self.get_base_model(self.cp.get('fit', 'model'))
+        base_model = self._get_base_model(self.cp.get('fit', 'model'))
         scoring = self.cp.get('fit', 'scoring')
         cv = self.cp.getint('fit', 'cv')
         n_jobs = self.cp.getint('fit', 'n_jobs')

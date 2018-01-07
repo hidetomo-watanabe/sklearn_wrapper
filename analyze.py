@@ -13,11 +13,11 @@ if __name__ == '__main__':
 
         analyzer_obj.get_raw_data()
         print('### INIT OVERVIEW')
-        analyzer_obj.display_raw_data()
+        analyzer_obj.display_data()
         analyzer_obj.trans_raw_data()
 
         print('### TRANSLATION OVERVIEW')
-        analyzer_obj.display_raw_data()
+        analyzer_obj.display_data()
         # analyzer_obj.visualize()
 
         analyzer_obj.get_fitting_data()
