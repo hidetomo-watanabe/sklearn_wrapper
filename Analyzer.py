@@ -18,6 +18,7 @@ from sklearn.naive_bayes import GaussianNB
 from sklearn.linear_model import Perceptron
 from sklearn.linear_model import SGDClassifier
 from sklearn.tree import DecisionTreeClassifier
+from xgboost import XGBClassifier
 import seaborn as sns
 import matplotlib.pyplot as plt
 
@@ -57,6 +58,8 @@ class Analyzer(object):
             return SGDClassifier()
         elif modelname == 'dt_clf':
             return DecisionTreeClassifier()
+        elif modelname == 'xgb_clf':
+            return XGBClassifier()
 
     def display_data(self):
         for df in [self.train_df, self.test_df]:
