@@ -272,8 +272,9 @@ class Analyzer(object):
             estimators.append((modelname, gs.best_estimator_))
         self.voting_model = VotingClassifier(
             estimators=estimators,
-            weights=[1] * len(estimators), voting='soft')
-        self.voting_model.fit(self.X_train, self.Y_train)
+            weights=[1] * len(estimators),
+            voting='soft', n_jobs=n_jobs)
+        self.voting_model = self.voting_model.fit(self.X_train, self.Y_train)
         print('voting model: %s' % self.voting_model)
         with open('outputs/%s' % filename, 'wb') as f:
             pickle.dump(self.voting_model, f)
