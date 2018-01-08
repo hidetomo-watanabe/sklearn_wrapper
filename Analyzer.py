@@ -264,7 +264,7 @@ class Analyzer(object):
             gs = GridSearchCV(
                 base_model, params, cv=cv, scoring=scoring, n_jobs=n_jobs)
             gs.fit(self.X_train, self.Y_train)
-            print('  modelname: %s' % modelname)
+            print('modelname: %s' % modelname)
             print('  X train shape: %s' % str(self.X_train.shape))
             print('  Y train shape: %s' % str(self.Y_train.shape))
             print('  best params: %s' % gs.best_params_)
