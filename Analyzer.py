@@ -10,16 +10,17 @@ from subprocess import check_output
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import GridSearchCV
 from sklearn.ensemble import VotingClassifier
-from sklearn.linear_model import LogisticRegression
-from sklearn.svm import SVC, LinearSVC
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LogisticRegression, LinearRegression
+from sklearn.svm import SVC, SVR, LinearSVC, LinearSVR
+from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.ensemble import GradientBoostingClassifier
-from sklearn.neighbors import KNeighborsClassifier
+from sklearn.ensemble import GradientBoostingRegressor
+from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
 from sklearn.naive_bayes import GaussianNB
 from sklearn.linear_model import Perceptron
-from sklearn.linear_model import SGDClassifier
-from sklearn.tree import DecisionTreeClassifier
-from xgboost import XGBClassifier
+from sklearn.linear_model import SGDClassifier, SGDRegressor
+from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
+from xgboost import XGBClassifier, XGBRegressor
 import seaborn as sns
 import matplotlib.pyplot as plt
 
@@ -41,26 +42,44 @@ class Analyzer(object):
     def _get_base_model(self, modelname):
         if modelname == 'log_reg':
             return LogisticRegression()
+        elif modelname == 'linear_reg':
+            return LinearRegression()
         elif modelname == 'svc':
             return SVC()
+        elif modelname == 'svr':
+            return SVR()
         elif modelname == 'l_svc':
             return LinearSVC()
+        elif modelname == 'l_svr':
+            return LinearSVR()
         elif modelname == 'rf_clf':
             return RandomForestClassifier()
+        elif modelname == 'rf_reg':
+            return RandomForestRegressor()
         elif modelname == 'gbdt_clf':
             return GradientBoostingClassifier()
+        elif modelname == 'gbdt_reg':
+            return GradientBoostingRegressor()
         elif modelname == 'knn_clf':
             return KNeighborsClassifier()
+        elif modelname == 'knn_reg':
+            return KNeighborsRegressor()
         elif modelname == 'g_nb':
             return GaussianNB()
         elif modelname == 'preceptron':
             return Perceptron()
         elif modelname == 'sgd_clf':
             return SGDClassifier()
+        elif modelname == 'sgd_reg':
+            return SGDRegressor()
         elif modelname == 'dt_clf':
             return DecisionTreeClassifier()
+        elif modelname == 'dt_reg':
+            return DecisionTreeRegressor()
         elif modelname == 'xgb_clf':
             return XGBClassifier()
+        elif modelname == 'xgb_reg':
+            return XGBRegressor()
 
     def display_data(self):
         for df in [self.train_df, self.test_df]:
