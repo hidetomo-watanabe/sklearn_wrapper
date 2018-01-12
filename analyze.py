@@ -6,7 +6,7 @@ if __name__ == '__main__':
     if len(sys.argv) > 1:
         config_path = sys.argv[1]
     else:
-        config_path = './config.ini'
+        config_path = './config.json'
     try:
         analyzer_obj = Analyzer()
         analyzer_obj.read_config_file(config_path)

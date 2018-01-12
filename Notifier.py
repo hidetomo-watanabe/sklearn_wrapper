@@ -1,19 +1,19 @@
 import json
 import requests
-import configparser
 
 
 class Notifier(object):
     def __init__(self):
-        self.cp = configparser.SafeConfigParser()
+        self.configs = {}
 
-    def read_config_file(self, path='./config.ini'):
-        self.cp.read(path)
+    def read_config_file(self, path='./config.json'):
+        with open(path, 'r') as f:
+            self.configs = json.loads(f.read())
 
     def notify_slack(self):
         text = 'Finished Analysis.'
         requests.post(
-            self.cp.get('notify', 'slack'),
+            self.configs['notify']['slack'],
             data=json.dumps({'text': text}))
 
 

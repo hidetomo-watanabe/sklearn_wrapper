@@ -1,6 +1,5 @@
 import math
 import json
-import configparser
 import pickle
 import myfuncs
 import numpy as np
@@ -27,17 +26,18 @@ import matplotlib.pyplot as plt
 
 class Analyzer(object):
     def __init__(self):
-        self.cp = configparser.SafeConfigParser()
+        self.configs = {}
 
-    def read_config_file(self, path='./config.ini'):
-        self.cp.read(path)
-        self.id_col = self.cp.get('data', 'id_col')
-        self.pred_col = self.cp.get('data', 'pred_col')
+    def read_config_file(self, path='./config.json'):
+        with open(path, 'r') as f:
+            self.configs = json.loads(f.read())
+        self.id_col = self.configs['data']['id_col']
+        self.pred_col = self.configs['data']['pred_col']
 
     def read_config_text(self, text):
-        self.cp.read_string(text)
-        self.id_col = self.cp.get('data', 'id_col')
-        self.pred_col = self.cp.get('data', 'pred_col')
+        self.configs = json.loads(text)
+        self.id_col = self.configs['data']['id_col']
+        self.pred_col = self.configs['data']['pred_col']
 
     def _get_base_model(self, modelname):
         if modelname == 'log_reg':
@@ -135,8 +135,8 @@ class Analyzer(object):
 
     def get_raw_data(self):
         print('### DATA LIST')
-        train_path = self.cp.get('data', 'train_path')
-        test_path = self.cp.get('data', 'test_path')
+        train_path = self.configs['data']['train_path']
+        test_path = self.configs['data']['test_path']
         self.train_df = pd.read_csv(train_path)
         self.test_df = pd.read_csv(test_path)
         return self.train_df, self.test_df
@@ -144,11 +144,10 @@ class Analyzer(object):
     def trans_raw_data(self):
         train_df = self.train_df
         test_df = self.test_df
-        cp = self.cp
-        trans_adhoc = json.loads(cp.get('translate', 'adhoc'))
-        trans_replace = json.loads(cp.get('translate', 'replace'))
-        trans_del = json.loads(cp.get('translate', 'del'))
-        trans_category = json.loads(cp.get('translate', 'category'))
+        trans_adhoc = self.configs['translate']['adhoc']
+        trans_replace = self.configs['translate']['replace']
+        trans_del = self.configs['translate']['del']
+        trans_category = self.configs['translate']['category']
         # replace
         for key, value in trans_replace.items():
             # mean
@@ -171,7 +170,7 @@ class Analyzer(object):
             del train_df[value]
             del test_df[value]
         # del std=0
-        if self.cp.getboolean('translate', 'del_std0'):
+        if self.configs['translate']['del_std0']:
             for column in test_df.columns:
                 if np.std(train_df[column].values) == 0:
                     if np.std(test_df[column].values) == 0:
@@ -188,7 +187,7 @@ class Analyzer(object):
         train_df = self.train_df
         test_df = self.test_df
         # random
-        if self.cp.getboolean('data', 'random'):
+        if self.configs['data']['random']:
             print('randomize train data')
             train_df = train_df.iloc[np.random.permutation(len(train_df))]
         # Y_train
@@ -243,10 +242,9 @@ class Analyzer(object):
 
         print('### DATA VALIDATION')
         X_train = self.X_train
-        adversarial = self.cp.get('data', 'adversarial')
+        adversarial = self.configs['data']['adversarial']
         if adversarial:
             print('with adversarial')
-            adversarial = json.loads(adversarial)
             adv_pred_train, adv_pred_test = _get_adversarial_preds(
                 X_train, self.X_test, adversarial)
             adv_pred_train_num_0 = len(np.where(adv_pred_train == 0)[0])
@@ -273,13 +271,13 @@ class Analyzer(object):
         print('### FIT')
         estimators = []
         for i, modelname in enumerate(
-            json.loads(self.cp.get('fit', 'models'))
+            self.configs['fit']['models']
         ):
             base_model = self._get_base_model(modelname)
-            scoring = self.cp.get('fit', 'scoring')
-            cv = self.cp.getint('fit', 'cv')
-            n_jobs = self.cp.getint('fit', 'n_jobs')
-            params = json.loads(self.cp.get('fit', 'params'))[i]
+            scoring = self.configs['fit']['scoring']
+            cv = self.configs['fit']['cv']
+            n_jobs = self.configs['fit']['n_jobs']
+            params = self.configs['fit']['params'][i]
             gs = GridSearchCV(
                 base_model, params, cv=cv, scoring=scoring, n_jobs=n_jobs)
             gs.fit(self.X_train, self.Y_train)
