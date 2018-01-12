@@ -42,10 +42,13 @@
             "Hoge": {"hoge1": 1, "hoge2": -1},
             "Bar": {"isnan": "mean"}
         },
-        "adhoc": [
-            "hoge.translate_hoge",
-            "hoge.translate_fuga"
-        ],
+        "adhoc": {
+            "myfunc": "hoge",
+            "methods": [
+                "translate_hoge",
+                "translate_fuga"
+            ]
+        },
         "category": {
             "Hoge": [1, 2, 3],
             "Fuga": ["a", "b", "c"]

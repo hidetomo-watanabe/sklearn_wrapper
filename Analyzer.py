@@ -1,10 +1,9 @@
 import math
 import json
 import pickle
-import myfuncs
 import numpy as np
 import pandas as pd
-from IPython.display import display
+import importlib
 from subprocess import check_output
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import GridSearchCV
@@ -20,6 +19,7 @@ from sklearn.linear_model import Perceptron
 from sklearn.linear_model import SGDClassifier, SGDRegressor
 from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 from xgboost import XGBClassifier, XGBRegressor
+from IPython.display import display
 import seaborn as sns
 import matplotlib.pyplot as plt
 
@@ -158,9 +158,10 @@ class Analyzer(object):
             train_df, test_df = self._replace_dfs(
                 [train_df, test_df], key, value, mean=key_mean)
         # adhoc
-        for value in trans_adhoc:
+        myfunc = importlib.import_module('myfuncs.%s' % trans_adhoc['myfunc'])
+        for method_name in trans_adhoc['methods']:
             train_df, test_df = eval(
-                'myfuncs.%s' % value)([train_df, test_df], train_df)
+                'myfunc.%s' % method_name)([train_df, test_df], train_df)
         # category
         for key, values in trans_category.items():
             train_df, test_df = self._categorize_dfs(
