@@ -158,7 +158,9 @@ class Analyzer(object):
             train_df, test_df = self._replace_dfs(
                 [train_df, test_df], key, value, mean=key_mean)
         # adhoc
-        myfunc = importlib.import_module('myfuncs.%s' % trans_adhoc['myfunc'])
+        if trans_adhoc['myfunc']:
+            myfunc = importlib.import_module(
+                'myfuncs.%s' % trans_adhoc['myfunc'])
         for method_name in trans_adhoc['methods']:
             train_df, test_df = eval(
                 'myfunc.%s' % method_name)([train_df, test_df], train_df)

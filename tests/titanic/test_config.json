@@ -1,7 +1,7 @@
 {
     "data": {
         "train_path": "./tests/titanic/train.csv",
-        "test_path": "./tests/input/titanic/test.csv",
+        "test_path": "./tests/titanic/test.csv",
         "pred_col": "Survived",
         "id_col": "PassengerId",
         "random": false,
