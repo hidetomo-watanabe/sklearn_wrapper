@@ -107,18 +107,18 @@ class Analyzer(object):
             output.append(df)
         return output
 
-    def _categorize_dfs(self, dfs, target, config):
-        """
-            config is list
-        """
+    def _categorize_dfs(self, dfs, target):
         output = []
+        all_vals = []
         for df in dfs:
-            for value2 in config:
-                df['%s_%s' % (target, value2)] = [0] * len(df[target].values)
-            for i, value1 in enumerate(df[target].values):
-                for value2 in config:
-                    if value1 == value2:
-                        df['%s_%s' % (target, value2)].values[i] = 1
+            all_vals.extend(list(set(df[target].values)))
+        for df in dfs:
+            for val in all_vals:
+                df['%s_%s' % (target, val)] = [0] * len(df[target].values)
+            for i, val_tmp in enumerate(df[target].values):
+                for val in all_vals:
+                    if val_tmp == val:
+                        df['%s_%s' % (target, val)].values[i] = 1
             del df[target]
             output.append(df)
         return output
@@ -165,9 +165,9 @@ class Analyzer(object):
             train_df, test_df = eval(
                 'myfunc.%s' % method_name)([train_df, test_df], train_df)
         # category
-        for key, values in trans_category.items():
+        for target in trans_category:
             train_df, test_df = self._categorize_dfs(
-                [train_df, test_df], key, values)
+                [train_df, test_df], target)
         # del
         for value in trans_del:
             del train_df[value]

@@ -117,18 +117,18 @@
     "            output.append(df)\n",
     "        return output\n",
     "\n",
-    "    def _categorize_dfs(self, dfs, target, config):\n",
-    "        \"\"\"\n",
-    "            config is list\n",
-    "        \"\"\"\n",
+    "    def _categorize_dfs(self, dfs, target):\n",
     "        output = []\n",
+    "        all_vals = []\n",
     "        for df in dfs:\n",
-    "            for value2 in config:\n",
-    "                df['%s_%s' % (target, value2)] = [0] * len(df[target].values)\n",
-    "            for i, value1 in enumerate(df[target].values):\n",
-    "                for value2 in config:\n",
-    "                    if value1 == value2:\n",
-    "                        df['%s_%s' % (target, value2)].values[i] = 1\n",
+    "            all_vals.extend(list(set(df[target].values)))\n",
+    "        for df in dfs:\n",
+    "            for val in all_vals:\n",
+    "                df['%s_%s' % (target, val)] = [0] * len(df[target].values)\n",
+    "            for i, val_tmp in enumerate(df[target].values):\n",
+    "                for val in all_vals:\n",
+    "                    if val_tmp == val:\n",
+    "                        df['%s_%s' % (target, val)].values[i] = 1\n",
     "            del df[target]\n",
     "            output.append(df)\n",
     "        return output\n",
@@ -173,9 +173,9 @@
     "            train_df, test_df = eval(\n",
     "                'myfunc.%s' % method_name)([train_df, test_df], train_df)\n",
     "        # category\n",
-    "        for key, values in trans_category.items():\n",
+    "        for target in trans_category:\n",
     "            train_df, test_df = self._categorize_dfs(\n",
-    "                [train_df, test_df], key, values)\n",
+    "                [train_df, test_df], target)\n",
     "        # del\n",
     "        for value in trans_del:\n",
     "            del train_df[value]\n",
@@ -404,7 +404,8 @@
    "metadata": {
     "_cell_guid": "2c80bcc2-ebcf-4c43-bdf0-6c4299566a56",
     "_execution_state": "idle",
-    "_uuid": "9b60b1203d2797ec68812ccf7c02c9e31bff718b"
+    "_uuid": "9b60b1203d2797ec68812ccf7c02c9e31bff718b",
+    "collapsed": true
    },
    "outputs": [],
    "source": [
@@ -460,10 +461,10 @@
     "                \"translate_fuga\"\n",
     "            ]\n",
     "        },\n",
-    "        \"category\": {\n",
-    "            \"Hoge\": [1, 2, 3],\n",
-    "            \"Fuga\": [\"a\", \"b\", \"c\"]\n",
-    "        },\n",
+    "        \"category\": [\n",
+    "            \"Hoge\",\n",
+    "            \"Fuga\"\n",
+    "        ],\n",
     "        \"del\": [\n",
     "            \"Hoge\",\n",
     "            \"Foo\"\n",
@@ -495,7 +496,9 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "metadata": {},
+   "metadata": {
+    "collapsed": true
+   },
    "outputs": [],
    "source": [
     "analyzer_obj = Analyzer()\n",
@@ -505,7 +508,9 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "metadata": {},
+   "metadata": {
+    "collapsed": true
+   },
    "outputs": [],
    "source": [
     "analyzer_obj.get_raw_data()\n",
@@ -518,6 +523,7 @@
    "cell_type": "code",
    "execution_count": null,
    "metadata": {
+    "collapsed": true,
     "scrolled": true
    },
    "outputs": [],
@@ -530,7 +536,9 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "metadata": {},
+   "metadata": {
+    "collapsed": true
+   },
    "outputs": [],
    "source": [
     "analyzer_obj.get_fitting_data()\n",
@@ -541,7 +549,9 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "metadata": {},
+   "metadata": {
+    "collapsed": true
+   },
    "outputs": [],
    "source": [
     "analyzer_obj.calc_best_model('tmp.pickle')\n",

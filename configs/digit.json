@@ -28,8 +28,8 @@
         },
         "adhoc": {
         },
-        "category": {
-        },
+        "category": [
+        ],
         "del": [
         ],
         "del_std0": true

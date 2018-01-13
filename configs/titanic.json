@@ -40,11 +40,11 @@
                 "translate_familystatus"
             ]
         },
-        "category": {
-            "Sex": ["male", "female"],
-            "Pclass": [1, 2, 3],
-            "FamilyStatus": [0, 1, 2]
-        },
+        "category": [
+            "Sex",
+            "Pclass",
+            "FamilyStatus"
+        ],
         "del": [
             "Name",
             "SibSp",

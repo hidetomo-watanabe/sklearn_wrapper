@@ -49,10 +49,10 @@
                 "translate_fuga"
             ]
         },
-        "category": {
-            "Hoge": [1, 2, 3],
-            "Fuga": ["a", "b", "c"]
-        },
+        "category": [
+            "Hoge",
+            "Fuga"
+        ],
         "del": [
             "Hoge",
             "Foo"
