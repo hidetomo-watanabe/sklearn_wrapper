@@ -8,6 +8,7 @@
         "adversarial": false
     },
     "fit": {
+        "mode": "clf",
         "models": [
             "svc"
         ],

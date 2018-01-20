@@ -7,7 +7,7 @@ import importlib
 from subprocess import check_output
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import GridSearchCV
-from sklearn.ensemble import VotingClassifier
+from sklearn.ensemble import VotingClassifier, BaggingRegressor
 from sklearn.linear_model import LogisticRegression, LinearRegression
 from sklearn.svm import SVC, SVR, LinearSVC, LinearSVR
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
@@ -276,18 +276,29 @@ class Analyzer(object):
             print('  best params: %s' % gs.best_params_)
             print('  best score of trained grid search: %s' % gs.best_score_)
             estimators.append((modelname, gs.best_estimator_))
-        self.voting_model = VotingClassifier(
-            estimators=estimators,
-            weights=[1] * len(estimators),
-            voting='hard', n_jobs=n_jobs)
-        self.voting_model = self.voting_model.fit(self.X_train, self.Y_train)
-        print('voting model: %s' % self.voting_model)
+        # classification
+        if self.configs['fit']['mode'] == 'clf':
+            self.ensemble_model = VotingClassifier(
+                estimators=estimators,
+                weights=[1] * len(estimators),
+                voting='hard', n_jobs=n_jobs)
+        # regression
+        elif self.configs['fit']['mode'] == 'reg':
+            if len(self.configs['fit']['models']) != 1:
+                raise Exception(
+                    '[ERROR] WHEN MODE IS REG, MODEL SHOULD BE 1')
+            self.ensemble_model = BaggingRegressor(
+                base_estimator=estimators[0][1],
+                n_jobs=n_jobs)
+        self.ensemble_model = self.ensemble_model.fit(
+            self.X_train, self.Y_train)
+        print('ensemble model: %s' % self.ensemble_model)
         with open('outputs/%s' % filename, 'wb') as f:
-            pickle.dump(self.voting_model, f)
-        return self.voting_model
+            pickle.dump(self.ensemble_model, f)
+        return self.ensemble_model
 
     def calc_output(self, filename):
-        Y_pred = self.voting_model.predict(self.X_test)
+        Y_pred = self.ensemble_model.predict(self.X_test)
         with open('outputs/%s' % filename, 'w') as f:
             f.write('%s,%s' % (self.id_col, self.pred_col))
             for i in range(len(self.id_pred)):

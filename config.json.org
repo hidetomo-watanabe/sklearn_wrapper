@@ -17,6 +17,7 @@
         }
     },
     "fit": {
+        "mode": "clf",
         "models": [
             "xgb_clf",
             "svc"
