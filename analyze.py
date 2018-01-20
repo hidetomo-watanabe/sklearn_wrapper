@@ -11,18 +11,21 @@ if __name__ == '__main__':
         analyzer_obj = Analyzer()
         analyzer_obj.read_config_file(config_path)
 
-        analyzer_obj.get_raw_data()
         print('### INIT OVERVIEW')
+        analyzer_obj.get_raw_data()
         analyzer_obj.display_data()
-        analyzer_obj.trans_raw_data()
+        print('')
 
         print('### TRANSLATION OVERVIEW')
+        analyzer_obj.trans_raw_data()
         analyzer_obj.display_data()
         # analyzer_obj.visualize()
+        print('')
 
         analyzer_obj.get_fitting_data()
         analyzer_obj.normalize_fitting_data()
         analyzer_obj.is_ok_with_adversarial_validation()
+        print('')
 
         analyzer_obj.calc_best_model('tmp.pickle')
         analyzer_obj.calc_output('tmp.csv')

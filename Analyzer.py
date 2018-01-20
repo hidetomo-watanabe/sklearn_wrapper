@@ -82,15 +82,19 @@ class Analyzer(object):
             return XGBRegressor()
 
     def display_data(self):
-        for df in [self.train_df, self.test_df]:
+        print('### DATA LIST')
+        for label, df in [('train', self.train_df), ('test', self.test_df)]:
+            print('%s:' % label)
             display(df.head())
             display(df.describe())
 
     def _replace_missing_of_dfs(self, dfs, target, target_mean):
-        output = []
+        replaced = False
+        output = [replaced]
         for df in dfs:
             for i, val in enumerate(df[target].values):
                 if math.isnan(val):
+                    replaced = True
                     df[target].values[i] = target_mean
             output.append(df)
         return output
@@ -122,7 +126,6 @@ class Analyzer(object):
         return output
 
     def get_raw_data(self):
-        print('### DATA LIST')
         train_path = self.configs['data']['train_path']
         test_path = self.configs['data']['test_path']
         self.train_df = pd.read_csv(train_path)
@@ -138,24 +141,29 @@ class Analyzer(object):
             myfunc = importlib.import_module(
                 'myfuncs.%s' % trans_adhoc['myfunc'])
         for method_name in trans_adhoc['methods']:
+            print('adhoc: %s' % method_name)
             train_df, test_df = eval(
                 'myfunc.%s' % method_name)([train_df, test_df], train_df)
         # del
-        for value in self.configs['translate']['del']:
-            del train_df[value]
-            del test_df[value]
+        for column in self.configs['translate']['del']:
+            print('del: %s' % column)
+            del train_df[column]
+            del test_df[column]
         # missing
         for column in test_df.columns:
             if test_df.dtypes[column] != 'object':
                 column_mean = train_df[column].mean()
-                train_df, test_df = self._replace_missing_of_dfs(
+                replaced, train_df, test_df = self._replace_missing_of_dfs(
                     [train_df, test_df], column, column_mean)
+                if replaced:
+                    print('missing: %s' % column)
         # category
         for column in test_df.columns:
             if (
                 test_df.dtypes[column] == 'object' or
                 column in self.configs['translate']['category']
             ):
+                print('category: %s' % column)
                 train_df, test_df = self._categorize_dfs(
                     [train_df, test_df], column)
         # del std=0
@@ -163,6 +171,7 @@ class Analyzer(object):
             for column in test_df.columns:
                 if np.std(train_df[column].values) == 0:
                     if np.std(test_df[column].values) == 0:
+                        print('del_std0: %s' % column)
                         del train_df[column]
                         del test_df[column]
         # float
