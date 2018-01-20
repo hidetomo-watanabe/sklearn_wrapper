@@ -49,10 +49,6 @@
             "Hoge",
             "Foo"
         ],
-        "replace": {
-            "Hoge": {"hoge1": 1, "hoge2": -1},
-            "Bar": {"isnan": "mean"}
-        },
         "category": [
             "Hoge",
             "Fuga"

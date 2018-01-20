@@ -86,24 +86,12 @@ class Analyzer(object):
             display(df.head())
             display(df.describe())
 
-    def _replace_dfs(self, dfs, target, config, *, mean=None):
-        """
-            config is dict
-        """
+    def _replace_missing_of_dfs(self, dfs, target, target_mean):
         output = []
         for df in dfs:
-            for i, value1 in enumerate(df[target].values):
-                for key, value2 in config.items():
-                    # mean
-                    if value2 == 'mean':
-                        value2 = mean
-                    # translate
-                    if key == 'isnan':
-                        if math.isnan(value1):
-                            df[target].values[i] = value2
-                    else:
-                        if value1 == key:
-                            df[target].values[i] = value2
+            for i, val in enumerate(df[target].values):
+                if math.isnan(val):
+                    df[target].values[i] = target_mean
             output.append(df)
         return output
 
@@ -123,7 +111,7 @@ class Analyzer(object):
             output.append(df)
         return output
 
-    def _to_float_dfs(self, dfs, pred_col, id_col):
+    def _to_float_of_dfs(self, dfs, pred_col, id_col):
         output = []
         for df in dfs:
             for key in df.keys():
@@ -156,19 +144,20 @@ class Analyzer(object):
         for value in self.configs['translate']['del']:
             del train_df[value]
             del test_df[value]
-        # replace
-        for key, value in self.configs['translate']['replace'].items():
-            # mean
-            if train_df.dtypes[key] == 'object':
-                key_mean = None
-            else:
-                key_mean = train_df[key].mean()
-            train_df, test_df = self._replace_dfs(
-                [train_df, test_df], key, value, mean=key_mean)
+        # missing
+        for column in test_df.columns:
+            if test_df.dtypes[column] != 'object':
+                column_mean = train_df[column].mean()
+                train_df, test_df = self._replace_missing_of_dfs(
+                    [train_df, test_df], column, column_mean)
         # category
-        for target in self.configs['translate']['category']:
-            train_df, test_df = self._categorize_dfs(
-                [train_df, test_df], target)
+        for column in test_df.columns:
+            if (
+                test_df.dtypes[column] == 'object' or
+                column in self.configs['translate']['category']
+            ):
+                train_df, test_df = self._categorize_dfs(
+                    [train_df, test_df], column)
         # del std=0
         if self.configs['translate']['del_std0']:
             for column in test_df.columns:
@@ -177,7 +166,7 @@ class Analyzer(object):
                         del train_df[column]
                         del test_df[column]
         # float
-        train_df, test_df = self._to_float_dfs(
+        train_df, test_df = self._to_float_of_dfs(
             [train_df, test_df], self.pred_col, self.id_col)
         self.train_df = train_df
         self.test_df = test_df

@@ -45,10 +45,7 @@
             "Cabin",
             "Embarked"
         ],
-        "replace": {
-        },
         "category": [
-            "Sex",
             "Pclass",
             "FamilyStatus"
         ],
