@@ -145,18 +145,6 @@ class Analyzer(object):
         train_df = self.train_df
         test_df = self.test_df
         trans_adhoc = self.configs['translate']['adhoc']
-        trans_replace = self.configs['translate']['replace']
-        trans_del = self.configs['translate']['del']
-        trans_category = self.configs['translate']['category']
-        # replace
-        for key, value in trans_replace.items():
-            # mean
-            if train_df.dtypes[key] == 'object':
-                key_mean = None
-            else:
-                key_mean = train_df[key].mean()
-            train_df, test_df = self._replace_dfs(
-                [train_df, test_df], key, value, mean=key_mean)
         # adhoc
         if trans_adhoc['myfunc']:
             myfunc = importlib.import_module(
@@ -164,14 +152,23 @@ class Analyzer(object):
         for method_name in trans_adhoc['methods']:
             train_df, test_df = eval(
                 'myfunc.%s' % method_name)([train_df, test_df], train_df)
-        # category
-        for target in trans_category:
-            train_df, test_df = self._categorize_dfs(
-                [train_df, test_df], target)
         # del
-        for value in trans_del:
+        for value in self.configs['translate']['del']:
             del train_df[value]
             del test_df[value]
+        # replace
+        for key, value in self.configs['translate']['replace'].items():
+            # mean
+            if train_df.dtypes[key] == 'object':
+                key_mean = None
+            else:
+                key_mean = train_df[key].mean()
+            train_df, test_df = self._replace_dfs(
+                [train_df, test_df], key, value, mean=key_mean)
+        # category
+        for target in self.configs['translate']['category']:
+            train_df, test_df = self._categorize_dfs(
+                [train_df, test_df], target)
         # del std=0
         if self.configs['translate']['del_std0']:
             for column in test_df.columns:

@@ -43,6 +43,7 @@ def translate_familystatus(dfs, train_df):
     # sibsp + parch == 0 => no family(0)
     # survive vs no survive in same familyname
     # => more survive(1) or less survive(2)
+    # delete sibsp, parch
     # categorize after
     #######################################
     # get family name
@@ -70,6 +71,9 @@ def translate_familystatus(dfs, train_df):
             # any family
             if family_name in n2s:
                 df['FamilyStatus'].values[i] = n2s[family_name]
+        # del sibsp, parch
+        del df['SibSp']
+        del df['Parch']
     # del family name
     del train_df['FamilyName']
     return dfs

@@ -38,10 +38,6 @@
         ]
     },
     "translate": {
-        "replace": {
-            "Hoge": {"hoge1": 1, "hoge2": -1},
-            "Bar": {"isnan": "mean"}
-        },
         "adhoc": {
             "myfunc": "hoge",
             "methods": [
@@ -49,13 +45,17 @@
                 "translate_fuga"
             ]
         },
-        "category": [
-            "Hoge",
-            "Fuga"
-        ],
         "del": [
             "Hoge",
             "Foo"
+        ],
+        "replace": {
+            "Hoge": {"hoge1": 1, "hoge2": -1},
+            "Bar": {"isnan": "mean"}
+        },
+        "category": [
+            "Hoge",
+            "Fuga"
         ],
         "del_std0": false
     },

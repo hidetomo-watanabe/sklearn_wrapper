@@ -24,13 +24,13 @@
         ]
     },
     "translate": {
-        "replace": {
-        },
         "adhoc": {
         },
-        "category": [
-        ],
         "del": [
+        ],
+        "replace": {
+        },
+        "category": [
         ],
         "del_std0": true
     },

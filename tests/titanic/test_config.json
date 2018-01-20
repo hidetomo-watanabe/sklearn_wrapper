@@ -31,8 +31,6 @@
         ]
     },
     "translate": {
-        "replace": {
-        },
         "adhoc": {
             "myfunc": "titanic",
             "methods": [
@@ -40,19 +38,19 @@
                 "translate_familystatus"
             ]
         },
-        "category": [
-            "Sex",
-            "Pclass",
-            "FamilyStatus"
-        ],
         "del": [
             "Name",
-            "SibSp",
-            "Parch",
             "Ticket",
             "Fare",
             "Cabin",
             "Embarked"
+        ],
+        "replace": {
+        },
+        "category": [
+            "Sex",
+            "Pclass",
+            "FamilyStatus"
         ],
         "del_std0": false
     },
