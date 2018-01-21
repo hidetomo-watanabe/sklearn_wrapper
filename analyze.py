@@ -1,4 +1,5 @@
 import sys
+import traceback
 from Analyzer import Analyzer
 from Notifier import Notifier
 
@@ -31,6 +32,7 @@ if __name__ == '__main__':
         analyzer_obj.calc_output('tmp.csv')
     except Exception as e:
         print('[ERROR] %s' % e)
+        traceback.print_exc()
     finally:
         notifier_obj = Notifier()
         notifier_obj.read_config_file(config_path)
