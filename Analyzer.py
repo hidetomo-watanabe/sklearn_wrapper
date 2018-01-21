@@ -115,13 +115,10 @@ class Analyzer(object):
             output.append(df)
         return output
 
-    def _to_float_of_dfs(self, dfs, pred_col, id_col):
+    def _to_float_of_dfs(self, dfs, target):
         output = []
         for df in dfs:
-            for key in df.keys():
-                if key == pred_col or key == id_col:
-                    continue
-                df[key] = df[key].astype(float)
+            df[target] = df[target].astype(float)
             output.append(df)
         return output
 
@@ -151,21 +148,27 @@ class Analyzer(object):
             del test_df[column]
         # missing
         for column in test_df.columns:
-            if test_df.dtypes[column] != 'object':
-                column_mean = train_df[column].mean()
-                replaced, train_df, test_df = self._replace_missing_of_dfs(
-                    [train_df, test_df], column, column_mean)
-                if replaced:
-                    print('missing: %s' % column)
+            if column in [self.id_col, self.pred_col]:
+                continue
+            if test_df.dtypes[column] == 'object':
+                continue
+            column_mean = train_df[column].mean()
+            replaced, train_df, test_df = self._replace_missing_of_dfs(
+                [train_df, test_df], column, column_mean)
+            if replaced:
+                print('missing: %s' % column)
         # category
         for column in test_df.columns:
+            if column in [self.id_col, self.pred_col]:
+                continue
             if (
-                test_df.dtypes[column] == 'object' or
-                column in self.configs['translate']['category']
+                test_df.dtypes[column] != 'object' and
+                column not in self.configs['translate']['category']
             ):
-                print('category: %s' % column)
-                train_df, test_df = self._categorize_dfs(
-                    [train_df, test_df], column)
+                continue
+            print('category: %s' % column)
+            train_df, test_df = self._categorize_dfs(
+                [train_df, test_df], column)
         # del std=0
         if self.configs['translate']['del_std0']:
             for column in test_df.columns:
@@ -175,8 +178,11 @@ class Analyzer(object):
                         del train_df[column]
                         del test_df[column]
         # float
-        train_df, test_df = self._to_float_of_dfs(
-            [train_df, test_df], self.pred_col, self.id_col)
+        for column in test_df.columns:
+            if column in [self.id_col, self.pred_col]:
+                continue
+            train_df, test_df = self._to_float_of_dfs(
+                [train_df, test_df], column)
         self.train_df = train_df
         self.test_df = test_df
         return self.train_df, self.test_df
