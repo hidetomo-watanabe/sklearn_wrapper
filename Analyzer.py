@@ -218,17 +218,12 @@ class Analyzer(object):
         # Y_train
         self.Y_train = train_df[self.pred_col].values
         # X_train
-        del train_df[self.pred_col]
-        if self.id_col in train_df.columns:
-            del train_df[self.id_col]
-        self.X_train = train_df.values
+        self.X_train = train_df \
+            .drop(self.id_col, axis=1).drop(self.pred_col, axis=1).values
         # X_test
-        if self.id_col in test_df.columns:
-            self.id_pred = test_df[self.id_col].values
-            del test_df[self.id_col]
-        else:
-            self.id_pred = test_df.index + 1
-        self.X_test = test_df.values
+        self.id_pred = test_df[self.id_col].values
+        self.X_test = test_df \
+            .drop(self.id_col, axis=1).values
         return self.X_train, self.Y_train, self.X_test
 
     def normalize_fitting_data(self):
