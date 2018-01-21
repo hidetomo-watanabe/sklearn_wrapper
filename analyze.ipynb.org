@@ -64,7 +64,8 @@
     "            \"Pclass\",\n",
     "            \"FamilyStatus\"\n",
     "        ],\n",
-    "        \"del_std0\": false\n",
+    "        \"dimension\": false,\n",
+    "        \"fit\": false\n",
     "    },\n",
     "    \"notify\": {\n",
     "        \"slack\": \"https://hooks.slack.com/services/hogehoge\"\n",
@@ -108,7 +109,7 @@
    },
    "outputs": [],
    "source": [
-    "print('### INIT OVERVIEW')\n",
+    "print('### INIT')\n",
     "analyzer_obj.get_raw_data()\n",
     "analyzer_obj.display_data()"
    ]
@@ -121,10 +122,34 @@
    },
    "outputs": [],
    "source": [
-    "print('### TRANSLATION OVERVIEW')\n",
+    "print('### TRANSLATION')\n",
     "analyzer_obj.trans_raw_data()\n",
-    "analyzer_obj.display_data()\n",
+    "analyzer_obj.display_data()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "scrolled": true
+   },
+   "outputs": [],
+   "source": [
+    "print('### VISUALIZATION')\n",
     "analyzer_obj.visualize()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "scrolled": true
+   },
+   "outputs": [],
+   "source": [
+    "print('### NORMALIZATION')\n",
+    "analyzer_obj.get_fitting_data()\n",
+    "analyzer_obj.normalize_fitting_data()"
    ]
   },
   {
@@ -133,8 +158,7 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "analyzer_obj.get_fitting_data()\n",
-    "analyzer_obj.normalize_fitting_data()\n",
+    "print('### VALIDATION')\n",
     "analyzer_obj.is_ok_with_adversarial_validation()"
    ]
   },
@@ -144,8 +168,10 @@
    "metadata": {},
    "outputs": [],
    "source": [
+    "print('### FIT')\n",
     "analyzer_obj.calc_best_model('tmp.pickle')\n",
-    "analyzer_obj.calc_output('tmp.csv')"
+    "analyzer_obj.calc_output()\n",
+    "analyzer_obj.write_output('tmp.csv')"
    ]
   }
  ],

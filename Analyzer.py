@@ -83,7 +83,6 @@ class Analyzer(object):
             return XGBRegressor()
 
     def display_data(self):
-        print('### DATA LIST')
         for label, df in [('train', self.train_df), ('test', self.test_df)]:
             print('%s:' % label)
             display(df.head())
@@ -200,11 +199,11 @@ class Analyzer(object):
             [train_df, test_df], train_df)
         # float
         for column in test_df.columns:
-            if column in [self.pred_col]:
+            if column in [self.id_col]:
                 continue
             if (
                 self.configs['fit']['mode'] == 'clf' and
-                column in [self.id_col]
+                column in [self.pred_col]
             ):
                 continue
             train_df, test_df = self._to_float_of_dfs(
@@ -233,12 +232,23 @@ class Analyzer(object):
 
     def normalize_fitting_data(self):
         # x
+        # ss
         ss_x = StandardScaler()
         ss_x.fit(self.X_train)
         self.X_train = ss_x.transform(self.X_train)
         self.X_test = ss_x.transform(self.X_test)
         # y
         if self.configs['fit']['mode'] == 'reg':
+            # other
+            trans_fit = self.configs['translate']['fit']
+            if trans_fit:
+                print('translate y_train with %s' % trans_fit)
+                if trans_fit == 'log':
+                    self.Y_train = np.array(list(map(math.log, self.Y_train)))
+                else:
+                    raise Exception(
+                        '[ERROR] NOT IMPELEMTED TRANS FIT: %s' % trans_fit)
+            # ss
             self.ss_y = StandardScaler()
             self.Y_train = self.Y_train.reshape(-1, 1)
             self.ss_y.fit(self.Y_train)
@@ -272,7 +282,6 @@ class Analyzer(object):
                 return False
             return True
 
-        print('### DATA VALIDATION')
         X_train = self.X_train
         adversarial = self.configs['data']['adversarial']
         if adversarial:
@@ -300,7 +309,6 @@ class Analyzer(object):
             return True
 
     def calc_best_model(self, filename):
-        print('### FIT')
         estimators = []
         for i, modelname in enumerate(
             self.configs['fit']['models']
@@ -340,19 +348,32 @@ class Analyzer(object):
             pickle.dump(self.ensemble_model, f)
         return self.ensemble_model
 
-    def calc_output(self, filename):
-        Y_pred = self.ensemble_model.predict(self.X_test)
+    def calc_output(self):
+        self.Y_pred = self.ensemble_model.predict(self.X_test)
+        # inverse normalize
         if self.configs['fit']['mode'] == 'reg':
-            Y_pred = self.ss_y.inverse_transform(Y_pred)
+            # ss
+            self.Y_pred = self.ss_y.inverse_transform(self.Y_pred)
+            # other
+            trans_fit = self.configs['translate']['fit']
+            if trans_fit:
+                print('inverse translate y_train with %s' % trans_fit)
+                if trans_fit == 'log':
+                    self.Y_pred = np.array(list(map(math.exp, self.Y_pred)))
+                else:
+                    raise Exception(
+                        '[ERROR] NOT IMPELEMTED TRANS FIT: %s' % trans_fit)
+        return self.Y_pred
+
+    def write_output(self, filename):
         with open('outputs/%s' % filename, 'w') as f:
             f.write('%s,%s' % (self.id_col, self.pred_col))
             for i in range(len(self.id_pred)):
                 f.write('\n')
-                f.write('%s,%s' % (self.id_pred[i], Y_pred[i]))
+                f.write('%s,%s' % (self.id_pred[i], self.Y_pred[i]))
         return filename
 
     def visualize(self):
-        print('### SIMPLE VISUALIZATION')
         for key in self.train_df.keys():
             if key == self.pred_col or key == self.id_col:
                 continue

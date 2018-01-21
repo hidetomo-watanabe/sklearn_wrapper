@@ -50,7 +50,8 @@
             "Pclass",
             "FamilyStatus"
         ],
-        "dimension": false
+        "dimension": false,
+        "fit": false
     },
     "notify": {
         "slack": "https://hooks.slack.com/services/hogehoge"
