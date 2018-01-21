@@ -31,7 +31,7 @@
         ],
         "category": [
         ],
-        "del_std0": true
+        "dimension": false
     },
     "notify": {
         "slack": "https://hooks.slack.com/services/hogehoge"

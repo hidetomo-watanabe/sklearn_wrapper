@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 import importlib
 from subprocess import check_output
+from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import GridSearchCV
 from sklearn.ensemble import VotingClassifier, BaggingRegressor
@@ -115,6 +116,31 @@ class Analyzer(object):
             output.append(df)
         return output
 
+    def _reduce_dimension_of_dfs(self, dfs, train_df):
+        def _drop_id_pred_cols(df):
+            if self.pred_col in df.columns:
+                return df.drop(self.id_col, axis=1).drop(self.pred_col, axis=1)
+            else:
+                return df.drop(self.id_col, axis=1)
+
+        output = []
+        n = self.configs['translate']['dimension']
+        if not n:
+            return dfs
+        if n == 'all':
+            n = len(_drop_id_pred_cols(train_df).columns)
+        pca_obj = PCA(n_components=n)
+        pca_obj.fit(_drop_id_pred_cols(train_df))
+        print('pca_ratio: %s' % pca_obj.explained_variance_ratio_)
+        for df_org in dfs:
+            df = pd.DataFrame(
+                pca_obj.transform(_drop_id_pred_cols(df_org).values))
+            df[self.id_col] = df_org[self.id_col]
+            if self.pred_col in df_org.columns:
+                df[self.pred_col] = df_org[self.pred_col].values
+            output.append(df)
+        return output
+
     def _to_float_of_dfs(self, dfs, target):
         output = []
         for df in dfs:
@@ -169,14 +195,9 @@ class Analyzer(object):
             print('category: %s' % column)
             train_df, test_df = self._categorize_dfs(
                 [train_df, test_df], column)
-        # del std=0
-        if self.configs['translate']['del_std0']:
-            for column in test_df.columns:
-                if np.std(train_df[column].values) == 0:
-                    if np.std(test_df[column].values) == 0:
-                        print('del_std0: %s' % column)
-                        del train_df[column]
-                        del test_df[column]
+        # dimension
+        train_df, test_df = self._reduce_dimension_of_dfs(
+            [train_df, test_df], train_df)
         # float
         for column in test_df.columns:
             if column in [self.id_col, self.pred_col]:

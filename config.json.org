@@ -54,7 +54,7 @@
             "Hoge",
             "Fuga"
         ],
-        "del_std0": false
+        "dimension": false
     },
     "notify": {
         "slack": "https://hooks.slack.com/services/hogehoge"
