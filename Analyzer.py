@@ -200,7 +200,12 @@ class Analyzer(object):
             [train_df, test_df], train_df)
         # float
         for column in test_df.columns:
-            if column in [self.id_col, self.pred_col]:
+            if column in [self.pred_col]:
+                continue
+            if (
+                self.configs['fit']['mode'] == 'clf' and
+                column in [self.id_col]
+            ):
                 continue
             train_df, test_df = self._to_float_of_dfs(
                 [train_df, test_df], column)
@@ -227,11 +232,18 @@ class Analyzer(object):
         return self.X_train, self.Y_train, self.X_test
 
     def normalize_fitting_data(self):
-        ss = StandardScaler()
-        ss.fit(self.X_train)
-        self.X_train = ss.transform(self.X_train)
-        self.X_test = ss.transform(self.X_test)
-        return self.X_train, self.X_test
+        # x
+        ss_x = StandardScaler()
+        ss_x.fit(self.X_train)
+        self.X_train = ss_x.transform(self.X_train)
+        self.X_test = ss_x.transform(self.X_test)
+        # y
+        if self.configs['fit']['mode'] == 'reg':
+            self.ss_y = StandardScaler()
+            self.Y_train = self.Y_train.reshape(-1, 1)
+            self.ss_y.fit(self.Y_train)
+            self.Y_train = self.ss_y.transform(self.Y_train).reshape(-1, )
+        return self.X_train, self.Y_train, self.X_test
 
     def is_ok_with_adversarial_validation(self):
         def _get_adversarial_preds(X_train, X_test, adversarial):
@@ -330,6 +342,8 @@ class Analyzer(object):
 
     def calc_output(self, filename):
         Y_pred = self.ensemble_model.predict(self.X_test)
+        if self.configs['fit']['mode'] == 'reg':
+            Y_pred = self.ss_y.inverse_transform(Y_pred)
         with open('outputs/%s' % filename, 'w') as f:
             f.write('%s,%s' % (self.id_col, self.pred_col))
             for i in range(len(self.id_pred)):
