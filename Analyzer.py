@@ -168,7 +168,7 @@ class Analyzer(object):
                 'myfunc.%s' % method_name)([train_df, test_df], train_df)
         # del
         for column in self.configs['translate']['del']:
-            print('del: %s' % column)
+            print('delete: %s' % column)
             del train_df[column]
             del test_df[column]
         # missing
@@ -176,12 +176,13 @@ class Analyzer(object):
             if column in [self.id_col, self.pred_col]:
                 continue
             if test_df.dtypes[column] == 'object':
+                print('[WARN] OBJECT MISSING IS NOT BE REPLACED: %s' % column)
                 continue
             column_mean = train_df[column].mean()
             replaced, train_df, test_df = self._replace_missing_of_dfs(
                 [train_df, test_df], column, column_mean)
             if replaced:
-                print('missing: %s' % column)
+                print('replace missing with mean: %s' % column)
         # category
         for column in test_df.columns:
             if column in [self.id_col, self.pred_col]:
@@ -191,7 +192,7 @@ class Analyzer(object):
                 column not in self.configs['translate']['category']
             ):
                 continue
-            print('category: %s' % column)
+            print('categorize: %s' % column)
             train_df, test_df = self._categorize_dfs(
                 [train_df, test_df], column)
         # dimension
