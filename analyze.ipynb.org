@@ -3,14 +3,10 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "metadata": {
-    "_cell_guid": "2c80bcc2-ebcf-4c43-bdf0-6c4299566a56",
-    "_execution_state": "idle",
-    "_uuid": "9b60b1203d2797ec68812ccf7c02c9e31bff718b",
-    "collapsed": true
-   },
+   "metadata": {},
    "outputs": [],
    "source": [
+    "config_path = './config.json'\n",
     "config_text = \"\"\"\n",
     "{\n",
     "    \"data\": {\n",
@@ -77,11 +73,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "metadata": {
-    "_cell_guid": "c8e70134-2005-4d80-984a-37fa7604a47e",
-    "_execution_state": "idle",
-    "_uuid": "d37904a3ec4a18a302373a89e220d93c03fb8c0c"
-   },
+   "metadata": {},
    "outputs": [],
    "source": [
     "from Analyzer import Analyzer\n",
@@ -91,21 +83,18 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "metadata": {
-    "collapsed": true
-   },
+   "metadata": {},
    "outputs": [],
    "source": [
     "analyzer_obj = Analyzer()\n",
-    "analyzer_obj.read_config_text(config_text)"
+    "analyzer_obj.read_config_file(config_path)\n",
+    "# analyzer_obj.read_config_text(config_text)"
    ]
   },
   {
    "cell_type": "code",
    "execution_count": null,
-   "metadata": {
-    "scrolled": true
-   },
+   "metadata": {},
    "outputs": [],
    "source": [
     "print('### INIT')\n",
@@ -116,9 +105,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "metadata": {
-    "scrolled": true
-   },
+   "metadata": {},
    "outputs": [],
    "source": [
     "print('### TRANSLATE')\n",
@@ -129,9 +116,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "metadata": {
-    "scrolled": true
-   },
+   "metadata": {},
    "outputs": [],
    "source": [
     "print('### VISUALIZE TRAIN DATA')\n",
@@ -141,9 +126,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "metadata": {
-    "scrolled": true
-   },
+   "metadata": {},
    "outputs": [],
    "source": [
     "print('### NORMALIZE')\n",
@@ -184,9 +167,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "metadata": {
-    "collapsed": true
-   },
+   "metadata": {},
    "outputs": [],
    "source": [
     "print('### OUTPUT')\n",
