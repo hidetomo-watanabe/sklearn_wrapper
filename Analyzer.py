@@ -374,7 +374,7 @@ class Analyzer(object):
                 f.write('%s,%s' % (self.id_pred[i], self.Y_pred[i]))
         return filename
 
-    def visualize(self):
+    def visualize_train_data(self):
         for key in self.train_df.keys():
             if key == self.pred_col or key == self.id_col:
                 continue

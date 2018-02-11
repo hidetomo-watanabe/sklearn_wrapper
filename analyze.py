@@ -23,7 +23,7 @@ if __name__ == '__main__':
         print('')
 
         # print('### VISUALIZATION')
-        # analyzer_obj.visualize()
+        # analyzer_obj.visualize_train_data()
         # print('')
 
         print('### NORMALIZATION')

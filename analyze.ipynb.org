@@ -136,7 +136,7 @@
    "outputs": [],
    "source": [
     "print('### VISUALIZATION')\n",
-    "analyzer_obj.visualize()"
+    "analyzer_obj.visualize_train_data()"
    ]
   },
   {
