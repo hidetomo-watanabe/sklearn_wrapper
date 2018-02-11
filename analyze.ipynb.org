@@ -80,8 +80,7 @@
    "metadata": {
     "_cell_guid": "c8e70134-2005-4d80-984a-37fa7604a47e",
     "_execution_state": "idle",
-    "_uuid": "d37904a3ec4a18a302373a89e220d93c03fb8c0c",
-    "collapsed": true
+    "_uuid": "d37904a3ec4a18a302373a89e220d93c03fb8c0c"
    },
    "outputs": [],
    "source": [
@@ -122,7 +121,7 @@
    },
    "outputs": [],
    "source": [
-    "print('### TRANSLATION')\n",
+    "print('### TRANSLATE')\n",
     "analyzer_obj.trans_raw_data()\n",
     "analyzer_obj.display_data()"
    ]
@@ -135,7 +134,7 @@
    },
    "outputs": [],
    "source": [
-    "print('### VISUALIZATION')\n",
+    "print('### VISUALIZE TRAIN DATA')\n",
     "analyzer_obj.visualize_train_data()"
    ]
   },
@@ -147,7 +146,7 @@
    },
    "outputs": [],
    "source": [
-    "print('### NORMALIZATION')\n",
+    "print('### NORMALIZE')\n",
     "analyzer_obj.get_fitting_data()\n",
     "analyzer_obj.normalize_fitting_data()"
    ]
@@ -158,7 +157,7 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "print('### VALIDATION')\n",
+    "print('### VALIDATE')\n",
     "analyzer_obj.is_ok_with_adversarial_validation()"
    ]
   },
@@ -169,7 +168,28 @@
    "outputs": [],
    "source": [
     "print('### FIT')\n",
-    "analyzer_obj.calc_best_model('tmp.pickle')\n",
+    "analyzer_obj.calc_best_model('tmp.pickle')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "print('### VISUALIZE TRAIN PRED DATA')\n",
+    "analyzer_obj.visualize_train_pred_data()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "collapsed": true
+   },
+   "outputs": [],
+   "source": [
+    "print('### OUTPUT')\n",
     "analyzer_obj.calc_output()\n",
     "analyzer_obj.write_output('tmp.csv')"
    ]

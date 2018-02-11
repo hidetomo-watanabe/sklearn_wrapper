@@ -381,6 +381,11 @@ class Analyzer(object):
             g = sns.FacetGrid(self.train_df, col=self.pred_col)
             g.map(plt.hist, key, bins=20)
 
+    def visualize_train_pred_data(self):
+        Y_train_pred = self.ensemble_model.predict(self.X_train)
+        g = sns.jointplot(self.Y_train, Y_train_pred, kind='kde')
+        g.set_axis_labels('Y_train', 'Y_train_pred')
+
 
 if __name__ == '__main__':
     pass
