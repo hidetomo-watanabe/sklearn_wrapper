@@ -310,7 +310,7 @@ class Analyzer(object):
             return True
 
     def calc_best_model(self, filename):
-        estimators = []
+        self.estimators = []
         for i, modelname in enumerate(
             self.configs['fit']['models']
         ):
@@ -327,12 +327,12 @@ class Analyzer(object):
             print('  Y train shape: %s' % str(self.Y_train.shape))
             print('  best params: %s' % gs.best_params_)
             print('  best score of trained grid search: %s' % gs.best_score_)
-            estimators.append((modelname, gs.best_estimator_))
+            self.estimators.append((modelname, gs.best_estimator_))
         # classification
         if self.configs['fit']['mode'] == 'clf':
             self.ensemble_model = VotingClassifier(
-                estimators=estimators,
-                weights=[1] * len(estimators),
+                estimators=self.estimators,
+                weights=[1] * len(self.estimators),
                 voting='hard', n_jobs=n_jobs)
         # regression
         elif self.configs['fit']['mode'] == 'reg':
@@ -340,7 +340,7 @@ class Analyzer(object):
                 raise Exception(
                     '[ERROR] WHEN MODE IS REG, MODEL SHOULD BE 1')
             self.ensemble_model = BaggingRegressor(
-                base_estimator=estimators[0][1],
+                base_estimator=self.estimators[0][1],
                 n_jobs=n_jobs)
         self.ensemble_model = self.ensemble_model.fit(
             self.X_train, self.Y_train)
@@ -382,9 +382,15 @@ class Analyzer(object):
             g.map(plt.hist, key, bins=20)
 
     def visualize_train_pred_data(self):
-        Y_train_pred = self.ensemble_model.predict(self.X_train)
-        g = sns.jointplot(self.Y_train, Y_train_pred, kind='kde')
-        g.set_axis_labels('Y_train', 'Y_train_pred')
+        def _plot(model, title):
+            Y_train_pred = model.predict(self.X_train)
+            g = sns.jointplot(self.Y_train, Y_train_pred, kind='kde')
+            g.set_axis_labels('Y_train', 'Y_train_pred')
+            g.fig.suptitle(title)
+
+        for i, estimator in enumerate(self.estimators):
+            _plot(estimator[1], 'estimator_%d' % i)
+        _plot(self.ensemble_model, 'ensemble model')
 
 
 if __name__ == '__main__':
