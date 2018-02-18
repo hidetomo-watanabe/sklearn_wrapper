@@ -6,7 +6,7 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "config_path = './config.json'\n",
+    "config_path = './scripts/config.json'\n",
     "config_text = \"\"\"\n",
     "{\n",
     "    \"data\": {\n",
@@ -76,8 +76,12 @@
    "metadata": {},
    "outputs": [],
    "source": [
+    "import sys\n",
+    "sys.path.append('./modules')\n",
     "from Analyzer import Analyzer\n",
-    "%matplotlib inline"
+    "%matplotlib inline\n",
+    "%reload_ext autoreload\n",
+    "%autoreload 2"
    ]
   },
   {
@@ -87,8 +91,8 @@
    "outputs": [],
    "source": [
     "analyzer_obj = Analyzer()\n",
-    "analyzer_obj.read_config_file(config_path)\n",
-    "# analyzer_obj.read_config_text(config_text)"
+    "# analyzer_obj.read_config_file(config_path)\n",
+    "analyzer_obj.read_config_text(config_text)"
    ]
   },
   {
