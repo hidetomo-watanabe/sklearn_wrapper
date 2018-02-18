@@ -1,5 +1,10 @@
 # analysis_for_kaggle
-### flow
-- cp config.ini.org config.ini
+### configs
+- titanic
+- digit
+- house
+
+### CUI flow
+- cp scripts/config.ini.org scripts/config.ini
 - (update config.ini)
-- python -u analyze.py
+- python -u scripts/analyze.py
