@@ -1,5 +1,8 @@
 import sys
+import os
 import traceback
+BASE_PATH = '%s/..' % os.path.dirname(os.path.abspath(__file__))
+sys.path.append('%s/modules' % BASE_PATH)
 from Analyzer import Analyzer
 from Notifier import Notifier
 
@@ -7,7 +10,7 @@ if __name__ == '__main__':
     if len(sys.argv) > 1:
         config_path = sys.argv[1]
     else:
-        config_path = './config.json'
+        config_path = '%s/config.json' % BASE_PATH
     try:
         analyzer_obj = Analyzer()
         analyzer_obj.read_config_file(config_path)

@@ -3,7 +3,7 @@ if [ -e 'outputs/tmp.csv' ]; then
   rm outputs/tmp.csv
 fi
 
-err_msg=$(python -u analyze.py tests/titanic/test_config.json | grep ERROR)
+err_msg=$(python -u scripts/analyze.py tests/titanic/test_config.json | grep ERROR)
 if [ -n "${err_msg}" ];then
   echo 'INTEGRATION TEST ERROR'
   echo -e "${err_msg}"

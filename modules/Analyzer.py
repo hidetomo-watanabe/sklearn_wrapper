@@ -1,10 +1,11 @@
+import sys
+import os
 import math
 import json
 import pickle
 import numpy as np
 import pandas as pd
 import importlib
-from subprocess import check_output
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import GridSearchCV
@@ -23,13 +24,14 @@ from xgboost import XGBClassifier, XGBRegressor
 from IPython.display import display
 import seaborn as sns
 import matplotlib.pyplot as plt
+BASE_PATH = '%s/..' % os.path.dirname(os.path.abspath(__file__))
 
 
 class Analyzer(object):
     def __init__(self):
         self.configs = {}
 
-    def read_config_file(self, path='./config.json'):
+    def read_config_file(self, path='%s/scripts/config.json' % BASE_PATH):
         with open(path, 'r') as f:
             self.configs = json.loads(f.read())
         self.id_col = self.configs['data']['id_col']
@@ -160,6 +162,7 @@ class Analyzer(object):
         trans_adhoc = self.configs['translate']['adhoc']
         # adhoc
         if trans_adhoc['myfunc']:
+            sys.path.append(BASE_PATH)
             myfunc = importlib.import_module(
                 'myfuncs.%s' % trans_adhoc['myfunc'])
         for method_name in trans_adhoc['methods']:
@@ -345,7 +348,7 @@ class Analyzer(object):
         self.ensemble_model = self.ensemble_model.fit(
             self.X_train, self.Y_train)
         print('ensemble model: %s' % self.ensemble_model)
-        with open('outputs/%s' % filename, 'wb') as f:
+        with open('%s/outputs/%s' % (BASE_PATH, filename), 'wb') as f:
             pickle.dump(self.ensemble_model, f)
         return self.ensemble_model
 
@@ -367,7 +370,7 @@ class Analyzer(object):
         return self.Y_pred
 
     def write_output(self, filename):
-        with open('outputs/%s' % filename, 'w') as f:
+        with open('%s/outputs/%s' % (BASE_PATH, filename), 'w') as f:
             f.write('%s,%s' % (self.id_col, self.pred_col))
             for i in range(len(self.id_pred)):
                 f.write('\n')
