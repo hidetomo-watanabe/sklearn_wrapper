@@ -1,10 +1,14 @@
 # analysis_for_kaggle
-### configs
+### overview
+- only SINGLE MODEL analysis
+- (TBI) ensemble model
+
+### sample configs
 - titanic
 - digit
 - house
 
 ### CUI flow
-- cp scripts/config.ini.org scripts/config.ini
-- (update config.ini)
+- cp scripts/config.json.org scripts/config.json
+- (update config.json)
 - python -u scripts/analyze.py
