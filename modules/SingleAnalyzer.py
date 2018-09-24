@@ -30,7 +30,7 @@ import matplotlib.pyplot as plt
 BASE_PATH = '%s/..' % os.path.dirname(os.path.abspath(__file__))
 
 
-class Analyzer(object):
+class SingleAnalyzer(object):
     def __init__(self):
         self.configs = {}
 
@@ -320,34 +320,31 @@ class Analyzer(object):
             return True
 
     def calc_best_model(self, filename):
-        self.estimators = []
-        for i, modelname in enumerate(
-            self.configs['fit']['models']
-        ):
-            base_model = self._get_base_model(modelname)
-            scoring = self.configs['fit']['scoring']
-            cv = self.configs['fit']['cv']
-            n_jobs = self.configs['fit']['n_jobs']
-            params = self.configs['fit']['params'][i]
-            gs = GridSearchCV(
-                base_model, params, cv=cv, scoring=scoring, n_jobs=n_jobs)
-            gs.fit(self.X_train, self.Y_train)
-            print('modelname: %s' % modelname)
-            print('  X train shape: %s' % str(self.X_train.shape))
-            print('  Y train shape: %s' % str(self.Y_train.shape))
-            print('  best params: %s' % gs.best_params_)
-            print('  best score of trained grid search: %s' % gs.best_score_)
-            self.estimators.append((modelname, gs.best_estimator_))
-        self.ensemble_model = self.estimators[0][1]
-        self.ensemble_model = self.ensemble_model.fit(
+        modelname = self.configs['fit']['model']
+        base_model = self._get_base_model(modelname)
+        scoring = self.configs['fit']['scoring']
+        cv = self.configs['fit']['cv']
+        n_jobs = self.configs['fit']['n_jobs']
+        params = self.configs['fit']['params']
+        gs = GridSearchCV(
+            base_model, params, cv=cv, scoring=scoring, n_jobs=n_jobs)
+        gs.fit(self.X_train, self.Y_train)
+        print('modelname: %s' % modelname)
+        print('  X train shape: %s' % str(self.X_train.shape))
+        print('  Y train shape: %s' % str(self.Y_train.shape))
+        print('  best params: %s' % gs.best_params_)
+        print('  best score of trained grid search: %s' % gs.best_score_)
+        self.estimator = gs.best_estimator_
+
+        self.estimator = self.estimator.fit(
             self.X_train, self.Y_train)
-        print('ensemble model: %s' % self.ensemble_model)
+        print('estimator: %s' % self.estimator)
         with open('%s/outputs/%s' % (BASE_PATH, filename), 'wb') as f:
-            pickle.dump(self.ensemble_model, f)
-        return self.ensemble_model
+            pickle.dump(self.estimator, f)
+        return self.estimator
 
     def calc_output(self):
-        self.Y_pred = self.ensemble_model.predict(self.X_test)
+        self.Y_pred = self.estimator.predict(self.X_test)
         # inverse normalize
         if self.configs['fit']['mode'] == 'reg':
             # ss
@@ -379,15 +376,10 @@ class Analyzer(object):
             g.map(plt.hist, key, bins=20)
 
     def visualize_train_pred_data(self):
-        def _plot(model, title):
-            Y_train_pred = model.predict(self.X_train)
-            g = sns.jointplot(self.Y_train, Y_train_pred, kind='kde')
-            g.set_axis_labels('Y_train', 'Y_train_pred')
-            g.fig.suptitle(title)
-
-        for i, estimator in enumerate(self.estimators):
-            _plot(estimator[1], 'estimator_%d' % i)
-        _plot(self.ensemble_model, 'ensemble model')
+        Y_train_pred = self.estimator.predict(self.X_train)
+        g = sns.jointplot(self.Y_train, Y_train_pred, kind='kde')
+        g.set_axis_labels('Y_train', 'Y_train_pred')
+        g.fig.suptitle('estimator')
 
 
 if __name__ == '__main__':
