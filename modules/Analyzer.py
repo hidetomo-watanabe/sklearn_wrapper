@@ -9,7 +9,6 @@ import importlib
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import GridSearchCV
-from sklearn.ensemble import VotingClassifier, BaggingRegressor
 from sklearn.linear_model import LogisticRegression, LinearRegression
 from sklearn.svm import SVC, SVR, LinearSVC, LinearSVR
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
@@ -21,6 +20,7 @@ from sklearn.linear_model import Perceptron
 from sklearn.linear_model import SGDClassifier, SGDRegressor
 from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 from xgboost import XGBClassifier, XGBRegressor
+from lightgbm import LGBMClassifier, LGBMRegressor
 from IPython.display import display
 try:
     import seaborn as sns
@@ -86,6 +86,10 @@ class Analyzer(object):
             return XGBClassifier()
         elif modelname == 'xgb_reg':
             return XGBRegressor()
+        elif modelname == 'lgb_clf':
+            return LGBMClassifier()
+        elif modelname == 'lgb_reg':
+            return LGBMRegressor()
 
     def display_data(self):
         for label, df in [('train', self.train_df), ('test', self.test_df)]:
@@ -334,20 +338,7 @@ class Analyzer(object):
             print('  best params: %s' % gs.best_params_)
             print('  best score of trained grid search: %s' % gs.best_score_)
             self.estimators.append((modelname, gs.best_estimator_))
-        # classification
-        if self.configs['fit']['mode'] == 'clf':
-            self.ensemble_model = VotingClassifier(
-                estimators=self.estimators,
-                weights=[1] * len(self.estimators),
-                voting='hard', n_jobs=n_jobs)
-        # regression
-        elif self.configs['fit']['mode'] == 'reg':
-            if len(self.configs['fit']['models']) != 1:
-                raise Exception(
-                    '[ERROR] WHEN MODE IS REG, MODEL SHOULD BE 1')
-            self.ensemble_model = BaggingRegressor(
-                base_estimator=self.estimators[0][1],
-                n_jobs=n_jobs)
+        self.ensemble_model = self.estimators[0][1]
         self.ensemble_model = self.ensemble_model.fit(
             self.X_train, self.Y_train)
         print('ensemble model: %s' % self.ensemble_model)
