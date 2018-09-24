@@ -22,7 +22,10 @@ from sklearn.linear_model import SGDClassifier, SGDRegressor
 from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 from xgboost import XGBClassifier, XGBRegressor
 from IPython.display import display
-import seaborn as sns
+try:
+    import seaborn as sns
+except Exception as e:
+    print('[WARN] CANNOT IMPORT SEABORN: %s' % e)
 import matplotlib.pyplot as plt
 BASE_PATH = '%s/..' % os.path.dirname(os.path.abspath(__file__))
 
