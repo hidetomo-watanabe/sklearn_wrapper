@@ -20,19 +20,15 @@
     },
     "fit": {
         "mode": "reg",
-        "models": [
-            "svr"
-        ],
+        "model": "svr",
         "scoring": "neg_mean_squared_error",
         "cv": 5,
         "n_jobs": -1,
-        "params" : [
-            {
-                "C": [1],
-                "degree": [1],
-                "kernel": ["poly"]
-            }
-        ]
+        "params" : {
+            "C": [1],
+            "degree": [1],
+            "kernel": ["poly"]
+        }
     },
     "translate": {
         "adhoc": {
