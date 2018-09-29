@@ -272,7 +272,7 @@ class SingleAnalyzer(object):
             tmp_X_train = X_train[:len(X_test)]
             X_adv = np.concatenate((tmp_X_train, X_test), axis=0)
             target_adv = np.concatenate(
-                (np.zeros(len(X_test)), np.ones(len(X_test))), axis=0)
+                (np.zeros(len(tmp_X_train)), np.ones(len(X_test))), axis=0)
             # fit
             gs = GridSearchCV(
                 self._get_base_model(adversarial['model']),
