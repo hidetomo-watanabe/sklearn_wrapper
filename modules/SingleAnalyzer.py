@@ -99,13 +99,14 @@ class SingleAnalyzer(object):
 
     def _replace_missing_of_dfs(self, dfs, target, target_mean):
         replaced = False
-        output = [replaced]
+        output = []
         for df in dfs:
             for i, val in enumerate(df[target].values):
                 if math.isnan(val):
                     replaced = True
                     df[target].values[i] = target_mean
             output.append(df)
+        output.insert(0, replaced)
         return output
 
     def _categorize_dfs(self, dfs, target):
