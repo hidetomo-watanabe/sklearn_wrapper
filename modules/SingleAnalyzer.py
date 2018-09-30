@@ -214,7 +214,7 @@ class SingleAnalyzer(object):
             if column in [self.id_col]:
                 continue
             if (
-                self.configs['fit']['mode'] == 'clf' and
+                self.configs['fit']['mode'] in ['clf', 'clf_proba'] and
                 column in [self.pred_col]
             ):
                 continue
@@ -345,7 +345,10 @@ class SingleAnalyzer(object):
         return self.estimator
 
     def calc_output(self):
-        self.Y_pred = self.estimator.predict(self.X_test)
+        if self.configs['fit']['mode'] == 'clf_proba':
+            self.Y_pred = self.estimator.predict_proba(self.X_test)
+        else:
+            self.Y_pred = self.estimator.predict(self.X_test)
         # inverse normalize
         if self.configs['fit']['mode'] == 'reg':
             # ss
@@ -363,10 +366,19 @@ class SingleAnalyzer(object):
 
     def write_output(self, filename):
         with open('%s/outputs/%s' % (BASE_PATH, filename), 'w') as f:
-            f.write('%s,%s' % (self.id_col, self.pred_col))
-            for i in range(len(self.id_pred)):
-                f.write('\n')
-                f.write('%s,%s' % (self.id_pred[i], self.Y_pred[i]))
+            if self.configs['fit']['mode'] == 'clf_proba':
+                f.write('%s' % (self.id_col))
+                for pred_val in sorted(np.unique(self.Y_train)):
+                    f.write(',%s_%s' % (self.pred_col, pred_val))
+                for i in range(len(self.id_pred)):
+                    f.write('\n')
+                    f.write('%s,' % (self.id_pred[i]))
+                    f.write('%s' % (','.join(list(map(str, self.Y_pred[i])))))
+            else:
+                f.write('%s,%s' % (self.id_col, self.pred_col))
+                for i in range(len(self.id_pred)):
+                    f.write('\n')
+                    f.write('%s,%s' % (self.id_pred[i], self.Y_pred[i]))
         return filename
 
     def visualize_train_data(self):
