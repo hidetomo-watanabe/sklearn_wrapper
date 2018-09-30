@@ -21,6 +21,9 @@ from sklearn.linear_model import SGDClassifier, SGDRegressor
 from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 from xgboost import XGBClassifier, XGBRegressor
 from lightgbm import LGBMClassifier, LGBMRegressor
+from keras.wrappers.scikit_learn import KerasClassifier
+from keras.wrappers.scikit_learn import KerasRegressor
+from MyKerasModel import create_keras_model
 from IPython.display import display
 try:
     import seaborn as sns
@@ -90,6 +93,10 @@ class SingleAnalyzer(object):
             return LGBMClassifier()
         elif modelname == 'lgb_reg':
             return LGBMRegressor()
+        elif modelname == 'keras_clf':
+            return KerasClassifier(build_fn=create_keras_model)
+        elif modelname == 'keras_reg':
+            return KerasRegressor(build_fn=create_keras_model)
 
     def display_data(self):
         for label, df in [('train', self.train_df), ('test', self.test_df)]:
@@ -214,7 +221,7 @@ class SingleAnalyzer(object):
             if column in [self.id_col]:
                 continue
             if (
-                self.configs['fit']['mode'] in ['clf', 'clf_proba'] and
+                self.configs['fit']['mode'] in ['clf'] and
                 column in [self.pred_col]
             ):
                 continue
@@ -328,29 +335,39 @@ class SingleAnalyzer(object):
         n_jobs = self.configs['fit']['n_jobs']
         params = self.configs['fit']['params']
         gs = GridSearchCV(
-            base_model, params, cv=cv, scoring=scoring, n_jobs=n_jobs)
+            estimator=base_model, param_grid=params,
+            cv=cv, scoring=scoring, n_jobs=n_jobs)
         gs.fit(self.X_train, self.Y_train)
         print('modelname: %s' % modelname)
         print('  X train shape: %s' % str(self.X_train.shape))
         print('  Y train shape: %s' % str(self.Y_train.shape))
         print('  best params: %s' % gs.best_params_)
         print('  best score of trained grid search: %s' % gs.best_score_)
-        self.estimator = gs.best_estimator_
-
-        self.estimator = self.estimator.fit(
-            self.X_train, self.Y_train)
+        if modelname in ['keras_clf', 'keras_reg']:
+            self.estimator = gs.best_estimator_.model
+            self.estimator.save('%s/outputs/%s' % (BASE_PATH, filename))
+        else:
+            self.estimator = gs.best_estimator_
+            with open('%s/outputs/%s' % (BASE_PATH, filename), 'wb') as f:
+                pickle.dump(self.estimator, f)
         print('estimator: %s' % self.estimator)
-        with open('%s/outputs/%s' % (BASE_PATH, filename), 'wb') as f:
-            pickle.dump(self.estimator, f)
         return self.estimator
 
     def calc_output(self):
-        if self.configs['fit']['mode'] == 'clf_proba':
-            self.Y_pred = self.estimator.predict_proba(self.X_test)
-        else:
+        modelname = self.configs['fit']['model']
+        self.Y_pred = None
+        self.Y_pred_proba = None
+        # keras
+        if modelname in ['keras_clf', 'keras_reg']:
+            self.Y_pred_proba = self.estimator.predict(self.X_test)
+        # clf
+        elif self.configs['fit']['mode'] == 'clf':
             self.Y_pred = self.estimator.predict(self.X_test)
-        # inverse normalize
-        if self.configs['fit']['mode'] == 'reg':
+            if hasattr(self.estimator, 'predict_proba'):
+                self.Y_pred_proba = self.estimator.predict_proba(self.X_test)
+        # reg
+        elif self.configs['fit']['mode'] == 'reg':
+            # inverse normalize
             # ss
             self.Y_pred = self.ss_y.inverse_transform(self.Y_pred)
             # other
@@ -362,23 +379,31 @@ class SingleAnalyzer(object):
                 else:
                     raise Exception(
                         '[ERROR] NOT IMPELEMTED TRANS FIT: %s' % trans_fit)
-        return self.Y_pred
+        return self.Y_pred, self.Y_pred_proba
 
     def write_output(self, filename):
-        with open('%s/outputs/%s' % (BASE_PATH, filename), 'w') as f:
-            if self.configs['fit']['mode'] == 'clf_proba':
+        def _write(filename):
+            with open('%s/outputs/%s' % (BASE_PATH, filename), 'w') as f:
+                f.write('%s,%s' % (self.id_col, self.pred_col))
+                for i in range(len(self.id_pred)):
+                    f.write('\n')
+                    f.write('%s,%s' % (self.id_pred[i], self.Y_pred[i]))
+
+        def _write_proba(filename):
+            with open('%s/outputs/%s' % (BASE_PATH, filename), 'w') as f:
                 f.write('%s' % (self.id_col))
                 for pred_val in sorted(np.unique(self.Y_train)):
                     f.write(',%s_%s' % (self.pred_col, pred_val))
                 for i in range(len(self.id_pred)):
                     f.write('\n')
                     f.write('%s,' % (self.id_pred[i]))
-                    f.write('%s' % (','.join(list(map(str, self.Y_pred[i])))))
-            else:
-                f.write('%s,%s' % (self.id_col, self.pred_col))
-                for i in range(len(self.id_pred)):
-                    f.write('\n')
-                    f.write('%s,%s' % (self.id_pred[i], self.Y_pred[i]))
+                    f.write('%s' % (','.join(
+                        list(map(str, self.Y_pred_proba[i])))))
+
+        if isinstance(self.Y_pred, np.ndarray):
+            _write(filename)
+        if isinstance(self.Y_pred_proba, np.ndarray):
+            _write_proba('proba_%s' % filename)
         return filename
 
     def visualize_train_data(self):

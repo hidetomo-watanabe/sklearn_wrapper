@@ -1,5 +1,6 @@
 __pycache__
 *.ipynb
-config.json
+scripts/config.json
+modules/MyKerasModel.py
 outputs/*.csv
 outputs/*.pickle
