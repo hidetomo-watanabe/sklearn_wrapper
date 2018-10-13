@@ -1,4 +1,5 @@
 import sys
+from tqdm import tqdm
 import pandas as pd
 
 if __name__ == '__main__':
@@ -46,12 +47,15 @@ if __name__ == '__main__':
         return stat_df
 
     print('[INFO] CREATE STAT')
+    print('[INFO] GET OBJECT IDS')
+    object_ids = pd.read_csv(input_meta_filename)['object_id'].values
     # csvが大きすぎるため分割して処理
     print('[INFO] READ INPUT AND GROUPBY DIVIDEDLY')
     CHUNKSIZE = 10000
     start_index = 0
     stat_df = pd.DataFrame()
     before_input_df_part = pd.DataFrame()
+    process_bar = tqdm(total=len(object_ids))
     while True:
         # チェック開始indexまでskip
         # メモリ削減のため、読み込むrowを制限
@@ -100,10 +104,11 @@ if __name__ == '__main__':
         stat_df_part = _get_stat_df(grouped_df_part)
         stat_df = pd.concat([stat_df, stat_df_part], ignore_index=True)
 
+        # 処理したobject_idの数だけproces_barを更新
+        process_bar.update(len(stat_df_part))
         start_index += 1
+    process_bar.close()
 
-    print('[INFO] GET OBJECT IDS')
-    object_ids = pd.read_csv(input_meta_filename)['object_id'].values
     print('[INFO] JOIN OBJECT IDS')
     # object_idの順番はinput_metaとinputで同一と仮定
     stat_df['object_id'] = object_ids
