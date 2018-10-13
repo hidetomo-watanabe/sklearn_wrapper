@@ -1,5 +1,4 @@
 import sys
-from tqdm import tqdm
 import pandas as pd
 
 if __name__ == '__main__':
@@ -48,32 +47,64 @@ if __name__ == '__main__':
 
     print('[INFO] CREATE STAT')
     # csvが大きすぎるため分割して処理
-    print('[INFO] GET OBJECT IDS')
-    object_ids = pd.read_csv(input_meta_filename)['object_id'].values
-    print('[INFO] READ INPUT AND GROUPBY ONE BY ONE')
+    print('[INFO] READ INPUT AND GROUPBY DIVIDEDLY')
+    CHUNKSIZE = 10000
+    start_index = 0
     stat_df = pd.DataFrame()
-    # object_idごとに、統計情報を計算していく
-    # object_idの順番はinput_metaとinputで同一と仮定
-    # object_idが進むごとにinput_readerのチェック開始indexを増やしていく
-    input_reader = list(pd.read_csv(input_filename, chunksize=10000))
-    read_start_index = 0
-    for object_id in tqdm(object_ids):
-        input_df_part = pd.DataFrame()
+    before_input_df_part = pd.DataFrame()
+    while True:
         # チェック開始indexまでskip
-        for i, x in enumerate(input_reader[read_start_index:]):
-            x_part = x.loc[x['object_id'] == object_id]
-            if len(x_part) > 0:
-                input_df_part = pd.concat(
-                    [input_df_part, x_part], ignore_index=True)
-            else:
-                # object_idは固まって存在していると仮定
-                # 該当データ群が途切れたらbreak
-                if len(input_df_part) > 0:
-                    read_start_index += i - 1
-                    break
+        # メモリ削減のため、読み込むrowを制限
+        # 2 x CHUNKSIZEを読んで、またいだデータに対応
+        if start_index == 0:
+            input_reader = list(pd.read_csv(
+                input_filename, chunksize=CHUNKSIZE,
+                skiprows=start_index * CHUNKSIZE,
+                nrows=2 * CHUNKSIZE))
+        else:
+            input_reader = list(pd.read_csv(
+                input_filename, chunksize=CHUNKSIZE, header=1,
+                names=[
+                    'object_id',
+                    'mjd',
+                    'passband',
+                    'flux',
+                    'flux_err',
+                    'detected'
+                ],
+                skiprows=start_index * CHUNKSIZE,
+                nrows=2 * CHUNKSIZE))
+        # 読み込み終了
+        if len(input_reader) == 0:
+            break
+
+        r0 = input_reader[0]
+        # r0のうち、すでに処理したデータを除いたもの
+        if len(before_input_df_part) > 0:
+            before_last_id = before_input_df_part['object_id'].values[-1]
+            input_df_part = r0[r0['object_id'] != before_last_id]
+        else:
+            input_df_part = r0
+        if len(input_reader) > 1:
+            r1 = input_reader[1]
+            # r1の先頭のまたいだデータを追加
+            r0_last_id = r0['object_id'].values[-1]
+            input_df_part = pd.concat(
+                [input_df_part, r1.loc[r1['object_id'] == r0_last_id]],
+                ignore_index=True)
+        before_input_df_part = input_df_part
+        # 読み込み終了
+        if len(input_df_part) == 0:
+            break
         grouped_df_part = input_df_part.groupby('object_id')
         stat_df_part = _get_stat_df(grouped_df_part)
         stat_df = pd.concat([stat_df, stat_df_part], ignore_index=True)
+
+        start_index += 1
+
+    print('[INFO] GET OBJECT IDS')
+    object_ids = pd.read_csv(input_meta_filename)['object_id'].values
+    print('[INFO] JOIN OBJECT IDS')
     # object_idの順番はinput_metaとinputで同一と仮定
     stat_df['object_id'] = object_ids
     stat_df = stat_df.set_index('object_id')
