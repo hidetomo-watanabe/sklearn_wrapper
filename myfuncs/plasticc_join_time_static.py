@@ -1,4 +1,5 @@
 import sys
+from tqdm import tqdm
 import pandas as pd
 
 if __name__ == '__main__':
@@ -54,15 +55,12 @@ if __name__ == '__main__':
     # object_idごとに、統計情報を計算していく
     # object_idの順番はinput_metaとinputで同一と仮定
     # object_idが進むごとにinput_readerのチェック開始indexを増やしていく
+    input_reader = list(pd.read_csv(input_filename, chunksize=10000))
     read_start_index = 0
-    for object_id in object_ids:
-        # 毎回取得し直さないと、readした部分が消えていく
-        input_reader = pd.read_csv(input_filename, chunksize=10000)
+    for object_id in tqdm(object_ids):
         input_df_part = pd.DataFrame()
-        for i, x in enumerate(input_reader):
-            # チェック開始indexまでskip
-            if i < read_start_index:
-                continue
+        # チェック開始indexまでskip
+        for i, x in enumerate(input_reader[read_start_index:]):
             x_part = x.loc[x['object_id'] == object_id]
             if len(x_part) > 0:
                 input_df_part = pd.concat(
@@ -71,7 +69,7 @@ if __name__ == '__main__':
                 # object_idは固まって存在していると仮定
                 # 該当データ群が途切れたらbreak
                 if len(input_df_part) > 0:
-                    read_start_index = i - 1
+                    read_start_index += i - 1
                     break
         grouped_df_part = input_df_part.groupby('object_id')
         stat_df_part = _get_stat_df(grouped_df_part)
