@@ -97,8 +97,8 @@ if __name__ == '__main__':
             input_df_part = pd.concat(
                 [input_df_part, r1.loc[r1['object_id'] == r0_last_id]],
                 ignore_index=True)
-            del r0
-        del r1
+            del r1
+        del r0
 
         # 処理対象がないため、loop終了
         if len(input_df_part) == 0:
