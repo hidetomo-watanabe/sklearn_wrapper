@@ -51,7 +51,7 @@ if __name__ == '__main__':
     object_ids = pd.read_csv(input_meta_filename)['object_id'].values
     # csvが大きすぎるため分割して処理
     print('[INFO] READ INPUT AND GROUPBY DIVIDEDLY')
-    CHUNKSIZE = 10000
+    CHUNKSIZE = 100000
     start_index = 0
     stat_df = pd.DataFrame()
     before_input_df_part = pd.DataFrame()
@@ -104,7 +104,7 @@ if __name__ == '__main__':
         stat_df_part = _get_stat_df(grouped_df_part)
         stat_df = pd.concat([stat_df, stat_df_part], ignore_index=True)
 
-        # 処理したobject_idの数だけproces_barを更新
+        # 処理したobject_idの数だけprocess_barを更新
         process_bar.update(len(stat_df_part))
         start_index += 1
     process_bar.close()
