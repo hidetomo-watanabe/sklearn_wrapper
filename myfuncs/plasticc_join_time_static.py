@@ -1,16 +1,12 @@
+import os
 import sys
 import pandas as pd
-from logging import getLogger, StreamHandler, Formatter, INFO
 from tqdm import tqdm
+BASE_PATH = '%s/..' % os.path.dirname(os.path.abspath(__file__))
+sys.path.append('%s/modules' % BASE_PATH)
+from MyLogger import MyLogger
 
-logger = getLogger(__name__)
-handler = StreamHandler()
-formatter = Formatter('%(asctime)s:%(lineno)d:%(levelname)s:%(message)s')
-handler.setLevel(INFO)
-handler.setFormatter(formatter)
-logger.setLevel(INFO)
-logger.addHandler(handler)
-logger.propagate = False
+logger = MyLogger().get_logger()
 
 if __name__ == '__main__':
     input_filename = sys.argv[1]
