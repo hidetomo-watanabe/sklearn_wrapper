@@ -1,6 +1,16 @@
 import sys
-from tqdm import tqdm
 import pandas as pd
+from logging import getLogger, StreamHandler, Formatter, INFO
+from tqdm import tqdm
+
+logger = getLogger(__name__)
+handler = StreamHandler()
+formatter = Formatter('%(asctime)s:%(lineno)d:%(levelname)s:%(message)s')
+handler.setLevel(INFO)
+handler.setFormatter(formatter)
+logger.setLevel(INFO)
+logger.addHandler(handler)
+logger.propagate = False
 
 if __name__ == '__main__':
     input_filename = sys.argv[1]
@@ -50,11 +60,11 @@ if __name__ == '__main__':
         stat_df = stat_df.join(max_df)
         return stat_df
 
-    print('[INFO] CREATE STAT')
-    print('[INFO] GET OBJECT IDS')
+    logger.info('CREATE STAT')
+    logger.info('GET OBJECT IDS')
     object_ids = pd.read_csv(input_meta_filename)['object_id'].values
     # csvが大きすぎるため分割して処理
-    print('[INFO] READ INPUT AND GROUPBY DIVIDEDLY')
+    logger.info('READ INPUT AND GROUPBY DIVIDEDLY')
     chunksize = 5000000
     start_index = 0
     stat_df = pd.DataFrame()
@@ -127,15 +137,15 @@ if __name__ == '__main__':
         del stat_df_part
     process_bar.close()
 
-    print('[INFO] JOIN OBJECT IDS')
+    logger.info('JOIN OBJECT IDS')
     # object_idの順番はinput_metaとinputで同一と仮定
     stat_df['object_id'] = object_ids
     stat_df = stat_df.set_index('object_id')
 
-    print('[INFO] CREATE OUTPUT')
-    print('[INFO] JOIN META')
+    logger.info('CREATE OUTPUT')
+    logger.info('JOIN META')
     output_df = pd.read_csv(input_meta_filename).set_index('object_id')
-    print('[INFO] JOIN STAT')
+    logger.info('JOIN STAT')
     output_df = output_df.join(stat_df)
-    print('[INFO] WRITE OUTPUT TO CSV')
+    logger.info('WRITE OUTPUT TO CSV')
     output_df.to_csv(output_filename)
