@@ -121,6 +121,7 @@ if __name__ == '__main__':
         start_index += 1
 
         # メモリ対策
+        del input_reader
         del input_df_part
         del grouped_df_part
         del stat_df_part
