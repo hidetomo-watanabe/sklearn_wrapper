@@ -51,15 +51,16 @@ if __name__ == '__main__':
     object_ids = pd.read_csv(input_meta_filename)['object_id'].values
     # csvが大きすぎるため分割して処理
     print('[INFO] READ INPUT AND GROUPBY DIVIDEDLY')
-    CHUNKSIZE = 100000
+    CHUNKSIZE = 5000000
     start_index = 0
     stat_df = pd.DataFrame()
-    before_input_df_part = pd.DataFrame()
+    before_last_id = None
     process_bar = tqdm(total=len(object_ids))
     while True:
         # チェック開始indexまでskip
         # メモリ削減のため、読み込むrowを制限
         # 2 x CHUNKSIZEを読んで、またいだデータに対応
+        # skiprowsが徐々に重くなるかも。。。
         if start_index == 0:
             input_reader = list(pd.read_csv(
                 input_filename, chunksize=CHUNKSIZE,
@@ -78,17 +79,19 @@ if __name__ == '__main__':
                 ],
                 skiprows=start_index * CHUNKSIZE,
                 nrows=2 * CHUNKSIZE))
-        # 読み込み終了
+
+        # ファイルを全て読んだため、loop終了
         if len(input_reader) == 0:
             break
 
         r0 = input_reader[0]
         # r0のうち、すでに処理したデータを除いたもの
-        if len(before_input_df_part) > 0:
-            before_last_id = before_input_df_part['object_id'].values[-1]
+        if before_last_id:
             input_df_part = r0[r0['object_id'] != before_last_id]
         else:
             input_df_part = r0
+        del r0
+
         if len(input_reader) > 1:
             r1 = input_reader[1]
             # r1の先頭のまたいだデータを追加
@@ -96,10 +99,16 @@ if __name__ == '__main__':
             input_df_part = pd.concat(
                 [input_df_part, r1.loc[r1['object_id'] == r0_last_id]],
                 ignore_index=True)
-        before_input_df_part = input_df_part
-        # 読み込み終了
+            del r1
+
+        # 処理対象がないため、loop終了
         if len(input_df_part) == 0:
             break
+
+        # 次loop時に対象外にするID
+        before_last_id = input_df_part['object_id'].values[-1]
+
+        # groupby
         grouped_df_part = input_df_part.groupby('object_id')
         stat_df_part = _get_stat_df(grouped_df_part)
         stat_df = pd.concat([stat_df, stat_df_part], ignore_index=True)
@@ -107,6 +116,11 @@ if __name__ == '__main__':
         # 処理したobject_idの数だけprocess_barを更新
         process_bar.update(len(stat_df_part))
         start_index += 1
+
+        # メモリ対策
+        del input_df_part
+        del grouped_df_part
+        del stat_df_part
     process_bar.close()
 
     print('[INFO] JOIN OBJECT IDS')
