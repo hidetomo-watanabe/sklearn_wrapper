@@ -6,6 +6,10 @@ if __name__ == '__main__':
     input_filename = sys.argv[1]
     input_meta_filename = sys.argv[2]
     output_filename = sys.argv[3]
+    if len(sys.argv) > 4:
+        chunksize = sys.argv[4]
+    else:
+        chunksize = 500000
 
     def _get_stat_df(grouped_df):
         mean_df = grouped_df.mean().rename(
@@ -51,7 +55,7 @@ if __name__ == '__main__':
     object_ids = pd.read_csv(input_meta_filename)['object_id'].values
     # csvが大きすぎるため分割して処理
     print('[INFO] READ INPUT AND GROUPBY DIVIDEDLY')
-    CHUNKSIZE = 5000000
+    chunksize = 5000000
     start_index = 0
     stat_df = pd.DataFrame()
     before_last_id = None
@@ -59,16 +63,16 @@ if __name__ == '__main__':
     while True:
         # チェック開始indexまでskip
         # メモリ削減のため、読み込むrowを制限
-        # 2 x CHUNKSIZEを読んで、またいだデータに対応
+        # 2 x chunksizeを読んで、またいだデータに対応
         # skiprowsが徐々に重くなるかも。。。
         if start_index == 0:
             input_reader = list(pd.read_csv(
-                input_filename, chunksize=CHUNKSIZE,
-                skiprows=start_index * CHUNKSIZE,
-                nrows=2 * CHUNKSIZE))
+                input_filename, chunksize=chunksize,
+                skiprows=start_index * chunksize,
+                nrows=2 * chunksize))
         else:
             input_reader = list(pd.read_csv(
-                input_filename, chunksize=CHUNKSIZE, header=1,
+                input_filename, chunksize=chunksize, header=1,
                 names=[
                     'object_id',
                     'mjd',
@@ -77,8 +81,8 @@ if __name__ == '__main__':
                     'flux_err',
                     'detected'
                 ],
-                skiprows=start_index * CHUNKSIZE,
-                nrows=2 * CHUNKSIZE))
+                skiprows=start_index * chunksize,
+                nrows=2 * chunksize))
 
         # ファイルを全て読んだため、loop終了
         if len(input_reader) == 0:
