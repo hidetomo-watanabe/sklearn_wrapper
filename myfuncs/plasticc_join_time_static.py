@@ -90,8 +90,6 @@ if __name__ == '__main__':
             input_df_part = r0[r0['object_id'] != before_last_id]
         else:
             input_df_part = r0
-        del r0
-
         if len(input_reader) > 1:
             r1 = input_reader[1]
             # r1の先頭のまたいだデータを追加
@@ -99,7 +97,8 @@ if __name__ == '__main__':
             input_df_part = pd.concat(
                 [input_df_part, r1.loc[r1['object_id'] == r0_last_id]],
                 ignore_index=True)
-            del r1
+        del r0
+        del r1
 
         # 処理対象がないため、loop終了
         if len(input_df_part) == 0:
