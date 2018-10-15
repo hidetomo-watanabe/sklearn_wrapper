@@ -23,7 +23,10 @@ from xgboost import XGBClassifier, XGBRegressor
 from lightgbm import LGBMClassifier, LGBMRegressor
 from keras.wrappers.scikit_learn import KerasClassifier
 from keras.wrappers.scikit_learn import KerasRegressor
-from MyKerasModel import create_keras_model
+try:
+    from MyKerasModel import create_keras_model
+except Exception as e:
+    print('[WARN] CANNOT IMPORT MY KERAS MODEL: %s' % e)
 from IPython.display import display
 try:
     import seaborn as sns
