@@ -23,17 +23,21 @@ from xgboost import XGBClassifier, XGBRegressor
 from lightgbm import LGBMClassifier, LGBMRegressor
 from keras.wrappers.scikit_learn import KerasClassifier
 from keras.wrappers.scikit_learn import KerasRegressor
+from IPython.display import display
+import matplotlib.pyplot as plt
+from logging import getLogger
+
+BASE_PATH = '%s/..' % os.path.dirname(os.path.abspath(__file__))
+logger = getLogger('analyze').getChild('SingleAnalyzer')
+
 try:
     from MyKerasModel import create_keras_model
 except Exception as e:
-    print('[WARN] CANNOT IMPORT MY KERAS MODEL: %s' % e)
-from IPython.display import display
+    logger.warn('CANNOT IMPORT MY KERAS MODEL: %s' % e)
 try:
     import seaborn as sns
 except Exception as e:
-    print('[WARN] CANNOT IMPORT SEABORN: %s' % e)
-import matplotlib.pyplot as plt
-BASE_PATH = '%s/..' % os.path.dirname(os.path.abspath(__file__))
+    logger.warn('CANNOT IMPORT SEABORN: %s' % e)
 
 
 class SingleAnalyzer(object):
@@ -103,7 +107,7 @@ class SingleAnalyzer(object):
 
     def display_data(self):
         for label, df in [('train', self.train_df), ('test', self.test_df)]:
-            print('%s:' % label)
+            logger.info('%s:' % label)
             display(df.head())
             display(df.describe())
 
@@ -150,7 +154,7 @@ class SingleAnalyzer(object):
             n = len(_drop_id_pred_cols(train_df).columns)
         pca_obj = PCA(n_components=n)
         pca_obj.fit(_drop_id_pred_cols(train_df))
-        print('pca_ratio: %s' % pca_obj.explained_variance_ratio_)
+        logger.info('pca_ratio: %s' % pca_obj.explained_variance_ratio_)
         for df_org in dfs:
             df = pd.DataFrame(
                 pca_obj.transform(_drop_id_pred_cols(df_org).values))
@@ -184,12 +188,12 @@ class SingleAnalyzer(object):
             myfunc = importlib.import_module(
                 'myfuncs.%s' % trans_adhoc['myfunc'])
         for method_name in trans_adhoc['methods']:
-            print('adhoc: %s' % method_name)
+            logger.info('adhoc: %s' % method_name)
             train_df, test_df = eval(
                 'myfunc.%s' % method_name)([train_df, test_df], train_df)
         # del
         for column in self.configs['translate']['del']:
-            print('delete: %s' % column)
+            logger.info('delete: %s' % column)
             del train_df[column]
             del test_df[column]
         # missing
@@ -197,13 +201,13 @@ class SingleAnalyzer(object):
             if column in [self.id_col, self.pred_col]:
                 continue
             if test_df.dtypes[column] == 'object':
-                print('[WARN] OBJECT MISSING IS NOT BE REPLACED: %s' % column)
+                logger.warn('OBJECT MISSING IS NOT BE REPLACED: %s' % column)
                 continue
             column_mean = train_df[column].mean()
             replaced, train_df, test_df = self._replace_missing_of_dfs(
                 [train_df, test_df], column, column_mean)
             if replaced:
-                print('replace missing with mean: %s' % column)
+                logger.info('replace missing with mean: %s' % column)
         # category
         for column in test_df.columns:
             if column in [self.id_col, self.pred_col]:
@@ -213,7 +217,7 @@ class SingleAnalyzer(object):
                 column not in self.configs['translate']['category']
             ):
                 continue
-            print('categorize: %s' % column)
+            logger.info('categorize: %s' % column)
             train_df, test_df = self._categorize_dfs(
                 [train_df, test_df], column)
         # dimension
@@ -239,7 +243,7 @@ class SingleAnalyzer(object):
         test_df = self.test_df
         # random
         if self.configs['data']['random']:
-            print('randomize train data')
+            logger.info('randomize train data')
             train_df = train_df.iloc[np.random.permutation(len(train_df))]
         # Y_train
         self.Y_train = train_df[self.pred_col].values
@@ -264,7 +268,7 @@ class SingleAnalyzer(object):
             # other
             trans_fit = self.configs['translate']['fit']
             if trans_fit:
-                print('translate y_train with %s' % trans_fit)
+                logger.info('translate y_train with %s' % trans_fit)
                 if trans_fit == 'log':
                     self.Y_train = np.array(list(map(math.log, self.Y_train)))
                 else:
@@ -307,17 +311,17 @@ class SingleAnalyzer(object):
         X_train = self.X_train
         adversarial = self.configs['data']['adversarial']
         if adversarial:
-            print('with adversarial')
+            logger.info('with adversarial')
             adv_pred_train, adv_pred_test = _get_adversarial_preds(
                 X_train, self.X_test, adversarial)
             adv_pred_train_num_0 = len(np.where(adv_pred_train == 0)[0])
             adv_pred_train_num_1 = len(np.where(adv_pred_train == 1)[0])
             adv_pred_test_num_0 = len(np.where(adv_pred_test == 0)[0])
             adv_pred_test_num_1 = len(np.where(adv_pred_test == 1)[0])
-            print('pred train num 0: %s' % adv_pred_train_num_0)
-            print('pred train num 1: %s' % adv_pred_train_num_1)
-            print('pred test num 0: %s' % adv_pred_test_num_0)
-            print('pred test num 1: %s' % adv_pred_test_num_1)
+            logger.info('pred train num 0: %s' % adv_pred_train_num_0)
+            logger.info('pred train num 1: %s' % adv_pred_train_num_1)
+            logger.info('pred test num 0: %s' % adv_pred_test_num_0)
+            logger.info('pred test num 1: %s' % adv_pred_test_num_1)
             if not _is_ok_pred_nums(
                 adv_pred_train_num_0,
                 adv_pred_train_num_1,
@@ -327,7 +331,7 @@ class SingleAnalyzer(object):
                 raise Exception(
                     '[ERROR] TRAIN AND TEST MAY BE HAVE DIFFERENT FEATURES')
         else:
-            print('[WARN] NO DATA VALIDATION')
+            logger.warn('NO DATA VALIDATION')
             return True
 
     def calc_best_model(self, filename):
@@ -341,11 +345,11 @@ class SingleAnalyzer(object):
             estimator=base_model, param_grid=params,
             cv=cv, scoring=scoring, n_jobs=n_jobs)
         gs.fit(self.X_train, self.Y_train)
-        print('modelname: %s' % modelname)
-        print('  X train shape: %s' % str(self.X_train.shape))
-        print('  Y train shape: %s' % str(self.Y_train.shape))
-        print('  best params: %s' % gs.best_params_)
-        print('  best score of trained grid search: %s' % gs.best_score_)
+        logger.info('modelname: %s' % modelname)
+        logger.info('  X train shape: %s' % str(self.X_train.shape))
+        logger.info('  Y train shape: %s' % str(self.Y_train.shape))
+        logger.info('  best params: %s' % gs.best_params_)
+        logger.info('  best score of trained grid search: %s' % gs.best_score_)
         if modelname in ['keras_clf', 'keras_reg']:
             self.estimator = gs.best_estimator_.model
             self.estimator.save('%s/outputs/%s' % (BASE_PATH, filename))
@@ -353,7 +357,7 @@ class SingleAnalyzer(object):
             self.estimator = gs.best_estimator_
             with open('%s/outputs/%s' % (BASE_PATH, filename), 'wb') as f:
                 pickle.dump(self.estimator, f)
-        print('estimator: %s' % self.estimator)
+        logger.info('estimator: %s' % self.estimator)
         return self.estimator
 
     def calc_output(self):
@@ -376,7 +380,7 @@ class SingleAnalyzer(object):
             # other
             trans_fit = self.configs['translate']['fit']
             if trans_fit:
-                print('inverse translate y_train with %s' % trans_fit)
+                logger.info('inverse translate y_train with %s' % trans_fit)
                 if trans_fit == 'log':
                     self.Y_pred = np.array(list(map(math.exp, self.Y_pred)))
                 else:

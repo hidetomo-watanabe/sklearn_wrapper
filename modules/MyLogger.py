@@ -5,8 +5,8 @@ class MyLogger(object):
     def __init__(self):
         pass
 
-    def get_logger(self):
-        logger = getLogger(__name__)
+    def get_logger(self, name):
+        logger = getLogger(name)
         handler = StreamHandler()
         formatter = Formatter(
             '%(asctime)s:%(lineno)d:%(levelname)s:%(message)s')
