@@ -53,6 +53,9 @@
     },
     "integrate": {
         "filenames": [
-        ]
+            "/path/1.csv",
+            "/path/2.csv"
+        ],
+        "weights": [1, 1]
     }
 }

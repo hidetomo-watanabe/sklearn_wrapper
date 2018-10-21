@@ -15,12 +15,19 @@ class Integrater(object):
         with open(path, 'r') as f:
             self.configs = json.loads(f.read())
         self.filenames = self.configs['integrate']['filenames']
+        if 'weights' in self.configs['integrate']:
+            self.weights = self.configs['integrate']['weights']
+        else:
+            self.weights = [1] * len(self.filenames)
 
     def calc_average(self):
-        dfs = []
-        for filename in self.filenames:
-            dfs.append(pd.read_csv(filename))
-        self.output = sum(dfs) / len(dfs)
+        self.output = pd.DataFrame()
+        for i, filename in enumerate(self.filenames):
+            if len(self.output) == 0:
+                self.output = pd.read_csv(filename) * self.weights[i]
+            else:
+                self.output += pd.read_csv(filename) * self.weights[i]
+        self.output /= sum(self.weights)
         return self.output
 
     def write_output(self, filename):

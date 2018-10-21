@@ -3,4 +3,5 @@ __pycache__
 scripts/config.json
 modules/MyKerasModel.py
 outputs/*.csv
+outputs/*.zip
 outputs/*.pickle
