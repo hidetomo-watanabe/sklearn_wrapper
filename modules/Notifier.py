@@ -13,7 +13,7 @@ class Notifier(object):
             self.configs = json.loads(f.read())
 
     def notify_slack(self):
-        text = 'Finished Analysis.'
+        text = 'Finished.'
         requests.post(
             self.configs['notify']['slack'],
             data=json.dumps({'text': text}))
