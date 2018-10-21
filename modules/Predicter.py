@@ -28,7 +28,7 @@ import matplotlib.pyplot as plt
 from logging import getLogger
 
 BASE_PATH = '%s/..' % os.path.dirname(os.path.abspath(__file__))
-logger = getLogger('analyze').getChild('Predicter')
+logger = getLogger('predict').getChild('Predicter')
 
 try:
     from MyKerasModel import create_keras_model

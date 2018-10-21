@@ -7,7 +7,7 @@ from Predicter import Predicter
 from Notifier import Notifier
 from MyLogger import MyLogger
 
-logger = MyLogger().get_logger('analyze')
+logger = MyLogger().get_logger('predict')
 
 if __name__ == '__main__':
     logger.info('# START')
