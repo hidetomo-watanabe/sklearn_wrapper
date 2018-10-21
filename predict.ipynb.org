@@ -78,7 +78,7 @@
    "source": [
     "import sys\n",
     "sys.path.append('./modules')\n",
-    "from Analyzer import Analyzer\n",
+    "from Predicter import Predicter\n",
     "%matplotlib inline\n",
     "%reload_ext autoreload\n",
     "%autoreload 2"
@@ -90,9 +90,9 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "analyzer_obj = Analyzer()\n",
-    "# analyzer_obj.read_config_file(config_path)\n",
-    "analyzer_obj.read_config_text(config_text)"
+    "predicter_obj = Predicter()\n",
+    "# predicter_obj.read_config_file(config_path)\n",
+    "predicter_obj.read_config_text(config_text)"
    ]
   },
   {
@@ -102,8 +102,8 @@
    "outputs": [],
    "source": [
     "print('### INIT')\n",
-    "analyzer_obj.get_raw_data()\n",
-    "analyzer_obj.display_data()"
+    "predicter_obj.get_raw_data()\n",
+    "predicter_obj.display_data()"
    ]
   },
   {
@@ -113,8 +113,8 @@
    "outputs": [],
    "source": [
     "print('### TRANSLATE')\n",
-    "analyzer_obj.trans_raw_data()\n",
-    "analyzer_obj.display_data()"
+    "predicter_obj.trans_raw_data()\n",
+    "predicter_obj.display_data()"
    ]
   },
   {
@@ -124,7 +124,7 @@
    "outputs": [],
    "source": [
     "print('### VISUALIZE TRAIN DATA')\n",
-    "analyzer_obj.visualize_train_data()"
+    "predicter_obj.visualize_train_data()"
    ]
   },
   {
@@ -134,8 +134,8 @@
    "outputs": [],
    "source": [
     "print('### NORMALIZE')\n",
-    "analyzer_obj.get_fitting_data()\n",
-    "analyzer_obj.normalize_fitting_data()"
+    "predicter_obj.get_fitting_data()\n",
+    "predicter_obj.normalize_fitting_data()"
    ]
   },
   {
@@ -145,7 +145,7 @@
    "outputs": [],
    "source": [
     "print('### VALIDATE')\n",
-    "analyzer_obj.is_ok_with_adversarial_validation()"
+    "predicter_obj.is_ok_with_adversarial_validation()"
    ]
   },
   {
@@ -155,7 +155,7 @@
    "outputs": [],
    "source": [
     "print('### FIT')\n",
-    "analyzer_obj.calc_best_model('tmp.pickle')"
+    "predicter_obj.calc_best_model('tmp.pickle')"
    ]
   },
   {
@@ -165,7 +165,7 @@
    "outputs": [],
    "source": [
     "print('### VISUALIZE TRAIN PRED DATA')\n",
-    "analyzer_obj.visualize_train_pred_data()"
+    "predicter_obj.visualize_train_pred_data()"
    ]
   },
   {
@@ -175,8 +175,8 @@
    "outputs": [],
    "source": [
     "print('### OUTPUT')\n",
-    "analyzer_obj.calc_output()\n",
-    "analyzer_obj.write_output('tmp.csv')"
+    "predicter_obj.calc_output()\n",
+    "predicter_obj.write_output('tmp.csv')"
    ]
   }
  ],

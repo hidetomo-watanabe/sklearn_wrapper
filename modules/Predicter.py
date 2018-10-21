@@ -28,7 +28,7 @@ import matplotlib.pyplot as plt
 from logging import getLogger
 
 BASE_PATH = '%s/..' % os.path.dirname(os.path.abspath(__file__))
-logger = getLogger('analyze').getChild('SingleAnalyzer')
+logger = getLogger('analyze').getChild('Predicter')
 
 try:
     from MyKerasModel import create_keras_model
@@ -40,7 +40,7 @@ except Exception as e:
     logger.warn('CANNOT IMPORT SEABORN: %s' % e)
 
 
-class SingleAnalyzer(object):
+class Predicter(object):
     def __init__(self):
         self.configs = {}
 
