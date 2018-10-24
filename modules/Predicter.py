@@ -363,6 +363,20 @@ class Predicter(object):
             ) as f:
                 pickle.dump(self.estimator, f)
         logger.info('estimator: %s' % self.estimator)
+
+        # feature_importances
+        if hasattr(self.estimator, 'feature_importances_'):
+            feature_columns = []
+            for key in self.train_df.keys():
+                if key == self.pred_col or key == self.id_col:
+                    continue
+                feature_columns.append(key)
+            feature_importances = pd.DataFrame(
+                data=[self.estimator.feature_importances_],
+                columns=feature_columns)
+            logger.info('feature importances:')
+            display(feature_importances)
+
         return self.estimator
 
     def calc_output(self):
