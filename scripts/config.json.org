@@ -16,19 +16,6 @@
             }
         }
     },
-    "fit": {
-        "mode": "clf",
-        "model": "svc",
-        "scoring": "accuracy",
-        "cv": 5,
-        "n_jobs": -1,
-        "params" : {
-            "probability": [true],
-            "C": [1, 2, 3, 4, 5],
-            "degree": [1, 2, 3, 4, 5],
-            "kernel": ["rbf", "linear", "poly", "sigmoid"]
-        }
-    },
     "translate": {
         "adhoc": {
             "myfunc": "hoge",
@@ -47,6 +34,20 @@
         ],
         "dimension": false,
         "fit": false
+    },
+    "fit": {
+        "mode": "clf",
+        "model": "svc",
+        "modelname": "tmp",
+        "scoring": "accuracy",
+        "cv": 5,
+        "n_jobs": -1,
+        "params" : {
+            "probability": [true],
+            "C": [1, 2, 3, 4, 5],
+            "degree": [1, 2, 3, 4, 5],
+            "kernel": ["rbf", "linear", "poly", "sigmoid"]
+        }
     },
     "notify": {
         "slack": "https://hooks.slack.com/services/hogehoge"

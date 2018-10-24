@@ -39,14 +39,14 @@ if __name__ == '__main__':
         predicter_obj.is_ok_with_adversarial_validation()
 
         logger.info('### FIT')
-        predicter_obj.calc_best_model('tmp.pickle')
+        predicter_obj.calc_best_model()
 
         # logger.info('### VISUALIZE TRAIN PRED DATA')
         # predicter_obj.visualize_train_pred_data()
 
         logger.info('### OUTPUT')
         predicter_obj.calc_output()
-        predicter_obj.write_output('tmp.csv')
+        predicter_obj.write_output()
 
     except Exception as e:
         logger.error('%s' % e)

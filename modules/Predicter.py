@@ -55,54 +55,54 @@ class Predicter(object):
         self.id_col = self.configs['data']['id_col']
         self.pred_col = self.configs['data']['pred_col']
 
-    def _get_base_model(self, modelname):
-        if modelname == 'log_reg':
+    def _get_base_model(self, model):
+        if model == 'log_reg':
             return LogisticRegression()
-        elif modelname == 'linear_reg':
+        elif model == 'linear_reg':
             return LinearRegression()
-        elif modelname == 'svc':
+        elif model == 'svc':
             return SVC()
-        elif modelname == 'svr':
+        elif model == 'svr':
             return SVR()
-        elif modelname == 'l_svc':
+        elif model == 'l_svc':
             return LinearSVC()
-        elif modelname == 'l_svr':
+        elif model == 'l_svr':
             return LinearSVR()
-        elif modelname == 'rf_clf':
+        elif model == 'rf_clf':
             return RandomForestClassifier()
-        elif modelname == 'rf_reg':
+        elif model == 'rf_reg':
             return RandomForestRegressor()
-        elif modelname == 'gbdt_clf':
+        elif model == 'gbdt_clf':
             return GradientBoostingClassifier()
-        elif modelname == 'gbdt_reg':
+        elif model == 'gbdt_reg':
             return GradientBoostingRegressor()
-        elif modelname == 'knn_clf':
+        elif model == 'knn_clf':
             return KNeighborsClassifier()
-        elif modelname == 'knn_reg':
+        elif model == 'knn_reg':
             return KNeighborsRegressor()
-        elif modelname == 'g_nb':
+        elif model == 'g_nb':
             return GaussianNB()
-        elif modelname == 'preceptron':
+        elif model == 'preceptron':
             return Perceptron()
-        elif modelname == 'sgd_clf':
+        elif model == 'sgd_clf':
             return SGDClassifier()
-        elif modelname == 'sgd_reg':
+        elif model == 'sgd_reg':
             return SGDRegressor()
-        elif modelname == 'dt_clf':
+        elif model == 'dt_clf':
             return DecisionTreeClassifier()
-        elif modelname == 'dt_reg':
+        elif model == 'dt_reg':
             return DecisionTreeRegressor()
-        elif modelname == 'xgb_clf':
+        elif model == 'xgb_clf':
             return XGBClassifier()
-        elif modelname == 'xgb_reg':
+        elif model == 'xgb_reg':
             return XGBRegressor()
-        elif modelname == 'lgb_clf':
+        elif model == 'lgb_clf':
             return LGBMClassifier()
-        elif modelname == 'lgb_reg':
+        elif model == 'lgb_reg':
             return LGBMRegressor()
-        elif modelname == 'keras_clf':
+        elif model == 'keras_clf':
             return KerasClassifier(build_fn=create_keras_model)
-        elif modelname == 'keras_reg':
+        elif model == 'keras_reg':
             return KerasRegressor(build_fn=create_keras_model)
 
     def display_data(self):
@@ -334,9 +334,10 @@ class Predicter(object):
             logger.warn('NO DATA VALIDATION')
             return True
 
-    def calc_best_model(self, filename):
-        modelname = self.configs['fit']['model']
-        base_model = self._get_base_model(modelname)
+    def calc_best_model(self):
+        model = self.configs['fit']['model']
+        modelname = self.configs['fit']['modelname']
+        base_model = self._get_base_model(model)
         scoring = self.configs['fit']['scoring']
         cv = self.configs['fit']['cv']
         n_jobs = self.configs['fit']['n_jobs']
@@ -345,27 +346,31 @@ class Predicter(object):
             estimator=base_model, param_grid=params,
             cv=cv, scoring=scoring, n_jobs=n_jobs)
         gs.fit(self.X_train, self.Y_train)
+        logger.info('model: %s' % model)
         logger.info('modelname: %s' % modelname)
         logger.info('  X train shape: %s' % str(self.X_train.shape))
         logger.info('  Y train shape: %s' % str(self.Y_train.shape))
         logger.info('  best params: %s' % gs.best_params_)
         logger.info('  best score of trained grid search: %s' % gs.best_score_)
-        if modelname in ['keras_clf', 'keras_reg']:
+        if model in ['keras_clf', 'keras_reg']:
             self.estimator = gs.best_estimator_.model
-            self.estimator.save('%s/outputs/%s' % (BASE_PATH, filename))
+            self.estimator.save(
+                '%s/outputs/%s.pickle' % (BASE_PATH, modelname))
         else:
             self.estimator = gs.best_estimator_
-            with open('%s/outputs/%s' % (BASE_PATH, filename), 'wb') as f:
+            with open(
+                '%s/outputs/%s.pickle' % (BASE_PATH, modelname), 'wb'
+            ) as f:
                 pickle.dump(self.estimator, f)
         logger.info('estimator: %s' % self.estimator)
         return self.estimator
 
     def calc_output(self):
-        modelname = self.configs['fit']['model']
+        model = self.configs['fit']['model']
         self.Y_pred = None
         self.Y_pred_proba = None
         # keras
-        if modelname in ['keras_clf', 'keras_reg']:
+        if model in ['keras_clf', 'keras_reg']:
             self.Y_pred_proba = self.estimator.predict(self.X_test)
         # clf
         elif self.configs['fit']['mode'] == 'clf':
@@ -388,7 +393,7 @@ class Predicter(object):
                         '[ERROR] NOT IMPELEMTED TRANS FIT: %s' % trans_fit)
         return self.Y_pred, self.Y_pred_proba
 
-    def write_output(self, filename):
+    def write_output(self):
         def _write(filename):
             with open('%s/outputs/%s' % (BASE_PATH, filename), 'w') as f:
                 f.write('%s,%s' % (self.id_col, self.pred_col))
@@ -407,6 +412,7 @@ class Predicter(object):
                     f.write('%s' % (','.join(
                         list(map(str, self.Y_pred_proba[i])))))
 
+        filename = '%s.csv' % self.configs['fit']['modelname']
         if isinstance(self.Y_pred, np.ndarray):
             _write(filename)
         if isinstance(self.Y_pred_proba, np.ndarray):
