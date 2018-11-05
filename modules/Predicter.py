@@ -31,6 +31,10 @@ BASE_PATH = '%s/..' % os.path.dirname(os.path.abspath(__file__))
 logger = getLogger('predict').getChild('Predicter')
 
 try:
+    from MyScoringFunc import get_my_scorer
+except Exception as e:
+    logger.warn('CANNOT IMPORT MY SCORING FUNC: %s' % e)
+try:
     from MyKerasModel import create_keras_model
 except Exception as e:
     logger.warn('CANNOT IMPORT MY KERAS MODEL: %s' % e)
@@ -342,9 +346,14 @@ class Predicter(object):
         cv = self.configs['fit']['cv']
         n_jobs = self.configs['fit']['n_jobs']
         params = self.configs['fit']['params']
+        if scoring == 'my_scorer':
+            scorer = get_my_scorer()
+        else:
+            scorer = scoring
+
         gs = GridSearchCV(
             estimator=base_model, param_grid=params,
-            cv=cv, scoring=scoring, n_jobs=n_jobs)
+            cv=cv, scoring=scorer, n_jobs=n_jobs)
         gs.fit(self.X_train, self.Y_train)
         logger.info('model: %s' % model)
         logger.info('modelname: %s' % modelname)

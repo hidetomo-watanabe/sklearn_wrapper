@@ -1,6 +1,7 @@
 __pycache__
 *.ipynb
 scripts/config.json
+modules/MyScoringFunc.py
 modules/MyKerasModel.py
 outputs/*.csv
 outputs/*.zip
