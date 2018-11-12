@@ -1,4 +1,4 @@
-from logging import getLogger, StreamHandler, Formatter, INFO
+from logging import getLogger, StreamHandler, Formatter, DEBUG
 
 
 class MyLogger(object):
@@ -10,9 +10,9 @@ class MyLogger(object):
         handler = StreamHandler()
         formatter = Formatter(
             '%(asctime)s:%(lineno)d:%(levelname)s:%(message)s')
-        handler.setLevel(INFO)
+        handler.setLevel(DEBUG)
         handler.setFormatter(formatter)
-        logger.setLevel(INFO)
+        logger.setLevel(DEBUG)
         logger.addHandler(handler)
         logger.propagate = False
         return logger
