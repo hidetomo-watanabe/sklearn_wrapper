@@ -386,6 +386,8 @@ class Predicter(object):
             feature_importances = pd.DataFrame(
                 data=[self.estimator.feature_importances_],
                 columns=feature_columns)
+            feature_importances = feature_importances.ix[
+                :, np.argsort(feature_importances.values[0])[::-1]]
             logger.info('feature importances:')
             display(feature_importances)
 
