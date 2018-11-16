@@ -345,14 +345,17 @@ class Predicter(object):
         scoring = self.configs['fit']['scoring']
         cv = self.configs['fit']['cv']
         n_jobs = self.configs['fit']['n_jobs']
+        fit_params = self.configs['fit']['fit_params']
         params = self.configs['fit']['params']
         if scoring == 'my_scorer':
             scorer = get_my_scorer()
         else:
             scorer = scoring
+        if len(fit_params.keys()) > 0:
+            fit_params['eval_set'] = [[self.X_train, self.Y_train]]
 
         gs = GridSearchCV(
-            estimator=base_model, param_grid=params,
+            estimator=base_model, param_grid=params, fit_params=fit_params,
             cv=cv, scoring=scorer, n_jobs=n_jobs)
         gs.fit(self.X_train, self.Y_train)
         logger.info('model: %s' % model)
