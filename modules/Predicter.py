@@ -419,6 +419,16 @@ class Predicter(object):
                 else:
                     raise Exception(
                         '[ERROR] NOT IMPELEMTED FIT Y_PRE: %s' % y_pre)
+        # post
+        fit_post = self.configs['fit']['post']
+        if fit_post['myfunc']:
+            sys.path.append(BASE_PATH)
+            myfunc = importlib.import_module(
+                'myfuncs.%s' % fit_post['myfunc'])
+        for method_name in fit_post['methods']:
+            logger.info('fit post: %s' % method_name)
+            self.Y_pred, self.Y_pred_proba = eval(
+                'myfunc.%s' % method_name)(self.Y_pred, self.Y_pred_proba)
         return self.Y_pred, self.Y_pred_proba
 
     def write_output(self):
@@ -432,7 +442,7 @@ class Predicter(object):
         def _write_proba(filename):
             with open('%s/outputs/%s' % (BASE_PATH, filename), 'w') as f:
                 f.write('%s' % (self.id_col))
-                for pred_val in sorted(np.unique(self.Y_train)):
+                for pred_val in self.estimator.classes_:
                     f.write(',%s_%s' % (self.pred_col, pred_val))
                 for i in range(len(self.id_pred)):
                     f.write('\n')

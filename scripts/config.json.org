@@ -49,6 +49,13 @@
             "C": [1, 2, 3, 4, 5],
             "degree": [1, 2, 3, 4, 5],
             "kernel": ["rbf", "linear", "poly", "sigmoid"]
+        },
+        "post": {
+            "myfunc": "hoge",
+            "methods": [
+                "add_hoge",
+                "add_fuga"
+            ]
         }
     },
     "notify": {

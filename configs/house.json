@@ -44,6 +44,11 @@
             "C": [1],
             "degree": [1],
             "kernel": ["poly"]
+        },
+        "post": {
+            "myfunc": false,
+            "methods": [
+            ]
         }
     },
     "notify": {
