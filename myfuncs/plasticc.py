@@ -1,3 +1,15 @@
+def translate_target(dfs, train_df):
+    #######################################
+    # mjd_diff = mjd_max - mjd_min
+    #######################################
+    for df in dfs:
+        if 'target' not in df.columns:
+            continue
+        df['class'] = df['target']
+        del df['target']
+    return dfs
+
+
 def translate_mjd(dfs, train_df):
     #######################################
     # mjd_diff = mjd_max - mjd_min
