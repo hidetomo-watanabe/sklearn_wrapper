@@ -28,10 +28,10 @@
         ],
         "category": [
         ],
-        "dimension": 62,
-        "fit": "log"
+        "dimension": 62
     },
     "fit": {
+        "pre": "log",
         "mode": "reg",
         "model": "svr",
         "modelname": "house",

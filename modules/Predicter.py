@@ -270,14 +270,14 @@ class Predicter(object):
         # y
         if self.configs['fit']['mode'] == 'reg':
             # other
-            trans_fit = self.configs['translate']['fit']
-            if trans_fit:
-                logger.info('translate y_train with %s' % trans_fit)
-                if trans_fit == 'log':
+            fit_pre = self.configs['fit']['pre']
+            if fit_pre:
+                logger.info('translate y_train with %s' % fit_pre)
+                if fit_pre == 'log':
                     self.Y_train = np.array(list(map(math.log, self.Y_train)))
                 else:
                     raise Exception(
-                        '[ERROR] NOT IMPELEMTED TRANS FIT: %s' % trans_fit)
+                        '[ERROR] NOT IMPELEMTED FIT PRE: %s' % fit_pre)
             # ss
             self.ss_y = StandardScaler()
             self.Y_train = self.Y_train.reshape(-1, 1)
@@ -411,14 +411,14 @@ class Predicter(object):
             # ss
             self.Y_pred = self.ss_y.inverse_transform(self.Y_pred)
             # other
-            trans_fit = self.configs['translate']['fit']
-            if trans_fit:
-                logger.info('inverse translate y_train with %s' % trans_fit)
-                if trans_fit == 'log':
+            fit_pre = self.configs['fit']['pre']
+            if fit_pre:
+                logger.info('inverse translate y_train with %s' % fit_pre)
+                if fit_pre == 'log':
                     self.Y_pred = np.array(list(map(math.exp, self.Y_pred)))
                 else:
                     raise Exception(
-                        '[ERROR] NOT IMPELEMTED TRANS FIT: %s' % trans_fit)
+                        '[ERROR] NOT IMPELEMTED FIT PRE: %s' % fit_pre)
         return self.Y_pred, self.Y_pred_proba
 
     def write_output(self):

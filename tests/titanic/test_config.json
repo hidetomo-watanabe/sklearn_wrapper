@@ -35,10 +35,10 @@
             "Pclass",
             "FamilyStatus"
         ],
-        "dimension": false,
-        "fit": false
+        "dimension": false
     },
     "fit": {
+        "pre": false,
         "mode": "clf",
         "model": "gbdt_clf",
         "modelname": "tmp",

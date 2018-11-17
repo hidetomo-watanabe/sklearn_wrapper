@@ -14,10 +14,10 @@
         ],
         "category": [
         ],
-        "dimension": false,
-        "fit": false
+        "dimension": false
     },
     "fit": {
+        "pre": false,
         "mode": "clf",
         "model": "svc",
         "modelname": "digit",
