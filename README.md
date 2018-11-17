@@ -60,4 +60,4 @@
 ### CUI flow
 - cp scripts/config.json.org scripts/config.json
 - (update config.json)
-- python -u scripts/analyze.py
+- python -u scripts/predict.py

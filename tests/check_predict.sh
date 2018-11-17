@@ -17,4 +17,11 @@ if [ -n "${diff_msg}" ];then
   exit 1
 fi
 
+diff_msg=$(diff outputs/proba_tmp.csv tests/titanic/proba_output.csv)
+if [ -n "${diff_msg}" ];then
+  echo 'INTEGRATION TEST ERROR'
+  echo -e "${diff_msg}"
+  exit 1
+fi
+
 echo 'INTEGRATION TEST OK'
