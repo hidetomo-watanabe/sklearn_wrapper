@@ -31,7 +31,7 @@
         "dimension": 62
     },
     "fit": {
-        "pre": "log",
+        "y_pre": "log",
         "mode": "reg",
         "model": "svr",
         "modelname": "house",

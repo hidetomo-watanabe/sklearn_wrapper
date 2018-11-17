@@ -35,7 +35,7 @@
         "dimension": false
     },
     "fit": {
-        "pre": false,
+        "y_pre": false,
         "mode": "clf",
         "model": "svc",
         "modelname": "tmp",
