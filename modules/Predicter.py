@@ -390,6 +390,10 @@ class Predicter(object):
                 :, np.argsort(feature_importances.values[0])[::-1]]
             logger.info('feature importances:')
             display(feature_importances)
+            logger.info('feature importances /sum:')
+            display(
+                feature_importances /
+                np.sum(self.estimator.feature_importances_))
 
         return self.estimator
 
