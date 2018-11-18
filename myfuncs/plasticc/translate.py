@@ -34,8 +34,11 @@ def add_class_99(Y_pred, Y_pred_proba):
     #######################################
     # add average proba to class_99
     #######################################
-    n_gal = len(Y_pred_proba.columns)
-    Y_pred_proba = Y_pred_proba * n_gal / (n_gal + 1)
+    n_gal = len(Y_pred_proba.columns) - 1
+    for column in Y_pred_proba.columns:
+        if column == 'object_id':
+            continue
+        Y_pred_proba[column] = Y_pred_proba[column] * n_gal / (n_gal + 1)
     Y_pred_proba['class_99'] = np.array(
         [[1 / (n_gal + 1)]] * Y_pred_proba.shape[0])
     return Y_pred, Y_pred_proba
