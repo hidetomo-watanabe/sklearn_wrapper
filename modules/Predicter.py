@@ -423,6 +423,21 @@ class Predicter(object):
                 else:
                     raise Exception(
                         '[ERROR] NOT IMPELEMTED FIT Y_PRE: %s' % y_pre)
+        # np => pd
+        if isinstance(self.Y_pred, np.ndarray):
+            self.Y_pred = pd.merge(
+                pd.DataFrame(data=self.id_pred, columns=[self.id_col]),
+                pd.DataFrame(data=self.Y_pred, columns=[self.pred_col]),
+                left_index=True, right_index=True)
+        if isinstance(self.Y_pred_proba, np.ndarray):
+            self.Y_pred_proba = pd.merge(
+                pd.DataFrame(data=self.id_pred, columns=[self.id_col]),
+                pd.DataFrame(
+                    data=self.Y_pred_proba,
+                    columns=map(
+                        lambda x: '%s_%s' % (self.pred_col, str(x)),
+                        self.estimator.classes_)),
+                left_index=True, right_index=True)
         # post
         fit_post = self.configs['fit']['post']
         if fit_post['myfunc']:
@@ -436,30 +451,14 @@ class Predicter(object):
         return self.Y_pred, self.Y_pred_proba
 
     def write_output(self, filename=None):
-        def _write(filename):
-            with open('%s/outputs/%s' % (BASE_PATH, filename), 'w') as f:
-                f.write('%s,%s' % (self.id_col, self.pred_col))
-                for i in range(len(self.id_pred)):
-                    f.write('\n')
-                    f.write('%s,%s' % (self.id_pred[i], self.Y_pred[i]))
-
-        def _write_proba(filename):
-            with open('%s/outputs/%s' % (BASE_PATH, filename), 'w') as f:
-                f.write('%s' % (self.id_col))
-                for pred_val in self.estimator.classes_:
-                    f.write(',%s_%s' % (self.pred_col, pred_val))
-                for i in range(len(self.id_pred)):
-                    f.write('\n')
-                    f.write('%s,' % (self.id_pred[i]))
-                    f.write('%s' % (','.join(
-                        list(map(str, self.Y_pred_proba[i])))))
-
         if not filename:
             filename = '%s.csv' % self.configs['fit']['modelname']
-        if isinstance(self.Y_pred, np.ndarray):
-            _write(filename)
-        if isinstance(self.Y_pred_proba, np.ndarray):
-            _write_proba('proba_%s' % filename)
+        if isinstance(self.Y_pred, pd.DataFrame):
+            self.Y_pred.to_csv(
+                '%s/outputs/%s' % (BASE_PATH, filename), index=False)
+        if isinstance(self.Y_pred_proba, pd.DataFrame):
+            self.Y_pred_proba.to_csv(
+                '%s/outputs/proba_%s' % (BASE_PATH, filename), index=False)
         return filename
 
     def visualize_train_data(self):

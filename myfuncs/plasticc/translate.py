@@ -30,14 +30,14 @@ def translate_flux(train_df, test_df):
     return train_df, test_df
 
 
-def add_class99(Y_pred, Y_pred_proba):
+def add_class_99(Y_pred, Y_pred_proba):
     #######################################
-    # add average proba to class99
+    # add average proba to class_99
     #######################################
-    n_gal = Y_pred_proba.shape[1]
+    n_gal = len(Y_pred_proba.columns)
     Y_pred_proba = Y_pred_proba * n_gal / (n_gal + 1)
-    class99 = np.array([[1 / (n_gal + 1)]] * Y_pred_proba.shape[0])
-    Y_pred_proba = np.hstack((Y_pred_proba, class99))
+    Y_pred_proba['class_99'] = np.array(
+        [[1 / (n_gal + 1)]] * Y_pred_proba.shape[0])
     return Y_pred, Y_pred_proba
 
 
