@@ -1,7 +1,7 @@
 import math
 
 
-def translate_age(dfs, train_df):
+def translate_age(train_df, test_df):
     #######################################
     # no age => mean grouped Mr, Mrs, Miss
     #######################################
@@ -15,30 +15,30 @@ def translate_age(dfs, train_df):
     for key in tmp.indices.keys():
         t2m[key] = tmp.mean()[key]
     # age range
-    for df in dfs:
+    for df in [train_df, test_df]:
         for i, val in enumerate(df['Age'].values):
             if math.isnan(val):
                 val = t2m[df['Name'].values[i].split(',')[1].split('.')[0]]
                 df['Age'].values[i] = val
     # del honorific title
     del train_df['HonorificTitle']
-    return dfs
+    return train_df, test_df
 
 
-def translate_fare(dfs, train_df):
+def translate_fare(train_df, test_df):
     #######################################
     # no fare => mean grouped by pclass
     #######################################
-    for df in dfs:
+    for df in [train_df, test_df]:
         for i, val in enumerate(df['Fare'].values):
             if math.isnan(val):
                 df['Fare'].values[i] = \
                     train_df.groupby('Pclass')['Fare'].mean()[
                         df['Pclass'].values[i]]
-    return dfs
+    return train_df, test_df
 
 
-def translate_familystatus(dfs, train_df):
+def translate_familystatus(train_df, test_df):
     #######################################
     # sibsp + parch == 0 => no family(0)
     # survive vs no survive in same familyname
@@ -61,7 +61,7 @@ def translate_familystatus(dfs, train_df):
         else:
             n2s[key] = 2
     # main
-    for df in dfs:
+    for df in [train_df, test_df]:
         df['FamilyStatus'] = [0] * len(df['Name'].values)
         for i, val in enumerate(df['Name'].values):
             family_name = val.split(',')[0]
@@ -76,7 +76,7 @@ def translate_familystatus(dfs, train_df):
         del df['Parch']
     # del family name
     del train_df['FamilyName']
-    return dfs
+    return train_df, test_df
 
 
 if __name__ == '__main__':

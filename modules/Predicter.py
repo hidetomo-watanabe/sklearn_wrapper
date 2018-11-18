@@ -194,7 +194,7 @@ class Predicter(object):
         for method_name in trans_adhoc['methods']:
             logger.info('adhoc: %s' % method_name)
             train_df, test_df = eval(
-                'myfunc.%s' % method_name)([train_df, test_df], train_df)
+                'myfunc.%s' % method_name)(train_df, test_df)
         # del
         for column in self.configs['translate']['del']:
             logger.info('delete: %s' % column)
@@ -435,7 +435,7 @@ class Predicter(object):
                 'myfunc.%s' % method_name)(self.Y_pred, self.Y_pred_proba)
         return self.Y_pred, self.Y_pred_proba
 
-    def write_output(self):
+    def write_output(self, filename=None):
         def _write(filename):
             with open('%s/outputs/%s' % (BASE_PATH, filename), 'w') as f:
                 f.write('%s,%s' % (self.id_col, self.pred_col))
@@ -454,7 +454,8 @@ class Predicter(object):
                     f.write('%s' % (','.join(
                         list(map(str, self.Y_pred_proba[i])))))
 
-        filename = '%s.csv' % self.configs['fit']['modelname']
+        if not filename:
+            filename = '%s.csv' % self.configs['fit']['modelname']
         if isinstance(self.Y_pred, np.ndarray):
             _write(filename)
         if isinstance(self.Y_pred_proba, np.ndarray):

@@ -9,6 +9,9 @@
     },
     "translate": {
         "adhoc": {
+            "myfunc": false,
+            "methods": [
+            ]
         },
         "del": [
         ],

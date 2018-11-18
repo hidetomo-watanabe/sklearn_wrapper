@@ -22,9 +22,9 @@ def _rm_tmp_png(img_path):
     os.remove(img_path)
 
 
-def extract_features(dfs, _):
+def extract_features(train_df, test_df):
     image_controller_obj = ImageController()
-    for df in dfs:
+    for df in [train_df, test_df]:
         for i in range(len(df)):
             pixels = []
             for j in range(N * N):
@@ -41,7 +41,7 @@ def extract_features(dfs, _):
             del pixels
             del features
             gc.collect()
-    return dfs
+    return train_df, test_df
 
 
 if __name__ == '__main__':
