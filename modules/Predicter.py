@@ -355,9 +355,9 @@ class Predicter(object):
             fit_params['eval_set'] = [[self.X_train, self.Y_train]]
 
         gs = GridSearchCV(
-            estimator=base_model, param_grid=params, fit_params=fit_params,
+            estimator=base_model, param_grid=params,
             cv=cv, scoring=scorer, n_jobs=n_jobs)
-        gs.fit(self.X_train, self.Y_train)
+        gs.fit(self.X_train, self.Y_train, **fit_params)
         logger.info('model: %s' % model)
         logger.info('modelname: %s' % modelname)
         logger.info('  X train shape: %s' % str(self.X_train.shape))
