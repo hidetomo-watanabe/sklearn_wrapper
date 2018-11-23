@@ -28,14 +28,14 @@ if __name__ == '__main__':
         def _calc_proba(predicter_obj):
             logger.info('### TRANSLATE')
             predicter_obj.trans_raw_data()
+            logger.info('##### NORMALIZE')
+            predicter_obj.get_fitting_data()
+            predicter_obj.normalize_fitting_data()
+            predicter_obj.reduce_dimension()
             predicter_obj.display_data()
 
             # logger.info('### VISUALIZE TRAIN DATA')
             # predicter_obj.visualize_train_data()
-
-            logger.info('### NORMALIZE')
-            predicter_obj.get_fitting_data()
-            predicter_obj.normalize_fitting_data()
 
             logger.info('### VALIDATE')
             predicter_obj.is_ok_with_adversarial_validation()
