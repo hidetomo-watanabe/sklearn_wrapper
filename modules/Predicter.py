@@ -143,31 +143,6 @@ class Predicter(object):
             output.append(df)
         return output
 
-    def _reduce_dimension_of_dfs(self, dfs, train_df):
-        def _drop_id_pred_cols(df):
-            if self.pred_col in df.columns:
-                return df.drop(self.id_col, axis=1).drop(self.pred_col, axis=1)
-            else:
-                return df.drop(self.id_col, axis=1)
-
-        output = []
-        n = self.configs['translate']['dimension']
-        if not n:
-            return dfs
-        if n == 'all':
-            n = len(_drop_id_pred_cols(train_df).columns)
-        pca_obj = PCA(n_components=n)
-        pca_obj.fit(_drop_id_pred_cols(train_df))
-        logger.info('pca_ratio: %s' % pca_obj.explained_variance_ratio_)
-        for df_org in dfs:
-            df = pd.DataFrame(
-                pca_obj.transform(_drop_id_pred_cols(df_org).values))
-            df[self.id_col] = df_org[self.id_col]
-            if self.pred_col in df_org.columns:
-                df[self.pred_col] = df_org[self.pred_col].values
-            output.append(df)
-        return output
-
     def _to_float_of_dfs(self, dfs, target):
         output = []
         for df in dfs:
@@ -224,9 +199,6 @@ class Predicter(object):
             logger.info('categorize: %s' % column)
             train_df, test_df = self._categorize_dfs(
                 [train_df, test_df], column)
-        # dimension
-        train_df, test_df = self._reduce_dimension_of_dfs(
-            [train_df, test_df], train_df)
         # float
         for column in test_df.columns:
             if column in [self.id_col]:
@@ -258,7 +230,13 @@ class Predicter(object):
         self.id_pred = test_df[self.id_col].values
         self.X_test = test_df \
             .drop(self.id_col, axis=1).values
-        return self.X_train, self.Y_train, self.X_test
+        # feature_columns
+        self.feature_columns = []
+        for key in self.train_df.keys():
+            if key == self.pred_col or key == self.id_col:
+                continue
+            self.feature_columns.append(key)
+        return self.feature_columns, self.X_train, self.Y_train, self.X_test
 
     def normalize_fitting_data(self):
         # x
@@ -283,7 +261,23 @@ class Predicter(object):
             self.Y_train = self.Y_train.reshape(-1, 1)
             self.ss_y.fit(self.Y_train)
             self.Y_train = self.ss_y.transform(self.Y_train).reshape(-1, )
-        return self.X_train, self.Y_train, self.X_test
+        return self.feature_columns, self.X_train, self.Y_train, self.X_test
+
+    def reduce_dimension(self):
+        n = self.configs['translate']['dimension']
+        if not n:
+            return self.X_train, self.Y_train, self.X_test
+        if n == 'all':
+            n = self.X_train.shape[1]
+        pca_obj = PCA(n_components=n)
+        pca_obj.fit(self.X_train)
+        logger.info('pca_ratio sum: %s' % sum(
+            pca_obj.explained_variance_ratio_))
+        logger.info('pca_ratio: %s' % pca_obj.explained_variance_ratio_)
+        self.X_train = pca_obj.transform(self.X_train)
+        self.X_test = pca_obj.transform(self.X_test)
+        self.feature_columns = list(map(lambda x: 'pca_%d' % x, range(n)))
+        return self.feature_columns, self.X_train, self.Y_train, self.X_test
 
     def is_ok_with_adversarial_validation(self):
         def _get_adversarial_preds(X_train, X_test, adversarial):
@@ -378,14 +372,9 @@ class Predicter(object):
 
         # feature_importances
         if hasattr(self.estimator, 'feature_importances_'):
-            feature_columns = []
-            for key in self.train_df.keys():
-                if key == self.pred_col or key == self.id_col:
-                    continue
-                feature_columns.append(key)
             feature_importances = pd.DataFrame(
                 data=[self.estimator.feature_importances_],
-                columns=feature_columns)
+                columns=self.feature_columns)
             feature_importances = feature_importances.ix[
                 :, np.argsort(feature_importances.values[0])[::-1]]
             logger.info('feature importances:')

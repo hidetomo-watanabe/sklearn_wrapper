@@ -34,6 +34,7 @@ if __name__ == '__main__':
         logger.info('### NORMALIZE')
         predicter_obj.get_fitting_data()
         predicter_obj.normalize_fitting_data()
+        predicter_obj.reduce_dimension()
 
         logger.info('### VALIDATE')
         predicter_obj.is_ok_with_adversarial_validation()

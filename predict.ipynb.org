@@ -135,7 +135,8 @@
    "source": [
     "print('### NORMALIZE')\n",
     "predicter_obj.get_fitting_data()\n",
-    "predicter_obj.normalize_fitting_data()"
+    "predicter_obj.normalize_fitting_data()\n"
+    "predicter_obj.reduce_dimension()"
    ]
   },
   {
