@@ -191,10 +191,8 @@ class Predicter(object):
         for column in test_df.columns:
             if column in [self.id_col, self.pred_col]:
                 continue
-            if (
-                test_df.dtypes[column] != 'object' and
-                column not in self.configs['translate']['category']
-            ):
+            if test_df.dtypes[column] != 'object' \
+                    and column not in self.configs['translate']['category']:
                 continue
             logger.info('categorize: %s' % column)
             train_df, test_df = self._categorize_dfs(
@@ -203,10 +201,8 @@ class Predicter(object):
         for column in test_df.columns:
             if column in [self.id_col]:
                 continue
-            if (
-                self.configs['fit']['mode'] in ['clf'] and
-                column in [self.pred_col]
-            ):
+            if self.configs['fit']['mode'] in ['clf'] \
+                    and column in [self.pred_col]:
                 continue
             train_df, test_df = self._to_float_of_dfs(
                 [train_df, test_df], column)
@@ -381,8 +377,8 @@ class Predicter(object):
             display(feature_importances)
             logger.info('feature importances /sum:')
             display(
-                feature_importances /
-                np.sum(self.estimator.feature_importances_))
+                feature_importances / np.sum(
+                    self.estimator.feature_importances_))
 
         return self.estimator
 
