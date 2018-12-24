@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 import importlib
 from sklearn.decomposition import PCA
+from sklearn.preprocessing import OneHotEncoder
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import GridSearchCV
 from sklearn.linear_model import LogisticRegression, LinearRegression
@@ -129,16 +130,13 @@ class Predicter(object):
 
     def _categorize_dfs(self, dfs, target):
         output = []
-        all_vals = []
+        enc = OneHotEncoder(categories='auto')
+        enc.fit(dfs[0][target].values.reshape(-1, 1))
         for df in dfs:
-            all_vals.extend(list(set(df[target].values)))
-        for df in dfs:
-            for val in all_vals:
-                df['%s_%s' % (target, val)] = [0] * len(df[target].values)
-            for i, val_tmp in enumerate(df[target].values):
-                for val in all_vals:
-                    if val_tmp == val:
-                        df['%s_%s' % (target, val)].values[i] = 1
+            feature_names = enc.get_feature_names(input_features=[target])
+            onehot = enc.transform(df[target].values.reshape(-1, 1)).toarray()
+            for i, column in enumerate(feature_names):
+                df[column] = onehot[:, i]
             del df[target]
             output.append(df)
         return output
