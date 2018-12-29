@@ -22,6 +22,7 @@ from sklearn.linear_model import SGDClassifier, SGDRegressor
 from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 from xgboost import XGBClassifier, XGBRegressor
 from lightgbm import LGBMClassifier, LGBMRegressor
+from catboost import CatBoostClassifier, CatBoostRegressor
 from keras.wrappers.scikit_learn import KerasClassifier
 from keras.wrappers.scikit_learn import KerasRegressor
 from IPython.display import display
@@ -105,6 +106,10 @@ class Predicter(object):
             return LGBMClassifier()
         elif model == 'lgb_reg':
             return LGBMRegressor()
+        elif model == 'catb_clf':
+            return CatBoostClassifier()
+        elif model == 'catb_reg':
+            return CatBoostRegressor()
         elif model == 'keras_clf':
             return KerasClassifier(build_fn=create_keras_model)
         elif model == 'keras_reg':
