@@ -62,7 +62,7 @@ class Predicter(object):
 
     def _get_base_model(self, model):
         if model == 'log_reg':
-            return LogisticRegression()
+            return LogisticRegression(solver='lbfgs')
         elif model == 'linear_reg':
             return LinearRegression()
         elif model == 'svc':
