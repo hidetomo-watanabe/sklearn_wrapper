@@ -390,16 +390,14 @@ class Predicter(object):
                 dataset=stack_dataset, estimator=LinearRegression)
         # validate
         # to-do
-        """
         stacker.use_cache = False
-        stacker.prbability = False
+        stacker.probability = False
         Y_trues, Y_preds = stacker.validate(k=ensemble_config['k'])
         cv_results = []
         for Y_true, Y_pred in zip(Y_trues, Y_preds):
-            cv_result = scorer(Y_true, Y_pred)
+            cv_result = scorer._score_func(Y_true, Y_pred)
             cv_results.append(cv_result)
         logger.info('ENSEMBLE SCORE MEAN: %f' % np.mean(cv_results))
-        """
 
         self.estimator = stacker
         return self.estimator
