@@ -369,7 +369,8 @@ class Predicter(object):
         dataset = Dataset(self.X_train, self.Y_train, self.X_test)
         for model_config in model_configs:
             single_estimator = self._calc_single_model(scorer, model_config)
-            if self.classes is None:
+            if self.classes is None \
+                    and self.configs['fit']['train_mode'] == 'clf':
                 self.classes = single_estimator.classes_
             modelname = model_config['modelname']
             if self.configs['fit']['train_mode'] == 'clf':
