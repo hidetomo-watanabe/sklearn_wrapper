@@ -137,16 +137,29 @@ class Predicter(object):
         return output
 
     def _categorize_dfs(self, dfs, target):
+        def _replace_nan(org):
+            df = pd.DataFrame(org)
+            df = df.replace({np.nan: 'DUMMY'})
+            return df[0].values
+
         output = []
-        enc = OneHotEncoder(categories='auto')
-        enc.fit(dfs[0][target].values.reshape(-1, 1))
+        # onehot
+        train_org = dfs[0][target].values
+        test_org = dfs[1][target].values
+        oh_enc = OneHotEncoder(categories='auto')
+        # use test data for checking category value
+        oh_enc.fit(
+            _replace_nan(np.concatenate([train_org, test_org])).reshape(-1, 1))
+        feature_names = oh_enc.get_feature_names(input_features=[target])
         for df in dfs:
-            feature_names = enc.get_feature_names(input_features=[target])
-            onehot = enc.transform(df[target].values.reshape(-1, 1)).toarray()
+            target_org = df[target].values
+            onehot = oh_enc.transform(
+                _replace_nan(target_org).reshape(-1, 1)).toarray()
             for i, column in enumerate(feature_names):
                 df[column] = onehot[:, i]
             del df[target]
             output.append(df)
+
         return output
 
     def _to_float_of_dfs(self, dfs, target):
@@ -347,7 +360,8 @@ class Predicter(object):
         if len(model_configs) == 1:
             logger.warn('NO ENSEMBLE')
             self.estimator = self._calc_single_model(scorer, model_configs[0])
-            self.classes = self.estimator.classes_
+            if self.configs['fit']['train_mode'] == 'clf':
+                self.classes = self.estimator.classes_
             return self.estimator
 
         # ensemble
