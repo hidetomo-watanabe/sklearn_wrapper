@@ -39,7 +39,7 @@ if __name__ == '__main__':
         predicter_obj.is_ok_with_adversarial_validation()
 
         logger.info('### FIT')
-        predicter_obj.calc_best_model()
+        predicter_obj.calc_ensemble_model()
 
         # logger.info('### VISUALIZE TRAIN PRED DATA')
         # predicter_obj.visualize_train_pred_data()

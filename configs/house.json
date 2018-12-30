@@ -32,19 +32,29 @@
     },
     "fit": {
         "y_pre": "log",
-        "mode": "reg",
-        "model": "svr",
-        "modelname": "house",
+        "train_mode": "reg",
+        "ensemble": {
+            "model": "stacking",
+            "modelname": "house",
+            "k": 10,
+            "seed": 111
+        },
         "scoring": "neg_mean_squared_error",
-        "cv": 5,
-        "n_jobs": -1,
-        "fit_params" : {
-        },
-        "params" : {
-            "C": [1],
-            "degree": [1],
-            "kernel": ["poly"]
-        },
+        "single_models": [
+            {
+                "model": "svr",
+                "modelname": "house_svr",
+                "cv": 5,
+                "n_jobs": -1,
+                "fit_params" : {
+                },
+                "params" : {
+                    "C": [1],
+                    "degree": [1],
+                    "kernel": ["poly"]
+                }
+            }
+        ],
         "post": {
             "myfunc": false,
             "methods": [

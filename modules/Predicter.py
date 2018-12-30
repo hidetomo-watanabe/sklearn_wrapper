@@ -204,7 +204,7 @@ class Predicter(object):
         for column in test_df.columns:
             if column in [self.id_col]:
                 continue
-            if self.configs['fit']['mode'] in ['clf'] \
+            if self.configs['fit']['train_mode'] in ['clf'] \
                     and column in [self.pred_col]:
                 continue
             train_df, test_df = self._to_float_of_dfs(
@@ -245,7 +245,7 @@ class Predicter(object):
         self.X_train = ss_x.transform(self.X_train)
         self.X_test = ss_x.transform(self.X_test)
         # y
-        if self.configs['fit']['mode'] == 'reg':
+        if self.configs['fit']['train_mode'] == 'reg':
             # other
             y_pre = self.configs['fit']['y_pre']
             if y_pre:
@@ -331,19 +331,32 @@ class Predicter(object):
             logger.warn('NO DATA VALIDATION')
             return True
 
-    def calc_best_model(self):
-        model = self.configs['fit']['model']
-        modelname = self.configs['fit']['modelname']
-        base_model = self._get_base_model(model)
+    def calc_ensemble_model(self):
         scoring = self.configs['fit']['scoring']
-        cv = self.configs['fit']['cv']
-        n_jobs = self.configs['fit']['n_jobs']
-        fit_params = self.configs['fit']['fit_params']
-        params = self.configs['fit']['params']
         if scoring == 'my_scorer':
             scorer = get_my_scorer()
         else:
             scorer = scoring
+        model_configs = self.configs['fit']['single_models']
+
+        # single
+        if len(model_configs) == 1:
+            logger.warn('NO ENSEMBLE')
+            self._calc_single_model(scorer, model_configs[0])
+            return self.estimator
+        """
+        for model_config in self.configs['fit']['models']
+            self._calc_single_model(scorer, model_config)
+        """
+
+    def _calc_single_model(self, scorer, model_config):
+        model = model_config['model']
+        modelname = model_config['modelname']
+        base_model = self._get_base_model(model)
+        cv = model_config['cv']
+        n_jobs = model_config['n_jobs']
+        fit_params = model_config['fit_params']
+        params = model_config['params']
         if len(fit_params.keys()) > 0:
             fit_params['eval_set'] = [[self.X_train, self.Y_train]]
 
@@ -386,19 +399,18 @@ class Predicter(object):
         return self.estimator
 
     def calc_output(self):
-        model = self.configs['fit']['model']
         self.Y_pred = None
         self.Y_pred_proba = None
         # keras
-        if model in ['keras_clf', 'keras_reg']:
+        if self.estimator.__class__ in [KerasClassifier, KerasRegressor]:
             self.Y_pred_proba = self.estimator.predict(self.X_test)
         # clf
-        elif self.configs['fit']['mode'] == 'clf':
+        elif self.configs['fit']['train_mode'] == 'clf':
             self.Y_pred = self.estimator.predict(self.X_test)
             if hasattr(self.estimator, 'predict_proba'):
                 self.Y_pred_proba = self.estimator.predict_proba(self.X_test)
         # reg
-        elif self.configs['fit']['mode'] == 'reg':
+        elif self.configs['fit']['train_mode'] == 'reg':
             # inverse normalize
             # ss
             self.Y_pred = self.ss_y.inverse_transform(self.Y_pred)
@@ -440,7 +452,7 @@ class Predicter(object):
 
     def write_output(self, filename=None):
         if not filename:
-            filename = '%s.csv' % self.configs['fit']['modelname']
+            filename = '%s.csv' % self.configs['fit']['ensemble']['modelname']
         if isinstance(self.Y_pred, pd.DataFrame):
             self.Y_pred.to_csv(
                 '%s/outputs/%s' % (BASE_PATH, filename), index=False)
