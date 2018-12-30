@@ -23,8 +23,11 @@ from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 from xgboost import XGBClassifier, XGBRegressor
 from lightgbm import LGBMClassifier, LGBMRegressor
 from catboost import CatBoostClassifier, CatBoostRegressor
-from keras.wrappers.scikit_learn import KerasClassifier
-from keras.wrappers.scikit_learn import KerasRegressor
+from keras.wrappers.scikit_learn import KerasClassifier, KerasRegressor
+from heamy.dataset import Dataset
+from heamy.estimator import Classifier, Regressor
+from heamy.pipeline import ModelsPipeline
+from sklearn.metrics import get_scorer
 from IPython.display import display
 import matplotlib.pyplot as plt
 from logging import getLogger
@@ -336,18 +339,70 @@ class Predicter(object):
         if scoring == 'my_scorer':
             scorer = get_my_scorer()
         else:
-            scorer = scoring
+            scorer = get_scorer(scoring)
         model_configs = self.configs['fit']['single_models']
+        self.classes = None
 
         # single
         if len(model_configs) == 1:
             logger.warn('NO ENSEMBLE')
-            self._calc_single_model(scorer, model_configs[0])
+            self.estimator = self._calc_single_model(scorer, model_configs[0])
+            self.classes = self.estimator.classes_
             return self.estimator
+
+        # ensemble
+        models = []
+        dataset = Dataset(self.X_train, self.Y_train, self.X_test)
+        for model_config in model_configs:
+            single_estimator = self._calc_single_model(scorer, model_config)
+            if self.classes is None:
+                self.classes = single_estimator.classes_
+            modelname = model_config['modelname']
+            if self.configs['fit']['train_mode'] == 'clf':
+                models.append(
+                    Classifier(
+                        dataset=dataset, estimator=single_estimator.__class__,
+                        parameters=single_estimator.get_params(),
+                        name=modelname))
+            elif self.configs['fit']['train_mode'] == 'reg':
+                models.append(
+                    Regressor(
+                        dataset=dataset, estimator=single_estimator.__class__,
+                        parameters=single_estimator.get_params(),
+                        name=modelname))
+        # pipeline
+        ensemble_config = self.configs['fit']['ensemble']
+        pipeline = ModelsPipeline(*models)
+        if ensemble_config['model'] == 'stacking':
+            stack_dataset = pipeline.stack(
+                k=ensemble_config['k'], seed=ensemble_config['seed'])
+        elif ensemble_config['model'] == 'blending':
+            stack_dataset = pipeline.blend(
+                propotion=ensemble_config['propotion'],
+                seed=ensemble_config['seed'])
+        # stacker
+        if self.configs['fit']['train_mode'] == 'clf':
+            stacker = Classifier(
+                dataset=stack_dataset, estimator=LogisticRegression,
+                parameters={'solver': 'lbfgs'})
+        elif self.configs['fit']['train_mode'] == 'reg':
+            stacker = Regressor(
+                dataset=stack_dataset, estimator=LinearRegression)
+        # validate
+        # to-do
         """
-        for model_config in self.configs['fit']['models']
-            self._calc_single_model(scorer, model_config)
+        stacker.use_cache = False
+        stacker.prbability = False
+        Y_trues, Y_preds = stacker.validate(k=ensemble_config['k'])
+        cv_results = []
+        for Y_true, Y_pred in zip(Y_trues, Y_preds):
+            cv_result = scorer(Y_true, Y_pred)
+            cv_results.append(cv_result)
+        logger.info('ENSEMBLE SCORE MEAN: %f' % np.mean(cv_results))
         """
+
+        self.estimator = stacker
+        return self.estimator
 
     def _calc_single_model(self, scorer, model_config):
         model = model_config['model']
@@ -371,21 +426,21 @@ class Predicter(object):
         logger.info('  best params: %s' % gs.best_params_)
         logger.info('  best score of trained grid search: %s' % gs.best_score_)
         if model in ['keras_clf', 'keras_reg']:
-            self.estimator = gs.best_estimator_.model
-            self.estimator.save(
+            estimator = gs.best_estimator_.model
+            estimator.save(
                 '%s/outputs/%s.pickle' % (BASE_PATH, modelname))
         else:
-            self.estimator = gs.best_estimator_
+            estimator = gs.best_estimator_
             with open(
                 '%s/outputs/%s.pickle' % (BASE_PATH, modelname), 'wb'
             ) as f:
-                pickle.dump(self.estimator, f)
-        logger.info('estimator: %s' % self.estimator)
+                pickle.dump(estimator, f)
+        logger.info('estimator: %s' % estimator)
 
         # feature_importances
-        if hasattr(self.estimator, 'feature_importances_'):
+        if hasattr(estimator, 'feature_importances_'):
             feature_importances = pd.DataFrame(
-                data=[self.estimator.feature_importances_],
+                data=[estimator.feature_importances_],
                 columns=self.feature_columns)
             feature_importances = feature_importances.ix[
                 :, np.argsort(feature_importances.values[0])[::-1]]
@@ -394,9 +449,9 @@ class Predicter(object):
             logger.info('feature importances /sum:')
             display(
                 feature_importances / np.sum(
-                    self.estimator.feature_importances_))
+                    estimator.feature_importances_))
 
-        return self.estimator
+        return estimator
 
     def calc_output(self):
         self.Y_pred = None
@@ -406,11 +461,30 @@ class Predicter(object):
             self.Y_pred_proba = self.estimator.predict(self.X_test)
         # clf
         elif self.configs['fit']['train_mode'] == 'clf':
-            self.Y_pred = self.estimator.predict(self.X_test)
-            if hasattr(self.estimator, 'predict_proba'):
-                self.Y_pred_proba = self.estimator.predict_proba(self.X_test)
+            # ensemble clf
+            if self.estimator.__class__ in [Classifier]:
+                self.estimator.use_cache = False
+                self.estimator.probability = False
+                self.Y_pred = self.estimator.predict()
+                self.estimator.probability = True
+                # from heamy sorce code, Y_pred_proba to be multi dimension
+                self.estimator.problem = ''
+                self.Y_pred_proba = self.estimator.predict()
+            # single clf
+            else:
+                self.Y_pred = self.estimator.predict(self.X_test)
+                if hasattr(self.estimator, 'predict_proba'):
+                    self.Y_pred_proba = self.estimator.predict_proba(
+                        self.X_test)
         # reg
         elif self.configs['fit']['train_mode'] == 'reg':
+            # ensemble reg
+            if self.estimator.__class__ in [Regressor]:
+                self.Y_pred = self.estimator.predict()
+            # single reg
+            else:
+                self.Y_pred = self.estimator.predict(self.X_test)
+
             # inverse normalize
             # ss
             self.Y_pred = self.ss_y.inverse_transform(self.Y_pred)
@@ -423,6 +497,7 @@ class Predicter(object):
                 else:
                     raise Exception(
                         '[ERROR] NOT IMPELEMTED FIT Y_PRE: %s' % y_pre)
+
         # np => pd
         if isinstance(self.Y_pred, np.ndarray):
             self.Y_pred = pd.merge(
@@ -436,8 +511,9 @@ class Predicter(object):
                     data=self.Y_pred_proba,
                     columns=map(
                         lambda x: '%s_%s' % (self.pred_col, str(x)),
-                        self.estimator.classes_)),
+                        self.classes)),
                 left_index=True, right_index=True)
+
         # post
         fit_post = self.configs['fit']['post']
         if fit_post['myfunc']:
