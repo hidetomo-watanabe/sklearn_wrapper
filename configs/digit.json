@@ -23,7 +23,8 @@
         "y_pre": false,
         "train_mode": "clf",
         "ensemble": {
-            "model": "stacking",
+            "mode": "stacking",
+            "model": "log_reg",
             "modelname": "digit",
             "k": 10,
             "seed": 111

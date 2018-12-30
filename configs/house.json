@@ -34,7 +34,8 @@
         "y_pre": "log",
         "train_mode": "reg",
         "ensemble": {
-            "model": "stacking",
+            "mode": "stacking",
+            "model": "log_reg",
             "modelname": "house",
             "k": 10,
             "seed": 111

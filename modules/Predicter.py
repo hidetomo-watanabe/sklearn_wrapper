@@ -373,21 +373,24 @@ class Predicter(object):
         # pipeline
         ensemble_config = self.configs['fit']['ensemble']
         pipeline = ModelsPipeline(*models)
-        if ensemble_config['model'] == 'stacking':
+        if ensemble_config['mode'] == 'stacking':
             stack_dataset = pipeline.stack(
                 k=ensemble_config['k'], seed=ensemble_config['seed'])
-        elif ensemble_config['model'] == 'blending':
+        elif ensemble_config['mode'] == 'blending':
             stack_dataset = pipeline.blend(
-                propotion=ensemble_config['propotion'],
+                proportion=ensemble_config['proportion'],
                 seed=ensemble_config['seed'])
         # stacker
         if self.configs['fit']['train_mode'] == 'clf':
             stacker = Classifier(
-                dataset=stack_dataset, estimator=LogisticRegression,
-                parameters={'solver': 'lbfgs'})
+                dataset=stack_dataset,
+                estimator=self._get_base_model(
+                    ensemble_config['model']).__class__)
         elif self.configs['fit']['train_mode'] == 'reg':
             stacker = Regressor(
-                dataset=stack_dataset, estimator=LinearRegression)
+                dataset=stack_dataset,
+                estimator=self._get_base_model(
+                    ensemble_config['model']).__class__)
         # validate
         # to-do
         stacker.use_cache = False
