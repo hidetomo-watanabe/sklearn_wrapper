@@ -392,15 +392,10 @@ class Predicter(object):
                 estimator=self._get_base_model(
                     ensemble_config['model']).__class__)
         # validate
-        # to-do
         stacker.use_cache = False
         stacker.probability = False
-        Y_trues, Y_preds = stacker.validate(k=ensemble_config['k'])
-        cv_results = []
-        for Y_true, Y_pred in zip(Y_trues, Y_preds):
-            cv_result = scorer._score_func(Y_true, Y_pred)
-            cv_results.append(cv_result)
-        logger.info('ENSEMBLE SCORE MEAN: %f' % np.mean(cv_results))
+        logger.info('ENSEMBLE VALIDATION:')
+        stacker.validate(k=ensemble_config['k'], scorer=scorer._score_func)
 
         self.estimator = stacker
         return self.estimator
