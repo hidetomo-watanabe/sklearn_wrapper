@@ -30,7 +30,9 @@ class Integrater(object):
         self.output /= sum(self.weights)
         return self.output
 
-    def write_output(self, filename):
+    def write_output(self, filename=None):
+        if not filename:
+            filename = '%s.csv' % self.configs['integrate']['output']
         self.output.to_csv(
             '%s/outputs/%s' % (BASE_PATH, filename), index=False)
 

@@ -75,6 +75,7 @@
         "slack": "https://hooks.slack.com/services/hogehoge"
     },
     "integrate": {
+        "output": "integrate",
         "filenames": [
             "/path/1.csv",
             "/path/2.csv"

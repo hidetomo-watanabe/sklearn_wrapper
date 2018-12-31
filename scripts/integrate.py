@@ -21,7 +21,7 @@ if __name__ == '__main__':
         integrater_obj.read_config_file(config_path)
 
         integrater_obj.calc_average()
-        integrater_obj.write_output('tmp.csv')
+        integrater_obj.write_output()
     except Exception as e:
         logger.error('%s' % e)
         traceback.print_exc()
