@@ -284,7 +284,7 @@ class Predicter(object):
             return self.X_train, self.Y_train, self.X_test
         if n == 'all':
             n = self.X_train.shape[1]
-        pca_obj = PCA(n_components=n)
+        pca_obj = PCA(n_components=n, random_state=10)
         pca_obj.fit(self.X_train)
         logger.info('pca_ratio sum: %s' % sum(
             pca_obj.explained_variance_ratio_))
