@@ -28,14 +28,14 @@
         ],
         "category": [
         ],
-        "dimension": 62
+        "dimension": 90
     },
     "fit": {
         "y_pre": "log",
         "train_mode": "reg",
         "ensemble": {
             "mode": "stacking",
-            "model": "log_reg",
+            "model": "linear_reg",
             "modelname": "house",
             "k": 10,
             "seed": 111
