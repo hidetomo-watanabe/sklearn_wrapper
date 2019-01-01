@@ -41,6 +41,9 @@ if __name__ == '__main__':
         logger.info('### FIT')
         predicter_obj.calc_ensemble_model()
 
+        # logger.info('### VISUALIZE LEARNING CURVES')
+        # predicter_obj.visualize_learning_curves()
+
         logger.info('### PREDICT')
         predicter_obj.calc_output()
 

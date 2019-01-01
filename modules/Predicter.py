@@ -9,7 +9,7 @@ import importlib
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.preprocessing import StandardScaler
-from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection import GridSearchCV, learning_curve
 from sklearn.linear_model import LogisticRegression, LinearRegression
 from sklearn.svm import SVC, SVR, LinearSVC, LinearSVR
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
@@ -360,15 +360,18 @@ class Predicter(object):
         if len(model_configs) == 1:
             logger.warn('NO ENSEMBLE')
             self.estimator = self._calc_single_model(scorer, model_configs[0])
+            self.single_estimators = [(model_configs[0], self.estimator)]
             if self.configs['fit']['train_mode'] == 'clf':
                 self.classes = self.estimator.classes_
             return self.estimator
 
         # ensemble
         models = []
+        self.single_estimators = []
         dataset = Dataset(self.X_train, self.Y_train, self.X_test)
         for model_config in model_configs:
             single_estimator = self._calc_single_model(scorer, model_config)
+            self.single_estimators.append((model_config, single_estimator))
             if self.classes is None \
                     and self.configs['fit']['train_mode'] == 'clf':
                 self.classes = single_estimator.classes_
@@ -571,6 +574,47 @@ class Predicter(object):
                 continue
             g = sns.FacetGrid(self.train_df, col=self.pred_col)
             g.map(plt.hist, key, bins=20)
+
+    def visualize_learning_curves(self):
+        def _plot_learning_curve(estimator, title, cv, n_jobs):
+            ylim = (0.7, 1.01)
+            train_sizes = np.linspace(.1, 1.0, 5)
+
+            plt.figure()
+            plt.title(title)
+            plt.ylim(*ylim)
+            plt.xlabel("Training examples")
+            plt.ylabel("Score")
+            train_sizes, train_scores, test_scores = learning_curve(
+                estimator, self.X_train, self.Y_train,
+                cv=cv, n_jobs=n_jobs, train_sizes=train_sizes)
+            train_scores_mean = np.mean(train_scores, axis=1)
+            train_scores_std = np.std(train_scores, axis=1)
+            test_scores_mean = np.mean(test_scores, axis=1)
+            test_scores_std = np.std(test_scores, axis=1)
+            plt.grid()
+
+            plt.fill_between(
+                train_sizes, train_scores_mean - train_scores_std,
+                train_scores_mean + train_scores_std, alpha=0.1,
+                color="r")
+            plt.fill_between(
+                train_sizes, test_scores_mean - test_scores_std,
+                test_scores_mean + test_scores_std, alpha=0.1, color="g")
+            plt.plot(
+                train_sizes, train_scores_mean, 'o-', color="r",
+                label="Training score")
+            plt.plot(
+                train_sizes, test_scores_mean, 'o-', color="g",
+                label="Cross-validation score")
+
+            plt.legend(loc="best")
+            return plt
+
+        for config, estimator in self.single_estimators:
+            title = 'learning curves: %s' % config['modelname']
+            _plot_learning_curve(
+                estimator, title, cv=config['cv'], n_jobs=config['n_jobs'])
 
     def visualize_train_pred_data(self):
         g = sns.jointplot(self.Y_train, self.Y_train_pred, kind='kde')

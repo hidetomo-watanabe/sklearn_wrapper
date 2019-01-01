@@ -97,6 +97,16 @@
    "metadata": {},
    "outputs": [],
    "source": [
+    "print('### VISUALIZE LEARNING CURVES')\n",
+    "predicter_obj.visualize_learning_curves()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
     "print('### PREDICT')\n",
     "predicter_obj.calc_output()"
    ]
