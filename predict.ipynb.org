@@ -97,6 +97,16 @@
    "metadata": {},
    "outputs": [],
    "source": [
+    "print('### PREDICT')\n",
+    "predicter_obj.calc_output()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
     "print('### VISUALIZE TRAIN PRED DATA')\n",
     "predicter_obj.visualize_train_pred_data()"
    ]
@@ -108,7 +118,6 @@
    "outputs": [],
    "source": [
     "print('### OUTPUT')\n",
-    "predicter_obj.calc_output()\n",
     "predicter_obj.write_output()"
    ]
   }

@@ -30,6 +30,7 @@ from heamy.pipeline import ModelsPipeline
 from sklearn.metrics import get_scorer
 from IPython.display import display
 import matplotlib.pyplot as plt
+import seaborn as sns
 from logging import getLogger
 
 BASE_PATH = '%s/..' % os.path.dirname(os.path.abspath(__file__))
@@ -43,10 +44,6 @@ try:
     from MyKerasModel import create_keras_model
 except Exception as e:
     logger.warn('CANNOT IMPORT MY KERAS MODEL: %s' % e)
-try:
-    import seaborn as sns
-except Exception as e:
-    logger.warn('CANNOT IMPORT SEABORN: %s' % e)
 
 
 class Predicter(object):
@@ -119,6 +116,9 @@ class Predicter(object):
             return KerasRegressor(build_fn=create_keras_model)
 
     def display_data(self):
+        if self.configs['fit']['train_mode'] == 'clf':
+            logger.info('train pred counts:')
+            display(self.train_df[self.pred_col].value_counts())
         for label, df in [('train', self.train_df), ('test', self.test_df)]:
             logger.info('%s:' % label)
             display(df.head())
@@ -406,8 +406,9 @@ class Predicter(object):
                 dataset=stack_dataset,
                 estimator=self._get_base_model(
                     ensemble_config['model']).__class__)
-        # validate
         stacker.use_cache = False
+
+        # validate
         stacker.probability = False
         logger.info('ENSEMBLE VALIDATION:')
         stacker.validate(k=ensemble_config['k'], scorer=scorer._score_func)
@@ -474,16 +475,23 @@ class Predicter(object):
         elif self.configs['fit']['train_mode'] == 'clf':
             # ensemble clf
             if self.estimator.__class__ in [Classifier]:
-                self.estimator.use_cache = False
+                # no proba
                 self.estimator.probability = False
                 self.Y_pred = self.estimator.predict()
+                # proba
                 self.estimator.probability = True
-                # from heamy sorce code, Y_pred_proba to be multi dimension
+                # from heamy sorce code, to make Y_pred_proba multi dimension
                 self.estimator.problem = ''
                 self.Y_pred_proba = self.estimator.predict()
+                # train no proba
+                self.estimator.probability = False
+                dataset = Dataset(self.X_train, self.Y_train, self.X_train)
+                self.estimator.dataset = dataset
+                self.Y_train_pred = self.estimator.predict()
             # single clf
             else:
                 self.Y_pred = self.estimator.predict(self.X_test)
+                self.Y_train_pred = self.estimator.predict(self.X_train)
                 if hasattr(self.estimator, 'predict_proba'):
                     self.Y_pred_proba = self.estimator.predict_proba(
                         self.X_test)
@@ -492,19 +500,27 @@ class Predicter(object):
             # ensemble reg
             if self.estimator.__class__ in [Regressor]:
                 self.Y_pred = self.estimator.predict()
+                # train
+                dataset = Dataset(self.X_train, self.Y_train, self.X_train)
+                self.estimator.dataset = dataset
+                self.Y_train_pred = self.estimator.predict()
             # single reg
             else:
                 self.Y_pred = self.estimator.predict(self.X_test)
+                self.Y_train_pred = self.estimator.predict(self.X_train)
 
             # inverse normalize
             # ss
             self.Y_pred = self.ss_y.inverse_transform(self.Y_pred)
+            self.Y_train_pred = self.ss_y.inverse_transform(self.Y_train_pred)
             # other
             y_pre = self.configs['fit']['y_pre']
             if y_pre:
                 logger.info('inverse translate y_train with %s' % y_pre)
                 if y_pre == 'log':
                     self.Y_pred = np.array(list(map(math.exp, self.Y_pred)))
+                    self.Y_train_pred = np.array(list(map(
+                        math.exp, self.Y_train_pred)))
                 else:
                     raise Exception(
                         '[ERROR] NOT IMPELEMTED FIT Y_PRE: %s' % y_pre)
@@ -535,7 +551,8 @@ class Predicter(object):
             logger.info('fit post: %s' % method_name)
             self.Y_pred, self.Y_pred_proba = eval(
                 'myfunc.%s' % method_name)(self.Y_pred, self.Y_pred_proba)
-        return self.Y_pred, self.Y_pred_proba
+
+        return self.Y_pred, self.Y_pred_proba, self.Y_train_pred
 
     def write_output(self, filename=None):
         if not filename:
@@ -550,14 +567,13 @@ class Predicter(object):
 
     def visualize_train_data(self):
         for key in self.train_df.keys():
-            if key == self.pred_col or key == self.id_col:
+            if key == self.id_col:
                 continue
             g = sns.FacetGrid(self.train_df, col=self.pred_col)
             g.map(plt.hist, key, bins=20)
 
     def visualize_train_pred_data(self):
-        Y_train_pred = self.estimator.predict(self.X_train)
-        g = sns.jointplot(self.Y_train, Y_train_pred, kind='kde')
+        g = sns.jointplot(self.Y_train, self.Y_train_pred, kind='kde')
         g.set_axis_labels('Y_train', 'Y_train_pred')
         g.fig.suptitle('estimator')
 

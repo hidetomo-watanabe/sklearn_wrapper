@@ -41,11 +41,13 @@ if __name__ == '__main__':
         logger.info('### FIT')
         predicter_obj.calc_ensemble_model()
 
+        logger.info('### PREDICT')
+        predicter_obj.calc_output()
+
         # logger.info('### VISUALIZE TRAIN PRED DATA')
         # predicter_obj.visualize_train_pred_data()
 
         logger.info('### OUTPUT')
-        predicter_obj.calc_output()
         predicter_obj.write_output()
 
     except Exception as e:
