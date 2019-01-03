@@ -9,8 +9,14 @@ catch()
   fi
 }
 
-if [ -e 'outputs/tmp.csv' ]; then
-  rm outputs/tmp.csv
+if [ -e 'outputs/tmp_titanic.csv' ]; then
+  rm outputs/tmp_titanic.csv
+fi
+if [ -e 'outputs/proba_tmp_titanic.csv' ]; then
+  rm outputs/proba_tmp_titanic.csv
+fi
+if [ -e 'outputs/tmp_house.csv' ]; then
+  rm outputs/tmp_house.csv
 fi
 
 # titanic
