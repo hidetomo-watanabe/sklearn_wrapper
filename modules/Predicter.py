@@ -26,7 +26,7 @@ from catboost import CatBoostClassifier, CatBoostRegressor
 from keras.wrappers.scikit_learn import KerasClassifier, KerasRegressor
 from heamy.dataset import Dataset
 from heamy.estimator import Classifier, Regressor
-from heamy.pipeline import ModelsPipeline
+from heamy.pipeline import ModelsPipeline, PipeApply
 from sklearn.metrics import get_scorer
 from IPython.display import display
 import matplotlib.pyplot as plt
@@ -391,25 +391,41 @@ class Predicter(object):
         # pipeline
         ensemble_config = self.configs['fit']['ensemble']
         pipeline = ModelsPipeline(*models)
-        if ensemble_config['mode'] == 'stacking':
-            stack_dataset = pipeline.stack(
-                k=ensemble_config['k'], seed=ensemble_config['seed'])
-        elif ensemble_config['mode'] == 'blending':
-            stack_dataset = pipeline.blend(
-                proportion=ensemble_config['proportion'],
-                seed=ensemble_config['seed'])
+
+        def _get_stacker():
+            # weighted_average
+            if ensemble_config['mode'] == 'weighted':
+                if self.configs['fit']['train_mode'] == 'clf':
+                    raise Exception(
+                        '[ERROR] NOT IMPLEMENTED CLASSIFICATION AND WEIGHTED AVERAGE')
+                weights = pipeline.find_weights(scorer._score_func)
+                stacker = pipeline.weight(weights)
+                return stacker
+
+            # stacking, blending
+            if ensemble_config['mode'] == 'stacking':
+                stack_dataset = pipeline.stack(
+                    k=ensemble_config['k'], seed=ensemble_config['seed'])
+            elif ensemble_config['mode'] == 'blending':
+                stack_dataset = pipeline.blend(
+                    proportion=ensemble_config['proportion'],
+                    seed=ensemble_config['seed'])
+            if self.configs['fit']['train_mode'] == 'clf':
+                stacker = Classifier(
+                    dataset=stack_dataset,
+                    estimator=self._get_base_model(
+                        ensemble_config['model']).__class__)
+            elif self.configs['fit']['train_mode'] == 'reg':
+                stacker = Regressor(
+                    dataset=stack_dataset,
+                    estimator=self._get_base_model(
+                        ensemble_config['model']).__class__)
+            stacker.use_cache = False
+
+            return stacker
+
         # stacker
-        if self.configs['fit']['train_mode'] == 'clf':
-            stacker = Classifier(
-                dataset=stack_dataset,
-                estimator=self._get_base_model(
-                    ensemble_config['model']).__class__)
-        elif self.configs['fit']['train_mode'] == 'reg':
-            stacker = Regressor(
-                dataset=stack_dataset,
-                estimator=self._get_base_model(
-                    ensemble_config['model']).__class__)
-        stacker.use_cache = False
+        stacker = _get_stacker()
 
         # validate
         stacker.probability = False
@@ -471,6 +487,7 @@ class Predicter(object):
     def calc_output(self):
         self.Y_pred = None
         self.Y_pred_proba = None
+        self.Y_train_pred = None
         # keras
         if self.estimator.__class__ in [KerasClassifier, KerasRegressor]:
             self.Y_pred_proba = self.estimator.predict(self.X_test)
@@ -500,8 +517,11 @@ class Predicter(object):
                         self.X_test)
         # reg
         elif self.configs['fit']['train_mode'] == 'reg':
+            # weighted_average reg
+            if self.estimator.__class__ in [PipeApply]:
+                self.Y_pred = self.estimator.execute()
             # ensemble reg
-            if self.estimator.__class__ in [Regressor]:
+            elif self.estimator.__class__ in [Regressor]:
                 self.Y_pred = self.estimator.predict()
                 # train
                 dataset = Dataset(self.X_train, self.Y_train, self.X_train)
@@ -515,7 +535,10 @@ class Predicter(object):
             # inverse normalize
             # ss
             self.Y_pred = self.ss_y.inverse_transform(self.Y_pred)
-            self.Y_train_pred = self.ss_y.inverse_transform(self.Y_train_pred)
+            if isinstance(self.Y_train_pred, np.ndarray):
+                self.Y_train_pred = self.ss_y.inverse_transform(self.Y_train_pred)
+            else:
+                logger.warn('NO Y_train_pred')
             # other
             y_pre = self.configs['fit']['y_pre']
             if y_pre:
@@ -617,6 +640,9 @@ class Predicter(object):
                 estimator, title, cv=config['cv'], n_jobs=config['n_jobs'])
 
     def visualize_train_pred_data(self):
+        if not isinstance(self.Y_train_pred, np.ndarray):
+            logger.warn('NO Y_train_pred')
+            return
         g = sns.jointplot(self.Y_train, self.Y_train_pred, kind='kde')
         g.set_axis_labels('Y_train', 'Y_train_pred')
         g.fig.suptitle('estimator')
