@@ -1,14 +1,33 @@
 import math
 
 
+def translate_honorific_title(train_df, test_df):
+    #######################################
+    # name => honorific title
+    #######################################
+    train_values = []
+    test_values = []
+    for i, val in enumerate(train_df['Name'].values):
+        title = val.split(',')[1].split('.')[0].strip()
+        if title in ['Mr', 'Mrs', 'Miss', 'Master']:
+            train_values.append(title)
+        else:
+            train_values.append('Other')
+    for i, val in enumerate(test_df['Name'].values):
+        title = val.split(',')[1].split('.')[0].strip()
+        if title in ['Mr', 'Mrs', 'Miss', 'Master']:
+            test_values.append(title)
+        else:
+            test_values.append('Other')
+    train_df['HonorificTitle'] = train_values
+    test_df['HonorificTitle'] = test_values
+    return train_df, test_df
+
+
 def translate_age(train_df, test_df):
     #######################################
     # no age => mean grouped Mr, Mrs, Miss
     #######################################
-    # get honorific title
-    train_df['HonorificTitle'] = [''] * len(train_df['Name'].values)
-    for i, val in enumerate(train_df['Name'].values):
-        train_df['HonorificTitle'].values[i] = val.split(',')[1].split('.')[0]
     # get honorific title => age mean
     t2m = {}
     tmp = train_df.groupby('HonorificTitle')['Age']
@@ -18,10 +37,7 @@ def translate_age(train_df, test_df):
     for df in [train_df, test_df]:
         for i, val in enumerate(df['Age'].values):
             if math.isnan(val):
-                val = t2m[df['Name'].values[i].split(',')[1].split('.')[0]]
-                df['Age'].values[i] = val
-    # del honorific title
-    del train_df['HonorificTitle']
+                df['Age'].values[i] = t2m[df['HonorificTitle'].values[i]]
     return train_df, test_df
 
 
