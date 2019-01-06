@@ -54,11 +54,19 @@
    "source": [
     "print('### TRANSLATE')\n",
     "predicter_obj.trans_raw_data()\n",
+    "predicter_obj.display_data()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
     "print('### NORMALIZE')\n",
     "predicter_obj.get_fitting_data()\n",
     "predicter_obj.normalize_fitting_data()\n",
-    "predicter_obj.reduce_dimension()\n",
-    "predicter_obj.display_data()"
+    "predicter_obj.reduce_dimension()"
    ]
   },
   {

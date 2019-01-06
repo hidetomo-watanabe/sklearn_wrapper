@@ -26,11 +26,12 @@ if __name__ == '__main__':
 
         logger.info('### TRANSLATE')
         predicter_obj.trans_raw_data()
+        predicter_obj.display_data()
+
         logger.info('##### NORMALIZE')
         predicter_obj.get_fitting_data()
         predicter_obj.normalize_fitting_data()
         predicter_obj.reduce_dimension()
-        predicter_obj.display_data()
 
         # logger.info('### VISUALIZE TRAIN DATA')
         # predicter_obj.visualize_train_data()
