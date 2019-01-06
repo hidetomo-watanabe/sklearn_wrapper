@@ -182,7 +182,6 @@ class Predicter(object):
         trans_adhoc = self.configs['translate']['adhoc']
         # adhoc
         if trans_adhoc['myfunc']:
-            sys.path.append(BASE_PATH)
             myfunc = importlib.import_module(
                 'myfuncs.%s' % trans_adhoc['myfunc'])
         for method_name in trans_adhoc['methods']:
