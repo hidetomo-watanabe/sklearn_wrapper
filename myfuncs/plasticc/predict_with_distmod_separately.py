@@ -16,7 +16,7 @@ if __name__ == '__main__':
     if len(sys.argv) > 1:
         config_path = sys.argv[1]
     else:
-        config_path = '%s/scripts/config.json' % BASE_PATH
+        config_path = '%s/configs/config.json' % BASE_PATH
     try:
         predicter_obj = Predicter()
         predicter_obj.read_config_file(config_path)

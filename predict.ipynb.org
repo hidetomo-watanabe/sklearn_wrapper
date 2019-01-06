@@ -6,7 +6,7 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "config_path = './scripts/config.json'\n",
+    "config_path = './configs/config.json'\n",
     "config_text = {}"
    ]
   },

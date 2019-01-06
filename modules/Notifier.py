@@ -8,7 +8,7 @@ class Notifier(object):
     def __init__(self):
         self.configs = {}
 
-    def read_config_file(self, path='%s/scripts/config.json' % BASE_PATH):
+    def read_config_file(self, path='%s/configs/config.json' % BASE_PATH):
         with open(path, 'r') as f:
             self.configs = json.loads(f.read())
 
