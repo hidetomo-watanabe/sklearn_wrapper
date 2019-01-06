@@ -24,9 +24,9 @@ _del 'outputs/proba_tmp_titanic2.csv'
 _del 'outputs/tmp_house.csv'
 
 # titanic
-err_msg=$(python -u scripts/predict.py tests/titanic/test_config.json | grep ERROR | :)
-err_msg=${err_msg}$(python -u scripts/predict.py tests/titanic/test_config2.json | grep ERROR | :)
-err_msg=${err_msg}$(python -u scripts/predict.py tests/house/test_config.json | grep ERROR | :)
+err_msg=$(python -u predict.py tests/titanic/test_config.json | grep ERROR | :)
+err_msg=${err_msg}$(python -u predict.py tests/titanic/test_config2.json | grep ERROR | :)
+err_msg=${err_msg}$(python -u predict.py tests/house/test_config.json | grep ERROR | :)
 if [ -n "${err_msg}" ];then
   echo 'PREDICT TEST ERROR'
   echo -e "${err_msg}"

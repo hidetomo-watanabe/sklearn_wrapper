@@ -1,11 +1,9 @@
 import sys
 import os
 import traceback
-BASE_PATH = '%s/..' % os.path.dirname(os.path.abspath(__file__))
-sys.path.append('%s/modules' % BASE_PATH)
-from Predicter import Predicter
-from Notifier import Notifier
-from MyLogger import MyLogger
+from modules.Predicter import Predicter
+from modules.Notifier import Notifier
+from modules.MyLogger import MyLogger
 
 logger = MyLogger().get_logger('predict')
 
@@ -15,7 +13,7 @@ if __name__ == '__main__':
     if len(sys.argv) > 1:
         config_path = sys.argv[1]
     else:
-        config_path = '%s/configs/config.json' % BASE_PATH
+        config_path = './configs/config.json'
     try:
         predicter_obj = Predicter()
         predicter_obj.read_config_file(config_path)
