@@ -1,7 +1,7 @@
 # analysis_for_kaggle
 ### overview
-- only SINGLE MODEL analysis
-- (TBI) ensemble model
+- single model
+- ensemble model
 
 ### available model
 ##### classification
@@ -29,6 +29,10 @@
   - XGBClasssifier
 - lgb_clf
   - LGBMClasssifier
+- catb_clf
+  - CatBoostClasssifier
+- keras_clf
+  - KerasClasssifier
 
 ##### regression
 - linear_reg
@@ -51,6 +55,10 @@
   - XGBRegressor
 - lgb_reg
   - LGBMRegressor
+- catb_clf
+  - CatBoostRegressor
+- keras_clf
+  - KerasRegressor
 
 ### sample configs
 - titanic
@@ -58,6 +66,6 @@
 - house
 
 ### CUI flow
-- cp scripts/config.json.org scripts/config.json
+- cp configs/config.json.org configs/config.json
 - (update config.json)
 - python -u scripts/predict.py
