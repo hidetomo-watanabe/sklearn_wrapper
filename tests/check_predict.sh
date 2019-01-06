@@ -6,6 +6,7 @@ catch()
 {
   if [ $? -ne 0 ]; then
     echo 'PREDICT TEST ERROR'
+    echo -e "${err_msg}"
   fi
 }
 

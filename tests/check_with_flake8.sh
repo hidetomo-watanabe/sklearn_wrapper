@@ -6,6 +6,7 @@ catch()
 {
   if [ $? -ne 0 ]; then
     echo 'FLAKE8 TEST ERROR'
+    echo -e "${flake8_msg}"
   fi
 }
 
