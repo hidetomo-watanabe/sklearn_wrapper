@@ -1,14 +1,13 @@
 import os
 import json
 import requests
-BASE_PATH = '%s/..' % os.path.dirname(os.path.abspath(__file__))
 
 
 class Notifier(object):
     def __init__(self):
         self.configs = {}
 
-    def read_config_file(self, path='%s/configs/config.json' % BASE_PATH):
+    def read_config_file(self, path):
         with open(path, 'r') as f:
             self.configs = json.loads(f.read())
 
