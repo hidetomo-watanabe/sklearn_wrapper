@@ -183,7 +183,7 @@ class Predicter(object):
         # adhoc
         if trans_adhoc['myfunc']:
             myfunc = importlib.import_module(
-                'myfuncs.%s' % trans_adhoc['myfunc'])
+                'modules.myfuncs.%s' % trans_adhoc['myfunc'])
         for method_name in trans_adhoc['methods']:
             logger.info('adhoc: %s' % method_name)
             train_df, test_df = eval(
@@ -346,12 +346,16 @@ class Predicter(object):
             logger.warn('NO DATA VALIDATION')
             return True
 
-    def calc_ensemble_model(self):
+    def _get_scorer(self):
         scoring = self.configs['fit']['scoring']
         if scoring == 'my_scorer':
-            scorer = get_my_scorer()
+            self.scorer = get_my_scorer()
         else:
-            scorer = get_scorer(scoring)
+            self.scorer = get_scorer(scoring)
+        return self.scorer
+
+    def calc_ensemble_model(self):
+        scorer = self._get_scorer()
         model_configs = self.configs['fit']['single_models']
         self.classes = None
 
@@ -609,6 +613,7 @@ class Predicter(object):
             plt.ylabel("Score")
             train_sizes, train_scores, test_scores = learning_curve(
                 estimator, self.X_train, self.Y_train,
+                scoring=self.scorer,
                 cv=cv, n_jobs=n_jobs, train_sizes=train_sizes)
             train_scores_mean = np.mean(train_scores, axis=1)
             train_scores_std = np.std(train_scores, axis=1)
