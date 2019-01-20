@@ -19,6 +19,8 @@
     "import sys\n",
     "sys.path.append('./modules')\n",
     "from Predicter import Predicter\n",
+    "from modules.MyLogger import MyLogger\n",
+    "logger = MyLogger().get_logger('predict')\n",
     "%matplotlib inline\n",
     "%reload_ext autoreload\n",
     "%autoreload 2"
