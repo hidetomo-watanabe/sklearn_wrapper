@@ -460,6 +460,8 @@ class Predicter(object):
         logger.info('  Y train shape: %s' % str(self.Y_train.shape))
         logger.info('  best params: %s' % gs.best_params_)
         logger.info('  best score of trained grid search: %s' % gs.best_score_)
+        logger.info('  score std of trained grid search: %s' %
+            gs.cv_results_['std_test_score'][gs.best_index_])
         if model in ['keras_clf', 'keras_reg']:
             estimator = gs.best_estimator_.model
             estimator.save(
