@@ -451,7 +451,8 @@ class Predicter(object):
 
         gs = GridSearchCV(
             estimator=base_model, param_grid=params,
-            cv=cv, scoring=scorer, n_jobs=n_jobs)
+            cv=cv, scoring=scorer, n_jobs=n_jobs,
+            return_train_score=False)
         gs.fit(self.X_train, self.Y_train, **fit_params)
         logger.info('model: %s' % model)
         logger.info('modelname: %s' % modelname)
