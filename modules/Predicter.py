@@ -24,6 +24,7 @@ from xgboost import XGBClassifier, XGBRegressor
 from lightgbm import LGBMClassifier, LGBMRegressor
 from catboost import CatBoostClassifier, CatBoostRegressor
 from keras.wrappers.scikit_learn import KerasClassifier, KerasRegressor
+from keras.engine.sequential import Sequential
 from heamy.dataset import Dataset
 from heamy.estimator import Classifier, Regressor
 from heamy.pipeline import ModelsPipeline, PipeApply
@@ -40,10 +41,6 @@ try:
     from MyScoringFunc import get_my_scorer
 except Exception as e:
     logger.warn('CANNOT IMPORT MY SCORING FUNC: %s' % e)
-try:
-    from MyKerasModel import create_keras_model
-except Exception as e:
-    logger.warn('CANNOT IMPORT MY KERAS MODEL: %s' % e)
 
 
 class Predicter(object):
@@ -61,7 +58,12 @@ class Predicter(object):
         self.id_col = self.configs['data']['id_col']
         self.pred_col = self.configs['data']['pred_col']
 
-    def _get_base_model(self, model):
+    def _get_base_model(self, model, keras_build=None):
+        if 'keras' in model:
+            mykerasmodel = importlib.import_module(
+                'modules.mykerasmodels.%s' % keras_build)
+            create_keras_model = mykerasmodel.create_keras_model
+
         if model == 'log_reg':
             return LogisticRegression(solver='lbfgs')
         elif model == 'linear_reg':
@@ -365,7 +367,10 @@ class Predicter(object):
             self.estimator = self._calc_single_model(scorer, model_configs[0])
             self.single_estimators = [(model_configs[0], self.estimator)]
             if self.configs['fit']['train_mode'] == 'clf':
-                self.classes = self.estimator.classes_
+                if hasattr(self.estimator, 'classes_'):
+                    self.classes = self.estimator.classes_
+                else:
+                    self.classes = sorted(np.unique(self.Y_train))
             return self.estimator
 
         # ensemble
@@ -441,7 +446,7 @@ class Predicter(object):
     def _calc_single_model(self, scorer, model_config):
         model = model_config['model']
         modelname = model_config['modelname']
-        base_model = self._get_base_model(model)
+        base_model = self._get_base_model(model, model_config.get('keras_build'))
         cv = model_config['cv']
         n_jobs = model_config['n_jobs']
         fit_params = model_config['fit_params']
@@ -495,7 +500,8 @@ class Predicter(object):
         self.Y_pred_proba = None
         self.Y_train_pred = None
         # keras
-        if self.estimator.__class__ in [KerasClassifier, KerasRegressor]:
+        if self.estimator.__class__ in [Sequential]:
+            self.Y_pred = self.estimator.predict_classes(self.X_test)
             self.Y_pred_proba = self.estimator.predict(self.X_test)
         # clf
         elif self.configs['fit']['train_mode'] == 'clf':

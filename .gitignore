@@ -4,7 +4,6 @@ catboost_info
 *.ipynb
 configs/config.json
 modules/MyScoringFunc.py
-modules/MyKerasModel.py
 outputs/*.csv
 outputs/*.zip
 outputs/*.pickle
