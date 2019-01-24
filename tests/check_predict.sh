@@ -4,9 +4,10 @@ set -eu
 trap catch EXIT
 catch()
 {
-  if [ $? -ne 0 ]; then
-    echo 'PREDICT TEST ERROR: SHELL'
+  if [ -n "${err_msg}" ]; then
+    echo 'PREDICT TEST ERROR'
     echo -e "${err_msg}"
+    exit 1
   fi
 }
 
@@ -28,37 +29,23 @@ _del 'outputs/tmp_house.csv'
 echo 'START PREDICT'
 # titanic
 # gbdt
-err_msg=$(python -u predict.py tests/titanic/test_config.json | grep ERROR | :)
+python -u predict.py tests/titanic/test_config.json
 # lgb
-err_msg=${err_msg}$(python -u predict.py tests/titanic/test_config2.json | grep ERROR | :)
+python -u predict.py tests/titanic/test_config2.json
 # house
 # svr
-err_msg=${err_msg}$(python -u predict.py tests/house/test_config.json | grep ERROR | :)
-if [ -n "${err_msg}" ];then
-  echo 'PREDICT TEST ERROR: PREDICT'
-  echo -e "${err_msg}"
-  exit 1
-fi
+python -u predict.py tests/house/test_config.json
 
+err_msg=''
 echo 'START DIFF'
 # diff
-diff_msg=$(diff outputs/tmp_titanic.csv tests/titanic/output.csv)
-diff_msg=${diff_msg}$(diff outputs/tmp_titanic2.csv tests/titanic/output2.csv)
-diff_msg=${diff_msg}$(diff outputs/tmp_house.csv tests/house/output.csv)
-if [ -n "${diff_msg}" ];then
-  echo 'PREDICT TEST ERROR: DIFF'
-  echo -e "${diff_msg}"
-  exit 1
-fi
+err_msg=${err_msg}$(diff outputs/tmp_titanic.csv tests/titanic/output.csv)
+err_msg=${err_msg}$(diff outputs/tmp_titanic2.csv tests/titanic/output2.csv)
+err_msg=${err_msg}$(diff outputs/tmp_house.csv tests/house/output.csv)
 
 echo 'START DIFF PROBA'
 # diff proba
-diff_msg=$(diff outputs/proba_tmp_titanic.csv tests/titanic/proba_output.csv)
-diff_msg=${diff_msg}$(diff outputs/proba_tmp_titanic2.csv tests/titanic/proba_output2.csv)
-if [ -n "${diff_msg}" ];then
-  echo 'PREDICT TEST ERROR: DIFF PROBA'
-  echo -e "${diff_msg}"
-  exit 1
-fi
+err_msg=${err_msg}$(diff outputs/proba_tmp_titanic.csv tests/titanic/proba_output.csv)
+err_msg=${err_msg}$(diff outputs/proba_tmp_titanic2.csv tests/titanic/proba_output2.csv)
 
 echo 'PREDICT TEST OK'
