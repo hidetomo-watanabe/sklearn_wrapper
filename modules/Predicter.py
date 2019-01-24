@@ -9,6 +9,7 @@ import importlib
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import StratifiedKFold, KFold
 from sklearn.model_selection import GridSearchCV, learning_curve
 from sklearn.linear_model import LogisticRegression, LinearRegression
 from sklearn.svm import SVC, SVR, LinearSVC, LinearSVR
@@ -303,10 +304,11 @@ class Predicter(object):
             target_adv = np.concatenate(
                 (np.zeros(len(tmp_X_train)), np.ones(len(X_test))), axis=0)
             # fit
+            skf = StratifiedKFold(n_splits=adversarial['cv'], shuffle=True, random_state=42)
             gs = GridSearchCV(
                 self._get_base_model(adversarial['model']),
                 adversarial['params'],
-                cv=adversarial['cv'],
+                cv=skf.split(X_adv, target_adv),
                 scoring=adversarial['scoring'],
                 n_jobs=adversarial['n_jobs'])
             gs.fit(X_adv, target_adv)
@@ -454,6 +456,12 @@ class Predicter(object):
         if len(fit_params.keys()) > 0:
             fit_params['eval_set'] = [[self.X_train, self.Y_train]]
 
+        if self.configs['fit']['train_mode'] == 'clf':
+            skf = StratifiedKFold(n_splits=cv, shuffle=True, random_state=42)
+            cv = skf.split(self.X_train, self.Y_train)
+        else:
+            kf = KFold(n_splits=cv, shuffle=True, random_state=42)
+            cv = kf.split(self.X_train, self.Y_train)
         gs = GridSearchCV(
             estimator=base_model, param_grid=params,
             cv=cv, scoring=scorer, n_jobs=n_jobs,
