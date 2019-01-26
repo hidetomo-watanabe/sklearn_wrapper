@@ -1,6 +1,9 @@
 #!/bin/bash
 
 CONFIG_FILE=$1
+if [ -z "${CONFIG_FILE}" ]; then
+  CONFIG_FILE='./configs/config.json'
+fi
 echo 'config_text = """\' > predict_for_kernel.py
 cat ${CONFIG_FILE} >> predict_for_kernel.py
 echo '"""' >> predict_for_kernel.py

@@ -190,12 +190,15 @@ class Predicter(object):
         trans_adhoc = self.configs['translate']['adhoc']
         # adhoc
         if trans_adhoc['myfunc']:
-            myfunc = importlib.import_module(
-                'modules.myfuncs.%s' % trans_adhoc['myfunc'])
+            if not self.kernel:
+                myfunc = importlib.import_module(
+                    'modules.myfuncs.%s' % trans_adhoc['myfunc'])
         for method_name in trans_adhoc['methods']:
             logger.info('adhoc: %s' % method_name)
+            if not self.kernel:
+                method_name = 'myfunc.%s' % method_name
             train_df, test_df = eval(
-                'myfunc.%s' % method_name)(train_df, test_df)
+                method_name)(train_df, test_df)
         # del
         for column in self.configs['translate']['del']:
             logger.info('delete: %s' % column)
