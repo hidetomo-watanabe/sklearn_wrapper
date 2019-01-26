@@ -35,7 +35,6 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from logging import getLogger
 
-BASE_PATH = '%s/..' % os.path.dirname(os.path.abspath(__file__))
 logger = getLogger('predict').getChild('Predicter')
 
 try:
@@ -46,6 +45,8 @@ except Exception as e:
 
 class Predicter(object):
     def __init__(self):
+        self.BASE_PATH = '%s/..' % os.path.dirname(os.path.abspath(__file__))
+        self.OUTPUT_PATH = '%s/outputs' % self.BASE_PATH
         self.configs = {}
 
     def read_config_file(self, path):
@@ -481,11 +482,11 @@ class Predicter(object):
         if model in ['keras_clf', 'keras_reg']:
             estimator = gs.best_estimator_.model
             estimator.save(
-                '%s/outputs/%s.pickle' % (BASE_PATH, modelname))
+                '%s/%s.pickle' % (self.OUTPUT_PATH, modelname))
         else:
             estimator = gs.best_estimator_
             with open(
-                '%s/outputs/%s.pickle' % (BASE_PATH, modelname), 'wb'
+                '%s/%s.pickle' % (self.OUTPUT_PATH, modelname), 'wb'
             ) as f:
                 pickle.dump(estimator, f)
         logger.info('estimator: %s' % estimator)
@@ -594,7 +595,7 @@ class Predicter(object):
         # post
         fit_post = self.configs['fit']['post']
         if fit_post['myfunc']:
-            sys.path.append(BASE_PATH)
+            sys.path.append(self.BASE_PATH)
             myfunc = importlib.import_module(
                 'myfuncs.%s' % fit_post['myfunc'])
         for method_name in fit_post['methods']:
@@ -609,10 +610,11 @@ class Predicter(object):
             filename = '%s.csv' % self.configs['fit']['ensemble']['modelname']
         if isinstance(self.Y_pred, pd.DataFrame):
             self.Y_pred.to_csv(
-                '%s/outputs/%s' % (BASE_PATH, filename), index=False)
+                '%s/%s' % (self.OUTPUT_PATH, filename), index=False)
         if isinstance(self.Y_pred_proba, pd.DataFrame):
             self.Y_pred_proba.to_csv(
-                '%s/outputs/proba_%s' % (BASE_PATH, filename), index=False)
+                '%s/proba_%s' % (self.OUTPUT_PATH, filename),
+                index=False)
         return filename
 
     def visualize_train_data(self):
