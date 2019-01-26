@@ -66,9 +66,10 @@ class Predicter(object):
 
     def _get_base_model(self, model, keras_build=None):
         if 'keras' in model:
-            mykerasmodel = importlib.import_module(
-                'modules.mykerasmodels.%s' % keras_build)
-            create_keras_model = mykerasmodel.create_keras_model
+            if not self.kernel:
+                mykerasmodel = importlib.import_module(
+                    'modules.mykerasmodels.%s' % keras_build)
+                create_keras_model = mykerasmodel.create_keras_model
 
         if model == 'log_reg':
             return LogisticRegression(solver='lbfgs')
