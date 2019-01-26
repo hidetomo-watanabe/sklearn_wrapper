@@ -304,7 +304,8 @@ class Predicter(object):
             target_adv = np.concatenate(
                 (np.zeros(len(tmp_X_train)), np.ones(len(X_test))), axis=0)
             # fit
-            skf = StratifiedKFold(n_splits=adversarial['cv'], shuffle=True, random_state=42)
+            skf = StratifiedKFold(
+                n_splits=adversarial['cv'], shuffle=True, random_state=42)
             gs = GridSearchCV(
                 self._get_base_model(adversarial['model']),
                 adversarial['params'],
@@ -406,8 +407,9 @@ class Predicter(object):
             # weighted_average
             if ensemble_config['mode'] == 'weighted':
                 if self.configs['fit']['train_mode'] == 'clf':
-                    raise Exception(
-                        '[ERROR] NOT IMPLEMENTED CLASSIFICATION AND WEIGHTED AVERAGE')
+                    err_msg = '[ERROR]'\
+                        ' NOT IMPLEMENTED CLASSIFICATION AND WEIGHTED AVERAGE'
+                    raise Exception(err_msg)
                 weights = pipeline.find_weights(scorer._score_func)
                 stacker = pipeline.weight(weights)
                 return stacker
@@ -448,7 +450,8 @@ class Predicter(object):
     def _calc_single_model(self, scorer, model_config):
         model = model_config['model']
         modelname = model_config['modelname']
-        base_model = self._get_base_model(model, model_config.get('keras_build'))
+        base_model = self._get_base_model(
+            model, model_config.get('keras_build'))
         cv = model_config['cv']
         n_jobs = model_config['n_jobs']
         fit_params = model_config['fit_params']
@@ -474,7 +477,7 @@ class Predicter(object):
         logger.info('  best params: %s' % gs.best_params_)
         logger.info('  best score of trained grid search: %s' % gs.best_score_)
         logger.info('  score std of trained grid search: %s' %
-            gs.cv_results_['std_test_score'][gs.best_index_])
+                    gs.cv_results_['std_test_score'][gs.best_index_])
         if model in ['keras_clf', 'keras_reg']:
             estimator = gs.best_estimator_.model
             estimator.save(
@@ -556,7 +559,8 @@ class Predicter(object):
             # ss
             self.Y_pred = self.ss_y.inverse_transform(self.Y_pred)
             if isinstance(self.Y_train_pred, np.ndarray):
-                self.Y_train_pred = self.ss_y.inverse_transform(self.Y_train_pred)
+                self.Y_train_pred = \
+                    self.ss_y.inverse_transform(self.Y_train_pred)
             else:
                 logger.warn('NO Y_train_pred')
             # other

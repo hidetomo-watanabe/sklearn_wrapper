@@ -1,5 +1,4 @@
 import sys
-import os
 import traceback
 from modules.Predicter import Predicter
 from modules.Notifier import Notifier
