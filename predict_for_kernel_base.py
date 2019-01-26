@@ -1,8 +1,5 @@
 import json
 import traceback
-from modules.Predicter import Predicter
-from modules.Notifier import Notifier
-from modules.MyLogger import MyLogger
 
 logger = MyLogger().get_logger('predict')
 
