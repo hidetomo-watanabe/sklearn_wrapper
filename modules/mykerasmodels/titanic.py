@@ -21,7 +21,3 @@ def create_keras_model():
         loss='categorical_crossentropy',
         optimizer=optimizer, metrics=['accuracy'])
     return model
-
-
-if __name__ == '__main__':
-    pass

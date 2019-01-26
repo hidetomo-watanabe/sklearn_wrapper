@@ -35,7 +35,3 @@ class Integrater(object):
             filename = '%s.csv' % self.configs['integrate']['output']
         self.output.to_csv(
             '%s/outputs/%s' % (BASE_PATH, filename), index=False)
-
-
-if __name__ == '__main__':
-    pass

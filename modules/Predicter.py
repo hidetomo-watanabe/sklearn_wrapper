@@ -44,9 +44,13 @@ except Exception as e:
 
 
 class Predicter(object):
-    def __init__(self):
+    def __init__(self, kernel=False):
+        self.kernel = kernel
         self.BASE_PATH = '%s/..' % os.path.dirname(os.path.abspath(__file__))
-        self.OUTPUT_PATH = '%s/outputs' % self.BASE_PATH
+        if not self.kernel:
+            self.OUTPUT_PATH = '%s/outputs' % self.BASE_PATH
+        else:
+            self.OUTPUT_PATH = '.'
         self.configs = {}
 
     def read_config_file(self, path):
@@ -595,13 +599,16 @@ class Predicter(object):
         # post
         fit_post = self.configs['fit']['post']
         if fit_post['myfunc']:
-            sys.path.append(self.BASE_PATH)
-            myfunc = importlib.import_module(
-                'myfuncs.%s' % fit_post['myfunc'])
+            if not self.kernel:
+                sys.path.append(self.BASE_PATH)
+                myfunc = importlib.import_module(
+                    'myfuncs.%s' % fit_post['myfunc'])
         for method_name in fit_post['methods']:
             logger.info('fit post: %s' % method_name)
+            if not self.kernel:
+                method_name = 'myfunc.%s' % method_name
             self.Y_pred, self.Y_pred_proba = eval(
-                'myfunc.%s' % method_name)(self.Y_pred, self.Y_pred_proba)
+                method_name)(self.Y_pred, self.Y_pred_proba)
 
         return self.Y_pred, self.Y_pred_proba, self.Y_train_pred
 
@@ -673,7 +680,3 @@ class Predicter(object):
         g = sns.jointplot(self.Y_train, self.Y_train_pred, kind='kde')
         g.set_axis_labels('Y_train', 'Y_train_pred')
         g.fig.suptitle('estimator')
-
-
-if __name__ == '__main__':
-    pass

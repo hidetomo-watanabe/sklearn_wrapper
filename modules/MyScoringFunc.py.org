@@ -9,7 +9,3 @@ def _get_my_loss_err(Y, Y_pred):
 
 def get_my_scorer():
     return make_scorer(_get_my_loss_err, greater_is_better=False)
-
-
-if __name__ == '__main__':
-    pass

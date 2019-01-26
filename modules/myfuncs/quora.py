@@ -44,7 +44,3 @@ def translate_target2prediction(Y_pred, Y_pred_proba):
     #######################################
     Y_pred = Y_pred.rename(columns={'target': 'prediction'})
     return Y_pred, Y_pred_proba
-
-
-if __name__ == '__main__':
-    pass

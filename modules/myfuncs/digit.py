@@ -42,7 +42,3 @@ def extract_features(train_df, test_df):
             del features
             gc.collect()
     return train_df, test_df
-
-
-if __name__ == '__main__':
-    pass

@@ -15,7 +15,3 @@ class ImageController(object):
         x = preprocess_input(x)
         features = self.vgg16_model.predict(x).flatten()
         return features
-
-
-if __name__ == '__main__':
-    pass

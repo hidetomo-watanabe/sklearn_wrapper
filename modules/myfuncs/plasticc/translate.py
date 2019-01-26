@@ -42,7 +42,3 @@ def add_class_99(Y_pred, Y_pred_proba):
     Y_pred_proba['class_99'] = np.array(
         [[1 / (n_gal + 1)]] * Y_pred_proba.shape[0])
     return Y_pred, Y_pred_proba
-
-
-if __name__ == '__main__':
-    pass

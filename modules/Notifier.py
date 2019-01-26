@@ -10,12 +10,11 @@ class Notifier(object):
         with open(path, 'r') as f:
             self.configs = json.loads(f.read())
 
+    def read_config_text(self, text):
+        self.configs = json.loads(text)
+
     def notify_slack(self):
         text = 'Finished.'
         requests.post(
             self.configs['notify']['slack'],
             data=json.dumps({'text': text}))
-
-
-if __name__ == '__main__':
-    pass

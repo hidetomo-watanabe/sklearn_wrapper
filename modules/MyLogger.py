@@ -16,7 +16,3 @@ class MyLogger(object):
         logger.addHandler(handler)
         logger.propagate = False
         return logger
-
-
-if __name__ == '__main__':
-    pass
