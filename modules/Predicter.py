@@ -47,11 +47,15 @@ class Predicter(object):
     def __init__(self, kernel=False):
         self.kernel = kernel
         self.BASE_PATH = '%s/..' % os.path.dirname(os.path.abspath(__file__))
-        if not self.kernel:
-            self.OUTPUT_PATH = '%s/outputs' % self.BASE_PATH
-        else:
+        if self.kernel:
             self.OUTPUT_PATH = '.'
+        else:
+            self.OUTPUT_PATH = '%s/outputs' % self.BASE_PATH
         self.configs = {}
+        # kerasのスコープ対策として、インスタンス作成時に読み込み
+        # keras使う時しか使わないので、evalで定義してエラー回避
+        if self.kernel:
+            self.create_keras_model = eval('create_keras_model')
 
     def read_config_file(self, path):
         with open(path, 'r') as f:
@@ -66,7 +70,9 @@ class Predicter(object):
 
     def _get_base_model(self, model, keras_build=None):
         if 'keras' in model:
-            if not self.kernel:
+            if self.kernel:
+                create_keras_model = self.create_keras_model
+            else:
                 mykerasmodel = importlib.import_module(
                     'modules.mykerasmodels.%s' % keras_build)
                 create_keras_model = mykerasmodel.create_keras_model
