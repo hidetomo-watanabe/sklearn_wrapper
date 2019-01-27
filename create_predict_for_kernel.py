@@ -24,7 +24,6 @@ if __name__ == '__main__':
         f.write('"""\n')
     # modules
     _append_file_text('./modules/Predicter.py', FILENAME)
-    _append_file_text('./modules/Notifier.py', FILENAME)
     _append_file_text('./modules/MyLogger.py', FILENAME)
     # translate adhoc
     with open(config_path, 'r') as f:

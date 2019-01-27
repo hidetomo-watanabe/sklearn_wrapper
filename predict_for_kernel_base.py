@@ -47,8 +47,4 @@ if __name__ == '__main__':
     except Exception as e:
         logger.error('%s' % e)
         traceback.print_exc()
-    finally:
-        notifier_obj = Notifier()
-        notifier_obj.read_config_text(config_text)
-        notifier_obj.notify_slack()
     logger.info('# FINISHED')
