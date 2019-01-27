@@ -1,0 +1,64 @@
+{
+    "data": {
+        "train_path": "../input/train.csv",
+        "test_path": "../input/test.csv",
+        "pred_col": "target",
+        "id_col": "qid",
+        "random": false,
+        "adversarial": false
+    },
+    "translate": {
+        "adhoc": {
+            "myfunc": "quora",
+            "methods": [
+                "translate_text2seq"
+            ]
+        },
+        "del": [
+        ],
+        "category": [
+        ],
+        "dimension": false
+    },
+    "fit": {
+        "y_pre": false,
+        "train_mode": "clf",
+        "ensemble": {
+            "mode": "stacking",
+            "model": "log_reg",
+            "modelname": "submission",
+            "k": 10,
+            "proportion": 0.2,
+            "seed": 111
+        },
+        "scoring": "f1",
+        "single_models": [
+            {
+                "model": "keras_clf",
+                "modelname": "quora_keras",
+                "keras_build": "quora",
+                "cv": 3,
+                "n_jobs": -1,
+                "fit_params" : {
+                },
+                "params" : {
+                }
+            }
+        ],
+        "post": {
+            "myfunc": "quora",
+            "methods": [
+                "translate_target2prediction"
+            ]
+        }
+    },
+    "notify": {
+        "slack": "https://hooks.slack.com/services/hogehoge"
+    },
+    "integrate": {
+        "output": "tmp",
+        "filenames": [
+        ],
+        "weights": [1, 1]
+    }
+}
