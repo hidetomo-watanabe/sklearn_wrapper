@@ -134,6 +134,7 @@ class Predicter(object):
         if self.configs['fit']['train_mode'] == 'clf':
             logger.info('train pred counts:')
             display(self.train_df[self.pred_col].value_counts())
+            display(self.train_df[self.pred_col].value_counts(normalize=True))
         for label, df in [('train', self.train_df), ('test', self.test_df)]:
             logger.info('%s:' % label)
             display(df.head())
