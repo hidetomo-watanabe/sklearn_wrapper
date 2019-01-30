@@ -30,6 +30,8 @@ from heamy.dataset import Dataset
 from heamy.estimator import Classifier, Regressor
 from heamy.pipeline import ModelsPipeline, PipeApply
 from sklearn.metrics import get_scorer
+import eli5
+from eli5.sklearn import PermutationImportance
 from IPython.display import display
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -69,7 +71,7 @@ class Predicter(object):
         self.pred_col = self.configs['data']['pred_col']
 
     def _get_base_model(self, model, keras_build=None):
-        if 'keras' in model:
+        if model in ['keras_clf', 'keras_reg']:
             if self.kernel:
                 create_keras_model = self.create_keras_model
             else:
@@ -519,6 +521,15 @@ class Predicter(object):
             display(
                 feature_importances / np.sum(
                     estimator.feature_importances_))
+
+        # permutation importance
+        if model not in ['keras_clf', 'keras_reg']:
+            perm = PermutationImportance(estimator, random_state=42).fit(
+                self.X_train, self.Y_train)
+            logger.info('permutation importance:')
+            display(
+                eli5.explain_weights_df(
+                    perm, feature_names=self.feature_columns))
 
         return estimator
 
