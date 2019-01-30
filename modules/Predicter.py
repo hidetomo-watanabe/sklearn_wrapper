@@ -539,8 +539,11 @@ class Predicter(object):
         self.Y_train_pred = None
         # keras
         if self.estimator.__class__ in [Sequential]:
-            self.Y_pred = self.estimator.predict_classes(self.X_test)
-            self.Y_pred_proba = self.estimator.predict(self.X_test)
+            if self.configs['fit']['train_mode'] == 'clf':
+                self.Y_pred = self.estimator.predict_classes(self.X_test)
+                self.Y_pred_proba = self.estimator.predict(self.X_test)
+            elif self.configs['fit']['train_mode'] == 'reg':
+                self.Y_pred = self.estimator.predict(self.X_test)
         # clf
         elif self.configs['fit']['train_mode'] == 'clf':
             # ensemble clf
