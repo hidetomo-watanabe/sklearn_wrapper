@@ -86,6 +86,7 @@
                 }
             }
         ],
+        "permutation": false,
         "post": {
             "myfunc": "hoge",
             "methods": [

@@ -523,13 +523,14 @@ class Predicter(object):
                     estimator.feature_importances_))
 
         # permutation importance
-        if model not in ['keras_clf', 'keras_reg']:
-            perm = PermutationImportance(estimator, random_state=42).fit(
-                self.X_train, self.Y_train)
-            logger.info('permutation importance:')
-            display(
-                eli5.explain_weights_df(
-                    perm, feature_names=self.feature_columns))
+        if self.configs['fit'].get('permutation'):
+            if model not in ['keras_clf', 'keras_reg']:
+                perm = PermutationImportance(estimator, random_state=42).fit(
+                    self.X_train, self.Y_train)
+                logger.info('permutation importance:')
+                display(
+                    eli5.explain_weights_df(
+                        perm, feature_names=self.feature_columns))
 
         return estimator
 
