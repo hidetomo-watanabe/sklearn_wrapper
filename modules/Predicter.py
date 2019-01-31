@@ -140,7 +140,7 @@ class Predicter(object):
         for label, df in [('train', self.train_df), ('test', self.test_df)]:
             logger.info('%s:' % label)
             display(df.head())
-            display(df.describe())
+            display(df.describe(include='all'))
 
     def _replace_missing_of_dfs(self, dfs, target, target_mean):
         replaced = False
