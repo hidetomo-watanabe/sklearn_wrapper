@@ -7,4 +7,4 @@ modules/MyScoringFunc.py
 outputs/*.csv
 outputs/*.zip
 outputs/*.pickle
-predict_for_kernel.py
+for_kernel/predict_for_kernel.py
