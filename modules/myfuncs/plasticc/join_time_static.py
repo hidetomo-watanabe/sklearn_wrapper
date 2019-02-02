@@ -1,14 +1,16 @@
 import os
 import sys
+import logging.config
+from logging import getLogger
 import pandas as pd
 from tqdm import tqdm
-BASE_PATH = '%s/..' % os.path.dirname(os.path.abspath(__file__))
-sys.path.append('%s/modules' % BASE_PATH)
-from MyLogger import MyLogger
-
-logger = MyLogger().get_logger()
 
 if __name__ == '__main__':
+    logging.config.fileConfig(
+        '../../../configs/logging.conf',
+        disable_existing_loggers=False)
+    logger = getLogger('join')
+
     input_filename = sys.argv[1]
     input_meta_filename = sys.argv[2]
     output_filename = sys.argv[3]

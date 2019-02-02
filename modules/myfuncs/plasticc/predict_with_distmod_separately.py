@@ -1,16 +1,20 @@
 import sys
 import os
 import traceback
+import logging.config
+from logging import getLogger
 import pandas as pd
 BASE_PATH = '%s/../..' % os.path.dirname(os.path.abspath(__file__))
 sys.path.append('%s/modules' % BASE_PATH)
 from Predicter import Predicter
 from Notifier import Notifier
-from MyLogger import MyLogger
-
-logger = MyLogger().get_logger('predict')
 
 if __name__ == '__main__':
+    logging.config.fileConfig(
+        '../../../configs/logging.conf',
+        disable_existing_loggers=False)
+    logger = getLogger('predict')
+
     logger.info('# START')
 
     if len(sys.argv) > 1:

@@ -1,13 +1,16 @@
 import sys
 import os
 import traceback
+import logging.config
+from logging import getLogger
 from modules.Integrater import Integrater
 from modules.Notifier import Notifier
-from modules.MyLogger import MyLogger
-
-logger = MyLogger().get_logger('integrate')
 
 if __name__ == '__main__':
+    logging.config.fileConfig(
+        './configs/logging.conf', disable_existing_loggers=False)
+    logger = getLogger('integrate')
+
     logger.info('# START')
 
     if len(sys.argv) > 1:

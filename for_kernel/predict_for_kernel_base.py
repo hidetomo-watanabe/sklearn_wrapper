@@ -1,9 +1,18 @@
 import json
 import traceback
-
-logger = MyLogger().get_logger('predict')
+from logging import getLogger
 
 if __name__ == '__main__':
+    logger = getLogger('predict')
+    handler = StreamHandler()
+    formatter = Formatter(
+        '[%(asctime)s][%(levelname)s](%(filename)s:%(lineno)s) %(message)s')
+    handler.setLevel(DEBUG)
+    handler.setFormatter(formatter)
+    logger.setLevel(DEBUG)
+    logger.addHandler(handler)
+    logger.propagate = False
+
     logger.info('# START')
 
     predicter_obj = Predicter(kernel=True)

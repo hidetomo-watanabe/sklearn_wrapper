@@ -26,7 +26,6 @@ if __name__ == '__main__':
         f.write('"""\n')
     # modules
     _append_file_text('%s/modules/Predicter.py' % BASE_PATH, FILENAME)
-    _append_file_text('%s/modules/MyLogger.py' % BASE_PATH, FILENAME)
     # translate adhoc
     with open(config_path, 'r') as f:
         config_json = json.loads(f.read())

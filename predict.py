@@ -1,12 +1,15 @@
 import sys
 import traceback
+import logging.config
+from logging import getLogger
 from modules.Predicter import Predicter
 from modules.Notifier import Notifier
-from modules.MyLogger import MyLogger
-
-logger = MyLogger().get_logger('predict')
 
 if __name__ == '__main__':
+    logging.config.fileConfig(
+        './configs/logging.conf', disable_existing_loggers=False)
+    logger = getLogger('predict')
+
     logger.info('# START')
 
     if len(sys.argv) > 1:
