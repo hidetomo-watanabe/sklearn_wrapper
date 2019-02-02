@@ -32,6 +32,8 @@ echo 'START PREDICT'
 python -u predict.py tests/titanic/test_config.json
 # lgb
 python -u predict.py tests/titanic/test_config2.json
+# keras
+python -u predict.py tests/titanic/test_config3.json
 # house
 # svr
 python -u predict.py tests/house/test_config.json

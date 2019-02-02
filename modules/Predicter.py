@@ -544,9 +544,10 @@ class Predicter(object):
             if self.estimator.__class__ in [Sequential]:
                 self.Y_pred = self.estimator.predict_classes(self.X_test)
                 self.Y_pred_proba = self.estimator.predict(self.X_test)
-                self.Y_train_pred = self.estimator.predict_classes(self.X_train)
+                self.Y_train_pred = self.estimator.predict_classes(
+                    self.X_train)
             # ensemble clf
-            if self.estimator.__class__ in [Classifier]:
+            elif self.estimator.__class__ in [Classifier]:
                 # no proba
                 self.estimator.probability = False
                 self.Y_pred = self.estimator.predict()
