@@ -6,7 +6,7 @@ catch()
 {
   if [ -n "${err_msg}" ]; then
     echo 'PREDICT TEST ERROR'
-    echo -e "${err_msg}"
+    echo "${err_msg}"
     exit 1
   fi
 }
