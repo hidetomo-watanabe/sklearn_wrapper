@@ -294,8 +294,8 @@ class Predicter(object):
                 if y_pre == 'log':
                     self.Y_train = np.array(list(map(math.log, self.Y_train)))
                 else:
-                    raise Exception(
-                        '[ERROR] NOT IMPELEMTED FIT Y_PRE: %s' % y_pre)
+                    logger.error('NOT IMPLEMENTED FIT Y_PRE: %s' % y_pre)
+                    raise Exception('NOT IMPLEMENTED')
             # ss
             self.ss_y = StandardScaler()
             self.Y_train = self.Y_train.reshape(-1, 1)
@@ -368,8 +368,7 @@ class Predicter(object):
                 adv_pred_test_num_0,
                 adv_pred_test_num_1,
             ):
-                raise Exception(
-                    '[ERROR] TRAIN AND TEST MAY BE HAVE DIFFERENT FEATURES')
+                logger.warn('TRAIN AND TEST MAY BE HAVE DIFFERENT FEATURES')
         else:
             logger.warn('NO DATA VALIDATION')
             return True
@@ -429,10 +428,6 @@ class Predicter(object):
         def _get_stacker():
             # weighted_average
             if ensemble_config['mode'] == 'weighted':
-                if self.configs['fit']['train_mode'] == 'clf':
-                    err_msg = '[ERROR]'\
-                        ' NOT IMPLEMENTED CLASSIFICATION AND WEIGHTED AVERAGE'
-                    raise Exception(err_msg)
                 weights = pipeline.find_weights(scorer._score_func)
                 stacker = pipeline.weight(weights)
                 return stacker
@@ -460,6 +455,11 @@ class Predicter(object):
             return stacker
 
         # stacker
+        if ensemble_config['mode'] == 'weighted' \
+                and self.configs['fit']['train_mode'] == 'clf':
+            logger.error(
+                'NOT IMPLEMENTED CLASSIFICATION AND WEIGHTED AVERAGE')
+            raise Exception('NOT IMPLEMENTED')
         stacker = _get_stacker()
 
         # validate
@@ -607,8 +607,8 @@ class Predicter(object):
                     self.Y_train_pred = np.array(list(map(
                         math.exp, self.Y_train_pred)))
                 else:
-                    raise Exception(
-                        '[ERROR] NOT IMPELEMTED FIT Y_PRE: %s' % y_pre)
+                    logger.error('NOT IMPLEMENTED FIT Y_PRE: %s' % y_pre)
+                    raise Exception('NOT IMPLEMENTED')
 
         # np => pd
         if isinstance(self.Y_pred, np.ndarray):
