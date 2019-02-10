@@ -1,13 +1,15 @@
 #!/bin/bash
 
-set -eu
+# set -eu
 trap catch EXIT
 catch()
 {
   if [ -n "${err_msg}" ]; then
-    echo 'PREDICT TEST ERROR'
     echo "${err_msg}"
+    echo 'PREDICT TEST ERROR'
     exit 1
+  else
+    echo 'PREDICT TEST OK'
   fi
 }
 
@@ -27,21 +29,21 @@ _del 'outputs/proba_tmp_titanic2.csv'
 _del 'outputs/tmp_house.csv'
 _del 'outputs/tmp_house2.csv'
 
+err_msg=''
 echo 'START PREDICT'
 # titanic
 # gbdt
-python -u predict.py tests/titanic/test_config.json
+err_msg=${err_msg}$(python -u predict.py tests/titanic/test_config.json 2>&1 | grep ERROR)
 # lgb
-python -u predict.py tests/titanic/test_config2.json
+err_msg=${err_msg}$(python -u predict.py tests/titanic/test_config2.json 2>&1 | grep ERROR)
 # keras
-python -u predict.py tests/titanic/test_config3.json
+err_msg=${err_msg}$(python -u predict.py tests/titanic/test_config3.json 2>&1 | grep ERROR)
 # house
 # svr
-python -u predict.py tests/house/test_config.json
+err_msg=${err_msg}$(python -u predict.py tests/house/test_config.json 2>&1 | grep ERROR)
 # keras
-python -u predict.py tests/house/test_config2.json
+err_msg=${err_msg}$(python -u predict.py tests/house/test_config2.json 2>&1 | grep ERROR)
 
-err_msg=''
 echo 'START DIFF'
 # diff
 err_msg=${err_msg}$(diff outputs/tmp_titanic.csv tests/titanic/output.csv)
@@ -52,5 +54,3 @@ echo 'START DIFF PROBA'
 # diff proba
 err_msg=${err_msg}$(diff outputs/proba_tmp_titanic.csv tests/titanic/proba_output.csv)
 err_msg=${err_msg}$(diff outputs/proba_tmp_titanic2.csv tests/titanic/proba_output2.csv)
-
-echo 'PREDICT TEST OK'

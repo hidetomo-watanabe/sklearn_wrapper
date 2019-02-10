@@ -28,7 +28,7 @@
         ],
         "category": [
         ],
-        "dimension": 90
+        "dimension": 100
     },
     "fit": {
         "y_pre": "log",
