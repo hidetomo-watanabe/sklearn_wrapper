@@ -26,6 +26,7 @@ from lightgbm import LGBMClassifier, LGBMRegressor
 from catboost import CatBoostClassifier, CatBoostRegressor
 from keras.wrappers.scikit_learn import KerasClassifier, KerasRegressor
 from keras.engine.sequential import Sequential
+from sklearn.multiclass import OneVsOneClassifier, OneVsRestClassifier
 from heamy.dataset import Dataset
 from heamy.estimator import Classifier, Regressor
 from heamy.pipeline import ModelsPipeline, PipeApply
@@ -475,6 +476,12 @@ class Predicter(object):
         modelname = model_config['modelname']
         base_model = self._get_base_model(
             model, model_config.get('keras_build'))
+        multiclass = model_config.get('multiclass')
+        if multiclass:
+            if multiclass == 'onevsone':
+                base_model = OneVsOneClassifier(base_model)
+            elif multiclass == 'onevsrest':
+                base_model = OneVsRestClassifier(base_model)
         cv = model_config['cv']
         n_jobs = model_config['n_jobs']
         fit_params = model_config['fit_params']
