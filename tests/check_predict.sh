@@ -25,6 +25,7 @@ _del 'outputs/tmp_titanic2.csv'
 _del 'outputs/proba_tmp_titanic.csv'
 _del 'outputs/proba_tmp_titanic2.csv'
 _del 'outputs/tmp_house.csv'
+_del 'outputs/tmp_house2.csv'
 
 echo 'START PREDICT'
 # titanic
@@ -37,6 +38,8 @@ python -u predict.py tests/titanic/test_config3.json
 # house
 # svr
 python -u predict.py tests/house/test_config.json
+# keras
+python -u predict.py tests/house/test_config2.json
 
 err_msg=''
 echo 'START DIFF'
