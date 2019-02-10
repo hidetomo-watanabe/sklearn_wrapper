@@ -190,8 +190,13 @@ class Predicter(object):
     def get_raw_data(self):
         train_path = self.configs['data']['train_path']
         test_path = self.configs['data']['test_path']
-        self.train_df = pd.read_csv(train_path)
-        self.test_df = pd.read_csv(test_path)
+        delim = self.configs['data'].get('delimiter')
+        if delim:
+            self.train_df = pd.read_csv(train_path, delimiter=delim)
+            self.test_df = pd.read_csv(test_path, delimiter=delim)
+        else:
+            self.train_df = pd.read_csv(train_path)
+            self.test_df = pd.read_csv(test_path)
         return self.train_df, self.test_df
 
     def trans_raw_data(self):

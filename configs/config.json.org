@@ -4,6 +4,7 @@
         "test_path": "/path/test.csv",
         "pred_col": "Hoge",
         "id_col": "Id",
+        "delimiter": ",",
         "random": false,
         "adversarial": {
             "model": "log_reg",
