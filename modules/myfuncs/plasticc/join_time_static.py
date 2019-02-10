@@ -1,4 +1,3 @@
-import os
 import sys
 import logging.config
 from logging import getLogger

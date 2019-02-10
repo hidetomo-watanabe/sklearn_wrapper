@@ -1,6 +1,4 @@
-import json
-import traceback
-from logging import getLogger
+from logging import getLogger, StreamHandler, Formatter, DEBUG
 
 if __name__ == '__main__':
     logger = getLogger('predict')
