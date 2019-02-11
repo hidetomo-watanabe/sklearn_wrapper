@@ -40,11 +40,6 @@ from logging import getLogger
 
 logger = getLogger('predict').getChild('Predicter')
 
-try:
-    from MyScoringFunc import get_my_scorer
-except Exception as e:
-    logger.warn('CANNOT IMPORT MY SCORING FUNC: %s' % e)
-
 
 class Predicter(object):
     def __init__(self, kernel=False):
@@ -376,8 +371,15 @@ class Predicter(object):
 
     def _get_scorer(self):
         scoring = self.configs['fit']['scoring']
+        logger.info('scoring: %s' % scoring)
         if scoring == 'my_scorer':
-            self.scorer = get_my_scorer()
+            if not self.kernel:
+                myfunc = importlib.import_module(
+                    'modules.myfuncs.%s' % self.configs['fit']['myfunc'])
+            method_name = 'get_my_scorer'
+            if not self.kernel:
+                method_name = 'myfunc.%s' % method_name
+            self.scorer = eval(method_name)()
         else:
             self.scorer = get_scorer(scoring)
         return self.scorer

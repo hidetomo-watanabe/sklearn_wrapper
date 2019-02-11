@@ -36,6 +36,7 @@
         "dimension": false
     },
     "fit": {
+        "myfunc": "hoge",
         "y_pre": false,
         "train_mode": "clf",
         "ensemble": {
