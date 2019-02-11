@@ -31,6 +31,7 @@
         "dimension": 100
     },
     "fit": {
+        "myfunc": "house",
         "y_pre": "log",
         "train_mode": "reg",
         "ensemble": {
@@ -44,7 +45,6 @@
         "single_models": [
             {
                 "model": "keras_reg",
-                "keras_build": "house",
                 "modelname": "tmp",
                 "cv": 3,
                 "n_jobs": -1,

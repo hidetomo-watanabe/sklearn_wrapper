@@ -80,7 +80,6 @@
             },
             {
                 "model": "keras_clf",
-                "keras_build": "keras1",
                 "modelname": "tmp",
                 "cv": 3,
                 "n_jobs": -1,

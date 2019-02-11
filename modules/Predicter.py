@@ -66,14 +66,14 @@ class Predicter(object):
         self.id_col = self.configs['data']['id_col']
         self.pred_col = self.configs['data']['pred_col']
 
-    def _get_base_model(self, model, keras_build=None):
+    def _get_base_model(self, model, keras_build_func=None):
         if model in ['keras_clf', 'keras_reg']:
             if self.kernel:
                 create_keras_model = self.create_keras_model
             else:
-                mykerasmodel = importlib.import_module(
-                    'modules.mykerasmodels.%s' % keras_build)
-                create_keras_model = mykerasmodel.create_keras_model
+                myfunc = importlib.import_module(
+                    'modules.myfuncs.%s' % keras_build_func)
+                create_keras_model = myfunc.create_keras_model
 
         if model == 'log_reg':
             return LogisticRegression(solver='lbfgs')
@@ -392,7 +392,8 @@ class Predicter(object):
         # single
         if len(model_configs) == 1:
             logger.warn('NO ENSEMBLE')
-            self.estimator = self._calc_single_model(scorer, model_configs[0])
+            self.estimator = self._calc_single_model(
+                scorer, model_configs[0], self.configs['fit'].get('myfunc'))
             self.single_estimators = [(model_configs[0], self.estimator)]
             if self.configs['fit']['train_mode'] == 'clf':
                 if hasattr(self.estimator, 'classes_'):
@@ -406,7 +407,8 @@ class Predicter(object):
         self.single_estimators = []
         dataset = Dataset(self.X_train, self.Y_train, self.X_test)
         for model_config in model_configs:
-            single_estimator = self._calc_single_model(scorer, model_config)
+            single_estimator = self._calc_single_model(
+                scorer, model_configs, self.configs['fit'].get('myfunc'))
             self.single_estimators.append((model_config, single_estimator))
             if self.classes is None \
                     and self.configs['fit']['train_mode'] == 'clf':
@@ -473,11 +475,10 @@ class Predicter(object):
         self.estimator = stacker
         return self.estimator
 
-    def _calc_single_model(self, scorer, model_config):
+    def _calc_single_model(self, scorer, model_config, myfunc):
         model = model_config['model']
         modelname = model_config['modelname']
-        base_model = self._get_base_model(
-            model, model_config.get('keras_build'))
+        base_model = self._get_base_model(model, myfunc)
         multiclass = model_config.get('multiclass')
         if multiclass:
             if multiclass == 'onevsone':
