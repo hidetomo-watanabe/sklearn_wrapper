@@ -1,11 +1,11 @@
 import sys
 import os
 import math
-import json
 import pickle
 import numpy as np
 import pandas as pd
 import importlib
+from .ConfigReader import ConfigReader
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.preprocessing import StandardScaler
@@ -41,7 +41,7 @@ from logging import getLogger
 logger = getLogger('predict').getChild('Predicter')
 
 
-class Predicter(object):
+class Predicter(ConfigReader):
     def __init__(self, kernel=False):
         self.kernel = kernel
         self.BASE_PATH = '%s/..' % os.path.dirname(os.path.abspath(__file__))
@@ -54,17 +54,6 @@ class Predicter(object):
         # keras使う時しか使わないので、evalで定義してエラー回避
         if self.kernel:
             self.create_keras_model = eval('create_keras_model')
-
-    def read_config_file(self, path):
-        with open(path, 'r') as f:
-            self.configs = json.loads(f.read())
-        self.id_col = self.configs['data']['id_col']
-        self.pred_col = self.configs['data']['pred_col']
-
-    def read_config_text(self, text):
-        self.configs = json.loads(text)
-        self.id_col = self.configs['data']['id_col']
-        self.pred_col = self.configs['data']['pred_col']
 
     def _get_base_model(self, model, keras_build_func=None):
         if model in ['keras_clf', 'keras_reg']:
