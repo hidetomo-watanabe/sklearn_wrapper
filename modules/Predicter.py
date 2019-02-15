@@ -376,6 +376,8 @@ class Predicter(ConfigReader):
         scorer = self._get_scorer()
         model_configs = self.configs['fit']['single_models']
         self.classes = None
+        logger.info('X train shape: %s' % str(self.X_train.shape))
+        logger.info('Y train shape: %s' % str(self.Y_train.shape))
 
         # single
         if len(model_configs) == 1:
@@ -480,6 +482,9 @@ class Predicter(ConfigReader):
         if len(fit_params.keys()) > 0:
             fit_params['eval_set'] = [[self.X_train, self.Y_train]]
 
+        logger.info('model: %s' % model)
+        logger.info('modelname: %s' % modelname)
+        logger.info('grid search with cv=%d' % cv)
         if self.configs['fit']['train_mode'] == 'clf':
             skf = StratifiedKFold(n_splits=cv, shuffle=True, random_state=42)
             cv = skf.split(self.X_train, self.Y_train)
@@ -491,10 +496,6 @@ class Predicter(ConfigReader):
             cv=cv, scoring=scorer, n_jobs=n_jobs,
             return_train_score=False)
         gs.fit(self.X_train, self.Y_train, **fit_params)
-        logger.info('model: %s' % model)
-        logger.info('modelname: %s' % modelname)
-        logger.info('  X train shape: %s' % str(self.X_train.shape))
-        logger.info('  Y train shape: %s' % str(self.Y_train.shape))
         logger.info('  best params: %s' % gs.best_params_)
         logger.info('  best score of trained grid search: %s' % gs.best_score_)
         logger.info('  score std of trained grid search: %s' %
