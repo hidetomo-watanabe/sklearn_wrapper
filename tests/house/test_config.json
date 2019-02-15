@@ -4,7 +4,6 @@
         "test_path": "./tests/house/test.csv",
         "pred_col": "SalePrice",
         "id_col": "Id",
-        "random": false,
         "adversarial": {
             "model": "log_reg",
             "scoring": "accuracy",

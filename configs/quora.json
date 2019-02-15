@@ -4,7 +4,6 @@
         "test_path": "../input/test.csv",
         "pred_col": "target",
         "id_col": "qid",
-        "random": false,
         "adversarial": false
     },
     "translate": {

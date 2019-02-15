@@ -242,10 +242,6 @@ class Predicter(ConfigReader):
     def get_fitting_data(self):
         train_df = self.train_df
         test_df = self.test_df
-        # random
-        if self.configs['data']['random']:
-            logger.info('randomize train data')
-            train_df = train_df.iloc[np.random.permutation(len(train_df))]
         # Y_train
         self.Y_train = train_df[self.pred_col].values
         # X_train
@@ -294,7 +290,7 @@ class Predicter(ConfigReader):
             return self.X_train, self.Y_train, self.X_test
         if n == 'all':
             n = self.X_train.shape[1]
-        pca_obj = PCA(n_components=n, random_state=10)
+        pca_obj = PCA(n_components=n, random_state=42)
         pca_obj.fit(self.X_train)
         logger.info('pca_ratio sum: %s' % sum(
             pca_obj.explained_variance_ratio_))

@@ -4,7 +4,6 @@
         "test_path": "./tests/titanic/test.csv",
         "pred_col": "Survived",
         "id_col": "PassengerId",
-        "random": false,
         "adversarial": {
             "model": "log_reg",
             "scoring": "accuracy",

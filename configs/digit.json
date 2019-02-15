@@ -4,7 +4,6 @@
         "test_path": "../input/digit/test.csv",
         "pred_col": "label",
         "id_col": "ImageId",
-        "random": false,
         "adversarial": false
     },
     "translate": {
