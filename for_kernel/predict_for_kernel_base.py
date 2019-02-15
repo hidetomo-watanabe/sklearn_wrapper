@@ -39,23 +39,14 @@ if __name__ == '__main__':
         X_train, Y_train, X_test, scaler_y, kernel=True)
     predicter_obj.read_config_text(config_text)
 
-    # logger.info('### VISUALIZE TRAIN DATA')
-    # predicter_obj.visualize_train_data()
-
     logger.info('### VALIDATE')
     predicter_obj.is_ok_with_adversarial_validation()
 
     logger.info('### FIT')
     predicter_obj.calc_ensemble_model()
 
-    # logger.info('### VISUALIZE LEARNING CURVES')
-    # predicter_obj.visualize_learning_curves()
-
     logger.info('### PREDICT')
     predicter_obj.calc_output()
-
-    # logger.info('### VISUALIZE TRAIN PRED DATA')
-    # predicter_obj.visualize_train_pred_data()
 
     logger.info('### OUTPUT')
     predicter_obj.write_output()

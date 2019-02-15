@@ -479,11 +479,11 @@ class Predicter(ConfigReader):
                 index=False)
         return filename
 
-    def visualize_train_data(self):
-        for key in self.train_df.keys():
+    def visualize_train_raw_data(self, train_df):
+        for key in train_df.keys():
             if key == self.id_col:
                 continue
-            g = sns.FacetGrid(self.train_df, col=self.pred_col)
+            g = sns.FacetGrid(train_df, col=self.pred_col)
             g.map(plt.hist, key, bins=20)
 
     def visualize_learning_curves(self):
@@ -528,7 +528,7 @@ class Predicter(ConfigReader):
             _plot_learning_curve(
                 estimator, title, cv=config['cv'], n_jobs=config['n_jobs'])
 
-    def visualize_train_pred_data(self):
+    def visualize_y_train_pred_data(self):
         if not isinstance(self.Y_train_pred, np.ndarray):
             logger.warn('NO Y_train_pred')
             return
