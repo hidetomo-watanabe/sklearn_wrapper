@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 import importlib
 from sklearn.model_selection import StratifiedKFold, KFold
-from sklearn.model_selection import GridSearchCV, learning_curve
+from sklearn.model_selection import GridSearchCV
 from sklearn.linear_model import LogisticRegression, LinearRegression
 from sklearn.svm import SVC, SVR, LinearSVC, LinearSVR
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
@@ -30,8 +30,6 @@ from sklearn.metrics import get_scorer
 import eli5
 from eli5.sklearn import PermutationImportance
 from IPython.display import display
-import matplotlib.pyplot as plt
-import seaborn as sns
 from logging import getLogger
 
 
@@ -478,60 +476,3 @@ class Predicter(ConfigReader):
                 '%s/proba_%s' % (self.OUTPUT_PATH, filename),
                 index=False)
         return filename
-
-    def visualize_train_raw_data(self, train_df):
-        for key in train_df.keys():
-            if key == self.id_col:
-                continue
-            g = sns.FacetGrid(train_df, col=self.pred_col)
-            g.map(plt.hist, key, bins=20)
-
-    def visualize_learning_curves(self):
-        def _plot_learning_curve(estimator, title, cv, n_jobs):
-            ylim = (0.7, 1.01)
-            train_sizes = np.linspace(.1, 1.0, 5)
-
-            plt.figure()
-            plt.title(title)
-            plt.ylim(*ylim)
-            plt.xlabel("Training examples")
-            plt.ylabel("Score")
-            train_sizes, train_scores, test_scores = learning_curve(
-                estimator, self.X_train, self.Y_train,
-                scoring=self.scorer,
-                cv=cv, n_jobs=n_jobs, train_sizes=train_sizes)
-            train_scores_mean = np.mean(train_scores, axis=1)
-            train_scores_std = np.std(train_scores, axis=1)
-            test_scores_mean = np.mean(test_scores, axis=1)
-            test_scores_std = np.std(test_scores, axis=1)
-            plt.grid()
-
-            plt.fill_between(
-                train_sizes, train_scores_mean - train_scores_std,
-                train_scores_mean + train_scores_std, alpha=0.1,
-                color="r")
-            plt.fill_between(
-                train_sizes, test_scores_mean - test_scores_std,
-                test_scores_mean + test_scores_std, alpha=0.1, color="g")
-            plt.plot(
-                train_sizes, train_scores_mean, 'o-', color="r",
-                label="Training score")
-            plt.plot(
-                train_sizes, test_scores_mean, 'o-', color="g",
-                label="Cross-validation score")
-
-            plt.legend(loc="best")
-            return plt
-
-        for config, estimator in self.single_estimators:
-            title = 'learning curves: %s' % config['modelname']
-            _plot_learning_curve(
-                estimator, title, cv=config['cv'], n_jobs=config['n_jobs'])
-
-    def visualize_y_train_pred_data(self):
-        if not isinstance(self.Y_train_pred, np.ndarray):
-            logger.warn('NO Y_train_pred')
-            return
-        g = sns.jointplot(self.Y_train, self.Y_train_pred, kind='kde')
-        g.set_axis_labels('Y_train', 'Y_train_pred')
-        g.fig.suptitle('estimator')

@@ -19,6 +19,7 @@
     "import sys\n",
     "sys.path.append('./modules')\n",
     "from modules.DataTranslater import DataTranslater\n",
+    "from modules.Visualizer import Visualizer\n",
     "from modules.Predicter import Predicter\n",
     "%matplotlib inline\n",
     "%reload_ext autoreload\n",
@@ -79,10 +80,9 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "predicter_obj = Predicter(\n",
-    "    feature_columns, test_ids, X_train, Y_train, X_test, scaler_y)\n",
-    "predicter_obj.read_config_file(config_path)\n",
-    "# predicter_obj.read_config_text(config_text)"
+    "visualizer_obj = Visualizer()\n",
+    "visualizer_obj.read_config_file(config_path)\n",
+    "# visualizer_obj.read_config_text(config_text)"
    ]
   },
   {
@@ -93,7 +93,19 @@
    "source": [
     "print('### VISUALIZE TRAIN RAW DATA')\n",
     "train_df, _ = translater_obj.get_raw_data()\n",
-    "predicter_obj.visualize_train_raw_data(train_df)"
+    "visualizer_obj.visualize_train_raw_data(train_df)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "predicter_obj = Predicter(\n",
+    "    feature_columns, test_ids, X_train, Y_train, X_test, scaler_y)\n",
+    "predicter_obj.read_config_file(config_path)\n",
+    "# predicter_obj.read_config_text(config_text)"
    ]
   },
   {
@@ -123,7 +135,10 @@
    "outputs": [],
    "source": [
     "print('### VISUALIZE LEARNING CURVES')\n",
-    "predicter_obj.visualize_learning_curves()"
+    "for config, estimator in predicter_obj.single_estimators:\n",
+    "    title = 'learning curves: %s' % config['modelname']\n",
+    "    visualizer_obj.visualize_learning_curve(\n",
+    "        title, estimator, X_train, Y_train, predicter_obj.scorer, config['cv'])"
    ]
   },
   {
@@ -143,7 +158,7 @@
    "outputs": [],
    "source": [
     "print('### VISUALIZE Y TRAIN PRED DATA')\n",
-    "predicter_obj.visualize_y_train_pred_data()"
+    "visualizer_obj.visualize_y_train_pred_data(Y_train, predicter_obj.Y_train_pred)"
    ]
   },
   {
