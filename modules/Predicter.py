@@ -122,6 +122,9 @@ class Predicter(ConfigReader):
             logger.info('train pred counts:')
             display(self.train_df[self.pred_col].value_counts())
             display(self.train_df[self.pred_col].value_counts(normalize=True))
+        elif self.configs['fit']['train_mode'] == 'reg':
+            logger.info('train pred std:')
+            display(self.train_df[self.pred_col].std())
         for label, df in [('train', self.train_df), ('test', self.test_df)]:
             logger.info('%s:' % label)
             display(df.head())
