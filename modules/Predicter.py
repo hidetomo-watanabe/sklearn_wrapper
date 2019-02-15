@@ -494,7 +494,7 @@ class Predicter(ConfigReader):
         gs = GridSearchCV(
             estimator=base_model, param_grid=params,
             cv=cv, scoring=scorer, n_jobs=n_jobs,
-            return_train_score=False)
+            return_train_score=False, refit=True)
         gs.fit(self.X_train, self.Y_train, **fit_params)
         logger.info('  best params: %s' % gs.best_params_)
         logger.info('  best score of trained grid search: %s' % gs.best_score_)
