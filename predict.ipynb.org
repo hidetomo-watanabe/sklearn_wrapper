@@ -18,6 +18,7 @@
    "source": [
     "import sys\n",
     "sys.path.append('./modules')\n",
+    "from modules.DataTranslater import DataTranslater\n",
     "from modules.Predicter import Predicter\n",
     "%matplotlib inline\n",
     "%reload_ext autoreload\n",
@@ -30,43 +31,58 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "predicter_obj = Predicter()\n",
+    "translater_obj = DataTranslater()\n",
+    "translater_obj.read_config_file(config_path)\n",
+    "# translater_obj.read_config_text(config_text)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "print('### RAW DATA')\n",
+    "translater_obj.create_raw_data()\n",
+    "translater_obj.display_data()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "print('### TRANSLATE RAW DATA')\n",
+    "translater_obj.translate_raw_data()\n",
+    "translater_obj.display_data()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "print('### DATA FOR MODEL')\n",
+    "translater_obj.create_data_for_model()\n",
+    "translater_obj.normalize_data_for_model()\n",
+    "translater_obj.reduce_dimension_of_data_for_model()\n",
+    "feature_columns, test_ids, X_train, Y_train, X_test = \\\n",
+    "    translater_obj.get_data_for_model()\n",
+    "scaler_y = translater_obj.get_scaler_y()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "predicter_obj = Predicter(\n",
+    "    feature_columns, test_ids, X_train, Y_train, X_test, scaler_y)\n",
     "predicter_obj.read_config_file(config_path)\n",
     "# predicter_obj.read_config_text(config_text)"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": null,
-   "metadata": {},
-   "outputs": [],
-   "source": [
-    "print('### INIT')\n",
-    "predicter_obj.get_raw_data()\n",
-    "predicter_obj.display_data()"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": null,
-   "metadata": {},
-   "outputs": [],
-   "source": [
-    "print('### TRANSLATE')\n",
-    "predicter_obj.trans_raw_data()\n",
-    "predicter_obj.display_data()"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": null,
-   "metadata": {},
-   "outputs": [],
-   "source": [
-    "print('### NORMALIZE')\n",
-    "predicter_obj.get_fitting_data()\n",
-    "predicter_obj.normalize_fitting_data()\n",
-    "predicter_obj.reduce_dimension()"
    ]
   },
   {
@@ -156,7 +172,7 @@
    "name": "python",
    "nbconvert_exporter": "python",
    "pygments_lexer": "ipython3",
-   "version": "3.6.7"
+   "version": "3.6.8"
   }
  },
  "nbformat": 4,

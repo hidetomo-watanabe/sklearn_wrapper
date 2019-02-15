@@ -2,6 +2,7 @@ import sys
 import traceback
 import logging.config
 from logging import getLogger
+from modules.DataTranslater import DataTranslater
 from modules.Predicter import Predicter
 from modules.Notifier import Notifier
 
@@ -17,21 +18,30 @@ if __name__ == '__main__':
     else:
         config_path = './configs/config.json'
     try:
-        predicter_obj = Predicter()
+        # data translate
+        translater_obj = DataTranslater()
+        translater_obj.read_config_file(config_path)
+
+        logger.info('### RAW DATA')
+        translater_obj.create_raw_data()
+        translater_obj.display_data()
+
+        logger.info('### TRANSLATE RAW DATA')
+        translater_obj.translate_raw_data()
+        translater_obj.display_data()
+
+        logger.info('##### DATA FOR MODEL')
+        translater_obj.create_data_for_model()
+        translater_obj.normalize_data_for_model()
+        translater_obj.reduce_dimension_of_data_for_model()
+        feature_columns, test_ids, X_train, Y_train, X_test = \
+            translater_obj.get_data_for_model()
+        scaler_y = translater_obj.get_scaler_y()
+
+        # predict
+        predicter_obj = Predicter(
+            feature_columns, test_ids, X_train, Y_train, X_test, scaler_y)
         predicter_obj.read_config_file(config_path)
-
-        logger.info('### INIT')
-        predicter_obj.get_raw_data()
-        predicter_obj.display_data()
-
-        logger.info('### TRANSLATE')
-        predicter_obj.trans_raw_data()
-        predicter_obj.display_data()
-
-        logger.info('##### NORMALIZE')
-        predicter_obj.get_fitting_data()
-        predicter_obj.normalize_fitting_data()
-        predicter_obj.reduce_dimension()
 
         # logger.info('### VISUALIZE TRAIN DATA')
         # predicter_obj.visualize_train_data()
