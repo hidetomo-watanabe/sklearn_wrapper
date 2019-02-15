@@ -29,14 +29,10 @@ if __name__ == '__main__':
     translater_obj.create_data_for_model()
     translater_obj.normalize_data_for_model()
     translater_obj.reduce_dimension_of_data_for_model()
-    feature_columns, test_ids, X_train, Y_train, X_test = \
-        translater_obj.get_data_for_model()
-    scaler_y = translater_obj.get_scaler_y()
+    data_for_model = translater_obj.get_data_for_model()
 
     # predict
-    predicter_obj = Predicter(
-        feature_columns, test_ids,
-        X_train, Y_train, X_test, scaler_y, kernel=True)
+    predicter_obj = Predicter(**data_for_model, kernel=True)
     predicter_obj.read_config_text(config_text)
 
     logger.info('### VALIDATE')

@@ -79,7 +79,11 @@ class DataTranslater(ConfigReader):
         return output
 
     def get_raw_data(self):
-        return self.train_df, self.test_df
+        output = {
+            'train_df': self.train_df,
+            'test_df': self.test_df,
+        }
+        return output
 
     def create_raw_data(self):
         train_path = self.configs['data']['train_path']
@@ -149,15 +153,16 @@ class DataTranslater(ConfigReader):
         return
 
     def get_data_for_model(self):
-        return \
-            self.feature_columns, self.test_ids, \
-            self.X_train, self.Y_train, self.X_test
-
-    def get_scaler_y(self):
+        output = {
+            'feature_columns': self.feature_columns,
+            'test_ids': self.test_ids,
+            'X_train': self.X_train,
+            'Y_train': self.Y_train,
+            'X_test': self.X_test,
+        }
         if hasattr(self, 'scaler_y'):
-            return self.scaler_y
-        else:
-            return
+            output['scaler_y'] = self.scaler_y
+        return output
 
     def create_data_for_model(self):
         train_df = self.train_df

@@ -69,9 +69,7 @@
     "translater_obj.create_data_for_model()\n",
     "translater_obj.normalize_data_for_model()\n",
     "translater_obj.reduce_dimension_of_data_for_model()\n",
-    "feature_columns, test_ids, X_train, Y_train, X_test = \\\n",
-    "    translater_obj.get_data_for_model()\n",
-    "scaler_y = translater_obj.get_scaler_y()"
+    "data_for_model = translater_obj.get_data_for_model()"
    ]
   },
   {
@@ -92,8 +90,8 @@
    "outputs": [],
    "source": [
     "print('### VISUALIZE TRAIN RAW DATA')\n",
-    "train_df, _ = translater_obj.get_raw_data()\n",
-    "visualizer_obj.visualize_train_raw_data(train_df)"
+    "raw_data = translater_obj.get_raw_data()\n",
+    "visualizer_obj.visualize_train_raw_data(raw_data['train_df'])"
    ]
   },
   {
@@ -102,8 +100,7 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "predicter_obj = Predicter(\n",
-    "    feature_columns, test_ids, X_train, Y_train, X_test, scaler_y)\n",
+    "predicter_obj = Predicter(**data_for_model)\n",
     "predicter_obj.read_config_file(config_path)\n",
     "# predicter_obj.read_config_text(config_text)"
    ]

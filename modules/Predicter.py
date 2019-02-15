@@ -45,7 +45,7 @@ class Predicter(ConfigReader):
         self,
         feature_columns, test_ids,
         X_train, Y_train, X_test,
-        scaler_y, kernel=False
+        scaler_y=None, kernel=False
     ):
         self.feature_columns = feature_columns
         self.test_ids = test_ids
