@@ -42,7 +42,8 @@ if __name__ == '__main__':
     predicter_obj.calc_ensemble_model()
 
     logger.info('### PREDICT')
-    predicter_obj.calc_output()
+    predicter_obj.predict_y()
+    predicter_obj.calc_predict_df()
 
     logger.info('### OUTPUT')
     predicter_obj.write_output()

@@ -181,7 +181,15 @@ class Predicter(ConfigReader):
             logger.warn('NO DATA VALIDATION')
             return True
 
-    def _get_scorer(self):
+    def get_estimator_data(self):
+        output = {
+            'scorer': self.scorer,
+            'single_estimators': self.single_estimators,
+            'estimator': self.estimator,
+        }
+        return output
+
+    def _get_scorer_from_config(self):
         scoring = self.configs['fit']['scoring']
         logger.info('scoring: %s' % scoring)
         if scoring == 'my_scorer':
@@ -197,7 +205,7 @@ class Predicter(ConfigReader):
         return self.scorer
 
     def calc_ensemble_model(self):
-        scorer = self._get_scorer()
+        scorer = self._get_scorer_from_config()
         model_configs = self.configs['fit']['single_models']
         self.classes = None
         logger.info('X train shape: %s' % str(self.X_train.shape))
@@ -362,7 +370,17 @@ class Predicter(ConfigReader):
 
         return estimator
 
-    def calc_output(self):
+    def get_predict_data(self):
+        output = {
+            'Y_pred': self.Y_pred,
+            'Y_pred_proba': self.Y_pred_proba,
+            'Y_train_pred': self.Y_train_pred,
+            'Y_pred_df': self.Y_pred_df,
+            'Y_pred_proba_df': self.Y_pred_proba_df,
+        }
+        return output
+
+    def predict_y(self):
         self.Y_pred = None
         self.Y_pred_proba = None
         self.Y_train_pred = None
@@ -432,15 +450,19 @@ class Predicter(ConfigReader):
                 else:
                     logger.error('NOT IMPLEMENTED FIT Y_PRE: %s' % y_pre)
                     raise Exception('NOT IMPLEMENTED')
+        return self.Y_pred, self.Y_pred_proba, self.Y_train_pred
 
+    def calc_predict_df(self):
+        self.Y_pred_df = None
+        self.Y_pred_proba_df = None
         # np => pd
         if isinstance(self.Y_pred, np.ndarray):
-            self.Y_pred = pd.merge(
+            self.Y_pred_df = pd.merge(
                 pd.DataFrame(data=self.test_ids, columns=[self.id_col]),
                 pd.DataFrame(data=self.Y_pred, columns=[self.pred_col]),
                 left_index=True, right_index=True)
         if isinstance(self.Y_pred_proba, np.ndarray):
-            self.Y_pred_proba = pd.merge(
+            self.Y_pred_proba_df = pd.merge(
                 pd.DataFrame(data=self.test_ids, columns=[self.id_col]),
                 pd.DataFrame(
                     data=self.Y_pred_proba,
@@ -460,19 +482,19 @@ class Predicter(ConfigReader):
             logger.info('fit post: %s' % method_name)
             if not self.kernel:
                 method_name = 'myfunc.%s' % method_name
-            self.Y_pred, self.Y_pred_proba = eval(
-                method_name)(self.Y_pred, self.Y_pred_proba)
+            self.Y_pred_df, self.Y_pred_proba_df = eval(
+                method_name)(self.Y_pred_df, self.Y_pred_proba_df)
 
-        return self.Y_pred, self.Y_pred_proba, self.Y_train_pred
+        return self.Y_pred_df, self.Y_pred_proba_df
 
     def write_output(self, filename=None):
         if not filename:
             filename = '%s.csv' % self.configs['fit']['ensemble']['modelname']
-        if isinstance(self.Y_pred, pd.DataFrame):
-            self.Y_pred.to_csv(
+        if isinstance(self.Y_pred_df, pd.DataFrame):
+            self.Y_pred_df.to_csv(
                 '%s/%s' % (self.OUTPUT_PATH, filename), index=False)
-        if isinstance(self.Y_pred_proba, pd.DataFrame):
-            self.Y_pred_proba.to_csv(
+        if isinstance(self.Y_pred_proba_df, pd.DataFrame):
+            self.Y_pred_proba_df.to_csv(
                 '%s/proba_%s' % (self.OUTPUT_PATH, filename),
                 index=False)
         return filename
