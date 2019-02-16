@@ -16,12 +16,18 @@ class Visualizer(ConfigReader):
     def __init__(self):
         self.configs = {}
 
-    def visualize_train_raw_data(self, train_df):
+    def visualize_train_raw_histgram(self, train_df):
         for key in train_df.keys():
             if key == self.id_col:
                 continue
             g = sns.FacetGrid(train_df, col=self.pred_col)
             g.map(plt.hist, key, bins=20)
+
+    def visualize_train_raw_heatmap(self, train_df):
+        plt.figure(figsize=(10, 10))
+        sns.heatmap(
+            train_df.drop(self.id_col, axis=1).corr(),
+            fmt="1.2f", annot=True, lw=0.7, cmap='YlGnBu')
 
     def visualize_learning_curve(
         self, title, estimator, X_train, Y_train, scorer, cv, n_jobs=-1

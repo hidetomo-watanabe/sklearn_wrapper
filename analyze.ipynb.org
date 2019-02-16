@@ -65,6 +65,16 @@
    "metadata": {},
    "outputs": [],
    "source": [
+    "print('### RAW DATA')\n",
+    "raw_data = translater_obj.get_raw_data()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
     "print('### DATA FOR MODEL')\n",
     "translater_obj.create_data_for_model()\n",
     "translater_obj.normalize_data_for_model()\n",
@@ -89,9 +99,18 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "print('### VISUALIZE TRAIN RAW DATA')\n",
-    "raw_data = translater_obj.get_raw_data()\n",
-    "visualizer_obj.visualize_train_raw_data(raw_data['train_df'])"
+    "print('### VISUALIZE TRAIN RAW HISTGRAM')\n",
+    "visualizer_obj.visualize_train_raw_histgram(raw_data['train_df'])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "print('### VISUALIZE TRAIN RAW HEATMAP')\n",
+    "visualizer_obj.visualize_train_raw_heatmap(raw_data['train_df'])"
    ]
   },
   {
