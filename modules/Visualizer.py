@@ -32,7 +32,7 @@ class Visualizer(ConfigReader):
                         bins=20, color=cmap(i), alpha=0.5,
                         label='%s: %d' % (self.pred_col, pred_val))
             elif self.configs['fit']['train_mode'] == 'reg':
-                pass
+                ax.hist(train_df[key], bins=20, alpha=0.5)
             ax.legend()
             plt.show()
 
