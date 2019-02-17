@@ -16,12 +16,25 @@ class Visualizer(ConfigReader):
     def __init__(self):
         self.configs = {}
 
-    def visualize_train_raw_histgram(self, train_df):
+    def visualize_train_raw_histogram(self, train_df):
         for key in train_df.keys():
             if key == self.id_col:
                 continue
-            g = sns.FacetGrid(train_df, col=self.pred_col)
-            g.map(plt.hist, key, bins=20)
+            ax = plt.subplot()
+            ax.set_title(key)
+            if self.configs['fit']['train_mode'] == 'clf':
+                cmap = plt.get_cmap("tab10")
+                for i, pred_val in enumerate(
+                    np.unique(train_df[self.pred_col].values)
+                ):
+                    ax.hist(
+                        train_df[train_df[self.pred_col] == pred_val][key],
+                        bins=20, color=cmap(i), alpha=0.5,
+                        label='%s: %d' % (self.pred_col, pred_val))
+            elif self.configs['fit']['train_mode'] == 'reg':
+                pass
+            ax.legend()
+            plt.show()
 
     def visualize_train_raw_heatmap(self, train_df):
         plt.figure(figsize=(10, 10))

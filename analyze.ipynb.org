@@ -99,8 +99,8 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "print('### VISUALIZE TRAIN RAW HISTGRAM')\n",
-    "visualizer_obj.visualize_train_raw_histgram(raw_data['train_df'])"
+    "print('### VISUALIZE TRAIN RAW HISTOGRAM')\n",
+    "visualizer_obj.visualize_train_raw_histogram(raw_data['train_df'])"
    ]
   },
   {
