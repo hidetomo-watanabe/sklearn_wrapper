@@ -25,6 +25,9 @@ class DataTranslater(ConfigReader):
             logger.info('train pred counts')
             for pred_col in self.pred_cols:
                 logger.info('%s:' % pred_col)
+                if pred_col not in self.train_df.columns:
+                    logger.warn('NOT %s IN TRAIN DF' % pred_col)
+                    continue
                 display(self.train_df[pred_col].value_counts())
                 display(self.train_df[pred_col].value_counts(normalize=True))
         elif self.configs['fit']['train_mode'] == 'reg':

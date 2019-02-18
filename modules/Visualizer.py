@@ -26,6 +26,9 @@ class Visualizer(ConfigReader):
                 cmap = plt.get_cmap("tab10")
                 for pred_col in self.pred_cols:
                     logger.info('%s:' % pred_col)
+                    if pred_col not in train_df.columns:
+                        logger.warn('NOT %s IN TRAIN DF' % pred_col)
+                        continue
                     for i, pred_val in enumerate(
                         np.unique(train_df[pred_col].values)
                     ):
