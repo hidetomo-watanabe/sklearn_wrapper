@@ -317,12 +317,12 @@ class Predicter(ConfigReader):
         logger.info('model: %s' % model)
         logger.info('modelname: %s' % modelname)
         logger.info('grid search with cv=%d' % cv)
-        if self.configs['fit']['train_mode'] == 'clf':
-            skf = StratifiedKFold(n_splits=cv, shuffle=True, random_state=42)
-            cv = skf.split(self.X_train, self.Y_train)
-        else:
+        if multiclass or self.configs['fit']['train_mode'] == 'reg':
             kf = KFold(n_splits=cv, shuffle=True, random_state=42)
             cv = kf.split(self.X_train, self.Y_train)
+        else:
+            skf = StratifiedKFold(n_splits=cv, shuffle=True, random_state=42)
+            cv = skf.split(self.X_train, self.Y_train)
         gs = GridSearchCV(
             estimator=base_model, param_grid=params,
             cv=cv, scoring=scorer, n_jobs=n_jobs,
@@ -464,15 +464,18 @@ class Predicter(ConfigReader):
         if isinstance(self.Y_pred_proba, np.ndarray):
             self.Y_pred_proba_df = pd.DataFrame(
                 data=self.test_ids, columns=[self.id_col])
-            for pred_col in self.pred_cols:
-                self.Y_pred_proba_df = pd.merge(
-                    self.Y_pred_proba_df,
-                    pd.DataFrame(
-                        data=self.Y_pred_proba,
-                        columns=map(
-                            lambda x: '%s_%s' % (pred_col, str(x)),
-                            self.classes)),
-                    left_index=True, right_index=True)
+            if len(self.pred_cols) == 1:
+                proba_columns = map(
+                    lambda x: '%s_%s' % (self.pred_cols[0], str(x)),
+                    self.classes)
+            else:
+                proba_columns = self.pred_cols
+            self.Y_pred_proba_df = pd.merge(
+                self.Y_pred_proba_df,
+                pd.DataFrame(
+                    data=self.Y_pred_proba,
+                    columns=proba_columns),
+                left_index=True, right_index=True)
 
         # post
         fit_post = self.configs['fit']['post']
