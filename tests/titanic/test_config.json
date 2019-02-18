@@ -2,7 +2,7 @@
     "data": {
         "train_path": "./tests/titanic/train.csv",
         "test_path": "./tests/titanic/test.csv",
-        "pred_col": "Survived",
+        "pred_cols": ["Survived"],
         "id_col": "PassengerId",
         "adversarial": {
             "model": "log_reg",

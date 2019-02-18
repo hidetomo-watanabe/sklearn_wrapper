@@ -22,12 +22,16 @@ class DataTranslater(ConfigReader):
 
     def display_data(self):
         if self.configs['fit']['train_mode'] == 'clf':
-            logger.info('train pred counts:')
-            display(self.train_df[self.pred_col].value_counts())
-            display(self.train_df[self.pred_col].value_counts(normalize=True))
+            logger.info('train pred counts')
+            for pred_col in self.pred_cols:
+                logger.info('%s:' % pred_col)
+                display(self.train_df[pred_col].value_counts())
+                display(self.train_df[pred_col].value_counts(normalize=True))
         elif self.configs['fit']['train_mode'] == 'reg':
-            logger.info('train pred std:')
-            display(self.train_df[self.pred_col].std())
+            logger.info('train pred std')
+            for pred_col in self.pred_cols:
+                logger.info('%s:' % pred_col)
+                display(self.train_df[pred_col].std())
         for label, df in [('train', self.train_df), ('test', self.test_df)]:
             logger.info('%s:' % label)
             display(df.head())
@@ -119,7 +123,7 @@ class DataTranslater(ConfigReader):
             del test_df[column]
         # missing
         for column in test_df.columns:
-            if column in [self.id_col, self.pred_col]:
+            if column in [self.id_col] + self.pred_cols:
                 continue
             if test_df.dtypes[column] == 'object':
                 logger.warn('OBJECT MISSING IS NOT BE REPLACED: %s' % column)
@@ -131,7 +135,7 @@ class DataTranslater(ConfigReader):
                 logger.info('replace missing with mean: %s' % column)
         # category
         for column in test_df.columns:
-            if column in [self.id_col, self.pred_col]:
+            if column in [self.id_col] + self.pred_cols:
                 continue
             if test_df.dtypes[column] != 'object' \
                     and column not in self.configs['translate']['category']:
@@ -144,7 +148,7 @@ class DataTranslater(ConfigReader):
             if column in [self.id_col]:
                 continue
             if self.configs['fit']['train_mode'] in ['clf'] \
-                    and column in [self.pred_col]:
+                    and column in self.pred_cols:
                 continue
             train_df, test_df = self._to_float_of_dfs(
                 [train_df, test_df], column)
@@ -168,10 +172,13 @@ class DataTranslater(ConfigReader):
         train_df = self.train_df
         test_df = self.test_df
         # Y_train
-        self.Y_train = train_df[self.pred_col].values
+        if len(self.pred_cols) == 1:
+            self.Y_train = train_df[self.pred_cols[0]].values
+        else:
+            self.Y_train = train_df[self.pred_cols].values
         # X_train
         self.X_train = train_df \
-            .drop(self.id_col, axis=1).drop(self.pred_col, axis=1).values
+            .drop(self.id_col, axis=1).drop(self.pred_cols, axis=1).values
         # X_test
         self.test_ids = test_df[self.id_col].values
         self.X_test = test_df \
@@ -179,7 +186,7 @@ class DataTranslater(ConfigReader):
         # feature_columns
         self.feature_columns = []
         for key in self.train_df.keys():
-            if key == self.pred_col or key == self.id_col:
+            if key in self.pred_cols or key == self.id_col:
                 continue
             self.feature_columns.append(key)
         return

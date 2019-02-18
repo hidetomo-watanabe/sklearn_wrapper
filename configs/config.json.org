@@ -2,7 +2,7 @@
     "data": {
         "train_path": "/path/train.csv",
         "test_path": "/path/test.csv",
-        "pred_col": "Hoge",
+        "pred_cols": ["Hoge"],
         "id_col": "Id",
         "delimiter": ",",
         "adversarial": {

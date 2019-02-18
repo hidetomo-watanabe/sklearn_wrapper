@@ -2,7 +2,7 @@
     "data": {
         "train_path": "./tests/house/train.csv",
         "test_path": "./tests/house/test.csv",
-        "pred_col": "SalePrice",
+        "pred_cols": ["SalePrice"],
         "id_col": "Id",
         "adversarial": {
             "model": "log_reg",

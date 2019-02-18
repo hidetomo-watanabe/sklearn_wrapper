@@ -24,13 +24,15 @@ class Visualizer(ConfigReader):
             ax.set_title(key)
             if self.configs['fit']['train_mode'] == 'clf':
                 cmap = plt.get_cmap("tab10")
-                for i, pred_val in enumerate(
-                    np.unique(train_df[self.pred_col].values)
-                ):
-                    ax.hist(
-                        train_df[train_df[self.pred_col] == pred_val][key],
-                        bins=20, color=cmap(i), alpha=0.5,
-                        label='%s: %d' % (self.pred_col, pred_val))
+                for pred_col in self.pred_cols:
+                    logger.info('%s:' % pred_col)
+                    for i, pred_val in enumerate(
+                        np.unique(train_df[pred_col].values)
+                    ):
+                        ax.hist(
+                            train_df[train_df[pred_col] == pred_val][key],
+                            bins=20, color=cmap(i), alpha=0.5,
+                            label='%s: %d' % (pred_col, pred_val))
             elif self.configs['fit']['train_mode'] == 'reg':
                 ax.hist(train_df[key], bins=20, alpha=0.5)
             ax.legend()

@@ -2,7 +2,7 @@
     "data": {
         "train_path": "../input/train.csv",
         "test_path": "../input/test.csv",
-        "pred_col": "target",
+        "pred_cols": ["target"],
         "id_col": "qid",
         "adversarial": false
     },

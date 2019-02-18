@@ -459,17 +459,20 @@ class Predicter(ConfigReader):
         if isinstance(self.Y_pred, np.ndarray):
             self.Y_pred_df = pd.merge(
                 pd.DataFrame(data=self.test_ids, columns=[self.id_col]),
-                pd.DataFrame(data=self.Y_pred, columns=[self.pred_col]),
+                pd.DataFrame(data=self.Y_pred, columns=self.pred_cols),
                 left_index=True, right_index=True)
         if isinstance(self.Y_pred_proba, np.ndarray):
-            self.Y_pred_proba_df = pd.merge(
-                pd.DataFrame(data=self.test_ids, columns=[self.id_col]),
-                pd.DataFrame(
-                    data=self.Y_pred_proba,
-                    columns=map(
-                        lambda x: '%s_%s' % (self.pred_col, str(x)),
-                        self.classes)),
-                left_index=True, right_index=True)
+            self.Y_pred_proba_df = pd.DataFrame(
+                data=self.test_ids, columns=[self.id_col])
+            for pred_col in self.pred_cols:
+                self.Y_pred_proba_df = pd.merge(
+                    self.Y_pred_proba_df,
+                    pd.DataFrame(
+                        data=self.Y_pred_proba,
+                        columns=map(
+                            lambda x: '%s_%s' % (pred_col, str(x)),
+                            self.classes)),
+                    left_index=True, right_index=True)
 
         # post
         fit_post = self.configs['fit']['post']

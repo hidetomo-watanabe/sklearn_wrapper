@@ -2,7 +2,7 @@
     "data": {
         "train_path": "../input/digit/train.csv",
         "test_path": "../input/digit/test.csv",
-        "pred_col": "label",
+        "pred_cols": ["label"],
         "id_col": "ImageId",
         "adversarial": false
     },
