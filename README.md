@@ -1,7 +1,8 @@
 # analysis_for_kaggle
 ### overview
 - single model
-- multiclass model
+  - regression
+  - classification(multilabel/multiclass)
 - ensemble model
 
 ### available model
