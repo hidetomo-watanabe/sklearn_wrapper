@@ -71,3 +71,6 @@
 - cp configs/config.json.org configs/config.json
 - **update config.json**
 - python predict.py
+
+### environment
+- https://github.com/hidetomo-watanabe/analysis_dockerfiles
