@@ -106,6 +106,17 @@
    "metadata": {},
    "outputs": [],
    "source": [
+    "print('### VISUALIZE TRAIN RAW PROFILING')\n",
+    "import pandas_profiling\n",
+    "pandas_profiling.ProfileReport(raw_data['train_df'])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
     "print('### VISUALIZE TRAIN RAW HISTOGRAM')\n",
     "visualizer_obj.visualize_train_raw_histogram(raw_data['train_df'])"
    ]
