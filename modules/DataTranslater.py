@@ -85,14 +85,14 @@ class DataTranslater(ConfigReader):
             output.append(df)
         return output
 
-    def get_raw_data(self):
+    def get_df_data(self):
         output = {
             'train_df': self.train_df,
             'test_df': self.test_df,
         }
         return output
 
-    def create_raw_data(self):
+    def create_df_data(self):
         train_path = self.configs['data']['train_path']
         test_path = self.configs['data']['test_path']
         delim = self.configs['data'].get('delimiter')
@@ -104,7 +104,7 @@ class DataTranslater(ConfigReader):
             self.test_df = pd.read_csv(test_path)
         return
 
-    def translate_raw_data(self):
+    def translate_df_data(self):
         train_df = self.train_df
         test_df = self.test_df
         trans_adhoc = self.configs['translate']['adhoc']

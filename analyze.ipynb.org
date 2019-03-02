@@ -50,8 +50,8 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "print('### RAW DATA')\n",
-    "translater_obj.create_raw_data()\n",
+    "print('### DF DATA')\n",
+    "translater_obj.create_df_data()\n",
     "translater_obj.display_data()"
    ]
   },
@@ -61,8 +61,8 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "print('### TRANSLATE RAW DATA')\n",
-    "translater_obj.translate_raw_data()\n",
+    "print('### TRANSLATE DF DATA')\n",
+    "translater_obj.translate_df_data()\n",
     "translater_obj.display_data()"
    ]
   },
@@ -72,8 +72,8 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "print('### RAW DATA')\n",
-    "raw_data = translater_obj.get_raw_data()"
+    "print('### DF DATA')\n",
+    "df_data = translater_obj.get_df_data()"
    ]
   },
   {
@@ -106,29 +106,29 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "print('### VISUALIZE TRAIN RAW PROFILING')\n",
+    "print('### VISUALIZE TRAIN DF HISTOGRAM')\n",
+    "visualizer_obj.visualize_train_df_histogram(df_data['train_df'])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "print('### VISUALIZE TRAIN DF HEATMAP')\n",
+    "visualizer_obj.visualize_train_df_heatmap(df_data['train_df'])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "print('### VISUALIZE TRAIN DF PROFILING')\n",
     "import pandas_profiling\n",
-    "pandas_profiling.ProfileReport(raw_data['train_df'])"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": null,
-   "metadata": {},
-   "outputs": [],
-   "source": [
-    "print('### VISUALIZE TRAIN RAW HISTOGRAM')\n",
-    "visualizer_obj.visualize_train_raw_histogram(raw_data['train_df'])"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": null,
-   "metadata": {},
-   "outputs": [],
-   "source": [
-    "print('### VISUALIZE TRAIN RAW HEATMAP')\n",
-    "visualizer_obj.visualize_train_raw_heatmap(raw_data['train_df'])"
+    "pandas_profiling.ProfileReport(df_data['train_df'])"
    ]
   },
   {

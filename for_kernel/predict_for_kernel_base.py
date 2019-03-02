@@ -17,12 +17,12 @@ if __name__ == '__main__':
     translater_obj = DataTranslater(kernel=True)
     translater_obj.read_config_text(config_text)
 
-    logger.info('### RAW DATA')
-    translater_obj.create_raw_data()
+    logger.info('### DF DATA')
+    translater_obj.create_df_data()
     translater_obj.display_data()
 
-    logger.info('### TRANSLATE RAW DATA')
-    translater_obj.translate_raw_data()
+    logger.info('### TRANSLATE DF DATA')
+    translater_obj.translate_df_data()
     translater_obj.display_data()
 
     logger.info('##### DATA FOR MODEL')

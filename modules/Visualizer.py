@@ -16,7 +16,7 @@ class Visualizer(ConfigReader):
     def __init__(self):
         self.configs = {}
 
-    def visualize_train_raw_histogram(self, train_df):
+    def visualize_train_df_histogram(self, train_df):
         for key in train_df.keys():
             if key == self.id_col:
                 continue
@@ -41,7 +41,7 @@ class Visualizer(ConfigReader):
             ax.legend()
             plt.show()
 
-    def visualize_train_raw_heatmap(self, train_df):
+    def visualize_train_df_heatmap(self, train_df):
         plt.figure(figsize=(10, 10))
         sns.heatmap(
             train_df.drop(self.id_col, axis=1).corr(),
