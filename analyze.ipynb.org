@@ -168,6 +168,16 @@
    "metadata": {},
    "outputs": [],
    "source": [
+    "print('### WRITE ESTIMATOR DATA')\n",
+    "predicter_obj.write_estimator_data()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
     "print('### VISUALIZE LEARNING CURVES')\n",
     "estimator_data = predicter_obj.get_estimator_data()\n",
     "for config, estimator in estimator_data['single_estimators']:\n",

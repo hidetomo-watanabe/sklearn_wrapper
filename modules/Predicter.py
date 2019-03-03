@@ -230,7 +230,7 @@ class Predicter(ConfigReader):
         dataset = Dataset(self.X_train, self.Y_train, self.X_test)
         for model_config in model_configs:
             single_estimator = self._calc_single_model(
-                scorer, model_configs, self.configs['fit'].get('myfunc'))
+                scorer, model_config, self.configs['fit'].get('myfunc'))
             self.single_estimators.append((model_config, single_estimator))
             if self.classes is None \
                     and self.configs['fit']['train_mode'] == 'clf':
@@ -334,14 +334,8 @@ class Predicter(ConfigReader):
                     gs.cv_results_['std_test_score'][gs.best_index_])
         if model in ['keras_clf', 'keras_reg']:
             estimator = gs.best_estimator_.model
-            estimator.save(
-                '%s/%s.pickle' % (self.OUTPUT_PATH, modelname))
         else:
             estimator = gs.best_estimator_
-            with open(
-                '%s/%s.pickle' % (self.OUTPUT_PATH, modelname), 'wb'
-            ) as f:
-                pickle.dump(estimator, f)
         logger.info('estimator: %s' % estimator)
 
         # feature_importances
@@ -369,6 +363,25 @@ class Predicter(ConfigReader):
                         perm, feature_names=self.feature_columns))
 
         return estimator
+
+    def write_estimator_data(self):
+        modelname = self.configs['fit']['ensemble']['modelname']
+        if len(self.single_estimators) == 1:
+            targets = self.single_estimators
+        else:
+            targets = self.single_estimators + [
+                ({'modelname': modelname}, self.estimator)
+            ]
+        for config, estimator in targets:
+            modelname = config['modelname']
+            if hasattr(estimator, 'save'):
+                estimator.save(
+                    '%s/%s.pickle' % (self.OUTPUT_PATH, modelname))
+            else:
+                with open(
+                    '%s/%s.pickle' % (self.OUTPUT_PATH, modelname), 'wb'
+                ) as f:
+                    pickle.dump(estimator, f)
 
     def get_predict_data(self):
         output = {

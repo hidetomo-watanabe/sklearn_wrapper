@@ -46,6 +46,9 @@ if __name__ == '__main__':
         logger.info('### FIT')
         predicter_obj.calc_ensemble_model()
 
+        logger.info('### WRITE ESTIMATOR DATA')
+        predicter_obj.write_estimator_data()
+
         logger.info('### PREDICT')
         predicter_obj.predict_y()
         predicter_obj.calc_predict_df()
