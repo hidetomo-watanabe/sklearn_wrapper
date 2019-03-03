@@ -38,6 +38,8 @@ err_msg=${err_msg}$(python -u predict.py tests/titanic/test_config.json 2>&1 | g
 err_msg=${err_msg}$(python -u predict.py tests/titanic/test_config2.json 2>&1 | grep ERROR)
 # keras
 err_msg=${err_msg}$(python -u predict.py tests/titanic/test_config3.json 2>&1 | grep ERROR)
+# ensemble
+err_msg=${err_msg}$(python -u predict.py tests/titanic/test_config4.json 2>&1 | grep ERROR)
 # house
 # svr
 err_msg=${err_msg}$(python -u predict.py tests/house/test_config.json 2>&1 | grep ERROR)
@@ -48,6 +50,7 @@ echo 'START DIFF'
 # diff
 err_msg=${err_msg}$(diff outputs/tmp_titanic.csv tests/titanic/output.csv)
 err_msg=${err_msg}$(diff outputs/tmp_titanic2.csv tests/titanic/output2.csv)
+err_msg=${err_msg}$(diff outputs/tmp_titanic4.csv tests/titanic/output4.csv)
 err_msg=${err_msg}$(diff outputs/tmp_house.csv tests/house/output.csv)
 
 echo 'START DIFF PROBA'
