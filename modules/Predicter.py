@@ -493,7 +493,7 @@ class Predicter(ConfigReader):
 
         return self.Y_pred_df, self.Y_pred_proba_df
 
-    def write_output(self, filename=None):
+    def write_predict_data(self, filename=None):
         if not filename:
             filename = '%s.csv' % self.configs['fit']['ensemble']['modelname']
         if isinstance(self.Y_pred_df, pd.DataFrame):

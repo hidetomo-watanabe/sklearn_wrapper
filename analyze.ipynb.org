@@ -207,8 +207,8 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "print('### OUTPUT')\n",
-    "predicter_obj.write_output()"
+    "print('### WRITE PREDICT DATA')\n",
+    "predicter_obj.write_predict_data()"
    ]
   }
  ],

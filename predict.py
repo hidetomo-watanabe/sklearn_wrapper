@@ -50,8 +50,8 @@ if __name__ == '__main__':
         predicter_obj.predict_y()
         predicter_obj.calc_predict_df()
 
-        logger.info('### OUTPUT')
-        predicter_obj.write_output()
+        logger.info('### WRITE PREDICT DATA')
+        predicter_obj.write_predict_data()
 
     except Exception as e:
         logger.error('%s' % e)

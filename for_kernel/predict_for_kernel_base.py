@@ -45,7 +45,7 @@ if __name__ == '__main__':
     predicter_obj.predict_y()
     predicter_obj.calc_predict_df()
 
-    logger.info('### OUTPUT')
-    predicter_obj.write_output()
+    logger.info('### WRITE PREDICT DATA')
+    predicter_obj.write_predict_data()
 
     logger.info('# FINISHED')
