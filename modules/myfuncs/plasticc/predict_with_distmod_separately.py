@@ -5,9 +5,10 @@ import logging.config
 from logging import getLogger
 import pandas as pd
 BASE_PATH = '%s/../..' % os.path.dirname(os.path.abspath(__file__))
-sys.path.append('%s/modules' % BASE_PATH)
-from Predicter import Predicter
-from Notifier import Notifier
+sys.path.append(BASE_PATH)
+from modules.DataTranslater import DataTranslater
+from modules.Predicter import Predicter
+from modules.Notifier import Notifier
 
 if __name__ == '__main__':
     logging.config.fileConfig(
@@ -22,24 +23,29 @@ if __name__ == '__main__':
     else:
         config_path = '%s/configs/config.json' % BASE_PATH
     try:
-        predicter_obj = Predicter()
-        predicter_obj.read_config_file(config_path)
+        # data translate
+        translater_obj = DataTranslater()
+        translater_obj.read_config_file(config_path)
 
-        logger.info('### INIT')
-        predicter_obj.get_data_for_view()
-        predicter_obj.display_data()
+        logger.info('### DATA FOR VIEW')
+        translater_obj.create_data_for_view()
+        translater_obj.display_data()
+        data_for_view = translater_obj.get_data_for_view()
 
-        def _calc_proba(predicter_obj):
-            logger.info('### TRANSLATE')
-            predicter_obj.trans_data_for_view()
-            logger.info('##### NORMALIZE')
-            predicter_obj.get_fitting_data()
-            predicter_obj.normalize_fitting_data()
-            predicter_obj.reduce_dimension()
-            predicter_obj.display_data()
+        def _calc_proba_df(translater_obj):
+            logger.info('### TRANSLATE DATA FOR VIEW')
+            translater_obj.translate_data_for_view()
+            translater_obj.display_data()
 
-            # logger.info('### VISUALIZE TRAIN DATA')
-            # predicter_obj.visualize_train_data()
+            logger.info('### DATA FOR MODEL')
+            translater_obj.create_data_for_model()
+            translater_obj.normalize_data_for_model()
+            translater_obj.reduce_dimension_of_data_for_model()
+            data_for_model = translater_obj.get_data_for_model()
+
+            # predict
+            predicter_obj = Predicter(**data_for_model)
+            predicter_obj.read_config_file(config_path)
 
             logger.info('### VALIDATE')
             predicter_obj.is_ok_with_adversarial_validation()
@@ -47,14 +53,11 @@ if __name__ == '__main__':
             logger.info('### FIT')
             predicter_obj.calc_ensemble_model()
 
-            # logger.info('### VISUALIZE TRAIN PRED DATA')
-            # predicter_obj.visualize_train_pred_data()
+            logger.info('### PREDICT')
+            predicter_obj.predict_y()
+            _, Y_pred_proba_df = predicter_obj.calc_predict_df()
 
-            logger.info('### OUTPUT')
-            _, Y_pred_proba = predicter_obj.calc_output()
-            # predicter_obj.write_output()
-
-            return Y_pred_proba
+            return Y_pred_proba_df
 
         def _fill_proba(proba):
             all_classes = [
@@ -70,24 +73,37 @@ if __name__ == '__main__':
             return proba
 
         logger.info('### DATA SEPARATION')
-        train_df = predicter_obj.train_df
-        test_df = predicter_obj.test_df
+        train_df = data_for_view['train_df']
+        test_df = data_for_view['test_df']
 
         logger.info('##### ISNULL DISTMOD')
-        predicter_obj.train_df = train_df[train_df['distmod'].isnull()]
-        predicter_obj.test_df = test_df[test_df['distmod'].isnull()]
-        isnull_proba = _calc_proba(predicter_obj)
+        translater_obj.train_df = train_df[train_df['distmod'].isnull()]
+        translater_obj.test_df = test_df[test_df['distmod'].isnull()]
+        isnull_proba_df = _calc_proba_df(translater_obj)
 
         logger.info('##### NOTNULL DISTMOD')
-        predicter_obj.train_df = train_df[train_df['distmod'].notnull()]
-        predicter_obj.test_df = test_df[test_df['distmod'].notnull()]
-        notnull_proba = _calc_proba(predicter_obj)
+        translater_obj.train_df = train_df[train_df['distmod'].notnull()]
+        translater_obj.test_df = test_df[test_df['distmod'].notnull()]
+        notnull_proba_df = _calc_proba_df(translater_obj)
 
-        all_proba = pd.concat(
-            [_fill_proba(isnull_proba), _fill_proba(notnull_proba)],
+        logger.info('### DATA INTEGRATION')
+        all_proba_df = pd.concat(
+            [_fill_proba(isnull_proba_df), _fill_proba(notnull_proba_df)],
             ignore_index=True)
-        predicter_obj.Y_pred_proba = all_proba
-        predicter_obj.write_output()
+
+        # predict
+        predicter_obj = Predicter(**{
+            'feature_columns': [],
+            'test_ids': [],
+            'X_train': [],
+            'Y_train': [],
+            'X_test': [],
+        })
+        predicter_obj.read_config_file(config_path)
+        predicter_obj.Y_pred_proba_df = all_proba_df
+
+        logger.info('### WRITE PREDICT DATA')
+        predicter_obj.write_predict_data()
 
     except Exception as e:
         logger.error('%s' % e)

@@ -33,7 +33,7 @@ if __name__ == '__main__':
         logger.info('### WRITE DATA FOR VIEW')
         translater_obj.write_data_for_view()
 
-        logger.info('##### DATA FOR MODEL')
+        logger.info('### DATA FOR MODEL')
         translater_obj.create_data_for_model()
         translater_obj.normalize_data_for_model()
         translater_obj.reduce_dimension_of_data_for_model()
