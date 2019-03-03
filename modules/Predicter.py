@@ -382,6 +382,7 @@ class Predicter(ConfigReader):
                     '%s/%s.pickle' % (self.OUTPUT_PATH, modelname), 'wb'
                 ) as f:
                     pickle.dump(estimator, f)
+        return
 
     def get_predict_data(self):
         output = {

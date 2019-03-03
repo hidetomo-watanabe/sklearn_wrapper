@@ -1,3 +1,4 @@
+import os
 import math
 import numpy as np
 import pandas as pd
@@ -18,6 +19,11 @@ except Exception:
 class DataTranslater(ConfigReader):
     def __init__(self, kernel=False):
         self.kernel = kernel
+        self.BASE_PATH = '%s/..' % os.path.dirname(os.path.abspath(__file__))
+        if self.kernel:
+            self.OUTPUT_PATH = '.'
+        else:
+            self.OUTPUT_PATH = '%s/outputs' % self.BASE_PATH
         self.configs = {}
 
     def display_data(self):
@@ -157,6 +163,13 @@ class DataTranslater(ConfigReader):
                 [train_df, test_df], column)
         self.train_df = train_df
         self.test_df = test_df
+        return
+
+    def write_data_for_view(self, filename='data_for_view'):
+        self.train_df.to_csv(
+            '%s/train_%s.csv' % (self.OUTPUT_PATH, filename), index=False)
+        self.test_df.to_csv(
+            '%s/test_%s.csv' % (self.OUTPUT_PATH, filename), index=False)
         return
 
     def get_data_for_model(self):

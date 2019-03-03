@@ -50,7 +50,7 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "print('### DF DATA')\n",
+    "print('### DATA FOR VIEW')\n",
     "translater_obj.create_data_for_view()\n",
     "translater_obj.display_data()"
    ]
@@ -61,7 +61,7 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "print('### TRANSLATE DF DATA')\n",
+    "print('### TRANSLATE DATA FOR VIEW')\n",
     "translater_obj.translate_data_for_view()\n",
     "translater_obj.display_data()"
    ]
@@ -72,7 +72,17 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "print('### DF DATA')\n",
+    "print('### WRITE DATA FOR VIEW')\n",
+    "translater_obj.write_data_for_view()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "print('### DATA FOR VIEW')\n",
     "data_for_view = translater_obj.get_data_for_view()"
    ]
   },

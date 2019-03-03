@@ -30,6 +30,9 @@ if __name__ == '__main__':
         translater_obj.translate_data_for_view()
         translater_obj.display_data()
 
+        logger.info('### WRITE DATA FOR VIEW')
+        translater_obj.write_data_for_view()
+
         logger.info('##### DATA FOR MODEL')
         translater_obj.create_data_for_model()
         translater_obj.normalize_data_for_model()
