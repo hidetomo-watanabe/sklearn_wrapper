@@ -22,12 +22,12 @@ if __name__ == '__main__':
         translater_obj = DataTranslater()
         translater_obj.read_config_file(config_path)
 
-        logger.info('### DF DATA')
-        translater_obj.create_df_data()
+        logger.info('### DATA FOR VIEW')
+        translater_obj.create_data_for_view()
         translater_obj.display_data()
 
-        logger.info('### TRANSLATE DF DATA')
-        translater_obj.translate_df_data()
+        logger.info('### TRANSLATE DATA FOR VIEW')
+        translater_obj.translate_data_for_view()
         translater_obj.display_data()
 
         logger.info('##### DATA FOR MODEL')

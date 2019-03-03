@@ -26,12 +26,12 @@ if __name__ == '__main__':
         predicter_obj.read_config_file(config_path)
 
         logger.info('### INIT')
-        predicter_obj.get_df_data()
+        predicter_obj.get_data_for_view()
         predicter_obj.display_data()
 
         def _calc_proba(predicter_obj):
             logger.info('### TRANSLATE')
-            predicter_obj.trans_df_data()
+            predicter_obj.trans_data_for_view()
             logger.info('##### NORMALIZE')
             predicter_obj.get_fitting_data()
             predicter_obj.normalize_fitting_data()

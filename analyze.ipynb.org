@@ -51,7 +51,7 @@
    "outputs": [],
    "source": [
     "print('### DF DATA')\n",
-    "translater_obj.create_df_data()\n",
+    "translater_obj.create_data_for_view()\n",
     "translater_obj.display_data()"
    ]
   },
@@ -62,7 +62,7 @@
    "outputs": [],
    "source": [
     "print('### TRANSLATE DF DATA')\n",
-    "translater_obj.translate_df_data()\n",
+    "translater_obj.translate_data_for_view()\n",
     "translater_obj.display_data()"
    ]
   },
@@ -73,7 +73,7 @@
    "outputs": [],
    "source": [
     "print('### DF DATA')\n",
-    "df_data = translater_obj.get_df_data()"
+    "data_for_view = translater_obj.get_data_for_view()"
    ]
   },
   {
@@ -107,7 +107,7 @@
    "outputs": [],
    "source": [
     "print('### VISUALIZE TRAIN DF HISTOGRAM')\n",
-    "visualizer_obj.visualize_train_df_histogram(df_data['train_df'])"
+    "visualizer_obj.visualize_train_df_histogram(data_for_view['train_df'])"
    ]
   },
   {
@@ -117,7 +117,7 @@
    "outputs": [],
    "source": [
     "print('### VISUALIZE TRAIN DF HEATMAP')\n",
-    "visualizer_obj.visualize_train_df_heatmap(df_data['train_df'])"
+    "visualizer_obj.visualize_train_df_heatmap(data_for_view['train_df'])"
    ]
   },
   {
@@ -128,7 +128,7 @@
    "source": [
     "print('### VISUALIZE TRAIN DF PROFILING')\n",
     "import pandas_profiling\n",
-    "pandas_profiling.ProfileReport(df_data['train_df'])"
+    "pandas_profiling.ProfileReport(data_for_view['train_df'])"
    ]
   },
   {
