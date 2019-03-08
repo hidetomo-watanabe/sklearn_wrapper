@@ -5,8 +5,10 @@ import pickle
 import numpy as np
 import pandas as pd
 import importlib
+import scipy
 from sklearn.model_selection import StratifiedKFold, KFold
-from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection import cross_val_score
+from hyperopt import fmin, tpe, hp, space_eval
 from sklearn.linear_model import LogisticRegression, LinearRegression
 from sklearn.svm import SVC, SVR, LinearSVC, LinearSVR
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
@@ -127,6 +129,45 @@ class Predicter(ConfigReader):
         elif model == 'keras_reg':
             return KerasRegressor(build_fn=create_keras_model)
 
+    def _calc_best_params(
+        self,
+        base_model, X_train, Y_train, params, scorer,
+        cv=3, n_jobs=-1, fit_params={}, max_evals=None
+    ):
+        def _hyperopt_objective(args):
+            model = base_model
+            model.set_params(**args)
+            scores = cross_val_score(
+                model, X_train, Y_train,
+                scoring=scorer, cv=cv, n_jobs=n_jobs, fit_params=fit_params)
+            score_mean = scipy.mean(scores)
+            logger.debug('  params: %s' % args)
+            logger.debug('  score mean: %s' % score_mean)
+            return -score_mean
+
+        params_space = {}
+        all_comb_num = 0
+        for key, val in params.items():
+            params_space[key] = hp.choice(key, val)
+            if all_comb_num == 0:
+                all_comb_num = 1
+            all_comb_num *= len(val)
+        if not max_evals:
+            if all_comb_num > 0:
+                max_evals = 1
+            else:
+                max_evals = 0
+
+        # no search
+        if max_evals == 0:
+            return {}
+
+        best_params = fmin(
+            _hyperopt_objective, params_space,
+            algo=tpe.suggest, max_evals=max_evals)
+        best_params = space_eval(params_space, best_params)
+        return best_params
+
     def is_ok_with_adversarial_validation(self):
         def _get_adversarial_preds(X_train, X_test, adversarial):
             # create data
@@ -137,15 +178,15 @@ class Predicter(ConfigReader):
             # fit
             skf = StratifiedKFold(
                 n_splits=adversarial['cv'], shuffle=True, random_state=42)
-            gs = GridSearchCV(
-                self._get_base_model(adversarial['model']),
-                adversarial['params'],
-                cv=skf.split(X_adv, target_adv),
-                scoring=adversarial['scoring'],
-                n_jobs=adversarial['n_jobs'])
-            gs.fit(X_adv, target_adv)
-            est = gs.best_estimator_
-            return est.predict(tmp_X_train), est.predict(X_test)
+            cv = skf.split(X_adv, target_adv)
+            base_model = self._get_base_model(adversarial['model'])
+            best_params = self._calc_best_params(
+                base_model, X_adv, target_adv, adversarial['params'],
+                adversarial['scoring'], cv, adversarial['n_jobs'])
+            estimator = base_model
+            estimator.set_params(**best_params)
+            estimator.fit(X_adv, target_adv)
+            return estimator.predict(tmp_X_train), estimator.predict(X_test)
 
         def _is_ok_pred_nums(tr0, tr1, te0, te1):
             if tr0 == 0 and te0 == 0:
@@ -309,6 +350,7 @@ class Predicter(ConfigReader):
                 base_model = OneVsRestClassifier(base_model)
         cv = model_config['cv']
         n_jobs = model_config['n_jobs']
+        max_evals = model_config.get('max_evals')
         fit_params = model_config['fit_params']
         params = model_config['params']
         if len(fit_params.keys()) > 0:
@@ -316,26 +358,21 @@ class Predicter(ConfigReader):
 
         logger.info('model: %s' % model)
         logger.info('modelname: %s' % modelname)
-        logger.info('grid search with cv=%d' % cv)
+        logger.info('search with cv=%d' % cv)
         if multiclass or self.configs['fit']['train_mode'] == 'reg':
             kf = KFold(n_splits=cv, shuffle=True, random_state=42)
             cv = kf.split(self.X_train, self.Y_train)
         else:
             skf = StratifiedKFold(n_splits=cv, shuffle=True, random_state=42)
             cv = skf.split(self.X_train, self.Y_train)
-        gs = GridSearchCV(
-            estimator=base_model, param_grid=params,
-            cv=cv, scoring=scorer, n_jobs=n_jobs,
-            return_train_score=False, refit=True)
-        gs.fit(self.X_train, self.Y_train, **fit_params)
-        logger.info('  best params: %s' % gs.best_params_)
-        logger.info('  best score of trained grid search: %s' % gs.best_score_)
-        logger.info('  score std of trained grid search: %s' %
-                    gs.cv_results_['std_test_score'][gs.best_index_])
-        if model in ['keras_clf', 'keras_reg']:
-            estimator = gs.best_estimator_.model
-        else:
-            estimator = gs.best_estimator_
+
+        best_params = self._calc_best_params(
+            base_model, self.X_train, self.Y_train, params,
+            scorer, cv, n_jobs, fit_params, max_evals)
+        logger.info('  best params: %s' % best_params)
+        estimator = base_model
+        estimator.set_params(**best_params)
+        estimator.fit(self.X_train, self.Y_train, **fit_params)
         logger.info('estimator: %s' % estimator)
 
         # feature_importances
