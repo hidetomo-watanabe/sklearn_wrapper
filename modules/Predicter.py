@@ -5,7 +5,6 @@ import pickle
 import numpy as np
 import pandas as pd
 import importlib
-import scipy
 from sklearn.model_selection import StratifiedKFold, KFold
 from sklearn.model_selection import cross_val_score
 from hyperopt import fmin, tpe, hp, space_eval
@@ -140,9 +139,11 @@ class Predicter(ConfigReader):
             scores = cross_val_score(
                 model, X_train, Y_train,
                 scoring=scorer, cv=cv, n_jobs=n_jobs, fit_params=fit_params)
-            score_mean = scipy.mean(scores)
+            score_mean = np.mean(scores)
+            score_std = np.std(scores)
             logger.debug('  params: %s' % args)
             logger.debug('  score mean: %s' % score_mean)
+            logger.debug('  score std: %s' % score_std)
             return -score_mean
 
         params_space = {}
@@ -369,7 +370,7 @@ class Predicter(ConfigReader):
         best_params = self._calc_best_params(
             base_model, self.X_train, self.Y_train, params,
             scorer, cv, n_jobs, fit_params, max_evals)
-        logger.info('  best params: %s' % best_params)
+        logger.info('best params: %s' % best_params)
         estimator = base_model
         estimator.set_params(**best_params)
         estimator.fit(self.X_train, self.Y_train, **fit_params)
