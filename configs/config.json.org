@@ -36,9 +36,9 @@
     },
     "fit": {
         "myfunc": "hoge",
+        "train_mode": "clf",
         "y_pre": false,
         "y_scaler": "standard",
-        "train_mode": "clf",
         "ensemble": {
             "mode": "stacking",
             "model": "log_reg",
