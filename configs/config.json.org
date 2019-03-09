@@ -37,6 +37,7 @@
     "fit": {
         "myfunc": "hoge",
         "y_pre": false,
+        "y_scaler": "standard",
         "train_mode": "clf",
         "ensemble": {
             "mode": "stacking",

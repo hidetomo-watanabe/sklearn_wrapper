@@ -46,14 +46,14 @@ class Predicter(ConfigReader):
         self,
         feature_columns, test_ids,
         X_train, Y_train, X_test,
-        scaler_y=None, kernel=False
+        y_scaler=None, kernel=False
     ):
         self.feature_columns = feature_columns
         self.test_ids = test_ids
         self.X_train = X_train
         self.Y_train = Y_train
         self.X_test = X_test
-        self.scaler_y = scaler_y
+        self.y_scaler = y_scaler
         self.kernel = kernel
         self.BASE_PATH = '%s/..' % os.path.dirname(os.path.abspath(__file__))
         if self.kernel:
@@ -484,14 +484,16 @@ class Predicter(ConfigReader):
                 self.Y_train_pred = self.estimator.predict(self.X_train)
 
             # inverse normalize
-            # ss
-            self.Y_pred = self.scaler_y.inverse_transform(self.Y_pred)
+            # scaler
+            self.Y_pred = self.Y_pred.reshape(-1, 1)
+            self.Y_pred = self.y_scaler.inverse_transform(self.Y_pred)
             if isinstance(self.Y_train_pred, np.ndarray):
+                self.Y_train_pred = self.Y_train_pred.reshape(-1, 1)
                 self.Y_train_pred = \
-                    self.scaler_y.inverse_transform(self.Y_train_pred)
+                    self.y_scaler.inverse_transform(self.Y_train_pred)
             else:
                 logger.warn('NO Y_train_pred')
-            # other
+            # pre
             y_pre = self.configs['fit']['y_pre']
             if y_pre:
                 logger.info('inverse translate y_train with %s' % y_pre)

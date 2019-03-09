@@ -5,7 +5,7 @@ import pandas as pd
 import importlib
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import OneHotEncoder
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from IPython.display import display
 from logging import getLogger
 
@@ -180,8 +180,8 @@ class DataTranslater(ConfigReader):
             'Y_train': self.Y_train,
             'X_test': self.X_test,
         }
-        if hasattr(self, 'scaler_y'):
-            output['scaler_y'] = self.scaler_y
+        if hasattr(self, 'y_scaler'):
+            output['y_scaler'] = self.y_scaler
         return output
 
     def create_data_for_model(self):
@@ -209,14 +209,14 @@ class DataTranslater(ConfigReader):
 
     def normalize_data_for_model(self):
         # x
-        # ss
+        # scaler
         scaler_x = StandardScaler()
         scaler_x.fit(self.X_train)
         self.X_train = scaler_x.transform(self.X_train)
         self.X_test = scaler_x.transform(self.X_test)
         # y
         if self.configs['fit']['train_mode'] == 'reg':
-            # other
+            # pre
             y_pre = self.configs['fit']['y_pre']
             if y_pre:
                 logger.info('translate y_train with %s' % y_pre)
@@ -225,11 +225,15 @@ class DataTranslater(ConfigReader):
                 else:
                     logger.error('NOT IMPLEMENTED FIT Y_PRE: %s' % y_pre)
                     raise Exception('NOT IMPLEMENTED')
-            # ss
-            self.scaler_y = StandardScaler()
+            # scaler
+            y_scaler = self.configs['fit'].get('y_scaler')
+            if (not y_scaler) or (y_scaler == 'standard'):
+                self.y_scaler = StandardScaler()
+            elif y_scaler == 'minmax':
+                self.y_scaler = MinMaxScaler()
             self.Y_train = self.Y_train.reshape(-1, 1)
-            self.scaler_y.fit(self.Y_train)
-            self.Y_train = self.scaler_y.transform(self.Y_train).reshape(-1, )
+            self.y_scaler.fit(self.Y_train)
+            self.Y_train = self.y_scaler.transform(self.Y_train).reshape(-1, )
         return
 
     def reduce_dimension_of_data_for_model(self):
