@@ -233,68 +233,21 @@ class Predicter(ConfigReader):
         }
         return output
 
-    def _get_scorer_from_config(self):
-        scoring = self.configs['fit']['scoring']
-        logger.info('scoring: %s' % scoring)
-        if scoring == 'my_scorer':
-            if not self.kernel:
-                myfunc = importlib.import_module(
-                    'modules.myfuncs.%s' % self.configs['fit']['myfunc'])
-            method_name = 'get_my_scorer'
-            if not self.kernel:
-                method_name = 'myfunc.%s' % method_name
-            self.scorer = eval(method_name)()
-        else:
-            self.scorer = get_scorer(scoring)
-        return self.scorer
-
     def calc_ensemble_model(self):
-        scorer = self._get_scorer_from_config()
-        model_configs = self.configs['fit']['single_models']
-        self.classes = None
-        logger.info('X train shape: %s' % str(self.X_train.shape))
-        logger.info('Y train shape: %s' % str(self.Y_train.shape))
-
-        # single
-        if len(model_configs) == 1:
-            logger.warn('NO ENSEMBLE')
-            self.estimator = self._calc_single_model(
-                scorer, model_configs[0], self.configs['fit'].get('myfunc'))
-            self.single_estimators = [(model_configs[0], self.estimator)]
-            if self.configs['fit']['train_mode'] == 'clf':
-                if hasattr(self.estimator, 'classes_'):
-                    self.classes = self.estimator.classes_
-                else:
-                    self.classes = sorted(np.unique(self.Y_train))
-            return self.estimator
-
-        # ensemble
-        models = []
-        self.single_estimators = []
-        dataset = Dataset(self.X_train, self.Y_train, self.X_test)
-        for model_config in model_configs:
-            single_estimator = self._calc_single_model(
-                scorer, model_config, self.configs['fit'].get('myfunc'))
-            self.single_estimators.append((model_config, single_estimator))
-            if self.classes is None \
-                    and self.configs['fit']['train_mode'] == 'clf':
-                self.classes = single_estimator.classes_
-            modelname = model_config['modelname']
-            if self.configs['fit']['train_mode'] == 'clf':
-                models.append(
-                    Classifier(
-                        dataset=dataset, estimator=single_estimator.__class__,
-                        parameters=single_estimator.get_params(),
-                        name=modelname))
-            elif self.configs['fit']['train_mode'] == 'reg':
-                models.append(
-                    Regressor(
-                        dataset=dataset, estimator=single_estimator.__class__,
-                        parameters=single_estimator.get_params(),
-                        name=modelname))
-        # pipeline
-        ensemble_config = self.configs['fit']['ensemble']
-        pipeline = ModelsPipeline(*models)
+        def _get_scorer_from_config():
+            scoring = self.configs['fit']['scoring']
+            logger.info('scoring: %s' % scoring)
+            if scoring == 'my_scorer':
+                if not self.kernel:
+                    myfunc = importlib.import_module(
+                        'modules.myfuncs.%s' % self.configs['fit']['myfunc'])
+                method_name = 'get_my_scorer'
+                if not self.kernel:
+                    method_name = 'myfunc.%s' % method_name
+                self.scorer = eval(method_name)()
+            else:
+                self.scorer = get_scorer(scoring)
+            return self.scorer
 
         def _get_stacker():
             # weighted_average
@@ -325,6 +278,118 @@ class Predicter(ConfigReader):
 
             return stacker
 
+        def _calc_single_model(model_config):
+            model = model_config['model']
+            modelname = model_config['modelname']
+            base_model = self._get_base_model(model, myfunc)
+            multiclass = model_config.get('multiclass')
+            if multiclass:
+                if multiclass == 'onevsone':
+                    multiclass = OneVsOneClassifier
+                elif multiclass == 'onevsrest':
+                    multiclass = OneVsRestClassifier
+            cv = model_config['cv']
+            n_jobs = model_config['n_jobs']
+            max_evals = model_config.get('max_evals')
+            fit_params = model_config['fit_params']
+            params = model_config['params']
+            if len(fit_params.keys()) > 0:
+                fit_params['eval_set'] = [[self.X_train, self.Y_train]]
+
+            logger.info('model: %s' % model)
+            logger.info('modelname: %s' % modelname)
+            logger.info('search with cv=%d' % cv)
+            if multiclass or self.configs['fit']['train_mode'] == 'reg':
+                cv = KFold(
+                    n_splits=cv, shuffle=True, random_state=42)
+            else:
+                cv = StratifiedKFold(
+                    n_splits=cv, shuffle=True, random_state=42)
+
+            best_params = self._calc_best_params(
+                base_model, self.X_train, self.Y_train, params,
+                scorer, cv, n_jobs, fit_params, max_evals, multiclass)
+            logger.info('best params: %s' % best_params)
+            estimator = base_model
+            estimator.set_params(**best_params)
+            if multiclass:
+                estimator = multiclass(estimator)
+            estimator.fit(self.X_train, self.Y_train, **fit_params)
+            logger.info('estimator: %s' % estimator)
+
+            # feature_importances
+            if hasattr(estimator, 'feature_importances_'):
+                feature_importances = pd.DataFrame(
+                    data=[estimator.feature_importances_],
+                    columns=self.feature_columns)
+                feature_importances = feature_importances.ix[
+                    :, np.argsort(feature_importances.values[0])[::-1]]
+                logger.info('feature importances:')
+                display(feature_importances)
+                logger.info('feature importances /sum:')
+                display(
+                    feature_importances / np.sum(
+                        estimator.feature_importances_))
+
+            # permutation importance
+            if self.configs['fit'].get('permutation'):
+                if model not in ['keras_clf', 'keras_reg']:
+                    perm = PermutationImportance(
+                        estimator, random_state=42).fit(
+                        self.X_train, self.Y_train)
+                    logger.info('permutation importance:')
+                    display(
+                        eli5.explain_weights_df(
+                            perm, feature_names=self.feature_columns))
+            return estimator
+
+        # configs
+        scorer = _get_scorer_from_config()
+        model_configs = self.configs['fit']['single_models']
+        myfunc = self.configs['fit'].get('myfunc')
+        self.classes = None
+        logger.info('X train shape: %s' % str(self.X_train.shape))
+        logger.info('Y train shape: %s' % str(self.Y_train.shape))
+
+        # single
+        if len(model_configs) == 1:
+            logger.warn('NO ENSEMBLE')
+            self.estimator = _calc_single_model(model_configs[0])
+            self.single_estimators = [(model_configs[0], self.estimator)]
+            if self.configs['fit']['train_mode'] == 'clf':
+                if hasattr(self.estimator, 'classes_'):
+                    self.classes = self.estimator.classes_
+                else:
+                    self.classes = sorted(np.unique(self.Y_train))
+            return self.estimator
+
+        # ensemble
+        models = []
+        self.single_estimators = []
+        dataset = Dataset(self.X_train, self.Y_train, self.X_test)
+        for model_config in model_configs:
+            single_estimator = _calc_single_model(model_config)
+            self.single_estimators.append((model_config, single_estimator))
+            if self.classes is None \
+                    and self.configs['fit']['train_mode'] == 'clf':
+                self.classes = single_estimator.classes_
+            modelname = model_config['modelname']
+            if self.configs['fit']['train_mode'] == 'clf':
+                models.append(
+                    Classifier(
+                        dataset=dataset, estimator=single_estimator.__class__,
+                        parameters=single_estimator.get_params(),
+                        name=modelname))
+            elif self.configs['fit']['train_mode'] == 'reg':
+                models.append(
+                    Regressor(
+                        dataset=dataset, estimator=single_estimator.__class__,
+                        parameters=single_estimator.get_params(),
+                        name=modelname))
+        # pipeline
+        ensemble_config = self.configs['fit']['ensemble']
+        pipeline = ModelsPipeline(*models)
+
         # stacker
         if ensemble_config['mode'] == 'weighted' \
                 and self.configs['fit']['train_mode'] == 'clf':
@@ -340,69 +405,6 @@ class Predicter(ConfigReader):
 
         self.estimator = stacker
         return self.estimator
-
-    def _calc_single_model(self, scorer, model_config, myfunc):
-        model = model_config['model']
-        modelname = model_config['modelname']
-        base_model = self._get_base_model(model, myfunc)
-        multiclass = model_config.get('multiclass')
-        if multiclass:
-            if multiclass == 'onevsone':
-                multiclass = OneVsOneClassifier
-            elif multiclass == 'onevsrest':
-                multiclass = OneVsRestClassifier
-        cv = model_config['cv']
-        n_jobs = model_config['n_jobs']
-        max_evals = model_config.get('max_evals')
-        fit_params = model_config['fit_params']
-        params = model_config['params']
-        if len(fit_params.keys()) > 0:
-            fit_params['eval_set'] = [[self.X_train, self.Y_train]]
-
-        logger.info('model: %s' % model)
-        logger.info('modelname: %s' % modelname)
-        logger.info('search with cv=%d' % cv)
-        if multiclass or self.configs['fit']['train_mode'] == 'reg':
-            cv = KFold(n_splits=cv, shuffle=True, random_state=42)
-        else:
-            cv = StratifiedKFold(n_splits=cv, shuffle=True, random_state=42)
-
-        best_params = self._calc_best_params(
-            base_model, self.X_train, self.Y_train, params,
-            scorer, cv, n_jobs, fit_params, max_evals, multiclass)
-        logger.info('best params: %s' % best_params)
-        estimator = base_model
-        estimator.set_params(**best_params)
-        if multiclass:
-            estimator = multiclass(estimator)
-        estimator.fit(self.X_train, self.Y_train, **fit_params)
-        logger.info('estimator: %s' % estimator)
-
-        # feature_importances
-        if hasattr(estimator, 'feature_importances_'):
-            feature_importances = pd.DataFrame(
-                data=[estimator.feature_importances_],
-                columns=self.feature_columns)
-            feature_importances = feature_importances.ix[
-                :, np.argsort(feature_importances.values[0])[::-1]]
-            logger.info('feature importances:')
-            display(feature_importances)
-            logger.info('feature importances /sum:')
-            display(
-                feature_importances / np.sum(
-                    estimator.feature_importances_))
-
-        # permutation importance
-        if self.configs['fit'].get('permutation'):
-            if model not in ['keras_clf', 'keras_reg']:
-                perm = PermutationImportance(estimator, random_state=42).fit(
-                    self.X_train, self.Y_train)
-                logger.info('permutation importance:')
-                display(
-                    eli5.explain_weights_df(
-                        perm, feature_names=self.feature_columns))
-
-        return estimator
 
     def write_estimator_data(self):
         modelname = self.configs['fit']['ensemble']['modelname']
