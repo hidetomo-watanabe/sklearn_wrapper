@@ -156,10 +156,7 @@ class Predicter(ConfigReader):
                 all_comb_num = 1
             all_comb_num *= len(val)
         if not max_evals:
-            if all_comb_num > 0:
-                max_evals = 1
-            else:
-                max_evals = 0
+            max_evals = all_comb_num
 
         # no search
         if max_evals == 0:
@@ -179,9 +176,8 @@ class Predicter(ConfigReader):
             target_adv = np.concatenate(
                 (np.zeros(len(tmp_X_train)), np.ones(len(X_test))), axis=0)
             # fit
-            skf = StratifiedKFold(
+            cv = StratifiedKFold(
                 n_splits=adversarial['cv'], shuffle=True, random_state=42)
-            cv = skf.split(X_adv, target_adv)
             base_model = self._get_base_model(adversarial['model'])
             best_params = self._calc_best_params(
                 base_model, X_adv, target_adv, adversarial['params'],
