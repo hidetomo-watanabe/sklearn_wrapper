@@ -1,37 +1,39 @@
 import os
-import json
 import pandas as pd
 from logging import getLogger
+from .ConfigReader import ConfigReader
 
-BASE_PATH = '%s/..' % os.path.dirname(os.path.abspath(__file__))
 logger = getLogger('predict').getChild('Integrater')
 
 
-class Integrater(object):
+class Integrater(ConfigReader):
     def __init__(self):
+        self.BASE_PATH = '%s/..' % os.path.dirname(os.path.abspath(__file__))
+        self.OUTPUT_PATH = '%s/outputs' % self.BASE_PATH
         self.configs = {}
 
-    def read_config_file(self, path):
-        with open(path, 'r') as f:
-            self.configs = json.loads(f.read())
-        self.filenames = self.configs['integrate']['filenames']
-        if 'weights' in self.configs['integrate']:
-            self.weights = self.configs['integrate']['weights']
-        else:
-            self.weights = [1] * len(self.filenames)
-
     def calc_average(self):
+        filenames = self.configs['integrate']['filenames']
+        if 'weights' in self.configs['integrate']:
+            weights = self.configs['integrate']['weights']
+        else:
+            weights = [1] * len(self.filenames)
+
         self.output = pd.DataFrame()
-        for i, filename in enumerate(self.filenames):
+        for i, filename in enumerate(filenames):
+            df = pd.read_csv(filename)
+            id_df = df[self.id_col]
+            val_df = df.drop(self.id_col, axis=1)
             if len(self.output) == 0:
-                self.output = pd.read_csv(filename) * self.weights[i]
+                self.output = val_df * weights[i]
             else:
-                self.output += pd.read_csv(filename) * self.weights[i]
-        self.output /= sum(self.weights)
+                self.output += val_df * weights[i]
+        self.output /= sum(weights)
+        self.output[self.id_col] = id_df
         return self.output
 
     def write_output(self, filename=None):
         if not filename:
             filename = '%s.csv' % self.configs['integrate']['output']
         self.output.to_csv(
-            '%s/outputs/%s' % (BASE_PATH, filename), index=False)
+            '%s/%s' % (self.OUTPUT_PATH, filename), index=False)

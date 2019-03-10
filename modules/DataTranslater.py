@@ -165,11 +165,11 @@ class DataTranslater(ConfigReader):
         self.test_df = test_df
         return
 
-    def write_data_for_view(self, filename='data_for_view'):
+    def write_data_for_view(self, filename='data_for_view.csv'):
         self.train_df.to_csv(
-            '%s/train_%s.csv' % (self.OUTPUT_PATH, filename), index=False)
+            '%s/train_%s' % (self.OUTPUT_PATH, filename), index=False)
         self.test_df.to_csv(
-            '%s/test_%s.csv' % (self.OUTPUT_PATH, filename), index=False)
+            '%s/test_%s' % (self.OUTPUT_PATH, filename), index=False)
         return
 
     def get_data_for_model(self):
