@@ -131,11 +131,13 @@ class Predicter(ConfigReader):
     def _calc_best_params(
         self,
         base_model, X_train, Y_train, params, scorer,
-        cv=3, n_jobs=-1, fit_params={}, max_evals=None
+        cv=3, n_jobs=-1, fit_params={}, max_evals=None, multiclass=None
     ):
         def _hyperopt_objective(args):
             model = base_model
             model.set_params(**args)
+            if multiclass:
+                model = multiclass(model)
             scores = cross_val_score(
                 model, X_train, Y_train,
                 scoring=scorer, cv=cv, n_jobs=n_jobs, fit_params=fit_params)
@@ -346,9 +348,9 @@ class Predicter(ConfigReader):
         multiclass = model_config.get('multiclass')
         if multiclass:
             if multiclass == 'onevsone':
-                base_model = OneVsOneClassifier(base_model)
+                multiclass = OneVsOneClassifier
             elif multiclass == 'onevsrest':
-                base_model = OneVsRestClassifier(base_model)
+                multiclass = OneVsRestClassifier
         cv = model_config['cv']
         n_jobs = model_config['n_jobs']
         max_evals = model_config.get('max_evals')
@@ -361,18 +363,18 @@ class Predicter(ConfigReader):
         logger.info('modelname: %s' % modelname)
         logger.info('search with cv=%d' % cv)
         if multiclass or self.configs['fit']['train_mode'] == 'reg':
-            kf = KFold(n_splits=cv, shuffle=True, random_state=42)
-            cv = kf.split(self.X_train, self.Y_train)
+            cv = KFold(n_splits=cv, shuffle=True, random_state=42)
         else:
-            skf = StratifiedKFold(n_splits=cv, shuffle=True, random_state=42)
-            cv = skf.split(self.X_train, self.Y_train)
+            cv = StratifiedKFold(n_splits=cv, shuffle=True, random_state=42)
 
         best_params = self._calc_best_params(
             base_model, self.X_train, self.Y_train, params,
-            scorer, cv, n_jobs, fit_params, max_evals)
+            scorer, cv, n_jobs, fit_params, max_evals, multiclass)
         logger.info('best params: %s' % best_params)
         estimator = base_model
         estimator.set_params(**best_params)
+        if multiclass:
+            estimator = multiclass(estimator)
         estimator.fit(self.X_train, self.Y_train, **fit_params)
         logger.info('estimator: %s' % estimator)
 
