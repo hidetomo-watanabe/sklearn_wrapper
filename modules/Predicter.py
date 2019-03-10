@@ -249,36 +249,8 @@ class Predicter(ConfigReader):
                 self.scorer = get_scorer(scoring)
             return self.scorer
 
-        def _get_stacker():
-            # weighted_average
-            if ensemble_config['mode'] == 'weighted':
-                weights = pipeline.find_weights(scorer._score_func)
-                stacker = pipeline.weight(weights)
-                return stacker
-
-            # stacking, blending
-            if ensemble_config['mode'] == 'stacking':
-                stack_dataset = pipeline.stack(
-                    k=ensemble_config['k'], seed=ensemble_config['seed'])
-            elif ensemble_config['mode'] == 'blending':
-                stack_dataset = pipeline.blend(
-                    proportion=ensemble_config['proportion'],
-                    seed=ensemble_config['seed'])
-            if self.configs['fit']['train_mode'] == 'clf':
-                stacker = Classifier(
-                    dataset=stack_dataset,
-                    estimator=self._get_base_model(
-                        ensemble_config['model']).__class__)
-            elif self.configs['fit']['train_mode'] == 'reg':
-                stacker = Regressor(
-                    dataset=stack_dataset,
-                    estimator=self._get_base_model(
-                        ensemble_config['model']).__class__)
-            stacker.use_cache = False
-
-            return stacker
-
-        def _calc_single_model(model_config):
+        def _calc_single_model(scorer, myfunc, model_config):
+            # params
             model = model_config['model']
             modelname = model_config['modelname']
             base_model = self._get_base_model(model, myfunc)
@@ -295,7 +267,6 @@ class Predicter(ConfigReader):
             params = model_config['params']
             if len(fit_params.keys()) > 0:
                 fit_params['eval_set'] = [[self.X_train, self.Y_train]]
-
             logger.info('model: %s' % model)
             logger.info('modelname: %s' % modelname)
             logger.info('search with cv=%d' % cv)
@@ -305,7 +276,7 @@ class Predicter(ConfigReader):
             else:
                 cv = StratifiedKFold(
                     n_splits=cv, shuffle=True, random_state=42)
-
+            # fit
             best_params = self._calc_best_params(
                 base_model, self.X_train, self.Y_train, params,
                 scorer, cv, n_jobs, fit_params, max_evals, multiclass)
@@ -343,6 +314,34 @@ class Predicter(ConfigReader):
                             perm, feature_names=self.feature_columns))
             return estimator
 
+        def _get_stacker(pipeline, ensemble_config):
+            # weighted_average
+            if ensemble_config['mode'] == 'weighted':
+                weights = pipeline.find_weights(scorer._score_func)
+                stacker = pipeline.weight(weights)
+                return stacker
+
+            # stacking, blending
+            if ensemble_config['mode'] == 'stacking':
+                stack_dataset = pipeline.stack(
+                    k=ensemble_config['k'], seed=ensemble_config['seed'])
+            elif ensemble_config['mode'] == 'blending':
+                stack_dataset = pipeline.blend(
+                    proportion=ensemble_config['proportion'],
+                    seed=ensemble_config['seed'])
+            if self.configs['fit']['train_mode'] == 'clf':
+                stacker = Classifier(
+                    dataset=stack_dataset,
+                    estimator=self._get_base_model(
+                        ensemble_config['model']).__class__)
+            elif self.configs['fit']['train_mode'] == 'reg':
+                stacker = Regressor(
+                    dataset=stack_dataset,
+                    estimator=self._get_base_model(
+                        ensemble_config['model']).__class__)
+            stacker.use_cache = False
+            return stacker
+
         # configs
         scorer = _get_scorer_from_config()
         model_configs = self.configs['fit']['single_models']
@@ -354,7 +353,8 @@ class Predicter(ConfigReader):
         # single
         if len(model_configs) == 1:
             logger.warn('NO ENSEMBLE')
-            self.estimator = _calc_single_model(model_configs[0])
+            self.estimator = _calc_single_model(
+                scorer, myfunc, model_configs[0])
             self.single_estimators = [(model_configs[0], self.estimator)]
             if self.configs['fit']['train_mode'] == 'clf':
                 if hasattr(self.estimator, 'classes_'):
@@ -368,7 +368,7 @@ class Predicter(ConfigReader):
         self.single_estimators = []
         dataset = Dataset(self.X_train, self.Y_train, self.X_test)
         for model_config in model_configs:
-            single_estimator = _calc_single_model(model_config)
+            single_estimator = _calc_single_model(scorer, myfunc, model_config)
             self.single_estimators.append((model_config, single_estimator))
             if self.classes is None \
                     and self.configs['fit']['train_mode'] == 'clf':
@@ -396,7 +396,7 @@ class Predicter(ConfigReader):
             logger.error(
                 'NOT IMPLEMENTED CLASSIFICATION AND WEIGHTED AVERAGE')
             raise Exception('NOT IMPLEMENTED')
-        stacker = _get_stacker()
+        stacker = _get_stacker(pipeline, ensemble_config)
 
         # validate
         stacker.probability = False
