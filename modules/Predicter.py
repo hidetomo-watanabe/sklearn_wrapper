@@ -116,9 +116,9 @@ class Predicter(ConfigReader):
         elif model == 'xgb_reg':
             return XGBRegressor()
         elif model == 'lgb_clf':
-            return LGBMClassifier(refernce='lgb_train')
+            return LGBMClassifier()
         elif model == 'lgb_reg':
-            return LGBMRegressor(reference='lgb_train')
+            return LGBMRegressor()
         elif model == 'catb_clf':
             return CatBoostClassifier()
         elif model == 'catb_reg':
