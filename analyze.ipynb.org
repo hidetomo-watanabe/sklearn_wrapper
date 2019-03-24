@@ -96,6 +96,7 @@
     "translater_obj.create_data_for_model()\n",
     "translater_obj.normalize_data_for_model()\n",
     "translater_obj.reduce_dimension_of_data_for_model()\n",
+    "translater_obj.extract_train_data_with_adversarial_validation()\n",
     "data_for_model = translater_obj.get_data_for_model()"
    ]
   },
@@ -150,16 +151,6 @@
     "predicter_obj = Predicter(**data_for_model)\n",
     "predicter_obj.read_config_file(config_path)\n",
     "# predicter_obj.read_config_text(config_text)"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": null,
-   "metadata": {},
-   "outputs": [],
-   "source": [
-    "print('### EXTRACTION')\n",
-    "predicter_obj.extract_train_data_with_adversarial_validation()"
    ]
   },
   {

@@ -14,6 +14,10 @@ try:
     from .ConfigReader import ConfigReader
 except Exception:
     logger.warn('IN FOR KERNEL SCRIPT, ConfigReader import IS SKIPPED')
+try:
+    from .Predicter import Predicter
+except Exception:
+    logger.warn('IN FOR KERNEL SCRIPT, Predicter import IS SKIPPED')
 
 
 class DataTranslater(ConfigReader):
@@ -240,6 +244,7 @@ class DataTranslater(ConfigReader):
         n = self.configs['translate']['dimension']
         if not n:
             return
+        logger.info('reduce dimension with pca')
         if n == 'all':
             n = self.X_train.shape[1]
         pca_obj = PCA(n_components=n, random_state=42)
@@ -250,4 +255,37 @@ class DataTranslater(ConfigReader):
         self.X_train = pca_obj.transform(self.X_train)
         self.X_test = pca_obj.transform(self.X_test)
         self.feature_columns = list(map(lambda x: 'pca_%d' % x, range(n)))
+        return
+
+    def extract_train_data_with_adversarial_validation(self):
+        def _get_adversarial_preds(X_train, X_test, adversarial):
+            # create data
+            X_adv = np.concatenate((X_train, X_test), axis=0)
+            Y_adv = np.concatenate(
+                (np.zeros(len(X_train)), np.ones(len(X_test))), axis=0)
+            # fit
+            predicter_obj = Predicter(**self.get_data_for_model())
+            predicter_obj.configs = self.configs
+            estimator = predicter_obj.calc_single_model(
+                adversarial['scoring'], adversarial,
+                X_train=X_adv, Y_train=Y_adv)
+            if not hasattr(estimator, 'predict_proba'):
+                logger.error(
+                    'NOT PREDICT_PROBA METHOD IN ADVERSARIAL ESTIMATOR')
+                raise Exception('NOT IMPLEMENTED')
+            test_index = list(estimator.classes_).index(1)
+            return estimator.predict_proba(X_train)[:, test_index]
+
+        adversarial = self.configs['data']['adversarial']
+        if not adversarial:
+            return
+        logger.info('extract X_train with adversarial validation')
+        adv_preds = _get_adversarial_preds(
+            self.X_train, self.X_test, adversarial)
+        RANDOM_PROBA = 0.5
+        org_len = len(self.X_train)
+        self.X_train = self.X_train[adv_preds < RANDOM_PROBA]
+        self.Y_train = self.Y_train[adv_preds < RANDOM_PROBA]
+        logger.info('with random_proba %s, train data reduced %s => %s'
+                    % (RANDOM_PROBA, org_len, len(self.X_train)))
         return

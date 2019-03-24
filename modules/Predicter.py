@@ -168,7 +168,7 @@ class Predicter(ConfigReader):
         best_params = space_eval(params_space, best_params)
         return best_params
 
-    def _calc_single_model(
+    def calc_single_model(
         self,
         scorer, model_config,
         keras_build_func=None, X_train=None, Y_train=None
@@ -245,38 +245,6 @@ class Predicter(ConfigReader):
                         perm, feature_names=self.feature_columns))
         return estimator
 
-    def extract_train_data_with_adversarial_validation(self):
-        def _get_adversarial_preds(X_train, X_test, adversarial):
-            # create data
-            X_adv = np.concatenate((X_train, X_test), axis=0)
-            Y_adv = np.concatenate(
-                (np.zeros(len(X_train)), np.ones(len(X_test))), axis=0)
-            # fit
-            estimator = self._calc_single_model(
-                adversarial['scoring'], adversarial,
-                X_train=X_adv, Y_train=Y_adv)
-            if not hasattr(estimator, 'predict_proba'):
-                logger.error(
-                    'NOT PREDICT_PROBA METHOD IN ADVERSARIAL ESTIMATOR')
-                raise Exception('NOT IMPLEMENTED')
-            test_index = list(estimator.classes_).index(1)
-            return estimator.predict_proba(X_train)[:, test_index]
-
-        adversarial = self.configs['data']['adversarial']
-        if adversarial:
-            logger.info('adversarial')
-            adv_preds = _get_adversarial_preds(
-                self.X_train, self.X_test, adversarial)
-            RANDOM_PROBA = 0.5
-            org_len = len(self.X_train)
-            self.X_train = self.X_train[adv_preds < RANDOM_PROBA]
-            self.Y_train = self.Y_train[adv_preds < RANDOM_PROBA]
-            logger.info('with random_proba %s, train data reduced %s => %s'
-                        % (RANDOM_PROBA, org_len, len(self.X_train)))
-        else:
-            logger.warn('NO ADVERSARIAL VALIDATION')
-        return
-
     def get_estimator_data(self):
         output = {
             'scorer': self.scorer,
@@ -340,7 +308,7 @@ class Predicter(ConfigReader):
         # single
         if len(model_configs) == 1:
             logger.warn('NO ENSEMBLE')
-            self.estimator = self._calc_single_model(
+            self.estimator = self.calc_single_model(
                 scorer, model_configs[0], keras_build_func=myfunc)
             self.single_estimators = [(model_configs[0], self.estimator)]
             if self.configs['fit']['train_mode'] == 'clf':
@@ -355,7 +323,7 @@ class Predicter(ConfigReader):
         self.single_estimators = []
         dataset = Dataset(self.X_train, self.Y_train, self.X_test)
         for model_config in model_configs:
-            single_estimator = self._calc_single_model(
+            single_estimator = self.calc_single_model(
                 scorer, model_config, keras_build_func=myfunc)
             self.single_estimators.append((model_config, single_estimator))
             if self.classes is None \
