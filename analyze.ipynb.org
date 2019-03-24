@@ -97,6 +97,8 @@
     "translater_obj.normalize_data_for_model()\n",
     "translater_obj.reduce_dimension_of_data_for_model()\n",
     "translater_obj.extract_train_data_with_adversarial_validation()\n",
+    "translater_obj.extract_train_data_with_undersampling()\n",
+    "translater_obj.add_train_data_with_oversampling()\n",
     "data_for_model = translater_obj.get_data_for_model()"
    ]
   },

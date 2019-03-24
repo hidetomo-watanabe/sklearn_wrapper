@@ -6,6 +6,8 @@ import importlib
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
+from imblearn.under_sampling import RandomUnderSampler
+from imblearn.over_sampling import RandomOverSampler, SMOTE
 from IPython.display import display
 from logging import getLogger
 
@@ -241,7 +243,7 @@ class DataTranslater(ConfigReader):
         return
 
     def reduce_dimension_of_data_for_model(self):
-        n = self.configs['translate']['dimension']
+        n = self.configs['translate'].get('dimension')
         if not n:
             return
         logger.info('reduce dimension with pca')
@@ -276,10 +278,10 @@ class DataTranslater(ConfigReader):
             test_index = list(estimator.classes_).index(1)
             return estimator.predict_proba(X_train)[:, test_index]
 
-        adversarial = self.configs['translate']['adversarial']
+        adversarial = self.configs['translate'].get('adversarial')
         if not adversarial:
             return
-        logger.info('extract X_train with adversarial validation')
+        logger.info('extract train data with adversarial validation')
         adv_preds = _get_adversarial_preds(
             self.X_train, self.X_test, adversarial)
         RANDOM_PROBA = 0.5
@@ -288,4 +290,36 @@ class DataTranslater(ConfigReader):
         self.Y_train = self.Y_train[adv_preds < RANDOM_PROBA]
         logger.info('with random_proba %s, train data reduced %s => %s'
                     % (RANDOM_PROBA, org_len, len(self.X_train)))
+        return
+
+    def extract_train_data_with_undersampling(self):
+        method = self.configs['translate'].get('undersampling')
+        if not method:
+            return
+
+        logger.info('extract train data with undersampling: %s' % method)
+        if method == 'random':
+            sampler_obj = RandomUnderSampler(random_state=42)
+        org_len = len(self.X_train)
+        self.X_train, self.Y_train = sampler_obj.fit_resample(
+            self.X_train, self.Y_train)
+        logger.info('train data reduced %s => %s'
+                    % (org_len, len(self.X_train)))
+        return
+
+    def add_train_data_with_oversampling(self):
+        method = self.configs['translate'].get('oversampling')
+        if not method:
+            return
+
+        logger.info('add train data with oversampling: %s' % method)
+        if method == 'random':
+            sampler_obj = RandomOverSampler(random_state=42)
+        elif method == 'smote':
+            sampler_obj = SMOTE(random_state=42)
+        org_len = len(self.X_train)
+        self.X_train, self.Y_train = sampler_obj.fit_resample(
+            self.X_train, self.Y_train)
+        logger.info('train data added %s => %s'
+                    % (org_len, len(self.X_train)))
         return

@@ -32,7 +32,9 @@
                 "penalty": ["l2"],
                 "C": [1, 2, 3, 4, 5]
             }
-        }
+        },
+        "undersampling": "random",
+        "oversampling": "smote"
     },
     "fit": {
         "myfunc": "hoge",
