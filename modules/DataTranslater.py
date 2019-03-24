@@ -276,7 +276,7 @@ class DataTranslater(ConfigReader):
             test_index = list(estimator.classes_).index(1)
             return estimator.predict_proba(X_train)[:, test_index]
 
-        adversarial = self.configs['data']['adversarial']
+        adversarial = self.configs['translate']['adversarial']
         if not adversarial:
             return
         logger.info('extract X_train with adversarial validation')

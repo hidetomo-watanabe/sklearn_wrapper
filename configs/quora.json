@@ -3,8 +3,7 @@
         "train_path": "../input/train.csv",
         "test_path": "../input/test.csv",
         "pred_cols": ["target"],
-        "id_col": "qid",
-        "adversarial": false
+        "id_col": "qid"
     },
     "translate": {
         "adhoc": {
@@ -17,7 +16,8 @@
         ],
         "category": [
         ],
-        "dimension": false
+        "dimension": false,
+        "adversarial": false
     },
     "fit": {
         "y_pre": false,

@@ -3,8 +3,7 @@
         "train_path": "../input/digit/train.csv",
         "test_path": "../input/digit/test.csv",
         "pred_cols": ["label"],
-        "id_col": "ImageId",
-        "adversarial": false
+        "id_col": "ImageId"
     },
     "translate": {
         "adhoc": {
@@ -16,7 +15,8 @@
         ],
         "category": [
         ],
-        "dimension": false
+        "dimension": false,
+        "adversarial": false
     },
     "fit": {
         "y_pre": false,
