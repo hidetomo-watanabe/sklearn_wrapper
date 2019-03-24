@@ -119,23 +119,27 @@ class DataTranslater(ConfigReader):
     def translate_data_for_view(self):
         train_df = self.train_df
         test_df = self.test_df
-        trans_adhoc = self.configs['translate']['adhoc']
+
         # adhoc
-        if trans_adhoc['myfunc']:
-            if not self.kernel:
-                myfunc = importlib.import_module(
-                    'modules.myfuncs.%s' % trans_adhoc['myfunc'])
-        for method_name in trans_adhoc['methods']:
-            logger.info('adhoc: %s' % method_name)
-            if not self.kernel:
-                method_name = 'myfunc.%s' % method_name
-            train_df, test_df = eval(
-                method_name)(train_df, test_df)
+        trans_adhoc = self.configs['translate'].get('adhoc')
+        if trans_adhoc:
+            if trans_adhoc['myfunc']:
+                if not self.kernel:
+                    myfunc = importlib.import_module(
+                        'modules.myfuncs.%s' % trans_adhoc['myfunc'])
+            for method_name in trans_adhoc['methods']:
+                logger.info('adhoc: %s' % method_name)
+                if not self.kernel:
+                    method_name = 'myfunc.%s' % method_name
+                train_df, test_df = eval(
+                    method_name)(train_df, test_df)
         # del
-        for column in self.configs['translate']['del']:
-            logger.info('delete: %s' % column)
-            del train_df[column]
-            del test_df[column]
+        trans_del = self.configs['translate']['del']
+        if trans_del:
+            for column in trans_del:
+                logger.info('delete: %s' % column)
+                del train_df[column]
+                del test_df[column]
         # missing
         for column in test_df.columns:
             if column in [self.id_col] + self.pred_cols:
@@ -149,11 +153,13 @@ class DataTranslater(ConfigReader):
             if replaced:
                 logger.info('replace missing with mean: %s' % column)
         # category
+        trans_category = self.configs['translate'].get('category')
         for column in test_df.columns:
             if column in [self.id_col] + self.pred_cols:
                 continue
             if test_df.dtypes[column] != 'object' \
-                    and column not in self.configs['translate']['category']:
+                and isinstance(trans_category, list) \
+                    and column not in trans_category:
                 continue
             logger.info('categorize: %s' % column)
             train_df, test_df = self._categorize_dfs(
@@ -223,7 +229,7 @@ class DataTranslater(ConfigReader):
         # y
         if self.configs['fit']['train_mode'] == 'reg':
             # pre
-            y_pre = self.configs['fit']['y_pre']
+            y_pre = self.configs['fit'].get('y_pre')
             if y_pre:
                 logger.info('translate y_train with %s' % y_pre)
                 if y_pre == 'log':

@@ -180,7 +180,10 @@ class Predicter(ConfigReader):
 
         # params
         model = model_config['model']
+        logger.info('model: %s' % model)
         modelname = model_config.get('modelname')
+        if modelname:
+            logger.info('modelname: %s' % modelname)
         base_model = self._get_base_model(model, keras_build_func)
         multiclass = model_config.get('multiclass')
         if multiclass:
@@ -188,25 +191,29 @@ class Predicter(ConfigReader):
                 multiclass = OneVsOneClassifier
             elif multiclass == 'onevsrest':
                 multiclass = OneVsRestClassifier
-        cv = model_config['cv']
-        n_jobs = model_config['n_jobs']
+        cv = model_config.get('cv')
+        if not cv:
+            cv = 3
+        logger.info('search with cv=%d' % cv)
+        n_jobs = model_config.get('n_jobs')
+        if not n_jobs:
+            n_jobs = -1
         max_evals = model_config.get('max_evals')
         fit_params = model_config.get('fit_params')
         if not fit_params:
             fit_params = {}
-        params = model_config['params']
         if len(fit_params.keys()) > 0:
             fit_params['eval_set'] = [[X_train, Y_train]]
-        logger.info('model: %s' % model)
-        if modelname:
-            logger.info('modelname: %s' % modelname)
-        logger.info('search with cv=%d' % cv)
+        params = model_config.get('params')
+        if not params:
+            params = {}
         if multiclass or self.configs['fit']['train_mode'] == 'reg':
             cv = KFold(
                 n_splits=cv, shuffle=True, random_state=42)
         else:
             cv = StratifiedKFold(
                 n_splits=cv, shuffle=True, random_state=42)
+
         # fit
         best_params = self._calc_best_params(
             base_model, X_train, Y_train, params,
@@ -260,7 +267,8 @@ class Predicter(ConfigReader):
             if scoring == 'my_scorer':
                 if not self.kernel:
                     myfunc = importlib.import_module(
-                        'modules.myfuncs.%s' % self.configs['fit']['myfunc'])
+                        'modules.myfuncs.%s'
+                        % self.configs['fit'].get('myfunc'))
                 method_name = 'get_my_scorer'
                 if not self.kernel:
                     method_name = 'myfunc.%s' % method_name
@@ -272,7 +280,7 @@ class Predicter(ConfigReader):
         def _get_stacker(pipeline, ensemble_config):
             # weighted_average
             if ensemble_config['mode'] == 'weighted':
-                weights = pipeline.find_weights(scorer._score_func)
+                weights = pipeline.find_weights(self.scorer._score_func)
                 stacker = pipeline.weight(weights)
                 return stacker
 
@@ -298,8 +306,8 @@ class Predicter(ConfigReader):
             return stacker
 
         # configs
-        scorer = _get_scorer_from_config()
         model_configs = self.configs['fit']['single_models']
+        self.scorer = _get_scorer_from_config()
         myfunc = self.configs['fit'].get('myfunc')
         self.classes = None
         logger.info('X train shape: %s' % str(self.X_train.shape))
@@ -309,7 +317,7 @@ class Predicter(ConfigReader):
         if len(model_configs) == 1:
             logger.warn('NO ENSEMBLE')
             self.estimator = self.calc_single_model(
-                scorer, model_configs[0], keras_build_func=myfunc)
+                self.scorer, model_configs[0], keras_build_func=myfunc)
             self.single_estimators = [(model_configs[0], self.estimator)]
             if self.configs['fit']['train_mode'] == 'clf':
                 if hasattr(self.estimator, 'classes_'):
@@ -324,7 +332,7 @@ class Predicter(ConfigReader):
         dataset = Dataset(self.X_train, self.Y_train, self.X_test)
         for model_config in model_configs:
             single_estimator = self.calc_single_model(
-                scorer, model_config, keras_build_func=myfunc)
+                self.scorer, model_config, keras_build_func=myfunc)
             self.single_estimators.append((model_config, single_estimator))
             if self.classes is None \
                     and self.configs['fit']['train_mode'] == 'clf':
@@ -357,7 +365,8 @@ class Predicter(ConfigReader):
         # validate
         stacker.probability = False
         logger.info('ENSEMBLE VALIDATION:')
-        stacker.validate(k=ensemble_config['k'], scorer=scorer._score_func)
+        stacker.validate(
+            k=ensemble_config['k'], scorer=self.scorer._score_func)
 
         self.estimator = stacker
         return self.estimator
@@ -454,7 +463,7 @@ class Predicter(ConfigReader):
             else:
                 logger.warn('NO Y_train_pred')
             # pre
-            y_pre = self.configs['fit']['y_pre']
+            y_pre = self.configs['fit'].get('y_pre')
             if y_pre:
                 logger.info('inverse translate y_train with %s' % y_pre)
                 if y_pre == 'log':
@@ -492,18 +501,19 @@ class Predicter(ConfigReader):
                 left_index=True, right_index=True)
 
         # post
-        fit_post = self.configs['fit']['post']
-        if fit_post['myfunc']:
-            if not self.kernel:
-                sys.path.append(self.BASE_PATH)
-                myfunc = importlib.import_module(
-                    'myfuncs.%s' % fit_post['myfunc'])
-        for method_name in fit_post['methods']:
-            logger.info('fit post: %s' % method_name)
-            if not self.kernel:
-                method_name = 'myfunc.%s' % method_name
-            self.Y_pred_df, self.Y_pred_proba_df = eval(
-                method_name)(self.Y_pred_df, self.Y_pred_proba_df)
+        fit_post = self.configs['fit'].get('post')
+        if fit_post:
+            if fit_post['myfunc']:
+                if not self.kernel:
+                    sys.path.append(self.BASE_PATH)
+                    myfunc = importlib.import_module(
+                        'myfuncs.%s' % fit_post['myfunc'])
+            for method_name in fit_post['methods']:
+                logger.info('fit post: %s' % method_name)
+                if not self.kernel:
+                    method_name = 'myfunc.%s' % method_name
+                self.Y_pred_df, self.Y_pred_proba_df = eval(
+                    method_name)(self.Y_pred_df, self.Y_pred_proba_df)
 
         return self.Y_pred_df, self.Y_pred_proba_df
 
