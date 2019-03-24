@@ -168,13 +168,12 @@ class Predicter(ConfigReader):
         best_params = space_eval(params_space, best_params)
         return best_params
 
-    def is_ok_with_adversarial_validation(self):
+    def extract_train_data_with_adversarial_validation(self):
         def _get_adversarial_preds(X_train, X_test, adversarial):
             # create data
-            tmp_X_train = X_train[:len(X_test)]
-            X_adv = np.concatenate((tmp_X_train, X_test), axis=0)
+            X_adv = np.concatenate((X_train, X_test), axis=0)
             target_adv = np.concatenate(
-                (np.zeros(len(tmp_X_train)), np.ones(len(X_test))), axis=0)
+                (np.zeros(len(X_train)), np.ones(len(X_test))), axis=0)
             # fit
             cv = StratifiedKFold(
                 n_splits=adversarial['cv'], shuffle=True, random_state=42)
@@ -185,41 +184,27 @@ class Predicter(ConfigReader):
             estimator = base_model
             estimator.set_params(**best_params)
             estimator.fit(X_adv, target_adv)
-            return estimator.predict(tmp_X_train), estimator.predict(X_test)
+            if not hasattr(estimator, 'predict_proba'):
+                logger.error(
+                    'NOT PREDICT_PROBA METHOD IN ADVERSARIAL ESTIMATOR')
+                raise Exception('NOT IMPLEMENTED')
+            test_index = list(estimator.classes_).index(1)
+            return estimator.predict_proba(X_train)[:, test_index]
 
-        def _is_ok_pred_nums(tr0, tr1, te0, te1):
-            if tr0 == 0 and te0 == 0:
-                return False
-            if tr1 == 0 and te1 == 0:
-                return False
-            if tr1 == 0 and te0 == 0:
-                return False
-            return True
-
-        X_train = self.X_train
         adversarial = self.configs['data']['adversarial']
         if adversarial:
-            logger.info('with adversarial')
-            adv_pred_train, adv_pred_test = _get_adversarial_preds(
-                X_train, self.X_test, adversarial)
-            adv_pred_train_num_0 = len(np.where(adv_pred_train == 0)[0])
-            adv_pred_train_num_1 = len(np.where(adv_pred_train == 1)[0])
-            adv_pred_test_num_0 = len(np.where(adv_pred_test == 0)[0])
-            adv_pred_test_num_1 = len(np.where(adv_pred_test == 1)[0])
-            logger.info('pred train num 0: %s' % adv_pred_train_num_0)
-            logger.info('pred train num 1: %s' % adv_pred_train_num_1)
-            logger.info('pred test num 0: %s' % adv_pred_test_num_0)
-            logger.info('pred test num 1: %s' % adv_pred_test_num_1)
-            if not _is_ok_pred_nums(
-                adv_pred_train_num_0,
-                adv_pred_train_num_1,
-                adv_pred_test_num_0,
-                adv_pred_test_num_1,
-            ):
-                logger.warn('TRAIN AND TEST MAY BE HAVE DIFFERENT FEATURES')
+            logger.info('adversarial')
+            adv_preds = _get_adversarial_preds(
+                self.X_train, self.X_test, adversarial)
+            RANDOM_PROBA = 0.5
+            org_len = len(self.X_train)
+            self.X_train = self.X_train[adv_preds < RANDOM_PROBA]
+            self.Y_train = self.Y_train[adv_preds < RANDOM_PROBA]
+            logger.info('with random_proba %s, train data reduced %s => %s'
+                        % (RANDOM_PROBA, org_len, len(self.X_train)))
         else:
-            logger.warn('NO DATA VALIDATION')
-            return True
+            logger.warn('NO ADVERSARIAL VALIDATION')
+        return
 
     def get_estimator_data(self):
         output = {

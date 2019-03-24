@@ -43,8 +43,8 @@ if __name__ == '__main__':
         predicter_obj = Predicter(**data_for_model)
         predicter_obj.read_config_file(config_path)
 
-        logger.info('### VALIDATE')
-        predicter_obj.is_ok_with_adversarial_validation()
+        logger.info('### EXTRACTION')
+        predicter_obj.extract_train_data_with_adversarial_validation()
 
         logger.info('### FIT')
         predicter_obj.calc_ensemble_model()
