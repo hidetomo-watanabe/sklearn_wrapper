@@ -101,17 +101,16 @@ def create_keras_model():
     # input_dim = self.X_train.shape[1]
     input_dim = 9
     activation = 'relu'
-    middle_dim = 100
-    # output_dim = len(np.unique(self.Y_train))
+    # output_dim = self.Y_train.shape[1]
     output_dim = 1
     optimizer = 'adam'
 
     model = Sequential()
-    # first layer
-    model.add(Dense(middle_dim, input_dim=input_dim, activation=activation))
-    model.add(Dense(middle_dim, activation=activation))
-    # last layer
+    model.add(Dense(10, input_dim=input_dim, activation=activation))
+    model.add(Dense(10, activation=activation))
     model.add(Dense(output_dim, activation="softmax"))
+
+    # compile model
     model.compile(
         loss='binary_crossentropy',
         optimizer=optimizer, metrics=['accuracy'])

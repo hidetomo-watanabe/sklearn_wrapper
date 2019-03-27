@@ -6,7 +6,7 @@ def create_keras_model():
     # input_dim = self.X_train.shape[1]
     input_dim = 100
     activation = 'relu'
-    # output_dim = len(np.unique(self.Y_train))
+    # output_dim = self.Y_train.shape[1]
     output_dim = 1
     optimizer = 'adam'
 
@@ -16,5 +16,7 @@ def create_keras_model():
     model.add(Dense(output_dim))
 
     # compile model
-    model.compile(loss='mean_squared_error', optimizer=optimizer)
+    model.compile(
+        loss='mean_squared_error',
+        optimizer=optimizer)
     return model
