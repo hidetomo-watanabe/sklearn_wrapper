@@ -103,7 +103,7 @@ def create_keras_model():
     activation = 'relu'
     middle_dim = 100
     # output_dim = len(np.unique(self.Y_train))
-    output_dim = 2
+    output_dim = 1
     optimizer = 'adam'
 
     model = Sequential()
@@ -113,6 +113,6 @@ def create_keras_model():
     # last layer
     model.add(Dense(output_dim, activation="softmax"))
     model.compile(
-        loss='categorical_crossentropy',
+        loss='binary_crossentropy',
         optimizer=optimizer, metrics=['accuracy'])
     return model

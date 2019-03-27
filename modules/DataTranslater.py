@@ -200,10 +200,7 @@ class DataTranslater(ConfigReader):
         train_df = self.train_df
         test_df = self.test_df
         # Y_train
-        if len(self.pred_cols) == 1:
-            self.Y_train = train_df[self.pred_cols[0]].values
-        else:
-            self.Y_train = train_df[self.pred_cols].values
+        self.Y_train = train_df[self.pred_cols].values
         # X_train
         self.X_train = train_df \
             .drop(self.id_col, axis=1).drop(self.pred_cols, axis=1).values
@@ -222,6 +219,7 @@ class DataTranslater(ConfigReader):
     def normalize_data_for_model(self):
         # x
         # scaler
+        logger.info('normalize x data')
         scaler_x = StandardScaler()
         scaler_x.fit(self.X_train)
         self.X_train = scaler_x.transform(self.X_train)
@@ -234,18 +232,19 @@ class DataTranslater(ConfigReader):
                 logger.info('translate y_train with %s' % y_pre)
                 if y_pre == 'log':
                     self.Y_train = np.array(list(map(math.log, self.Y_train)))
+                    self.Y_train = self.Y_train.reshape(-1, 1)
                 else:
                     logger.error('NOT IMPLEMENTED FIT Y_PRE: %s' % y_pre)
                     raise Exception('NOT IMPLEMENTED')
             # scaler
+            logger.info('normalize y data')
             y_scaler = self.configs['fit'].get('y_scaler')
             if (not y_scaler) or (y_scaler == 'standard'):
                 self.y_scaler = StandardScaler()
             elif y_scaler == 'minmax':
                 self.y_scaler = MinMaxScaler()
-            self.Y_train = self.Y_train.reshape(-1, 1)
             self.y_scaler.fit(self.Y_train)
-            self.Y_train = self.y_scaler.transform(self.Y_train).reshape(-1, )
+            self.Y_train = self.y_scaler.transform(self.Y_train)
         return
 
     def reduce_dimension_of_data_for_model(self):
