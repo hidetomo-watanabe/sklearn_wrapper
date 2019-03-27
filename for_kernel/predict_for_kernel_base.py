@@ -35,6 +35,7 @@ if __name__ == '__main__':
     translater_obj.extract_train_data_with_adversarial_validation()
     translater_obj.extract_train_data_with_undersampling()
     translater_obj.add_train_data_with_oversampling()
+    translater_obj.reshape_data_for_model_for_keras()
     data_for_model = translater_obj.get_data_for_model()
 
     # predict

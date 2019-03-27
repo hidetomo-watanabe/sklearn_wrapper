@@ -34,7 +34,8 @@
             }
         },
         "undersampling": "random",
-        "oversampling": "smote"
+        "oversampling": "smote",
+        "reshape": "lstm"
     },
     "fit": {
         "myfunc": "hoge",

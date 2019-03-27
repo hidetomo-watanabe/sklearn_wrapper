@@ -328,3 +328,17 @@ class DataTranslater(ConfigReader):
         logger.info('train data added %s => %s'
                     % (org_len, len(self.X_train)))
         return
+
+    def reshape_data_for_model_for_keras(self):
+        mode = self.configs['translate'].get('reshape')
+        if not mode:
+            return
+
+        logger.info('reshape for keras: %s' % mode)
+        if mode == 'lstm':
+            self.X_train = self.X_train.reshape(*self.X_train.shape, 1)
+            self.X_test = self.X_test.reshape(*self.X_test.shape, 1)
+        else:
+            logger.error('NOT IMPLEMENTED RESHAPE: %s' % mode)
+            raise Exception('NOT IMPLEMENTED')
+        return
