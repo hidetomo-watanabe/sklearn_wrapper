@@ -35,7 +35,7 @@
         },
         "undersampling": "random",
         "oversampling": "smote",
-        "reshape": "lstm"
+        "reshape_for_keras": "lstm"
     },
     "fit": {
         "myfunc": "hoge",

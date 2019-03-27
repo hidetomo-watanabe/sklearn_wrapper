@@ -114,4 +114,5 @@ def create_keras_model():
     model.compile(
         loss='binary_crossentropy',
         optimizer=optimizer, metrics=['accuracy'])
+    model.summary()
     return model

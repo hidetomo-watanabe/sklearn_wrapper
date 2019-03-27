@@ -330,7 +330,7 @@ class DataTranslater(ConfigReader):
         return
 
     def reshape_data_for_model_for_keras(self):
-        mode = self.configs['translate'].get('reshape')
+        mode = self.configs['translate'].get('reshape_for_keras')
         if not mode:
             return
 
@@ -338,7 +338,11 @@ class DataTranslater(ConfigReader):
         if mode == 'lstm':
             self.X_train = self.X_train.reshape(*self.X_train.shape, 1)
             self.X_test = self.X_test.reshape(*self.X_test.shape, 1)
+        elif mode == '1dcnn':
+            self.X_train = self.X_train.reshape(*self.X_train.shape, 1)
+            self.Y_train = self.Y_train.reshape(*self.Y_train.shape, 1)
+            self.X_test = self.X_test.reshape(*self.X_test.shape, 1)
         else:
-            logger.error('NOT IMPLEMENTED RESHAPE: %s' % mode)
+            logger.error('NOT IMPLEMENTED RESHAPE FOR KERAS: %s' % mode)
             raise Exception('NOT IMPLEMENTED')
         return

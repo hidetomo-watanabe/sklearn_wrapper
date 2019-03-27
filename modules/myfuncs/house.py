@@ -19,4 +19,5 @@ def create_keras_model():
     model.compile(
         loss='mean_squared_error',
         optimizer=optimizer)
+    model.summary()
     return model
