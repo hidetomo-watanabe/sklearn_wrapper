@@ -28,9 +28,10 @@
             "scoring": "accuracy",
             "cv": 3,
             "n_jobs": -1,
+            "max_evals": 3,
             "params" : {
-                "penalty": ["l2"],
-                "C": [1, 2, 3, 4, 5]
+                "n_estimators": [3, 5, 10],
+                "max_depth": [3, 5, 10]
             }
         },
         "undersampling": "random",
