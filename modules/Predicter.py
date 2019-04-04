@@ -214,6 +214,11 @@ class Predicter(ConfigReader):
             cv = StratifiedKFold(
                 n_splits=cv, shuffle=True, random_state=42)
 
+        # for warning
+        if model not in ['keras_clf', 'keras_reg']:
+            if len(Y_train.shape) > 1 and Y_train.shape[1] == 1:
+                Y_train = Y_train.reshape(-1,)
+
         # fit
         best_params = self._calc_best_params(
             base_model, X_train, Y_train, params,
