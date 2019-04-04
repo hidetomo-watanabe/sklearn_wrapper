@@ -217,7 +217,7 @@ class Predicter(ConfigReader):
         # for warning
         if model not in ['keras_clf', 'keras_reg']:
             if len(Y_train.shape) > 1 and Y_train.shape[1] == 1:
-                Y_train = Y_train.reshape(-1,)
+                Y_train = Y_train.ravel()
 
         # fit
         best_params = self._calc_best_params(
@@ -332,9 +332,14 @@ class Predicter(ConfigReader):
             return self.estimator
 
         # ensemble
+        logger.info('SINGLE FIT IN ENSEMBLE')
         models = []
         self.single_estimators = []
-        dataset = Dataset(self.X_train, self.Y_train, self.X_test)
+        # for warning
+        if len(self.Y_train.shape) > 1 and self.Y_train.shape[1] == 1:
+            dataset = Dataset(self.X_train, self.Y_train.ravel(), self.X_test)
+        else:
+            dataset = Dataset(self.X_train, self.Y_train, self.X_test)
         for model_config in model_configs:
             single_estimator = self.calc_single_model(
                 self.scorer, model_config, keras_build_func=myfunc)
@@ -369,7 +374,7 @@ class Predicter(ConfigReader):
 
         # validate
         stacker.probability = False
-        logger.info('ENSEMBLE VALIDATION:')
+        logger.info('ENSEMBLE VALIDATION')
         stacker.validate(
             k=ensemble_config['k'], scorer=self.scorer._score_func)
 
