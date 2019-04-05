@@ -289,12 +289,14 @@ class DataTranslater(ConfigReader):
         logger.info('extract train data with adversarial validation')
         adv_preds = _get_adversarial_preds(
             self.X_train, self.X_test, adversarial)
-        RANDOM_PROBA = 0.5
+        threshold = adversarial.get('threshold')
+        if not threshold:
+            threshold = 0.5
         org_len = len(self.X_train)
-        self.X_train = self.X_train[adv_preds < RANDOM_PROBA]
-        self.Y_train = self.Y_train[adv_preds < RANDOM_PROBA]
-        logger.info('with random_proba %s, train data reduced %s => %s'
-                    % (RANDOM_PROBA, org_len, len(self.X_train)))
+        self.X_train = self.X_train[adv_preds < threshold]
+        self.Y_train = self.Y_train[adv_preds < threshold]
+        logger.info('with threshold %s, train data reduced %s => %s'
+                    % (threshold, org_len, len(self.X_train)))
         return
 
     def extract_train_data_with_undersampling(self):
