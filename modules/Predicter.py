@@ -517,7 +517,7 @@ class Predicter(ConfigReader):
                 if not self.kernel:
                     sys.path.append(self.BASE_PATH)
                     myfunc = importlib.import_module(
-                        'myfuncs.%s' % fit_post['myfunc'])
+                        'modules.myfuncs.%s' % fit_post['myfunc'])
             for method_name in fit_post['methods']:
                 logger.info('fit post: %s' % method_name)
                 if not self.kernel:
