@@ -45,7 +45,7 @@ err_msg=${err_msg}$(python -u predict.py tests/titanic/test_config4.json 2>&1 | 
 err_msg=${err_msg}$(python -u predict.py tests/house/test_config.json 2>&1 | grep ERROR)
 # keras
 err_msg=${err_msg}$(python -u predict.py tests/house/test_config2.json 2>&1 | grep ERROR)
-# digit part multi lable classification
+# digit_part multi lable classification
 # lgb
 err_msg=${err_msg}$(python -u predict.py tests/digit_part/test_config.json 2>&1 | grep ERROR)
 
