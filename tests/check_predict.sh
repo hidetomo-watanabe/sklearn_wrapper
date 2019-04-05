@@ -31,7 +31,7 @@ _del 'outputs/tmp_house2.csv'
 
 err_msg=''
 echo 'START PREDICT'
-# titanic
+# titanic binary classification
 # gbdt
 err_msg=${err_msg}$(python -u predict.py tests/titanic/test_config.json 2>&1 | grep ERROR)
 # lgb
@@ -40,11 +40,14 @@ err_msg=${err_msg}$(python -u predict.py tests/titanic/test_config2.json 2>&1 | 
 err_msg=${err_msg}$(python -u predict.py tests/titanic/test_config3.json 2>&1 | grep ERROR)
 # ensemble
 err_msg=${err_msg}$(python -u predict.py tests/titanic/test_config4.json 2>&1 | grep ERROR)
-# house
+# house regression
 # svr
 err_msg=${err_msg}$(python -u predict.py tests/house/test_config.json 2>&1 | grep ERROR)
 # keras
 err_msg=${err_msg}$(python -u predict.py tests/house/test_config2.json 2>&1 | grep ERROR)
+# digit part multi lable classification
+# lgb
+err_msg=${err_msg}$(python -u predict.py tests/digit_part/test_config.json 2>&1 | grep ERROR)
 
 echo 'START DIFF'
 # diff

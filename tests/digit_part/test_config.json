@@ -1,7 +1,7 @@
 {
     "data": {
-        "train_path": "../input/digit/train.csv",
-        "test_path": "../input/digit/test.csv",
+        "train_path": "./tests/digit_part/train.csv",
+        "test_path": "./tests/digit_part/test.csv",
         "pred_cols": ["label"],
         "id_col": "ImageId"
     },
@@ -16,7 +16,7 @@
         ],
         "category": [
         ],
-        "dimension": false,
+        "dimension": 100,
         "adversarial": false
     },
     "fit": {
@@ -25,25 +25,20 @@
         "ensemble": {
             "mode": "stacking",
             "model": "log_reg",
-            "modelname": "digit",
+            "modelname": "tmp_digit",
             "k": 10,
             "seed": 111
         },
         "scoring": "accuracy",
         "single_models": [
             {
-                "model": "svc",
-                "modelname": "digit_svc",
+                "model": "lgb_clf",
+                "modelname": "tmp",
                 "cv": 3,
                 "n_jobs": -1,
-                "max_evals": 5,
                 "fit_params" : {
                 },
                 "params" : {
-                    "probability": [true],
-                    "C": [1, 2, 3, 4, 5],
-                    "degree": [1, 2, 3, 4, 5],
-                    "kernel": ["rbf", "linear", "poly", "sigmoid"]
                 }
             }
         ],
