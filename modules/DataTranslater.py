@@ -292,6 +292,10 @@ class DataTranslater(ConfigReader):
         logger.info('extract train data with adversarial validation')
         adv_train_preds, adv_test_preds = _get_adversarial_preds(
             self.X_train, self.X_test, adversarial)
+        logger.info('adversarial train preds:')
+        display(pd.DataFrame(adv_train_preds).describe(include='all'))
+        logger.info('adversarial test preds:')
+        display(pd.DataFrame(adv_test_preds).describe(include='all'))
 
         if adversarial.get('add_column'):
             logger.info('add adversarial_test_proba column to X')
@@ -302,11 +306,11 @@ class DataTranslater(ConfigReader):
                 self.X_test, adv_test_preds.reshape(-1, 1), axis=1)
 
         threshold = adversarial.get('threshold')
-        if not threshold:
+        if not threshold and int(threshold) != 0:
             threshold = 0.5
         org_len = len(self.X_train)
-        self.X_train = self.X_train[adv_train_preds < threshold]
-        self.Y_train = self.Y_train[adv_train_preds < threshold]
+        self.X_train = self.X_train[adv_train_preds > threshold]
+        self.Y_train = self.Y_train[adv_train_preds > threshold]
         logger.info('with threshold %s, train data reduced %s => %s'
                     % (threshold, org_len, len(self.X_train)))
         return

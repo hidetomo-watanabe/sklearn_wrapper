@@ -36,7 +36,7 @@
                 "n_estimators": [3, 5, 10],
                 "max_depth": [3, 5, 10]
             },
-            "threshold": 0.5,
+            "threshold": 0.0,
             "add_column": false
         }
     },
