@@ -281,20 +281,32 @@ class DataTranslater(ConfigReader):
                     'NOT PREDICT_PROBA METHOD IN ADVERSARIAL ESTIMATOR')
                 raise Exception('NOT IMPLEMENTED')
             test_index = list(estimator.classes_).index(1)
-            return estimator.predict_proba(X_train)[:, test_index]
+            adv_train_preds = estimator.predict_proba(X_train)[:, test_index]
+            adv_test_preds = estimator.predict_proba(X_test)[:, test_index]
+            return adv_train_preds, adv_test_preds
 
         adversarial = self.configs['translate'].get('adversarial')
         if not adversarial:
             return
+
         logger.info('extract train data with adversarial validation')
-        adv_preds = _get_adversarial_preds(
+        adv_train_preds, adv_test_preds = _get_adversarial_preds(
             self.X_train, self.X_test, adversarial)
+
+        if adversarial.get('add_column'):
+            logger.info('add adversarial_test_proba column to X')
+            self.feature_columns.append('adversarial_test_proba')
+            self.X_train = np.append(
+                self.X_train, adv_train_preds.reshape(-1, 1), axis=1)
+            self.X_test = np.append(
+                self.X_test, adv_test_preds.reshape(-1, 1), axis=1)
+
         threshold = adversarial.get('threshold')
         if not threshold:
             threshold = 0.5
         org_len = len(self.X_train)
-        self.X_train = self.X_train[adv_preds < threshold]
-        self.Y_train = self.Y_train[adv_preds < threshold]
+        self.X_train = self.X_train[adv_train_preds < threshold]
+        self.Y_train = self.Y_train[adv_train_preds < threshold]
         logger.info('with threshold %s, train data reduced %s => %s'
                     % (threshold, org_len, len(self.X_train)))
         return
