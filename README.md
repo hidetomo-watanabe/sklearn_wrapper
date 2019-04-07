@@ -39,6 +39,10 @@
 ##### regression
 - linear_reg
   - LinearRegression
+- lasso
+  - Lasso
+- ridge
+  - Ridge
 - svr
   - SVR
 - l_svr

@@ -9,6 +9,7 @@ from sklearn.model_selection import StratifiedKFold, KFold
 from sklearn.model_selection import cross_val_score
 from hyperopt import fmin, tpe, hp, space_eval
 from sklearn.linear_model import LogisticRegression, LinearRegression
+from sklearn.linear_model import Lasso, Ridge
 from sklearn.svm import SVC, SVR, LinearSVC, LinearSVR
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.ensemble import GradientBoostingClassifier
@@ -79,6 +80,10 @@ class Predicter(ConfigReader):
             return LogisticRegression(solver='lbfgs')
         elif model == 'linear_reg':
             return LinearRegression()
+        elif model == 'lasso':
+            return Lasso()
+        elif model == 'ridge':
+            return Ridge()
         elif model == 'svc':
             return SVC()
         elif model == 'svr':
