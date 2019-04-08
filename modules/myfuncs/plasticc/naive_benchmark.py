@@ -14,7 +14,7 @@ if __name__ == '__main__':
     classes = np.unique(meta_data['target'])
     classes_all = np.hstack([classes, [99]])
 
-    # create a dictionary {class : index} to map class number with the index
+    # create a dictionary {class: index} to map class number with the index
     # (index will be used for submission columns like 0, 1, 2 ... 14)
     target_map = {j: i for i, j in enumerate(classes_all)}
 
