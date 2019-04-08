@@ -280,7 +280,11 @@ class DataTranslater(ConfigReader):
                 logger.error(
                     'NOT PREDICT_PROBA METHOD IN ADVERSARIAL ESTIMATOR')
                 raise Exception('NOT IMPLEMENTED')
-            test_index = list(estimator.classes_).index(1)
+            if hasattr(estimator, 'classes_'):
+                test_index = list(estimator.classes_).index(1)
+            else:
+                logger.warn('CLASSES_ NOT IN ESTIMATOR')
+                test_index = 1
             adv_train_preds = estimator.predict_proba(X_train)[:, test_index]
             adv_test_preds = estimator.predict_proba(X_test)[:, test_index]
             return adv_train_preds, adv_test_preds

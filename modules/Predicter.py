@@ -15,6 +15,7 @@ from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.ensemble import GradientBoostingRegressor
 from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
+from sklearn.mixture import GaussianMixture
 from sklearn.naive_bayes import GaussianNB
 from sklearn.linear_model import Perceptron
 from sklearn.linear_model import SGDClassifier, SGDRegressor
@@ -104,6 +105,8 @@ class Predicter(ConfigReader):
             return KNeighborsClassifier()
         elif model == 'knn_reg':
             return KNeighborsRegressor()
+        elif model == 'g_mix':
+            return GaussianMixture()
         elif model == 'g_nb':
             return GaussianNB()
         elif model == 'preceptron':
