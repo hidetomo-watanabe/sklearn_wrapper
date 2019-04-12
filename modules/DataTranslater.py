@@ -3,9 +3,10 @@ import math
 import numpy as np
 import pandas as pd
 import importlib
-from sklearn.decomposition import PCA
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
+from sklearn.decomposition import PCA
+from sklearn.ensemble import IsolationForest
 from imblearn.under_sampling import RandomUnderSampler
 from imblearn.over_sampling import RandomOverSampler, SMOTE
 from IPython.display import display
@@ -317,6 +318,20 @@ class DataTranslater(ConfigReader):
         self.Y_train = self.Y_train[adv_train_preds > threshold]
         logger.info('with threshold %s, train data reduced %s => %s'
                     % (threshold, org_len, len(self.X_train)))
+        return
+
+    def extract_no_anomaly_train_data(self):
+        if not self.configs['translate'].get('no_anomaly'):
+            return
+
+        logger.info('extract no anomaly train data')
+        isf = IsolationForest(random_state=42, n_jobs=-1)
+        preds = isf.fit_predict(self.X_train, self.Y_train)
+        org_len = len(self.X_train)
+        self.X_train = self.X_train[preds == 1]
+        self.Y_train = self.Y_train[preds == 1]
+        logger.info('train data reduced %s => %s'
+                    % (org_len, len(self.X_train)))
         return
 
     def extract_train_data_with_undersampling(self):

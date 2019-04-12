@@ -36,6 +36,7 @@
             "threshold": 0.5,
             "add_column": false
         },
+        "no_anomaly": true,
         "undersampling": "random",
         "oversampling": "smote",
         "reshape_for_keras": "lstm"
