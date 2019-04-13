@@ -6,6 +6,8 @@ import importlib
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from sklearn.decomposition import PCA
+from xgboost import XGBClassifier
+from sklearn.feature_selection import RFE
 from sklearn.ensemble import IsolationForest
 from imblearn.under_sampling import RandomUnderSampler
 from imblearn.over_sampling import RandomOverSampler, SMOTE
@@ -268,6 +270,15 @@ class DataTranslater(ConfigReader):
             logger.info('pca_ratio sum: %s' % sum(
                 model_obj.explained_variance_ratio_))
             logger.info('pca_ratio: %s' % model_obj.explained_variance_ratio_)
+        elif model == 'rfe':
+            # for warning
+            Y_train = self.Y_train
+            if len(Y_train.shape) > 1 and Y_train.shape[1] == 1:
+                Y_train = Y_train.ravel()
+            model_obj = RFE(
+                n_features_to_select=n,
+                estimator=XGBClassifier(random_state=42, n_jobs=-1))
+            model_obj.fit(self.X_train, Y_train)
         else:
             logger.error('NOT IMPLEMENTED DIMENSION MODEL: %s' % model)
             raise Exception('NOT IMPLEMENTED')
