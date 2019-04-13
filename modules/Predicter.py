@@ -135,6 +135,9 @@ class Predicter(ConfigReader):
             return KerasClassifier(build_fn=create_keras_model)
         elif model == 'keras_reg':
             return KerasRegressor(build_fn=create_keras_model)
+        else:
+            logger.error('NOT IMPLEMENTED BASE MODEL: %s' % model)
+            raise Exception('NOT IMPLEMENTED')
 
     def _calc_best_params(
         self,
@@ -491,6 +494,9 @@ class Predicter(ConfigReader):
                 else:
                     logger.error('NOT IMPLEMENTED FIT Y_PRE: %s' % y_pre)
                     raise Exception('NOT IMPLEMENTED')
+        else:
+            logger.error('TRAIN MODE SHOULD BE clf OR reg')
+            raise Exception('NOT IMPLEMENTED')
         return self.Y_pred, self.Y_pred_proba, self.Y_train_pred
 
     def calc_predict_df(self):

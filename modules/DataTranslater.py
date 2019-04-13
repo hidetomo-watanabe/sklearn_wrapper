@@ -48,6 +48,9 @@ class DataTranslater(ConfigReader):
             for pred_col in self.pred_cols:
                 logger.info('%s:' % pred_col)
                 display(self.train_df[pred_col].std())
+        else:
+            logger.error('TRAIN MODE SHOULD BE clf OR reg')
+            raise Exception('NOT IMPLEMENTED')
         for label, df in [('train', self.train_df), ('test', self.test_df)]:
             logger.info('%s:' % label)
             display(df.head())
@@ -265,6 +268,9 @@ class DataTranslater(ConfigReader):
             logger.info('pca_ratio sum: %s' % sum(
                 model_obj.explained_variance_ratio_))
             logger.info('pca_ratio: %s' % model_obj.explained_variance_ratio_)
+        else:
+            logger.error('NOT IMPLEMENTED DIMENSION MODEL: %s' % model)
+            raise Exception('NOT IMPLEMENTED')
 
         self.X_train = model_obj.transform(self.X_train)
         self.X_test = model_obj.transform(self.X_test)
@@ -302,6 +308,7 @@ class DataTranslater(ConfigReader):
             return
 
         logger.info('extract train data with adversarial validation')
+        logger.warn('IN DATA PREPROCESSING, USING TEST DATA')
         adv_train_preds, adv_test_preds = _get_adversarial_preds(
             self.X_train, self.X_test, adversarial)
         logger.info('adversarial train preds:')
@@ -349,6 +356,9 @@ class DataTranslater(ConfigReader):
         logger.info('extract train data with undersampling: %s' % method)
         if method == 'random':
             sampler_obj = RandomUnderSampler(random_state=42)
+        else:
+            logger.error('NOT IMPLEMENTED UNDERSAMPLING METHOD: %s' % method)
+            raise Exception('NOT IMPLEMENTED')
         org_len = len(self.X_train)
         self.X_train, self.Y_train = sampler_obj.fit_resample(
             self.X_train, self.Y_train)
@@ -366,6 +376,9 @@ class DataTranslater(ConfigReader):
             sampler_obj = RandomOverSampler(random_state=42)
         elif method == 'smote':
             sampler_obj = SMOTE(random_state=42)
+        else:
+            logger.error('NOT IMPLEMENTED OVERSAMPLING METHOD: %s' % method)
+            raise Exception('NOT IMPLEMENTED')
         org_len = len(self.X_train)
         self.X_train, self.Y_train = sampler_obj.fit_resample(
             self.X_train, self.Y_train)
