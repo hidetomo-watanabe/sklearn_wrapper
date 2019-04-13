@@ -22,7 +22,10 @@
             "Hoge",
             "Fuga"
         ],
-        "dimension": false,
+        "dimension": {
+            "n": 250,
+            "model": "pca"
+        },
         "adversarial": {
             "model": "rf_clf",
             "scoring": "accuracy",

@@ -249,20 +249,27 @@ class DataTranslater(ConfigReader):
         return
 
     def reduce_dimension_of_data_for_model(self):
-        n = self.configs['translate'].get('dimension')
-        if not n:
+        di_config = self.configs['translate'].get('dimension')
+        if not di_config:
             return
-        logger.info('reduce dimension with pca')
+
+        n = di_config['n']
+        model = di_config['model']
+        logger.info('reduce dimension to %s with %s' % (n, model))
         if n == 'all':
             n = self.X_train.shape[1]
-        pca_obj = PCA(n_components=n, random_state=42)
-        pca_obj.fit(self.X_train)
-        logger.info('pca_ratio sum: %s' % sum(
-            pca_obj.explained_variance_ratio_))
-        logger.info('pca_ratio: %s' % pca_obj.explained_variance_ratio_)
-        self.X_train = pca_obj.transform(self.X_train)
-        self.X_test = pca_obj.transform(self.X_test)
-        self.feature_columns = list(map(lambda x: 'pca_%d' % x, range(n)))
+
+        if model == 'pca':
+            model_obj = PCA(n_components=n, random_state=42)
+            model_obj.fit(self.X_train)
+            logger.info('pca_ratio sum: %s' % sum(
+                model_obj.explained_variance_ratio_))
+            logger.info('pca_ratio: %s' % model_obj.explained_variance_ratio_)
+
+        self.X_train = model_obj.transform(self.X_train)
+        self.X_test = model_obj.transform(self.X_test)
+        self.feature_columns = list(map(
+            lambda x: '%s_%d' % (model, x), range(n)))
         return
 
     def extract_train_data_with_adversarial_validation(self):

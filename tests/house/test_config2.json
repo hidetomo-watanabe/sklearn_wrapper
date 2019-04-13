@@ -15,7 +15,10 @@
         ],
         "category": [
         ],
-        "dimension": 100,
+        "dimension": {
+            "n": 100,
+            "model": "pca"
+        },
         "adversarial": false
     },
     "fit": {
