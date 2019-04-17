@@ -18,10 +18,13 @@
             "Hoge",
             "Foo"
         ],
-        "category": [
-            "Hoge",
-            "Fuga"
-        ],
+        "category": {
+            "target": [
+                "Hoge",
+                "Fuga"
+            ],
+            "model": "onehot"
+        },
         "dimension": {
             "n": 250,
             "model": "pca"

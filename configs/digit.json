@@ -14,8 +14,11 @@
         },
         "del": [
         ],
-        "category": [
-        ],
+        "category": {
+            "target": [
+            ],
+            "model": "onehot"
+        },
         "dimension": false,
         "adversarial": false
     },

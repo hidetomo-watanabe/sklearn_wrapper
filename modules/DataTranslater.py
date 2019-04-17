@@ -70,25 +70,29 @@ class DataTranslater(ConfigReader):
         output.insert(0, replaced)
         return output
 
-    def _categorize_dfs(self, dfs, target):
+    def _categorize_dfs(self, dfs, target, model):
         def _replace_nan(org):
             df = pd.DataFrame(org)
             df = df.replace({np.nan: 'REPLACED_NAN'})
             return df[0].values
 
         output = []
-        # onehot
-        oh_enc = OneHotEncoder(categories='auto', handle_unknown='ignore')
+        if model == 'onehot':
+            model_obj = OneHotEncoder(
+                categories='auto', handle_unknown='ignore')
+        else:
+            logger.error('NOT IMPLEMENTED CATEGORIZE: %s' % model)
+            raise Exception('NOT IMPLEMENTED')
         train_org = dfs[0][target].values
-        oh_enc.fit(
+        model_obj.fit(
             _replace_nan(train_org).reshape(-1, 1))
-        feature_names = oh_enc.get_feature_names(input_features=[target])
+        feature_names = model_obj.get_feature_names(input_features=[target])
         for df in dfs:
             target_org = df[target].values
-            onehot = oh_enc.transform(
+            transed = model_obj.transform(
                 _replace_nan(target_org).reshape(-1, 1)).toarray()
             for i, column in enumerate(feature_names):
-                df[column] = onehot[:, i]
+                df[column] = transed[:, i]
             del df[target]
             output.append(df)
 
@@ -138,7 +142,7 @@ class DataTranslater(ConfigReader):
                 train_df, test_df = eval(
                     method_name)(train_df, test_df)
         # del
-        trans_del = self.configs['translate']['del']
+        trans_del = self.configs['translate'].get('del')
         if trans_del:
             for column in trans_del:
                 logger.info('delete: %s' % column)
@@ -162,12 +166,12 @@ class DataTranslater(ConfigReader):
             if column in [self.id_col] + self.pred_cols:
                 continue
             if test_df.dtypes[column] != 'object' \
-                and isinstance(trans_category, list) \
-                    and column not in trans_category:
+                and trans_category \
+                    and column not in trans_category['target']:
                 continue
             logger.info('categorize: %s' % column)
             train_df, test_df = self._categorize_dfs(
-                [train_df, test_df], column)
+                [train_df, test_df], column, trans_category['model'])
         # float
         for column in test_df.columns:
             if column in [self.id_col]:

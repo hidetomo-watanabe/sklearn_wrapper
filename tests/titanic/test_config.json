@@ -22,10 +22,13 @@
             "Cabin",
             "Embarked"
         ],
-        "category": [
-            "Pclass",
-            "FamilyStatus"
-        ],
+        "category": {
+            "target": [
+                "Pclass",
+                "FamilyStatus"
+            ],
+            "model": "onehot"
+        },
         "dimension": false,
         "adversarial": false
     },

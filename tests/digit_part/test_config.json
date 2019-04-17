@@ -14,8 +14,11 @@
         },
         "del": [
         ],
-        "category": [
-        ],
+        "category": {
+            "target": [
+            ],
+            "model": "onehot"
+        },
         "dimension": {
             "n": 100,
             "model": "pca"
