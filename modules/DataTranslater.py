@@ -3,7 +3,7 @@ import math
 import numpy as np
 import pandas as pd
 import importlib
-from sklearn.preprocessing import OneHotEncoder
+from sklearn.preprocessing import OneHotEncoder, LabelEncoder
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from sklearn.decomposition import PCA
 from xgboost import XGBClassifier
@@ -76,21 +76,38 @@ class DataTranslater(ConfigReader):
             df = df.replace({np.nan: 'REPLACED_NAN'})
             return df[0].values
 
+        def _get_transed_data(model, fit_target, trans_target):
+            if model == 'onehot':
+                model_obj = OneHotEncoder(
+                    categories='auto', handle_unknown='ignore')
+                model_obj.fit(fit_target.reshape(-1, 1))
+                feature_names = model_obj.get_feature_names(
+                    input_features=[target])
+                transed = model_obj.transform(
+                    trans_target.reshape(-1, 1)).toarray()
+            elif model == 'label':
+                feature_names = ['%s_label' % target]
+                model_obj = LabelEncoder()
+                model_obj.fit(fit_target)
+                transed = model_obj.transform(trans_target).reshape(-1, 1)
+            elif model == 'count':
+                feature_names = ['%s_count' % target]
+                df = pd.DataFrame(fit_target)
+                counts = df.groupby(0)[0].count()
+                transed = trans_target.reshape(-1, 1)
+                for c in counts.index:
+                    transed = np.where(transed == c, counts[c], transed)
+            else:
+                logger.error('NOT IMPLEMENTED CATEGORIZE: %s' % model)
+                raise Exception('NOT IMPLEMENTED')
+            return feature_names, transed
+
         output = []
-        if model == 'onehot':
-            model_obj = OneHotEncoder(
-                categories='auto', handle_unknown='ignore')
-        else:
-            logger.error('NOT IMPLEMENTED CATEGORIZE: %s' % model)
-            raise Exception('NOT IMPLEMENTED')
-        train_org = dfs[0][target].values
-        model_obj.fit(
-            _replace_nan(train_org).reshape(-1, 1))
-        feature_names = model_obj.get_feature_names(input_features=[target])
+        fit_target = _replace_nan(dfs[0][target].values)
         for df in dfs:
-            target_org = df[target].values
-            transed = model_obj.transform(
-                _replace_nan(target_org).reshape(-1, 1)).toarray()
+            trans_target = _replace_nan(df[target].values)
+            feature_names, transed = _get_transed_data(
+                model, fit_target, trans_target)
             for i, column in enumerate(feature_names):
                 df[column] = transed[:, i]
             del df[target]
