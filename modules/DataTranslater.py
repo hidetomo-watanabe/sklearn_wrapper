@@ -73,17 +73,15 @@ class DataTranslater(ConfigReader):
     def _categorize_dfs(self, dfs, target):
         def _replace_nan(org):
             df = pd.DataFrame(org)
-            df = df.replace({np.nan: 'DUMMY'})
+            df = df.replace({np.nan: 'REPLACED_NAN'})
             return df[0].values
 
         output = []
         # onehot
+        oh_enc = OneHotEncoder(categories='auto', handle_unknown='ignore')
         train_org = dfs[0][target].values
-        test_org = dfs[1][target].values
-        oh_enc = OneHotEncoder(categories='auto')
-        # use test data for checking category value
         oh_enc.fit(
-            _replace_nan(np.concatenate([train_org, test_org])).reshape(-1, 1))
+            _replace_nan(train_org).reshape(-1, 1))
         feature_names = oh_enc.get_feature_names(input_features=[target])
         for df in dfs:
             target_org = df[target].values
