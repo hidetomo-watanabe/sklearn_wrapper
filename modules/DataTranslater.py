@@ -76,21 +76,24 @@ class DataTranslater(ConfigReader):
             df = df.replace({np.nan: 'REPLACED_NAN'})
             return df[0].values
 
-        def _get_transed_data(model, fit_target, trans_target):
+        def _get_transed_data(model_obj, model, fit_target, trans_target):
             if model == 'onehot':
-                model_obj = OneHotEncoder(
-                    categories='auto', handle_unknown='ignore')
-                model_obj.fit(fit_target.reshape(-1, 1))
+                if not model_obj:
+                    model_obj = OneHotEncoder(
+                        categories='auto', handle_unknown='ignore')
+                    model_obj.fit(fit_target.reshape(-1, 1))
                 feature_names = model_obj.get_feature_names(
                     input_features=[target])
                 transed = model_obj.transform(
                     trans_target.reshape(-1, 1)).toarray()
             elif model == 'label':
+                if not model_obj:
+                    model_obj = LabelEncoder()
+                    model_obj.fit(fit_target)
                 feature_names = ['%s_label' % target]
-                model_obj = LabelEncoder()
-                model_obj.fit(fit_target)
                 transed = model_obj.transform(trans_target).reshape(-1, 1)
             elif model == 'count':
+                model_obj = None
                 feature_names = ['%s_count' % target]
                 df = pd.DataFrame(fit_target)
                 counts = df.groupby(0)[0].count()
@@ -100,14 +103,15 @@ class DataTranslater(ConfigReader):
             else:
                 logger.error('NOT IMPLEMENTED CATEGORIZE: %s' % model)
                 raise Exception('NOT IMPLEMENTED')
-            return feature_names, transed
+            return model_obj, feature_names, transed
 
         output = []
         fit_target = _replace_nan(dfs[0][target].values)
+        model_obj = None
         for df in dfs:
             trans_target = _replace_nan(df[target].values)
-            feature_names, transed = _get_transed_data(
-                model, fit_target, trans_target)
+            model_obj, feature_names, transed = _get_transed_data(
+                model_obj, model, fit_target, trans_target)
             for i, column in enumerate(feature_names):
                 df[column] = transed[:, i]
             del df[target]
