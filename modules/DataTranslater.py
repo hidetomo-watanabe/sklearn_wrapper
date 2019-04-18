@@ -46,10 +46,11 @@ class DataTranslater(ConfigReader):
                 display(self.train_df[pred_col].value_counts())
                 display(self.train_df[pred_col].value_counts(normalize=True))
         elif self.configs['fit']['train_mode'] == 'reg':
-            logger.info('train pred std')
+            logger.info('train pred mean, std')
             for pred_col in self.pred_cols:
                 logger.info('%s:' % pred_col)
-                display(self.train_df[pred_col].std())
+                display('mean: %f' % self.train_df[pred_col].mean())
+                display('std: %f' % self.train_df[pred_col].std())
         else:
             logger.error('TRAIN MODE SHOULD BE clf OR reg')
             raise Exception('NOT IMPLEMENTED')
@@ -97,9 +98,13 @@ class DataTranslater(ConfigReader):
                 feature_names = ['%s_count' % target]
                 df = pd.DataFrame(fit_target)
                 counts = df.groupby(0)[0].count()
-                transed = trans_target.reshape(-1, 1)
+                transed = trans_target
+                # only test
+                transed = np.where(
+                    ~np.in1d(transed, list(counts.index)), 1, transed)
                 for c in counts.index:
                     transed = np.where(transed == c, counts[c], transed)
+                transed = transed.reshape(-1, 1)
             else:
                 logger.error('NOT IMPLEMENTED CATEGORIZE: %s' % model)
                 raise Exception('NOT IMPLEMENTED')
@@ -183,6 +188,7 @@ class DataTranslater(ConfigReader):
                 logger.info('replace missing with mean: %s' % column)
         # category
         trans_category = self.configs['translate'].get('category')
+        logger.info('categorize model: %s' % trans_category['model'])
         for column in test_df.columns:
             if column in [self.id_col] + self.pred_cols:
                 continue
