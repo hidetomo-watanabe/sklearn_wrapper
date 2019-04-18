@@ -3,7 +3,7 @@ import math
 import numpy as np
 import pandas as pd
 import importlib
-from sklearn.preprocessing import OneHotEncoder, LabelEncoder
+from sklearn.preprocessing import OneHotEncoder
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from sklearn.decomposition import PCA
 from xgboost import XGBClassifier
@@ -88,11 +88,19 @@ class DataTranslater(ConfigReader):
                 transed = model_obj.transform(
                     trans_target.reshape(-1, 1)).toarray()
             elif model == 'label':
-                if not model_obj:
-                    model_obj = LabelEncoder()
-                    model_obj.fit(fit_target)
+                model_obj = None
                 feature_names = ['%s_label' % target]
-                transed = model_obj.transform(trans_target).reshape(-1, 1)
+                df = pd.DataFrame(fit_target)
+                uniqs = np.unique(df[0].values)
+                labels = pd.DataFrame(
+                    data=np.arange(1, len(uniqs) + 1), index=uniqs)
+                transed = trans_target
+                # only test, insert -1
+                transed = np.where(
+                    ~np.in1d(transed, list(labels.index)), -1, transed)
+                for i in labels.index:
+                    transed = np.where(transed == i, labels[0][i], transed)
+                transed = transed.reshape(-1, 1)
             elif model == 'count':
                 model_obj = None
                 feature_names = ['%s_count' % target]
