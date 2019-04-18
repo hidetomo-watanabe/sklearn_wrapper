@@ -77,12 +77,14 @@ class DataTranslater(ConfigReader):
             df = df.replace({np.nan: 'REPLACED_NAN'})
             return df[0].values
 
-        def _get_transed_data(model_obj, model, fit_target, trans_target):
+        def _get_transed_data(
+            model_obj, model, fit_x_target, fit_y_target, trans_target
+        ):
             if model == 'onehot':
                 if not model_obj:
                     model_obj = OneHotEncoder(
                         categories='auto', handle_unknown='ignore')
-                    model_obj.fit(fit_target.reshape(-1, 1))
+                    model_obj.fit(fit_x_target.reshape(-1, 1))
                 feature_names = model_obj.get_feature_names(
                     input_features=[target])
                 transed = model_obj.transform(
@@ -90,22 +92,24 @@ class DataTranslater(ConfigReader):
             elif model == 'label':
                 model_obj = None
                 feature_names = ['%s_label' % target]
-                df = pd.DataFrame(fit_target)
-                uniqs = np.unique(df[0].values)
+                df = pd.DataFrame(data=fit_x_target, columns=['x'])
+                uniqs = np.unique(df['x'].values)
                 labels = pd.DataFrame(
-                    data=np.arange(1, len(uniqs) + 1), index=uniqs)
+                    data=np.arange(1, len(uniqs) + 1),
+                    index=uniqs, columns=['uniq'])
                 transed = trans_target
                 # only test, insert -1
                 transed = np.where(
                     ~np.in1d(transed, list(labels.index)), -1, transed)
                 for i in labels.index:
-                    transed = np.where(transed == i, labels[0][i], transed)
+                    transed = np.where(
+                        transed == i, labels['uniq'][i], transed)
                 transed = transed.reshape(-1, 1)
             elif model == 'count':
                 model_obj = None
                 feature_names = ['%s_count' % target]
-                df = pd.DataFrame(fit_target)
-                counts = df.groupby(0)[0].count()
+                df = pd.DataFrame(data=fit_x_target, columns=['x'])
+                counts = df.groupby('x')['x'].count()
                 transed = trans_target
                 # only test, insert 1
                 transed = np.where(
@@ -116,8 +120,8 @@ class DataTranslater(ConfigReader):
             elif model == 'rank':
                 model_obj = None
                 feature_names = ['%s_rank' % target]
-                df = pd.DataFrame(fit_target)
-                ranks = df.groupby(0)[0].count().rank(ascending=False)
+                df = pd.DataFrame(data=fit_x_target, columns=['x'])
+                ranks = df.groupby('x')['x'].count().rank(ascending=False)
                 transed = trans_target
                 # only test, insert -1
                 transed = np.where(
@@ -125,18 +129,32 @@ class DataTranslater(ConfigReader):
                 for i in ranks.index:
                     transed = np.where(transed == i, ranks[i], transed)
                 transed = transed.reshape(-1, 1)
+            elif model == 'target':
+                model_obj = None
+                feature_names = ['%s_target' % target]
+                df = pd.DataFrame(data=fit_x_target, columns=['x'])
+                df['y'] = fit_y_target
+                means = df.groupby('x')['y'].mean()
+                transed = trans_target
+                # only test, insert 0
+                transed = np.where(
+                    ~np.in1d(transed, list(means.index)), 0, transed)
+                for i in means.index:
+                    transed = np.where(transed == i, means[i], transed)
+                transed = transed.reshape(-1, 1)
             else:
                 logger.error('NOT IMPLEMENTED CATEGORIZE: %s' % model)
                 raise Exception('NOT IMPLEMENTED')
             return model_obj, feature_names, transed
 
         output = []
-        fit_target = _replace_nan(dfs[0][target].values)
+        fit_x_target = _replace_nan(dfs[0][target].values)
+        fit_y_target = _replace_nan(dfs[0][self.pred_cols].values)
         model_obj = None
         for df in dfs:
             trans_target = _replace_nan(df[target].values)
             model_obj, feature_names, transed = _get_transed_data(
-                model_obj, model, fit_target, trans_target)
+                model_obj, model, fit_x_target, fit_y_target, trans_target)
             for i, column in enumerate(feature_names):
                 df[column] = transed[:, i]
             del df[target]
