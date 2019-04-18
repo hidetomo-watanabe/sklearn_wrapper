@@ -99,11 +99,23 @@ class DataTranslater(ConfigReader):
                 df = pd.DataFrame(fit_target)
                 counts = df.groupby(0)[0].count()
                 transed = trans_target
-                # only test
+                # only test, insert 1
                 transed = np.where(
                     ~np.in1d(transed, list(counts.index)), 1, transed)
-                for c in counts.index:
-                    transed = np.where(transed == c, counts[c], transed)
+                for i in counts.index:
+                    transed = np.where(transed == i, counts[i], transed)
+                transed = transed.reshape(-1, 1)
+            elif model == 'rank':
+                model_obj = None
+                feature_names = ['%s_rank' % target]
+                df = pd.DataFrame(fit_target)
+                ranks = df.groupby(0)[0].count().rank(ascending=False)
+                transed = trans_target
+                # only test, insert -1
+                transed = np.where(
+                    ~np.in1d(transed, list(ranks.index)), -1, transed)
+                for i in ranks.index:
+                    transed = np.where(transed == i, ranks[i], transed)
                 transed = transed.reshape(-1, 1)
             else:
                 logger.error('NOT IMPLEMENTED CATEGORIZE: %s' % model)
