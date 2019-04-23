@@ -351,26 +351,33 @@ class Predicter(ConfigReader):
             dataset = Dataset(self.X_train, self.Y_train.ravel(), self.X_test)
         else:
             dataset = Dataset(self.X_train, self.Y_train, self.X_test)
+
+        # single fit
         for model_config in model_configs:
             single_estimator = self.calc_single_model(
                 self.scorer, model_config, keras_build_func=myfunc)
             self.single_estimators.append((model_config, single_estimator))
-            if self.classes is None \
-                    and self.configs['fit']['train_mode'] == 'clf':
-                self.classes = single_estimator.classes_
             modelname = model_config['modelname']
+            # clf
             if self.configs['fit']['train_mode'] == 'clf':
+                if self.classes is None:
+                    if hasattr(single_estimator, 'classes_'):
+                        self.classes = single_estimator.classes_
+                    else:
+                        self.classes = sorted(np.unique(self.Y_train))
                 models.append(
                     Classifier(
                         dataset=dataset, estimator=single_estimator.__class__,
                         parameters=single_estimator.get_params(),
                         name=modelname))
+            # reg
             elif self.configs['fit']['train_mode'] == 'reg':
                 models.append(
                     Regressor(
                         dataset=dataset, estimator=single_estimator.__class__,
                         parameters=single_estimator.get_params(),
                         name=modelname))
+
         # pipeline
         ensemble_config = self.configs['fit']['ensemble']
         pipeline = ModelsPipeline(*models)
