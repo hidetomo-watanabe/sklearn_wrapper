@@ -1,0 +1,75 @@
+{
+    "data": {
+        "train_path": "../input/gendered_pronoun/train.tsv",
+        "test_path": "../input/gendered_pronoun/test_stage_2.tsv",
+        "pred_cols": ["A","B","NEITHER"],
+        "id_col": "ID",
+        "delimiter": "\t"
+    },
+    "translate": {
+        "adhoc": {
+            "myfunc": "gendered_pronoun",
+            "methods": [
+                "rename_columns",
+                "get_base_features",
+                "get_nlp_features",
+                "get_train_neither"
+            ]
+        },
+        "del": [
+            "Pronoun",
+            "Text",
+            "A-noun",
+            "B-noun",
+            "URL"
+        ],
+        "category": {
+            "target": [
+            ],
+            "model": "onehot"
+        },
+        "dimension": false,
+        "adversarial": false,
+        "undersampling": "random",
+        "oversampling": false
+    },
+    "fit": {
+        "myfunc": "gendred_pronoun",
+        "y_pre": false,
+        "train_mode": "clf",
+        "ensemble": {
+            "mode": "stacking",
+            "model": "log_reg",
+            "modelname": "tmp_gp",
+            "k": 10,
+            "seed": 111
+        },
+        "scoring": "neg_log_loss",
+        "single_models": [
+            {
+                "model": "lgb_clf",
+                "multiclass": "onevsrest",
+                "modelname": "tmp",
+                "cv": 3,
+                "n_jobs": -1,
+                "max_evals": 50,
+                "fit_params" : {
+                },
+                "params" : {
+                    "num_leaves": [5, 10, 20, 30, 50, 100],
+                    "max_depth": [5, 10, 20, 30, 50, 100],
+                    "n_estimators": [5, 10, 20, 30, 50, 100]
+                }
+            }
+        ],
+        "permutation": false,
+        "post": {
+            "myfunc": false,
+            "methods": [
+            ]
+        }
+    },
+    "notify": {
+        "slack": "https://hooks.slack.com/services/hogehoge"
+    }
+}
