@@ -183,6 +183,22 @@
    "metadata": {},
    "outputs": [],
    "source": [
+    "print('### VISUALIZE SHAP')\n",
+    "import shap\n",
+    "shap.initjs()\n",
+    "explainer = shap.TreeExplainer(model=predicter_obj.estimator, feature_dependence='tree_path_dependent', model_output='margin')\n",
+    "shap_values = explainer.shap_values(X=data_for_model['X_train'], y=data_for_model['Y_train'])\n",
+    "shap.summary_plot(shap_values, data_for_model['X_train'], feature_names=data_for_model['feature_columns'])\n",
+    "# shap.summary_plot(shap_values, data_for_model['X_train'], feature_names=data_for_model['feature_columns'], plot_type=\"bar\")\n",
+    "shap.force_plot(base_value=explainer.expected_value, shap_values=shap_values, feature_names=data_for_model['feature_columns'])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
     "print('### VISUALIZE LEARNING CURVES')\n",
     "estimator_data = predicter_obj.get_estimator_data()\n",
     "for config, estimator in estimator_data['single_estimators']:\n",
