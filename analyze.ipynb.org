@@ -229,7 +229,7 @@
     "print('### VISUALIZE Y TRAIN PRED DATA')\n",
     "pred_data = predicter_obj.get_predict_data()\n",
     "visualizer_obj.visualize_y_train_pred_data(\n",
-    "    data_for_model['Y_train'], pred_data['Y_train_pred'])"
+    "    data_for_model['Y_train'], pred_data['Y_train_pred'].reshape(-1, 1))"
    ]
   },
   {
