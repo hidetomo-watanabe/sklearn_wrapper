@@ -250,11 +250,17 @@ class DataTranslater(ConfigReader):
         self.test_df = test_df
         return
 
-    def write_data_for_view(self, filename='data_for_view.csv'):
+    def write_data_for_view(self):
+        savename = self.configs['translate'].get('savename')
+        if not savename:
+            logger.warn('NO SAVENAME')
+            return
+
+        savename += '.csv'
         self.train_df.to_csv(
-            '%s/train_%s' % (self.OUTPUT_PATH, filename), index=False)
+            '%s/train_%s' % (self.OUTPUT_PATH, savename), index=False)
         self.test_df.to_csv(
-            '%s/test_%s' % (self.OUTPUT_PATH, filename), index=False)
+            '%s/test_%s' % (self.OUTPUT_PATH, savename), index=False)
         return
 
     def get_data_for_model(self):

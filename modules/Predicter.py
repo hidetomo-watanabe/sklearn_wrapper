@@ -357,7 +357,9 @@ class Predicter(ConfigReader):
             single_estimator = self.calc_single_model(
                 self.scorer, model_config, keras_build_func=myfunc)
             self.single_estimators.append((model_config, single_estimator))
-            modelname = model_config['modelname']
+            modelname = model_config.get('modelname')
+            if not modelname:
+                modelname = 'tmp_model'
             # clf
             if self.configs['fit']['train_mode'] == 'clf':
                 if self.classes is None:
@@ -400,7 +402,9 @@ class Predicter(ConfigReader):
         return self.estimator
 
     def write_estimator_data(self):
-        modelname = self.configs['fit']['ensemble']['modelname']
+        modelname = self.configs['fit']['ensemble'].get('modelname')
+        if not modelname:
+            modelname = 'tmp_model'
         if len(self.single_estimators) == 1:
             targets = self.single_estimators
         else:
@@ -408,7 +412,9 @@ class Predicter(ConfigReader):
                 ({'modelname': modelname}, self.estimator)
             ]
         for config, estimator in targets:
-            modelname = config['modelname']
+            modelname = config.get('modelname')
+            if not modelname:
+                modelname = 'tmp_model'
             if hasattr(estimator, 'save'):
                 estimator.save(
                     '%s/%s.pickle' % (self.OUTPUT_PATH, modelname))
@@ -548,9 +554,11 @@ class Predicter(ConfigReader):
 
         return self.Y_pred_df, self.Y_pred_proba_df
 
-    def write_predict_data(self, filename=None):
-        if not filename:
-            filename = '%s.csv' % self.configs['fit']['ensemble']['modelname']
+    def write_predict_data(self):
+        modelname = self.configs['fit']['ensemble'].get('modelname')
+        if not modelname:
+            modelname = 'tmp_model'
+        filename = '%s.csv' % modelname
         if isinstance(self.Y_pred_df, pd.DataFrame):
             self.Y_pred_df.to_csv(
                 '%s/%s' % (self.OUTPUT_PATH, filename), index=False)

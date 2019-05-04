@@ -45,7 +45,8 @@
         "no_anomaly": true,
         "undersampling": "random",
         "oversampling": "smote",
-        "reshape_for_keras": "lstm"
+        "reshape_for_keras": "lstm",
+        "savename": "tmp_file"
     },
     "fit": {
         "myfunc": "hoge",
@@ -65,7 +66,7 @@
             {
                 "model": "gbdt_clf",
                 "multiclass": "onevsrest",
-                "modelname": "tmp",
+                "modelname": "tmp_model1",
                 "cv": 3,
                 "n_jobs": -1,
                 "max_evals": 1,
@@ -79,7 +80,7 @@
             {
                 "model": "svc",
                 "multiclass": "onevsone",
-                "modelname": "tmp",
+                "modelname": "tmp_model2",
                 "cv": 5,
                 "n_jobs": -1,
                 "max_evals": 1,
@@ -95,7 +96,7 @@
             },
             {
                 "model": "keras_clf",
-                "modelname": "tmp",
+                "modelname": "tmp_model3",
                 "cv": 3,
                 "n_jobs": -1,
                 "max_evals": 1,
