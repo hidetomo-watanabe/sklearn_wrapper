@@ -1,5 +1,8 @@
 import json
 import requests
+from logging import getLogger
+
+logger = getLogger('predict').getChild('Notifier')
 
 
 class Notifier(object):
@@ -14,7 +17,17 @@ class Notifier(object):
         self.configs = json.loads(text)
 
     def notify_slack(self):
-        text = 'Finished.'
-        requests.post(
-            self.configs['notify']['slack'],
-            data=json.dumps({'text': text}))
+        mode = self.configs['notify'].get('mode')
+        if not mode:
+            logger.warn('NO NOTIFICATION')
+            return
+
+        logger.info('NOTIFICATION: %s' % mode)
+        if mode == 'slack':
+            text = 'Finished.'
+            requests.post(
+                self.configs['notify'][mode],
+                data=json.dumps({'text': text}))
+        else:
+            logger.error('NOT IMPLEMENTED NOTIFICATION: %s' % mode)
+            raise Exception('NOT IMPLEMENTED')
