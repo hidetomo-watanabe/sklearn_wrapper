@@ -343,7 +343,7 @@ class Predicter(ConfigReader):
             return self.estimator
 
         # ensemble
-        logger.info('SINGLE FIT IN ENSEMBLE')
+        logger.info('single fit in ensemble')
         models = []
         self.single_estimators = []
         # for warning
@@ -394,7 +394,7 @@ class Predicter(ConfigReader):
 
         # validate
         stacker.probability = False
-        logger.info('ENSEMBLE VALIDATION')
+        logger.info('ensemble validation')
         stacker.validate(
             k=ensemble_config['k'], scorer=self.scorer._score_func)
 

@@ -22,7 +22,7 @@ class Notifier(object):
             logger.warn('NO NOTIFICATION')
             return
 
-        logger.info('NOTIFICATION: %s' % mode)
+        logger.info('notification: %s' % mode)
         if mode == 'slack':
             text = 'Finished.'
             requests.post(
