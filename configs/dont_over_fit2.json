@@ -1,0 +1,89 @@
+{
+    "data": {
+        "train_path": "~/share/dont_over_fit2/train.csv",
+        "test_path": "~/share/dont_over_fit2/test.csv",
+        "pred_cols": ["target"],
+        "id_col": "id",
+        "delimiter": ","
+    },
+    "translate": {
+        "adhoc": {
+            "myfunc": "dont_over_fit2",
+            "methods": [
+                "translate_target2int"
+            ]
+        },
+        "del": [
+        ],
+        "category": {
+            "target": [
+            ],
+            "model": "onehot"
+        },
+        "dimension": {
+            "n": 280,
+            "model": "rfe"
+        },
+        "adversarial": {
+            "model": "g_mix",
+            "scoring": "accuracy",
+            "cv": 3,
+            "n_jobs": -1,
+            "params": {
+                "n_components": [2]
+            },
+            "threshold": 0.0,
+            "add_column": true
+        },
+        "no_anomaly": true,
+        "undersampling": false,
+        "oversampling": false,
+        "reshape_for_keras": false
+    },
+    "fit": {
+        "myfunc": false,
+        "train_mode": "clf",
+        "y_pre": false,
+        "y_scaler": "standard",
+        "ensemble": {
+            "mode": "stacking",
+            "model": "log_reg",
+            "modelname": "stacker",
+            "k": 10,
+            "proportion": 0.2,
+            "seed": 111
+        },
+        "scoring": "roc_auc",
+        "single_models": [
+            {
+                "model": "lasso",
+                "modelname": "tmp",
+                "cv": 5,
+                "n_jobs": -1,
+                "max_evals": 10,
+                "fit_params": {
+                },
+                "params": {
+                    "alpha": [0.022, 0.021, 0.02, 0.019, 0.023, 0.024, 0.025, 0.026, 0.027, 0.029, 0.031],
+                    "tol": [0.0013, 0.0014, 0.001, 0.0015, 0.0011, 0.0012, 0.0016, 0.0017]
+                }
+            }
+        ],
+        "permutation": false,
+        "post": {
+            "myfunc": "dont_over_fit2",
+            "methods": [
+                "translate_pred2max1"
+            ]
+        }
+    },
+    "notify": {
+        "slack": "https://hooks.slack.com/services/hogehoge"
+    },
+    "integrate": {
+        "output": "integrate",
+        "filenames": [
+        ],
+        "weights": [1, 1]
+    }
+}
