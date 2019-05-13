@@ -227,7 +227,7 @@ class Predicter(ConfigReader):
 
         # for warning
         if model not in ['keras_clf', 'keras_reg']:
-            if len(Y_train.shape) > 1 and Y_train.shape[1] == 1:
+            if Y_train.ndim > 1 and Y_train.shape[1] == 1:
                 Y_train = Y_train.ravel()
 
         # fit
@@ -347,7 +347,7 @@ class Predicter(ConfigReader):
         models = []
         self.single_estimators = []
         # for warning
-        if len(self.Y_train.shape) > 1 and self.Y_train.shape[1] == 1:
+        if self.Y_train.ndim > 1 and self.Y_train.shape[1] == 1:
             dataset = Dataset(self.X_train, self.Y_train.ravel(), self.X_test)
         else:
             dataset = Dataset(self.X_train, self.Y_train, self.X_test)

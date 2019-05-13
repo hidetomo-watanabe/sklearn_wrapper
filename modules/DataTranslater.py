@@ -63,10 +63,9 @@ class DataTranslater(ConfigReader):
         replaced = False
         output = []
         for df in dfs:
-            for i, val in enumerate(df[target].values):
-                if math.isnan(val):
-                    replaced = True
-                    df[target].values[i] = target_mean
+            if df[target].isna().any():
+                replaced = True
+                df[target] = df[target].fillna(target_mean)
             output.append(df)
         output.insert(0, replaced)
         return output
@@ -346,7 +345,7 @@ class DataTranslater(ConfigReader):
         elif model == 'rfe':
             # for warning
             Y_train = self.Y_train
-            if len(Y_train.shape) > 1 and Y_train.shape[1] == 1:
+            if Y_train.ndim > 1 and Y_train.shape[1] == 1:
                 Y_train = Y_train.ravel()
             model_obj = RFE(
                 n_features_to_select=n,
