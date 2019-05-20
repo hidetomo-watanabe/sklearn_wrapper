@@ -7,7 +7,7 @@ import pandas as pd
 import importlib
 from sklearn.model_selection import StratifiedKFold, KFold
 from sklearn.model_selection import cross_val_score
-from hyperopt import fmin, tpe, hp, space_eval
+from hyperopt import fmin, tpe, hp, space_eval, Trials, STATUS_OK
 from sklearn.linear_model import LogisticRegression, LinearRegression
 from sklearn.linear_model import Lasso, Ridge
 from sklearn.svm import SVC, SVR, LinearSVC, LinearSVR
@@ -157,7 +157,7 @@ class Predicter(ConfigReader):
             logger.debug('  params: %s' % args)
             logger.debug('  score mean: %s' % score_mean)
             logger.debug('  score std: %s' % score_std)
-            return -score_mean
+            return {'loss': -1 * score_mean, 'status': STATUS_OK}
 
         params_space = {}
         all_comb_num = 0
@@ -173,10 +173,14 @@ class Predicter(ConfigReader):
         if max_evals == 0:
             return {}
 
+        trials_obj = Trials()
         best_params = fmin(
-            _hyperopt_objective, params_space,
-            algo=tpe.suggest, max_evals=max_evals)
+            fn=_hyperopt_objective, space=params_space,
+            algo=tpe.suggest, max_evals=max_evals, trials=trials_obj)
         best_params = space_eval(params_space, best_params)
+        best_score_mean = -1 * min(
+            [item['result']['loss'] for item in trials_obj.trials])
+        logger.info('best score mean: %s' % best_score_mean)
         return best_params
 
     def calc_single_model(
