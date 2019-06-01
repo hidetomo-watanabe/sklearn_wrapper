@@ -23,6 +23,7 @@ from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 from xgboost import XGBClassifier, XGBRegressor
 from lightgbm import LGBMClassifier, LGBMRegressor
 from catboost import CatBoostClassifier, CatBoostRegressor
+from rgf.sklearn import RGFClassifier, RGFRegressor
 from keras.wrappers.scikit_learn import KerasClassifier, KerasRegressor
 from keras.engine.sequential import Sequential
 from sklearn.multiclass import OneVsOneClassifier, OneVsRestClassifier
@@ -131,6 +132,10 @@ class Predicter(ConfigReader):
             return CatBoostClassifier()
         elif model == 'catb_reg':
             return CatBoostRegressor()
+        elif model == 'rgf_clf':
+            return RGFClassifier()
+        elif model == 'rgf_reg':
+            return RGFRegressor()
         elif model == 'keras_clf':
             return KerasClassifier(build_fn=create_keras_model)
         elif model == 'keras_reg':

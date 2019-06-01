@@ -33,6 +33,8 @@
   - LGBMClasssifier
 - catb_clf
   - CatBoostClasssifier
+- rgf_clf
+  - RGFClasssifier
 - keras_clf
   - KerasClasssifier
 
@@ -61,9 +63,11 @@
   - XGBRegressor
 - lgb_reg
   - LGBMRegressor
-- catb_clf
+- catb_reg
   - CatBoostRegressor
-- keras_clf
+- rgf_reg
+  - RGFRegressor
+- keras_reg
   - KerasRegressor
 
 ### sample configs
