@@ -73,14 +73,54 @@
                 "fit_params": {
                 },
                 "params": {
-                    "n_estimators": [1, 2, 3, 4, 5],
-                    "max_depth": [1, 2, 3, 4, 5]
+                    "max_depth": [4, 6, 8, 10],
+                    "learning_rate": [0.01, 0.05, 0.1, 0.5, 1.0],
+                    "n_estimators": [100, 300, 500, 1000],
+                    "random_state": [42]
+                }
+            },
+            {
+                "model": "xgb_clf",
+                "multiclass": "onevsrest",
+                "modelname": "tmp_model2",
+                "cv": 3,
+                "n_jobs": -1,
+                "max_evals": 1,
+                "fit_params": {
+                },
+                "params": {
+                    "max_depth": [7, 10, 30, 50],
+                    "learning_rate": [0.01, 0.05, 0.1, 0.5, 1.0],
+                    "n_estimators": [100, 300, 500, 1000],
+                    "reg_alpha": [0, 5, 15, 300],
+                    "reg_lambda": [0, 5, 15, 300],
+                    "random_state": [42]
+                }
+            },
+            {
+                "model": "lgb_clf",
+                "multiclass": "onevsrest",
+                "modelname": "tmp_model3",
+                "cv": 3,
+                "n_jobs": -1,
+                "max_evals": 1,
+                "fit_params": {
+                },
+                "params": {
+                    "max_depth": [7, 10, 30, 50],
+                    "min_data_in_leaf": [10, 20, 30, 50, 100, 500, 1000],
+                    "learning_rate": [0.01, 0.05, 0.1, 0.5, 1.0],
+                    "num_rounds": [100, 300, 500, 1000],
+                    "num_leaves": [10, 31, 50, 70, 80],
+                    "lambda_l1": [0, 5, 15, 300],
+                    "lambda_l2": [0, 5, 15, 300],
+                    "seed": [42]
                 }
             },
             {
                 "model": "svc",
                 "multiclass": "onevsone",
-                "modelname": "tmp_model2",
+                "modelname": "tmp_model4",
                 "cv": 5,
                 "n_jobs": -1,
                 "max_evals": 1,
@@ -96,7 +136,7 @@
             },
             {
                 "model": "keras_clf",
-                "modelname": "tmp_model3",
+                "modelname": "tmp_model5",
                 "cv": 3,
                 "n_jobs": -1,
                 "max_evals": 1,
