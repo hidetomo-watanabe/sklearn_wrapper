@@ -92,17 +92,8 @@ class DataTranslater(ConfigReader):
                 model_obj = None
                 feature_names = ['%s_label' % target]
                 df = pd.DataFrame(data=fit_x_target, columns=['x'])
-                uniqs = np.unique(df['x'].values)
-                labels = pd.DataFrame(
-                    data=np.arange(1, len(uniqs) + 1),
-                    index=uniqs, columns=['uniq'])
-                transed = trans_target
-                # only test, insert -1
-                transed = np.where(
-                    ~np.in1d(transed, list(labels.index)), -1, transed)
-                for i in labels.index:
-                    transed = np.where(
-                        transed == i, labels['uniq'][i], transed)
+                _, uniqs = pd.factorize(df['x'])
+                transed = uniqs.get_indexer(trans_target)
                 transed = transed.reshape(-1, 1)
             elif model == 'count':
                 model_obj = None
