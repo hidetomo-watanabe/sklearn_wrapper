@@ -288,15 +288,19 @@ class DataTranslater(ConfigReader):
     def normalize_data_for_model(self):
         # x
         # scaler
-        logger.info('normalize x data')
-        scaler_x = StandardScaler()
-        scaler_x.fit(self.X_train)
-        self.X_train = scaler_x.transform(self.X_train)
-        self.X_test = scaler_x.transform(self.X_test)
+        x_scaler = self.configs['translate'].get('x_scaler')
+        logger.info(f'normalize x data: {x_scaler}')
+        if (not x_scaler) or (x_scaler == 'standard'):
+            self.x_scaler = StandardScaler()
+        elif x_scaler == 'minmax':
+            self.x_scaler = MinMaxScaler()
+        self.x_scaler.fit(self.X_train)
+        self.X_train = self.x_scaler.transform(self.X_train)
+        self.X_test = self.x_scaler.transform(self.X_test)
         # y
         if self.configs['fit']['train_mode'] == 'reg':
             # pre
-            y_pre = self.configs['fit'].get('y_pre')
+            y_pre = self.configs['translate'].get('y_pre')
             if y_pre:
                 logger.info('translate y_train with %s' % y_pre)
                 if y_pre == 'log':
@@ -306,8 +310,8 @@ class DataTranslater(ConfigReader):
                     logger.error('NOT IMPLEMENTED FIT Y_PRE: %s' % y_pre)
                     raise Exception('NOT IMPLEMENTED')
             # scaler
-            logger.info('normalize y data')
-            y_scaler = self.configs['fit'].get('y_scaler')
+            y_scaler = self.configs['translate'].get('y_scaler')
+            logger.info(f'normalize y data: {y_scaler}')
             if (not y_scaler) or (y_scaler == 'standard'):
                 self.y_scaler = StandardScaler()
             elif y_scaler == 'minmax':

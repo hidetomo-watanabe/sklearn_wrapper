@@ -18,6 +18,7 @@
             ],
             "model": "onehot"
         },
+        "y_pre": "log",
         "dimension": {
             "n": 90,
             "model": "pca"
@@ -25,7 +26,6 @@
         "adversarial": false
     },
     "fit": {
-        "y_pre": "log",
         "train_mode": "reg",
         "ensemble": {
             "mode": "stacking",

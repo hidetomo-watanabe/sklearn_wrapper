@@ -18,6 +18,7 @@
             ],
             "model": "onehot"
         },
+        "y_pre": "log",
         "dimension": {
             "n": 100,
             "model": "pca"
@@ -26,7 +27,6 @@
     },
     "fit": {
         "myfunc": "house",
-        "y_pre": "log",
         "train_mode": "reg",
         "ensemble": {
             "mode": "stacking",

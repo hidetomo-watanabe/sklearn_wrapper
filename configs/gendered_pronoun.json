@@ -28,6 +28,7 @@
             ],
             "model": "onehot"
         },
+        "y_pre": false,
         "dimension": false,
         "adversarial": false,
         "undersampling": "random",
@@ -35,7 +36,6 @@
     },
     "fit": {
         "myfunc": "gendred_pronoun",
-        "y_pre": false,
         "train_mode": "clf",
         "ensemble": {
             "mode": "stacking",

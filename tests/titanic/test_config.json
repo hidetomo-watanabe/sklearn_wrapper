@@ -29,11 +29,11 @@
             ],
             "model": "onehot"
         },
+        "y_pre": false,
         "dimension": false,
         "adversarial": false
     },
     "fit": {
-        "y_pre": false,
         "train_mode": "clf",
         "ensemble": {
             "mode": "stacking",

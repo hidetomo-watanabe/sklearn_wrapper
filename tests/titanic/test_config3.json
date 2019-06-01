@@ -29,6 +29,7 @@
             ],
             "model": "onehot"
         },
+        "y_pre": false,
         "dimension": false,
         "adversarial": {
             "model": "rf_clf",
@@ -45,7 +46,6 @@
     },
     "fit": {
         "myfunc": "titanic",
-        "y_pre": false,
         "train_mode": "clf",
         "ensemble": {
             "mode": "stacking",

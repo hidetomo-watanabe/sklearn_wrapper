@@ -19,6 +19,7 @@
             ],
             "model": "onehot"
         },
+        "y_pre": false,
         "dimension": {
             "n": 100,
             "model": "pca"
@@ -26,7 +27,6 @@
         "adversarial": false
     },
     "fit": {
-        "y_pre": false,
         "train_mode": "clf",
         "ensemble": {
             "mode": "stacking",

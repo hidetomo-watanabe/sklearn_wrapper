@@ -25,6 +25,9 @@
             ],
             "model": "onehot"
         },
+        "x_scaler": "standard",
+        "y_pre": false,
+        "y_scaler": "standard",
         "dimension": {
             "n": 250,
             "model": "pca"
@@ -51,8 +54,6 @@
     "fit": {
         "myfunc": "hoge",
         "train_mode": "clf",
-        "y_pre": false,
-        "y_scaler": "standard",
         "ensemble": {
             "mode": "stacking",
             "model": "log_reg",

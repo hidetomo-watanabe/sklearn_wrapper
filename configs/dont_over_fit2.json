@@ -20,6 +20,8 @@
             ],
             "model": "onehot"
         },
+        "y_pre": false,
+        "y_scaler": "standard",
         "dimension": {
             "n": 280,
             "model": "rfe"
@@ -43,8 +45,6 @@
     "fit": {
         "myfunc": false,
         "train_mode": "clf",
-        "y_pre": false,
-        "y_scaler": "standard",
         "ensemble": {
             "mode": "stacking",
             "model": "log_reg",
