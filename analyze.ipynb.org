@@ -142,6 +142,17 @@
    "metadata": {},
    "outputs": [],
    "source": [
+    "print('### VISUALIZE TRAIN DF SCATTER MATRIX')\n",
+    "import pandas as pd\n",
+    "pd.plotting.scatter_matrix(data_for_view['train_df'])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
     "print('### VISUALIZE TRAIN DF PROFILING')\n",
     "import pandas_profiling\n",
     "pandas_profiling.ProfileReport(data_for_view['train_df'])"
