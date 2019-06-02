@@ -261,6 +261,20 @@ class DataTranslater(ConfigReader):
             'Y_train': self.Y_train,
             'X_test': self.X_test,
         }
+        return output
+
+    def get_pre_processers(self):
+        output = {
+            'x_scaler': self.x_scaler,
+        }
+        if hasattr(self, 'y_scaler'):
+            output['y_scaler'] = self.y_scaler
+        if hasattr(self, 'dimension_model'):
+            output['dimension_model'] = self.dimension_model
+        return output
+
+    def get_post_processers(self):
+        output = {}
         if hasattr(self, 'y_scaler'):
             output['y_scaler'] = self.y_scaler
         return output
@@ -359,6 +373,7 @@ class DataTranslater(ConfigReader):
         self.X_test = model_obj.transform(self.X_test)
         self.feature_columns = list(map(
             lambda x: '%s_%d' % (model, x), range(n)))
+        self.dimension_model = model_obj
         return
 
     def extract_train_data_with_adversarial_validation(self):
@@ -391,7 +406,6 @@ class DataTranslater(ConfigReader):
             return
 
         logger.info('extract train data with adversarial validation')
-        logger.warn('IN DATA PREPROCESSING, USING TEST DATA')
         adv_train_preds, adv_test_preds = _get_adversarial_preds(
             self.X_train, self.X_test, adversarial)
         logger.info('adversarial train preds:')
@@ -401,6 +415,7 @@ class DataTranslater(ConfigReader):
 
         if adversarial.get('add_column'):
             logger.info('add adversarial_test_proba column to X')
+            logger.warn('IN DATA PREPROCESSING, USING TEST DATA')
             self.feature_columns.append('adversarial_test_proba')
             self.X_train = np.append(
                 self.X_train, adv_train_preds.reshape(-1, 1), axis=1)

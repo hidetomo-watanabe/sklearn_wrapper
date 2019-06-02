@@ -43,9 +43,10 @@ if __name__ == '__main__':
         translater_obj.add_train_data_with_oversampling()
         translater_obj.reshape_data_for_model_for_keras()
         data_for_model = translater_obj.get_data_for_model()
+        post_processers = translater_obj.get_post_processers()
 
         # predict
-        predicter_obj = Predicter(**data_for_model)
+        predicter_obj = Predicter(**data_for_model, **post_processers)
         predicter_obj.read_config_file(config_path)
 
         logger.info('### FIT')
