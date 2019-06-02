@@ -147,17 +147,14 @@
                 }
             }
         ],
-        "permutation": false,
-        "post": {
-            "myfunc": "hoge",
-            "methods": [
-                "add_hoge",
-                "add_fuga"
-            ]
-        }
+        "permutation": false
     },
-    "notify": {
-        "slack": "https://hooks.slack.com/services/hogehoge"
+    "post": {
+        "myfunc": "hoge",
+        "methods": [
+            "add_hoge",
+            "add_fuga"
+        ]
     },
     "integrate": {
         "output": "integrate",
@@ -166,5 +163,8 @@
             "/path/2.csv"
         ],
         "weights": [1, 1]
+    },
+    "notify": {
+        "slack": "https://hooks.slack.com/services/hogehoge"
     }
 }

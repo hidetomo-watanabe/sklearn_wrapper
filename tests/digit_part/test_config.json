@@ -47,13 +47,13 @@
                 "params": {
                 }
             }
-        ],
-        "post": {
-            "myfunc": "digit",
-            "methods": [
-                "translate_label2upper"
-            ]
-        }
+        ]
+    },
+    "post": {
+        "myfunc": "digit",
+        "methods": [
+            "translate_label2upper"
+        ]
     },
     "notify": {
         "slack": "https://hooks.slack.com/services/hogehoge"

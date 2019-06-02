@@ -47,12 +47,12 @@
                 "params": {
                 }
             }
-        ],
-        "post": {
-            "myfunc": false,
-            "methods": [
-            ]
-        }
+        ]
+    },
+    "post": {
+        "myfunc": false,
+        "methods": [
+        ]
     },
     "notify": {
         "slack": "https://hooks.slack.com/services/hogehoge"

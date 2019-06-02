@@ -547,7 +547,7 @@ class Predicter(ConfigReader):
                 left_index=True, right_index=True)
 
         # post
-        fit_post = self.configs['fit'].get('post')
+        fit_post = self.configs.get('post')
         if fit_post:
             if fit_post['myfunc']:
                 if not self.kernel:
