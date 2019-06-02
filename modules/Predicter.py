@@ -506,7 +506,7 @@ class Predicter(ConfigReader):
             else:
                 logger.warn('NO Y_train_pred')
             # pre
-            y_pre = self.configs['translate'].get('y_pre')
+            y_pre = self.configs['pre'].get('y_pre')
             if y_pre:
                 logger.info('inverse translate y_train with %s' % y_pre)
                 if y_pre == 'log':

@@ -6,7 +6,8 @@
         "id_col": "ID",
         "delimiter": "\t"
     },
-    "translate": {
+    "pre": {
+        "train_mode": "clf",
         "adhoc": {
             "myfunc": "gendered_pronoun",
             "methods": [

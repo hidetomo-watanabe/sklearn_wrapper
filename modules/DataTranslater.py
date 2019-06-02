@@ -36,7 +36,7 @@ class DataTranslater(ConfigReader):
         self.configs = {}
 
     def display_data(self):
-        if self.configs['fit']['train_mode'] == 'clf':
+        if self.configs['pre']['train_mode'] == 'clf':
             logger.info('train pred counts')
             for pred_col in self.pred_cols:
                 logger.info('%s:' % pred_col)
@@ -45,7 +45,7 @@ class DataTranslater(ConfigReader):
                     continue
                 display(self.train_df[pred_col].value_counts())
                 display(self.train_df[pred_col].value_counts(normalize=True))
-        elif self.configs['fit']['train_mode'] == 'reg':
+        elif self.configs['pre']['train_mode'] == 'reg':
             logger.info('train pred mean, std')
             for pred_col in self.pred_cols:
                 logger.info('%s:' % pred_col)
@@ -183,7 +183,7 @@ class DataTranslater(ConfigReader):
         test_df = self.test_df
 
         # adhoc
-        trans_adhoc = self.configs['translate'].get('adhoc')
+        trans_adhoc = self.configs['pre'].get('adhoc')
         if trans_adhoc:
             if trans_adhoc['myfunc']:
                 if not self.kernel:
@@ -196,7 +196,7 @@ class DataTranslater(ConfigReader):
                 train_df, test_df = eval(
                     method_name)(train_df, test_df)
         # del
-        trans_del = self.configs['translate'].get('del')
+        trans_del = self.configs['pre'].get('del')
         if trans_del:
             for column in trans_del:
                 logger.info('delete: %s' % column)
@@ -215,7 +215,7 @@ class DataTranslater(ConfigReader):
             if replaced:
                 logger.info('replace missing with mean: %s' % column)
         # category
-        trans_category = self.configs['translate'].get('category')
+        trans_category = self.configs['pre'].get('category')
         logger.info('categorize model: %s' % trans_category['model'])
         for column in test_df.columns:
             if column in [self.id_col] + self.pred_cols:
@@ -231,7 +231,7 @@ class DataTranslater(ConfigReader):
         for column in test_df.columns:
             if column in [self.id_col]:
                 continue
-            if self.configs['fit']['train_mode'] in ['clf'] \
+            if self.configs['pre']['train_mode'] in ['clf'] \
                     and column in self.pred_cols:
                 continue
             train_df, test_df = self._to_float_of_dfs(
@@ -241,7 +241,7 @@ class DataTranslater(ConfigReader):
         return
 
     def write_data_for_view(self):
-        savename = self.configs['translate'].get('savename')
+        savename = self.configs['pre'].get('savename')
         if not savename:
             logger.warn('NO SAVENAME')
             return
@@ -288,7 +288,7 @@ class DataTranslater(ConfigReader):
     def normalize_data_for_model(self):
         # x
         # scaler
-        x_scaler = self.configs['translate'].get('x_scaler')
+        x_scaler = self.configs['pre'].get('x_scaler')
         logger.info(f'normalize x data: {x_scaler}')
         if (not x_scaler) or (x_scaler == 'standard'):
             self.x_scaler = StandardScaler()
@@ -298,9 +298,9 @@ class DataTranslater(ConfigReader):
         self.X_train = self.x_scaler.transform(self.X_train)
         self.X_test = self.x_scaler.transform(self.X_test)
         # y
-        if self.configs['fit']['train_mode'] == 'reg':
+        if self.configs['pre']['train_mode'] == 'reg':
             # pre
-            y_pre = self.configs['translate'].get('y_pre')
+            y_pre = self.configs['pre'].get('y_pre')
             if y_pre:
                 logger.info('translate y_train with %s' % y_pre)
                 if y_pre == 'log':
@@ -310,7 +310,7 @@ class DataTranslater(ConfigReader):
                     logger.error('NOT IMPLEMENTED FIT Y_PRE: %s' % y_pre)
                     raise Exception('NOT IMPLEMENTED')
             # scaler
-            y_scaler = self.configs['translate'].get('y_scaler')
+            y_scaler = self.configs['pre'].get('y_scaler')
             logger.info(f'normalize y data: {y_scaler}')
             if (not y_scaler) or (y_scaler == 'standard'):
                 self.y_scaler = StandardScaler()
@@ -321,7 +321,7 @@ class DataTranslater(ConfigReader):
         return
 
     def reduce_dimension_of_data_for_model(self):
-        di_config = self.configs['translate'].get('dimension')
+        di_config = self.configs['pre'].get('dimension')
         if not di_config:
             return
 
@@ -386,7 +386,7 @@ class DataTranslater(ConfigReader):
             adv_test_preds = estimator.predict_proba(X_test)[:, test_index]
             return adv_train_preds, adv_test_preds
 
-        adversarial = self.configs['translate'].get('adversarial')
+        adversarial = self.configs['pre'].get('adversarial')
         if not adversarial:
             return
 
@@ -418,7 +418,7 @@ class DataTranslater(ConfigReader):
         return
 
     def extract_no_anomaly_train_data(self):
-        if not self.configs['translate'].get('no_anomaly'):
+        if not self.configs['pre'].get('no_anomaly'):
             return
 
         logger.info('extract no anomaly train data')
@@ -432,7 +432,7 @@ class DataTranslater(ConfigReader):
         return
 
     def extract_train_data_with_undersampling(self):
-        method = self.configs['translate'].get('undersampling')
+        method = self.configs['pre'].get('undersampling')
         if not method:
             return
 
@@ -450,7 +450,7 @@ class DataTranslater(ConfigReader):
         return
 
     def add_train_data_with_oversampling(self):
-        method = self.configs['translate'].get('oversampling')
+        method = self.configs['pre'].get('oversampling')
         if not method:
             return
 
@@ -470,7 +470,7 @@ class DataTranslater(ConfigReader):
         return
 
     def reshape_data_for_model_for_keras(self):
-        mode = self.configs['translate'].get('reshape_for_keras')
+        mode = self.configs['pre'].get('reshape_for_keras')
         if not mode:
             return
 

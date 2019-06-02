@@ -5,7 +5,8 @@
         "pred_cols": ["SalePrice"],
         "id_col": "Id"
     },
-    "translate": {
+    "pre": {
+        "train_mode": "reg",
         "adhoc": {
             "myfunc": false,
             "methods": [

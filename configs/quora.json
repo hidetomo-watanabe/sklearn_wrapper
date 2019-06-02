@@ -5,7 +5,8 @@
         "pred_cols": ["target"],
         "id_col": "qid"
     },
-    "translate": {
+    "pre": {
+        "train_mode": "clf",
         "adhoc": {
             "myfunc": "quora",
             "methods": [

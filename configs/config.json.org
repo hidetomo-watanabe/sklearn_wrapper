@@ -6,7 +6,8 @@
         "id_col": "Id",
         "delimiter": ","
     },
-    "translate": {
+    "pre": {
+        "train_mode": "clf",
         "adhoc": {
             "myfunc": "hoge",
             "methods": [
