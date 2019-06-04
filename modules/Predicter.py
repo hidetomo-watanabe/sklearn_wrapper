@@ -231,12 +231,22 @@ class Predicter(ConfigReader):
         params = model_config.get('params')
         if not params:
             params = {}
-        if self.configs['fit']['train_mode'] == 'reg':
-            cv = KFold(
-                n_splits=cv, shuffle=True, random_state=42)
+        if self.configs['fit'].get('time_series'):
+            indexes = np.arange(len(Y_train))
+            cv_splits = []
+            cv_unit = int(len(indexes) / (cv + 1))
+            for i in range(cv):
+                cv_splits.append(
+                    (indexes[i * cv_unit:(i + 1) * cv_unit],
+                        indexes[(i + 1) * cv_unit:(i + 2) * cv_unit]))
+            cv = cv_splits
         else:
-            cv = StratifiedKFold(
-                n_splits=cv, shuffle=True, random_state=42)
+            if self.configs['fit']['train_mode'] == 'reg':
+                cv = KFold(
+                    n_splits=cv, shuffle=True, random_state=42)
+            else:
+                cv = StratifiedKFold(
+                    n_splits=cv, shuffle=True, random_state=42)
 
         # for warning
         if model not in ['keras_clf', 'keras_reg']:

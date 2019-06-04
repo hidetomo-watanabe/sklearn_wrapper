@@ -55,6 +55,7 @@
     "fit": {
         "myfunc": "hoge",
         "train_mode": "clf",
+        "time_series": true,
         "ensemble": {
             "mode": "stacking",
             "model": "log_reg",
