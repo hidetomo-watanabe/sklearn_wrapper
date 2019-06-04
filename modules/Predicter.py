@@ -153,7 +153,7 @@ class Predicter(ConfigReader):
             model = base_model
             model.set_params(**args)
             if multiclass:
-                model = multiclass(model)
+                model = multiclass(estimator=model, n_jobs=n_jobs)
             scores = cross_val_score(
                 model, X_train, Y_train,
                 scoring=scorer, cv=cv, n_jobs=n_jobs, fit_params=fit_params)
@@ -211,6 +211,10 @@ class Predicter(ConfigReader):
                 multiclass = OneVsOneClassifier
             elif multiclass == 'onevsrest':
                 multiclass = OneVsRestClassifier
+            else:
+                logger.error(
+                    f'NOT IMPLEMENTED MULTICLASS: {multiclass}')
+                raise Exception('NOT IMPLEMENTED')
         cv = model_config.get('cv')
         if not cv:
             cv = 3
@@ -227,7 +231,7 @@ class Predicter(ConfigReader):
         params = model_config.get('params')
         if not params:
             params = {}
-        if multiclass or self.configs['fit']['train_mode'] == 'reg':
+        if self.configs['fit']['train_mode'] == 'reg':
             cv = KFold(
                 n_splits=cv, shuffle=True, random_state=42)
         else:
@@ -247,7 +251,7 @@ class Predicter(ConfigReader):
         estimator = base_model
         estimator.set_params(**best_params)
         if multiclass:
-            estimator = multiclass(estimator)
+            estimator = multiclass(estimator=estimator, n_jobs=n_jobs)
         estimator.fit(X_train, Y_train, **fit_params)
         logger.info('estimator: %s' % estimator)
 
