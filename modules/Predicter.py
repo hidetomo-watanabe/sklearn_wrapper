@@ -236,9 +236,13 @@ class Predicter(ConfigReader):
             cv_splits = []
             cv_unit = int(len(indexes) / (cv + 1))
             for i in range(cv):
+                if i == (cv - 1):
+                    end = len(indexes)
+                else:
+                    end = (i + 2) * cv_unit
                 cv_splits.append(
-                    (indexes[i * cv_unit:(i + 1) * cv_unit],
-                        indexes[(i + 1) * cv_unit:(i + 2) * cv_unit]))
+                    (indexes[i * cv_unit: (i + 1) * cv_unit],
+                        indexes[(i + 1) * cv_unit: end]))
             cv = cv_splits
         else:
             if self.configs['fit']['train_mode'] == 'reg':
