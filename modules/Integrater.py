@@ -14,20 +14,19 @@ class Integrater(ConfigReader):
 
     def calc_average(self):
         filenames = self.configs['integrate']['filenames']
-        if 'weights' in self.configs['integrate']:
-            weights = self.configs['integrate']['weights']
-        else:
+        weights = self.configs['integrate'].get('weights')
+        if not weights:
             weights = [1] * len(self.filenames)
 
         self.output = pd.DataFrame()
-        for i, filename in enumerate(filenames):
+        for filename, weight in zip(filenames, weights):
             df = pd.read_csv(filename)
             id_df = df[self.id_col]
             val_df = df.drop(self.id_col, axis=1)
             if len(self.output) == 0:
-                self.output = val_df * weights[i]
+                self.output = val_df * weight
             else:
-                self.output += val_df * weights[i]
+                self.output += val_df * weight
         self.output /= sum(weights)
         self.output[self.id_col] = id_df
         return self.output
