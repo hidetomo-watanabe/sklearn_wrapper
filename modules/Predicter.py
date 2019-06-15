@@ -154,9 +154,15 @@ class Predicter(ConfigReader):
             model.set_params(**args)
             if multiclass:
                 model = multiclass(estimator=model, n_jobs=n_jobs)
-            scores = cross_val_score(
-                model, X_train, Y_train,
-                scoring=scorer, cv=cv, n_jobs=n_jobs, fit_params=fit_params)
+            try:
+                scores = cross_val_score(
+                    model, X_train, Y_train,
+                    scoring=scorer, cv=cv,
+                    n_jobs=n_jobs, fit_params=fit_params)
+            except Exception as e:
+                logger.warn(e)
+                logger.warn('SET SCORE 0')
+                scores = [0]
             score_mean = np.mean(scores)
             score_std = np.std(scores)
             logger.debug('  params: %s' % args)
