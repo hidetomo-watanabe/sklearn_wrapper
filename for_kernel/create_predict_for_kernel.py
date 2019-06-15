@@ -28,21 +28,13 @@ if __name__ == '__main__':
     _append_file_text('%s/modules/ConfigReader.py' % BASE_PATH, FILENAME)
     _append_file_text('%s/modules/DataTranslater.py' % BASE_PATH, FILENAME)
     _append_file_text('%s/modules/Predicter.py' % BASE_PATH, FILENAME)
-    # translate adhoc
+    # pre adhoc
     with open(config_path, 'r') as f:
         config_json = json.loads(f.read())
-    adhoc = config_json['translate']['adhoc']['myfunc']
+    adhoc = config_json['pre']['adhoc']['myfunc']
     if adhoc:
         _append_file_text(
             '%s/modules/myfuncs/%s.py' % (BASE_PATH, adhoc), FILENAME)
-    # keras model
-    single_models = config_json['fit']['single_models']
-    for model in single_models:
-        keras_build = model.get('keras_build')
-        if keras_build:
-            _append_file_text(
-                '%s/modules/mykerasmodels/%s.py'
-                % (BASE_PATH, keras_build), FILENAME)
     # base
     _append_file_text(
         '%s/for_kernel/predict_for_kernel_base.py' % BASE_PATH, FILENAME)
