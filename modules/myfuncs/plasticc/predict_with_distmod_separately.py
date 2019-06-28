@@ -39,16 +39,17 @@ if __name__ == '__main__':
 
             logger.info('### DATA FOR MODEL')
             translater_obj.create_data_for_model()
-            translater_obj.normalize_data_for_model()
-            translater_obj.reduce_dimension_of_data_for_model()
+
+            logger.info('### TRANSLATE DATA FOR MODEL')
+            translater_obj.translate_data_for_model()
+
+            logger.info('### GET DATA FOR MODEL')
             data_for_model = translater_obj.get_data_for_model()
+            post_processers = translater_obj.get_post_processers()
 
             # predict
-            predicter_obj = Predicter(**data_for_model)
+            predicter_obj = Predicter(**data_for_model, **post_processers)
             predicter_obj.read_config_file(config_path)
-
-            logger.info('### VALIDATE')
-            predicter_obj.is_ok_with_adversarial_validation()
 
             logger.info('### FIT')
             predicter_obj.calc_ensemble_model()

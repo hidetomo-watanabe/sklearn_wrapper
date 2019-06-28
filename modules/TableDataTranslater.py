@@ -59,6 +59,25 @@ class TableDataTranslater(ConfigReader):
             display(df.head())
             display(df.describe(include='all'))
 
+    def get_data_for_view(self):
+        output = {
+            'train_df': self.train_df,
+            'test_df': self.test_df,
+        }
+        return output
+
+    def create_data_for_view(self):
+        train_path = self.configs['data']['train_path']
+        test_path = self.configs['data']['test_path']
+        delim = self.configs['data'].get('delimiter')
+        if delim:
+            self.train_df = pd.read_csv(train_path, delimiter=delim)
+            self.test_df = pd.read_csv(test_path, delimiter=delim)
+        else:
+            self.train_df = pd.read_csv(train_path)
+            self.test_df = pd.read_csv(test_path)
+        return
+
     def _replace_missing_of_dfs(self, dfs, target, target_mean):
         replaced = False
         output = []
@@ -158,25 +177,6 @@ class TableDataTranslater(ConfigReader):
             df[target] = df[target].astype(float)
             output.append(df)
         return output
-
-    def get_data_for_view(self):
-        output = {
-            'train_df': self.train_df,
-            'test_df': self.test_df,
-        }
-        return output
-
-    def create_data_for_view(self):
-        train_path = self.configs['data']['train_path']
-        test_path = self.configs['data']['test_path']
-        delim = self.configs['data'].get('delimiter')
-        if delim:
-            self.train_df = pd.read_csv(train_path, delimiter=delim)
-            self.test_df = pd.read_csv(test_path, delimiter=delim)
-        else:
-            self.train_df = pd.read_csv(train_path)
-            self.test_df = pd.read_csv(test_path)
-        return
 
     def translate_data_for_view(self):
         train_df = self.train_df
@@ -299,7 +299,7 @@ class TableDataTranslater(ConfigReader):
             self.feature_columns.append(key)
         return
 
-    def normalize_data_for_model(self):
+    def _normalize_data_for_model(self):
         # x
         # scaler
         x_scaler = self.configs['pre'].get('x_scaler')
@@ -334,7 +334,7 @@ class TableDataTranslater(ConfigReader):
             self.Y_train = self.y_scaler.transform(self.Y_train)
         return
 
-    def reduce_dimension_of_data_for_model(self):
+    def _reduce_dimension_of_data_for_model(self):
         di_config = self.configs['pre'].get('dimension')
         if not di_config:
             return
@@ -376,7 +376,7 @@ class TableDataTranslater(ConfigReader):
         self.dimension_model = model_obj
         return
 
-    def extract_train_data_with_adversarial_validation(self):
+    def _extract_train_data_with_adversarial_validation(self):
         def _get_adversarial_preds(X_train, X_test, adversarial):
             # create data
             X_adv = np.concatenate((X_train, X_test), axis=0)
@@ -432,7 +432,7 @@ class TableDataTranslater(ConfigReader):
                     % (threshold, org_len, len(self.X_train)))
         return
 
-    def extract_no_anomaly_train_data(self):
+    def _extract_no_anomaly_train_data(self):
         if not self.configs['pre'].get('no_anomaly'):
             return
 
@@ -446,7 +446,7 @@ class TableDataTranslater(ConfigReader):
                     % (org_len, len(self.X_train)))
         return
 
-    def extract_train_data_with_undersampling(self):
+    def _extract_train_data_with_undersampling(self):
         method = self.configs['pre'].get('undersampling')
         if not method:
             return
@@ -464,7 +464,7 @@ class TableDataTranslater(ConfigReader):
                     % (org_len, len(self.X_train)))
         return
 
-    def add_train_data_with_oversampling(self):
+    def _add_train_data_with_oversampling(self):
         method = self.configs['pre'].get('oversampling')
         if not method:
             return
@@ -484,7 +484,7 @@ class TableDataTranslater(ConfigReader):
                     % (org_len, len(self.X_train)))
         return
 
-    def reshape_data_for_model_for_keras(self):
+    def _reshape_data_for_model_for_keras(self):
         mode = self.configs['pre'].get('reshape_for_keras')
         if not mode:
             return
@@ -500,4 +500,14 @@ class TableDataTranslater(ConfigReader):
         else:
             logger.error('NOT IMPLEMENTED RESHAPE FOR KERAS: %s' % mode)
             raise Exception('NOT IMPLEMENTED')
+        return
+
+    def translate_data_for_model(self):
+        self._normalize_data_for_model()
+        self._reduce_dimension_of_data_for_model()
+        self._extract_train_data_with_adversarial_validation()
+        self._extract_no_anomaly_train_data()
+        self._extract_train_data_with_undersampling()
+        self._add_train_data_with_oversampling()
+        self._reshape_data_for_model_for_keras()
         return
