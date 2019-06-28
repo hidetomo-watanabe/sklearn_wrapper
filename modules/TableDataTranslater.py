@@ -14,7 +14,7 @@ from imblearn.over_sampling import RandomOverSampler, SMOTE
 from IPython.display import display
 from logging import getLogger
 
-logger = getLogger('predict').getChild('DataTranslater')
+logger = getLogger('predict').getChild('TableDataTranslater')
 try:
     from .ConfigReader import ConfigReader
 except Exception:
@@ -25,7 +25,7 @@ except Exception:
     logger.warn('IN FOR KERNEL SCRIPT, Predicter import IS SKIPPED')
 
 
-class DataTranslater(ConfigReader):
+class TableDataTranslater(ConfigReader):
     def __init__(self, kernel=False):
         self.kernel = kernel
         self.BASE_PATH = '%s/..' % os.path.dirname(os.path.abspath(__file__))

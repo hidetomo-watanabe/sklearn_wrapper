@@ -26,7 +26,7 @@ if __name__ == '__main__':
         f.write('"""\n')
     # modules
     _append_file_text('%s/modules/ConfigReader.py' % BASE_PATH, FILENAME)
-    _append_file_text('%s/modules/DataTranslater.py' % BASE_PATH, FILENAME)
+    _append_file_text('%s/modules/TableDataTranslater.py' % BASE_PATH, FILENAME)
     _append_file_text('%s/modules/Predicter.py' % BASE_PATH, FILENAME)
     # pre adhoc
     with open(config_path, 'r') as f:
