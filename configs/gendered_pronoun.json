@@ -10,6 +10,7 @@
     "pre": {
         "train_mode": "clf",
         "y_pre": false,
+        "y_scaler": "standard",
         "table": {
             "adhoc": {
                 "myfunc": "gendered_pronoun",
@@ -32,6 +33,7 @@
                 ],
                 "model": "onehot"
             },
+            "x_scaler": "standard",
             "dimension": false,
             "adversarial": false,
             "undersampling": "random",

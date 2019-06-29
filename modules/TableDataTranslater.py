@@ -305,13 +305,16 @@ class TableDataTranslater(ConfigReader):
         # scaler
         x_scaler = self.configs['pre']['table'].get('x_scaler')
         logger.info(f'normalize x data: {x_scaler}')
-        if (not x_scaler) or (x_scaler == 'standard'):
-            self.x_scaler = StandardScaler()
-        elif x_scaler == 'minmax':
-            self.x_scaler = MinMaxScaler()
-        self.x_scaler.fit(self.X_train)
-        self.X_train = self.x_scaler.transform(self.X_train)
-        self.X_test = self.x_scaler.transform(self.X_test)
+        if x_scaler:
+            if x_scaler == 'standard':
+                self.x_scaler = StandardScaler()
+            elif x_scaler == 'minmax':
+                self.x_scaler = MinMaxScaler()
+            self.x_scaler.fit(self.X_train)
+            self.X_train = self.x_scaler.transform(self.X_train)
+            self.X_test = self.x_scaler.transform(self.X_test)
+        else:
+            self.x_scaler = None
         # y
         if self.configs['pre']['train_mode'] == 'reg':
             # pre
@@ -327,12 +330,15 @@ class TableDataTranslater(ConfigReader):
             # scaler
             y_scaler = self.configs['pre'].get('y_scaler')
             logger.info(f'normalize y data: {y_scaler}')
-            if (not y_scaler) or (y_scaler == 'standard'):
-                self.y_scaler = StandardScaler()
-            elif y_scaler == 'minmax':
-                self.y_scaler = MinMaxScaler()
-            self.y_scaler.fit(self.Y_train)
-            self.Y_train = self.y_scaler.transform(self.Y_train)
+            if y_scaler:
+                if y_scaler == 'standard':
+                    self.y_scaler = StandardScaler()
+                elif y_scaler == 'minmax':
+                    self.y_scaler = MinMaxScaler()
+                self.y_scaler.fit(self.Y_train)
+                self.Y_train = self.y_scaler.transform(self.Y_train)
+            else:
+                self.y_scaler = None
         return
 
     def _reduce_dimension_of_data_for_model(self):

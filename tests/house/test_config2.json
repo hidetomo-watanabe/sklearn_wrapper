@@ -9,6 +9,7 @@
     "pre": {
         "train_mode": "reg",
         "y_pre": "log",
+        "y_scaler": "standard",
         "table": {
             "adhoc": {
                 "myfunc": false,
@@ -22,6 +23,7 @@
                 ],
                 "model": "onehot"
             },
+            "x_scaler": "standard",
             "dimension": {
                 "n": 100,
                 "model": "pca"

@@ -25,6 +25,7 @@
                 ],
                 "model": "onehot"
             },
+            "x_scaler": "standard",
             "dimension": {
                 "n": 280,
                 "model": "rfe"
