@@ -2,55 +2,60 @@
     "data": {
         "train_path": "/path/train.csv",
         "test_path": "/path/test.csv",
+        "type": "table",
         "pred_cols": ["Hoge"],
         "id_col": "Id",
         "delimiter": ","
     },
     "pre": {
         "train_mode": "clf",
-        "adhoc": {
-            "myfunc": "hoge",
-            "methods": [
-                "translate_hoge",
-                "translate_fuga"
-            ]
-        },
-        "del": [
-            "Hoge",
-            "Foo"
-        ],
-        "category": {
-            "target": [
-                "Hoge",
-                "Fuga"
-            ],
-            "model": "onehot"
-        },
-        "x_scaler": "standard",
         "y_pre": false,
         "y_scaler": "standard",
-        "dimension": {
-            "n": 250,
-            "model": "pca"
-        },
-        "adversarial": {
-            "model": "rf_clf",
-            "scoring": "accuracy",
-            "cv": 3,
-            "n_jobs": -1,
-            "max_evals": 3,
-            "params": {
-                "n_estimators": [3, 5, 10],
-                "max_depth": [3, 5, 10]
+        "savename": "tmp_file",
+        "table": {
+            "adhoc": {
+                "myfunc": "hoge",
+                "methods": [
+                    "translate_hoge",
+                    "translate_fuga"
+                ]
             },
-            "threshold": 0.5,
-            "add_column": false
+            "del": [
+                "Hoge",
+                "Foo"
+            ],
+            "category": {
+                "target": [
+                    "Hoge",
+                    "Fuga"
+                ],
+                "model": "onehot"
+            },
+            "x_scaler": "standard",
+            "dimension": {
+                "n": 250,
+                "model": "pca"
+            },
+            "adversarial": {
+                "model": "rf_clf",
+                "scoring": "accuracy",
+                "cv": 3,
+                "n_jobs": -1,
+                "max_evals": 3,
+                "params": {
+                    "n_estimators": [3, 5, 10],
+                    "max_depth": [3, 5, 10]
+                },
+                "threshold": 0.5,
+                "add_column": false
+            },
+            "no_anomaly": true,
+            "undersampling": "random",
+            "oversampling": "smote",
+            "reshape_for_keras": "lstm"
         },
-        "no_anomaly": true,
-        "undersampling": "random",
-        "oversampling": "smote",
-        "reshape_for_keras": "lstm",
-        "savename": "tmp_file"
+        "image": {
+        }
     },
     "fit": {
         "myfunc": "hoge",

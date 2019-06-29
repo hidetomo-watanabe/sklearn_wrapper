@@ -2,38 +2,41 @@
     "data": {
         "train_path": "../input/gendered_pronoun/train.tsv",
         "test_path": "../input/gendered_pronoun/test_stage_2.tsv",
+        "type": "table",
         "pred_cols": ["A","B","NEITHER"],
         "id_col": "ID",
         "delimiter": "\t"
     },
     "pre": {
         "train_mode": "clf",
-        "adhoc": {
-            "myfunc": "gendered_pronoun",
-            "methods": [
-                "rename_columns",
-                "get_base_features",
-                "get_nlp_features",
-                "get_train_neither"
-            ]
-        },
-        "del": [
-            "Pronoun",
-            "Text",
-            "A-noun",
-            "B-noun",
-            "URL"
-        ],
-        "category": {
-            "target": [
-            ],
-            "model": "onehot"
-        },
         "y_pre": false,
-        "dimension": false,
-        "adversarial": false,
-        "undersampling": "random",
-        "oversampling": false
+        "table": {
+            "adhoc": {
+                "myfunc": "gendered_pronoun",
+                "methods": [
+                    "rename_columns",
+                    "get_base_features",
+                    "get_nlp_features",
+                    "get_train_neither"
+                ]
+            },
+            "del": [
+                "Pronoun",
+                "Text",
+                "A-noun",
+                "B-noun",
+                "URL"
+            ],
+            "category": {
+                "target": [
+                ],
+                "model": "onehot"
+            },
+            "dimension": false,
+            "adversarial": false,
+            "undersampling": "random",
+            "oversampling": false
+        }
     },
     "fit": {
         "myfunc": "gendred_pronoun",

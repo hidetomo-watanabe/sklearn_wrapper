@@ -2,7 +2,7 @@ import sys
 import traceback
 import logging.config
 from logging import getLogger
-from modules.TableDataTranslater import TableDataTranslater
+from modules.DataTranslater import DataTranslater
 from modules.Predicter import Predicter
 from modules.Notifier import Notifier
 
@@ -19,8 +19,9 @@ if __name__ == '__main__':
         config_path = './configs/config.json'
     try:
         # data translate
-        translater_obj = TableDataTranslater()
+        translater_obj = DataTranslater()
         translater_obj.read_config_file(config_path)
+        translater_obj.get_translater()
 
         logger.info('### DATA FOR VIEW')
         translater_obj.create_data_for_view()

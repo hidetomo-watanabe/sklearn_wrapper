@@ -14,8 +14,9 @@ if __name__ == '__main__':
     logger.info('# START')
 
     # data translate
-    translater_obj = TableDataTranslater(kernel=True)
+    translater_obj = DataTranslater(kernel=True)
     translater_obj.read_config_text(config_text)
+    translater_obj.get_translater()
 
     logger.info('### DATA FOR VIEW')
     translater_obj.create_data_for_view()

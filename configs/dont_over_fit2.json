@@ -2,46 +2,49 @@
     "data": {
         "train_path": "~/share/dont_over_fit2/train.csv",
         "test_path": "~/share/dont_over_fit2/test.csv",
+        "type": "table",
         "pred_cols": ["target"],
         "id_col": "id",
         "delimiter": ","
     },
     "pre": {
         "train_mode": "clf",
-        "adhoc": {
-            "myfunc": "dont_over_fit2",
-            "methods": [
-                "translate_target2int"
-            ]
-        },
-        "del": [
-        ],
-        "category": {
-            "target": [
-            ],
-            "model": "onehot"
-        },
         "y_pre": false,
         "y_scaler": "standard",
-        "dimension": {
-            "n": 280,
-            "model": "rfe"
-        },
-        "adversarial": {
-            "model": "g_mix",
-            "scoring": "accuracy",
-            "cv": 3,
-            "n_jobs": -1,
-            "params": {
-                "n_components": [2]
+        "table": {
+            "adhoc": {
+                "myfunc": "dont_over_fit2",
+                "methods": [
+                    "translate_target2int"
+                ]
             },
-            "threshold": 0.0,
-            "add_column": true
-        },
-        "no_anomaly": true,
-        "undersampling": false,
-        "oversampling": false,
-        "reshape_for_keras": false
+            "del": [
+            ],
+            "category": {
+                "target": [
+                ],
+                "model": "onehot"
+            },
+            "dimension": {
+                "n": 280,
+                "model": "rfe"
+            },
+            "adversarial": {
+                "model": "g_mix",
+                "scoring": "accuracy",
+                "cv": 3,
+                "n_jobs": -1,
+                "params": {
+                    "n_components": [2]
+                },
+                "threshold": 0.0,
+                "add_column": true
+            },
+            "no_anomaly": true,
+            "undersampling": false,
+            "oversampling": false,
+            "reshape_for_keras": false
+        }
     },
     "fit": {
         "myfunc": false,

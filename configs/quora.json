@@ -2,27 +2,30 @@
     "data": {
         "train_path": "../input/train.csv",
         "test_path": "../input/test.csv",
+        "type": "table",
         "pred_cols": ["target"],
         "id_col": "qid"
     },
     "pre": {
         "train_mode": "clf",
-        "adhoc": {
-            "myfunc": "quora",
-            "methods": [
-                "translate_text2seq"
-            ]
-        },
-        "del": [
-        ],
-        "category": {
-            "target": [
-            ],
-            "model": "onehot"
-        },
         "y_pre": false,
-        "dimension": false,
-        "adversarial": false
+        "table": {
+            "adhoc": {
+                "myfunc": "quora",
+                "methods": [
+                    "translate_text2seq"
+                ]
+            },
+            "del": [
+            ],
+            "category": {
+                "target": [
+                ],
+                "model": "onehot"
+            },
+            "dimension": false,
+            "adversarial": false
+        }
     },
     "fit": {
         "train_mode": "clf",

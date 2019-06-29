@@ -58,6 +58,7 @@ class TableDataTranslater(ConfigReader):
             logger.info('%s:' % label)
             display(df.head())
             display(df.describe(include='all'))
+        return
 
     def get_data_for_view(self):
         output = {
@@ -183,7 +184,7 @@ class TableDataTranslater(ConfigReader):
         test_df = self.test_df
 
         # adhoc
-        trans_adhoc = self.configs['pre'].get('adhoc')
+        trans_adhoc = self.configs['pre']['table'].get('adhoc')
         if trans_adhoc:
             if trans_adhoc['myfunc']:
                 if not self.kernel:
@@ -196,7 +197,7 @@ class TableDataTranslater(ConfigReader):
                 train_df, test_df = eval(
                     method_name)(train_df, test_df)
         # del
-        trans_del = self.configs['pre'].get('del')
+        trans_del = self.configs['pre']['table'].get('del')
         if trans_del:
             for column in trans_del:
                 logger.info('delete: %s' % column)
@@ -215,7 +216,7 @@ class TableDataTranslater(ConfigReader):
             if replaced:
                 logger.info('replace missing with mean: %s' % column)
         # category
-        trans_category = self.configs['pre'].get('category')
+        trans_category = self.configs['pre']['table'].get('category')
         logger.info('categorize model: %s' % trans_category['model'])
         for column in test_df.columns:
             if column in [self.id_col] + self.pred_cols:
@@ -251,7 +252,7 @@ class TableDataTranslater(ConfigReader):
             '%s/train_%s' % (self.OUTPUT_PATH, savename), index=False)
         self.test_df.to_csv(
             '%s/test_%s' % (self.OUTPUT_PATH, savename), index=False)
-        return
+        return savename
 
     def get_data_for_model(self):
         output = {
@@ -302,7 +303,7 @@ class TableDataTranslater(ConfigReader):
     def _normalize_data_for_model(self):
         # x
         # scaler
-        x_scaler = self.configs['pre'].get('x_scaler')
+        x_scaler = self.configs['pre']['table'].get('x_scaler')
         logger.info(f'normalize x data: {x_scaler}')
         if (not x_scaler) or (x_scaler == 'standard'):
             self.x_scaler = StandardScaler()
@@ -335,7 +336,7 @@ class TableDataTranslater(ConfigReader):
         return
 
     def _reduce_dimension_of_data_for_model(self):
-        di_config = self.configs['pre'].get('dimension')
+        di_config = self.configs['pre']['table'].get('dimension')
         if not di_config:
             return
 
@@ -401,7 +402,7 @@ class TableDataTranslater(ConfigReader):
             adv_test_preds = estimator.predict_proba(X_test)[:, test_index]
             return adv_train_preds, adv_test_preds
 
-        adversarial = self.configs['pre'].get('adversarial')
+        adversarial = self.configs['pre']['table'].get('adversarial')
         if not adversarial:
             return
 
@@ -433,7 +434,7 @@ class TableDataTranslater(ConfigReader):
         return
 
     def _extract_no_anomaly_train_data(self):
-        if not self.configs['pre'].get('no_anomaly'):
+        if not self.configs['pre']['table'].get('no_anomaly'):
             return
 
         logger.info('extract no anomaly train data')
@@ -447,7 +448,7 @@ class TableDataTranslater(ConfigReader):
         return
 
     def _extract_train_data_with_undersampling(self):
-        method = self.configs['pre'].get('undersampling')
+        method = self.configs['pre']['table'].get('undersampling')
         if not method:
             return
 
@@ -465,7 +466,7 @@ class TableDataTranslater(ConfigReader):
         return
 
     def _add_train_data_with_oversampling(self):
-        method = self.configs['pre'].get('oversampling')
+        method = self.configs['pre']['table'].get('oversampling')
         if not method:
             return
 
@@ -485,7 +486,7 @@ class TableDataTranslater(ConfigReader):
         return
 
     def _reshape_data_for_model_for_keras(self):
-        mode = self.configs['pre'].get('reshape_for_keras')
+        mode = self.configs['pre']['table'].get('reshape_for_keras')
         if not mode:
             return
 

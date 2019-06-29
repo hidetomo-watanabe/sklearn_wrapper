@@ -2,27 +2,30 @@
     "data": {
         "train_path": "../input/digit/train.csv",
         "test_path": "../input/digit/test.csv",
+        "type": "table",
         "pred_cols": ["label"],
         "id_col": "ImageId"
     },
     "pre": {
         "train_mode": "clf",
-        "adhoc": {
-            "myfunc": "digit",
-            "methods": [
-                "add_image_id"
-            ]
-        },
-        "del": [
-        ],
-        "category": {
-            "target": [
-            ],
-            "model": "onehot"
-        },
         "y_pre": false,
-        "dimension": false,
-        "adversarial": false
+        "table": {
+            "adhoc": {
+                "myfunc": "digit",
+                "methods": [
+                    "add_image_id"
+                ]
+            },
+            "del": [
+            ],
+            "category": {
+                "target": [
+                ],
+                "model": "onehot"
+            },
+            "dimension": false,
+            "adversarial": false
+        }
     },
     "fit": {
         "train_mode": "clf",

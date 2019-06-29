@@ -2,37 +2,40 @@
     "data": {
         "train_path": "../input/titanic/train.csv",
         "test_path": "../input/titanic/test.csv",
+        "type": "table",
         "pred_cols": ["Survived"],
         "id_col": "PassengerId"
     },
     "pre": {
         "train_mode": "clf",
-        "adhoc": {
-            "myfunc": "titanic",
-            "methods": [
-                "translate_honorific_title",
-                "translate_age",
-                "translate_familystatus"
-            ]
-        },
-        "del": [
-            "HonorificTitle",
-            "Name",
-            "Ticket",
-            "Fare",
-            "Cabin",
-            "Embarked"
-        ],
-        "category": {
-            "target": [
-                "Pclass",
-                "FamilyStatus"
-            ],
-            "model": "onehot"
-        },
         "y_pre": false,
-        "dimension": false,
-        "adversarial": false
+        "table": {
+            "adhoc": {
+                "myfunc": "titanic",
+                "methods": [
+                    "translate_honorific_title",
+                    "translate_age",
+                    "translate_familystatus"
+                ]
+            },
+            "del": [
+                "HonorificTitle",
+                "Name",
+                "Ticket",
+                "Fare",
+                "Cabin",
+                "Embarked"
+            ],
+            "category": {
+                "target": [
+                    "Pclass",
+                    "FamilyStatus"
+                ],
+                "model": "onehot"
+            },
+            "dimension": false,
+            "adversarial": false
+        }
     },
     "fit": {
         "train_mode": "clf",

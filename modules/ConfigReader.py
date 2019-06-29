@@ -10,8 +10,10 @@ class ConfigReader(object):
             self.configs = json.loads(f.read())
         self.id_col = self.configs['data']['id_col']
         self.pred_cols = self.configs['data']['pred_cols']
+        return
 
     def read_config_text(self, text):
         self.configs = json.loads(text)
         self.id_col = self.configs['data']['id_col']
         self.pred_cols = self.configs['data']['pred_cols']
+        return

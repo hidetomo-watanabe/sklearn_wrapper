@@ -2,29 +2,32 @@
     "data": {
         "train_path": "./tests/house/train.csv",
         "test_path": "./tests/house/test.csv",
+        "type": "table",
         "pred_cols": ["SalePrice"],
         "id_col": "Id"
     },
     "pre": {
         "train_mode": "reg",
-        "adhoc": {
-            "myfunc": false,
-            "methods": [
-            ]
-        },
-        "del": [
-        ],
-        "category": {
-            "target": [
-            ],
-            "model": "onehot"
-        },
         "y_pre": "log",
-        "dimension": {
-            "n": 100,
-            "model": "pca"
-        },
-        "adversarial": false
+        "table": {
+            "adhoc": {
+                "myfunc": false,
+                "methods": [
+                ]
+            },
+            "del": [
+            ],
+            "category": {
+                "target": [
+                ],
+                "model": "onehot"
+            },
+            "dimension": {
+                "n": 100,
+                "model": "pca"
+            },
+            "adversarial": false
+        }
     },
     "fit": {
         "myfunc": "house",
