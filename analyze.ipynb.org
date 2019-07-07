@@ -41,7 +41,8 @@
    "source": [
     "translater_obj = DataTranslater()\n",
     "translater_obj.read_config_file(config_path)\n",
-    "# translater_obj.read_config_text(config_text)"
+    "# translater_obj.read_config_text(config_text)\n",
+    "translater_obj.get_translater()"
    ]
   },
   {
@@ -82,7 +83,7 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "print('### DATA FOR VIEW')\n",
+    "print('### GET DATA FOR VIEW')\n",
     "data_for_view = translater_obj.get_data_for_view()"
    ]
   },
@@ -93,15 +94,28 @@
    "outputs": [],
    "source": [
     "print('### DATA FOR MODEL')\n",
-    "translater_obj.create_data_for_model()\n",
-    "translater_obj.normalize_data_for_model()\n",
-    "translater_obj.reduce_dimension_of_data_for_model()\n",
-    "translater_obj.extract_train_data_with_adversarial_validation()\n",
-    "translater_obj.extract_no_anomaly_train_data()\n",
-    "translater_obj.extract_train_data_with_undersampling()\n",
-    "translater_obj.add_train_data_with_oversampling()\n",
-    "translater_obj.reshape_data_for_model_for_keras()\n",
-    "data_for_model = translater_obj.get_data_for_model()"
+    "translater_obj.create_data_for_model()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "print('### TRANSLATE DATA FOR MODEL')\n",
+    "translater_obj.translate_data_for_model()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "print('### GET DATA FOR MODEL')\n",
+    "data_for_model = translater_obj.get_data_for_model()\n",
+    "post_processers = translater_obj.get_post_processers()"
    ]
   },
   {
@@ -164,7 +178,7 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "predicter_obj = Predicter(**data_for_model)\n",
+    "predicter_obj = Predicter(**data_for_model, **post_processers)\n",
     "predicter_obj.read_config_file(config_path)\n",
     "# predicter_obj.read_config_text(config_text)"
    ]
