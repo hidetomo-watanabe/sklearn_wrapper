@@ -9,6 +9,10 @@ try:
     from .TableDataTranslater import TableDataTranslater
 except Exception:
     logger.warn('IN FOR KERNEL SCRIPT, TableDataTranslater import IS SKIPPED')
+try:
+    from .ImageDataTranslater import ImageDataTranslater
+except Exception:
+    logger.warn('IN FOR KERNEL SCRIPT, ImageDataTranslater import IS SKIPPED')
 
 
 class DataTranslater(ConfigReader):
@@ -20,8 +24,7 @@ class DataTranslater(ConfigReader):
         if data_type == 'table':
             self.translater = TableDataTranslater(self.kernel)
         elif data_type == 'image':
-            logger.error('NOT YET IMAGE DATA TRANSLATER')
-            raise Exception('NOT IMPLEMENTED')
+            self.translater = ImageDataTranslater(self.kernel)
         else:
             logger.error('DATA MODE SHOULD BE table OR image')
             raise Exception('NOT IMPLEMENTED')

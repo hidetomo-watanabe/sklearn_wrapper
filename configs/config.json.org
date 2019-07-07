@@ -55,6 +55,7 @@
             "reshape_for_keras": "lstm"
         },
         "image": {
+            "img_path": "img_path"
         }
     },
     "fit": {
