@@ -103,15 +103,21 @@ class ImageDataTranslater(ConfigReader):
         return output
 
     def create_data_for_model(self):
+        img_config = self.configs['pre']['image']
+
         def _translate_image2array(img_path):
             img = cv2.imread(img_path)
+            resize_param = img_config['resize']
+            if resize_param:
+                img = cv2.resize(
+                    img, dsize=(resize_param['x'], resize_param['y']))
             img = image.img_to_array(img)
             img = img / 255
             return img
 
         train_df = self.train_df
         test_df = self.test_df
-        img_path_col = self.configs['pre']['image']['img_path']
+        img_path_col = img_config['img_path']
         # Y_train
         self.Y_train = train_df[self.pred_cols].values
         # X_train
