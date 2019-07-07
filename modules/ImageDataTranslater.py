@@ -164,5 +164,4 @@ class ImageDataTranslater(ConfigReader):
 
     def translate_data_for_model(self):
         self._normalize_data_for_model()
-        # resize to do
         return
