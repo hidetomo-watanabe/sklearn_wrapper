@@ -1,0 +1,11 @@
+id,has_cactus,img_path
+0004be2cfeaba1c0361d39e2b000257b.jpg,1,./tests/cactus_part/train/0004be2cfeaba1c0361d39e2b000257b.jpg
+000c8a36845c0208e833c79c1bffedd1.jpg,1,./tests/cactus_part/train/000c8a36845c0208e833c79c1bffedd1.jpg
+000d1e9a533f62e55c289303b072733d.jpg,1,./tests/cactus_part/train/000d1e9a533f62e55c289303b072733d.jpg
+0011485b40695e9138e92d0b3fb55128.jpg,1,./tests/cactus_part/train/0011485b40695e9138e92d0b3fb55128.jpg
+0014d7a11e90b62848904c1418fc8cf2.jpg,1,./tests/cactus_part/train/0014d7a11e90b62848904c1418fc8cf2.jpg
+0017c3c18ddd57a2ea6f9848c79d83d2.jpg,1,./tests/cactus_part/train/0017c3c18ddd57a2ea6f9848c79d83d2.jpg
+002134abf28af54575c18741b89dd2a4.jpg,0,./tests/cactus_part/train/002134abf28af54575c18741b89dd2a4.jpg
+0024320f43bdd490562246435af4f90b.jpg,0,./tests/cactus_part/train/0024320f43bdd490562246435af4f90b.jpg
+002930423b9840e67e5a54afd4768a1e.jpg,1,./tests/cactus_part/train/002930423b9840e67e5a54afd4768a1e.jpg
+ff650a87b5e8c0d309006f9b390b653c.jpg,1,./tests/cactus_part/train/ff650a87b5e8c0d309006f9b390b653c.jpg

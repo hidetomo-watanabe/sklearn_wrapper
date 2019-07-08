@@ -31,7 +31,7 @@ _del 'outputs/tmp_house2.csv'
 
 err_msg=''
 echo 'START PREDICT'
-# titanic binary classification
+# titanic table binary classification
 echo '  TITANIC'
 # gbdt
 err_msg=${err_msg}$(python -u predict.py tests/titanic/test_config.json 2>&1 | grep ERROR)
@@ -42,17 +42,22 @@ err_msg=${err_msg}$(python -u predict.py tests/titanic/test_config3.json 2>&1 | 
 # ensemble
 err_msg=${err_msg}$(python -u predict.py tests/titanic/test_config4.json 2>&1 | grep ERROR)
 _check
-# house regression
+# house table regression
 echo '  HOUSE'
 # svr
 err_msg=${err_msg}$(python -u predict.py tests/house/test_config.json 2>&1 | grep ERROR)
 # keras
 err_msg=${err_msg}$(python -u predict.py tests/house/test_config2.json 2>&1 | grep ERROR)
 _check
-# digit_part multi lable classification
+# digit_part table multi lable classification
 echo '  DIGIT PART'
 # lgb
 err_msg=${err_msg}$(python -u predict.py tests/digit_part/test_config.json 2>&1 | grep ERROR)
+_check
+# cactus_part image binary classification
+echo '  CACTUS PART'
+# keras
+err_msg=${err_msg}$(python -u predict.py tests/cactus_part/test_config.json 2>&1 | grep ERROR)
 _check
 
 # diff
