@@ -52,8 +52,6 @@
             {
                 "model": "lgb_clf",
                 "modelname": "tmp",
-                "cv": 3,
-                "n_jobs": -1,
                 "fit_params": {
                 },
                 "params": {

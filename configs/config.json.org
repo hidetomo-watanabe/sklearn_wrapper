@@ -65,7 +65,12 @@
     "fit": {
         "myfunc": "hoge",
         "train_mode": "clf",
-        "fold": "time_series",
+        "cv": {
+            "fold": "group",
+            "num": 3,
+            "group": "Hoge"
+        },
+        "n_jobs": -1,
         "ensemble": {
             "mode": "stacking",
             "model": "log_reg",
@@ -80,8 +85,6 @@
                 "model": "gbdt_clf",
                 "multiclass": "onevsrest",
                 "modelname": "tmp_model1",
-                "cv": 3,
-                "n_jobs": -1,
                 "max_evals": 1,
                 "fit_params": {
                 },
@@ -96,8 +99,6 @@
                 "model": "xgb_clf",
                 "multiclass": "onevsrest",
                 "modelname": "tmp_model2",
-                "cv": 3,
-                "n_jobs": -1,
                 "max_evals": 1,
                 "fit_params": {
                 },
@@ -114,8 +115,6 @@
                 "model": "lgb_clf",
                 "multiclass": "onevsrest",
                 "modelname": "tmp_model3",
-                "cv": 3,
-                "n_jobs": -1,
                 "max_evals": 1,
                 "fit_params": {
                 },
@@ -134,8 +133,6 @@
                 "model": "svc",
                 "multiclass": "onevsone",
                 "modelname": "tmp_model4",
-                "cv": 5,
-                "n_jobs": -1,
                 "max_evals": 1,
                 "fit_params": {
                 },
@@ -150,8 +147,6 @@
             {
                 "model": "keras_clf",
                 "modelname": "tmp_model5",
-                "cv": 3,
-                "n_jobs": -1,
                 "max_evals": 1,
                 "fit_params": {
                 },

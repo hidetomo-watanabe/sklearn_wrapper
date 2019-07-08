@@ -390,7 +390,9 @@ class TableDataTranslater(ConfigReader):
             Y_adv = np.concatenate(
                 (np.zeros(len(X_train)), np.ones(len(X_test))), axis=0)
             # fit
-            predicter_obj = Predicter(**self.get_data_for_model())
+            predicter_obj = Predicter(
+                **self.get_data_for_model(),
+                **self.get_post_processers())
             predicter_obj.configs = self.configs
             estimator = predicter_obj.calc_single_model(
                 adversarial['scoring'], adversarial,

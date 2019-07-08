@@ -196,7 +196,7 @@ class Predicter(ConfigReader):
 
     def calc_single_model(
         self,
-        scorer, model_config,
+        scorer, model_config, cv=3, n_jobs=-1,
         keras_build_func=None, X_train=None, Y_train=None
     ):
         if not isinstance(X_train, np.ndarray):
@@ -222,13 +222,6 @@ class Predicter(ConfigReader):
                 logger.error(
                     f'NOT IMPLEMENTED MULTICLASS: {multiclass}')
                 raise Exception('NOT IMPLEMENTED')
-        cv = model_config.get('cv')
-        if not cv:
-            cv = 3
-        logger.info('search with cv=%d' % cv)
-        n_jobs = model_config.get('n_jobs')
-        if not n_jobs:
-            n_jobs = -1
         max_evals = model_config.get('max_evals')
         fit_params = model_config.get('fit_params')
         if not fit_params:
@@ -238,35 +231,6 @@ class Predicter(ConfigReader):
         params = model_config.get('params')
         if not params:
             params = {}
-        # fold
-        fold = self.configs['fit'].get('fold')
-        if fold:
-            logger.info('fold: %s' % fold)
-            if fold == 'time_series':
-                indexes = np.arange(len(Y_train))
-                cv_splits = []
-                cv_unit = int(len(indexes) / (cv + 1))
-                for i in range(cv):
-                    if i == (cv - 1):
-                        end = len(indexes)
-                    else:
-                        end = (i + 2) * cv_unit
-                    cv_splits.append(
-                        (indexes[i * cv_unit: (i + 1) * cv_unit],
-                            indexes[(i + 1) * cv_unit: end]))
-                cv = cv_splits
-            elif fold == 'stratified':
-                cv = StratifiedKFold(
-                    n_splits=cv, shuffle=True, random_state=42)
-            elif fold == 'group':
-                cv = GroupKFold(n_splits=cv)
-        else:
-            if self.configs['fit']['train_mode'] == 'reg':
-                cv = KFold(
-                    n_splits=cv, shuffle=True, random_state=42)
-            elif self.configs['fit']['train_mode'] == 'clf':
-                cv = StratifiedKFold(
-                    n_splits=cv, shuffle=True, random_state=42)
 
         # for warning
         if model not in ['keras_clf', 'keras_reg']:
@@ -320,6 +284,46 @@ class Predicter(ConfigReader):
         return output
 
     def calc_ensemble_model(self):
+        def _get_cv_from_config():
+            cv_config = self.configs['fit'].get('cv')
+            if not cv_config:
+                if self.configs['fit']['train_mode'] == 'reg':
+                    model = KFold(
+                        shuffle=True, random_state=42)
+                    cv = model.split(self.X_train, self.Y_train)
+                elif self.configs['fit']['train_mode'] == 'clf':
+                    model = StratifiedKFold(
+                        shuffle=True, random_state=42)
+                    cv = model.split(self.X_train, self.Y_train)
+                return cv
+
+            fold = cv_config['fold']
+            num = cv_config['num']
+            logger.info('search with cv: fold=%s, num=%d' % (fold, num))
+            if fold == 'time_series':
+                indexes = np.arange(len(self.Y_train))
+                cv_splits = []
+                cv_unit = int(len(indexes) / (num + 1))
+                for i in range(num):
+                    if i == (num - 1):
+                        end = len(indexes)
+                    else:
+                        end = (i + 2) * cv_unit
+                    cv_splits.append(
+                        (indexes[i * cv_unit: (i + 1) * cv_unit],
+                            indexes[(i + 1) * cv_unit: end]))
+                cv = cv_splits
+            elif fold == 'stratified':
+                model = StratifiedKFold(
+                    n_splits=num, shuffle=True, random_state=42)
+                cv = model.split(self.X_train, self.Y_train)
+            elif fold == 'group':
+                group_ind = self.feature_columns.index(cv_config['group'])
+                groups = self.X_train[:, group_ind]
+                model = GroupKFold(n_splits=num)
+                cv = model.split(self.X_train, self.Y_train, groups=groups)
+            return cv
+
         def _get_scorer_from_config():
             scoring = self.configs['fit']['scoring']
             logger.info('scoring: %s' % scoring)
@@ -366,6 +370,10 @@ class Predicter(ConfigReader):
 
         # configs
         model_configs = self.configs['fit']['single_models']
+        cv = _get_cv_from_config()
+        n_jobs = self.configs['fit'].get('n_jobs')
+        if not n_jobs:
+            n_jobs = -1
         self.scorer = _get_scorer_from_config()
         myfunc = self.configs['fit'].get('myfunc')
         self.classes = None
@@ -376,7 +384,8 @@ class Predicter(ConfigReader):
         if len(model_configs) == 1:
             logger.warn('NO ENSEMBLE')
             self.estimator = self.calc_single_model(
-                self.scorer, model_configs[0], keras_build_func=myfunc)
+                self.scorer, model_configs[0],
+                cv, n_jobs, keras_build_func=myfunc)
             self.single_estimators = [(model_configs[0], self.estimator)]
             if self.configs['fit']['train_mode'] == 'clf':
                 if hasattr(self.estimator, 'classes_'):
@@ -398,7 +407,7 @@ class Predicter(ConfigReader):
         # single fit
         for model_config in model_configs:
             single_estimator = self.calc_single_model(
-                self.scorer, model_config, keras_build_func=myfunc)
+                self.scorer, model_config, cv, n_jobs, keras_build_func=myfunc)
             self.single_estimators.append((model_config, single_estimator))
             modelname = model_config.get('modelname')
             if not modelname:

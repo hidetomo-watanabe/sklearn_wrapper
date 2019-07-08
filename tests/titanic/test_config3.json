@@ -39,8 +39,6 @@
             "adversarial": {
                 "model": "rf_clf",
                 "scoring": "accuracy",
-                "cv": 3,
-                "n_jobs": -1,
                 "params": {
                     "n_estimators": [3, 5, 10],
                     "max_depth": [3, 5, 10]
@@ -65,8 +63,6 @@
             {
                 "model": "keras_clf",
                 "modelname": "tmp",
-                "cv": 3,
-                "n_jobs": -1,
                 "fit_params": {
                 },
                 "params": {
