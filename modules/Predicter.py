@@ -259,8 +259,7 @@ class Predicter(ConfigReader):
                 cv = StratifiedKFold(
                     n_splits=cv, shuffle=True, random_state=42)
             elif fold == 'group':
-                cv = GroupKFold(
-                    n_splits=cv, shuffle=True, random_state=42)
+                cv = GroupKFold(n_splits=cv)
         else:
             if self.configs['fit']['train_mode'] == 'reg':
                 cv = KFold(
