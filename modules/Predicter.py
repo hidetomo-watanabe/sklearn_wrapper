@@ -318,6 +318,7 @@ class Predicter(ConfigReader):
                     n_splits=num, shuffle=True, random_state=42)
                 cv = model.split(self.X_train, self.Y_train)
             elif fold == 'group':
+                logger.info('search with cv: group=%s' % cv_config['group'])
                 group_ind = self.feature_columns.index(cv_config['group'])
                 groups = self.X_train[:, group_ind]
                 model = GroupKFold(n_splits=num)
