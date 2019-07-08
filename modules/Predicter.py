@@ -5,7 +5,7 @@ import pickle
 import numpy as np
 import pandas as pd
 import importlib
-from sklearn.model_selection import StratifiedKFold, KFold
+from sklearn.model_selection import StratifiedKFold, GroupKFold, KFold
 from sklearn.model_selection import cross_val_score
 from hyperopt import fmin, tpe, hp, space_eval, Trials, STATUS_OK
 from sklearn.linear_model import LogisticRegression, LinearRegression
@@ -213,6 +213,7 @@ class Predicter(ConfigReader):
         base_model = self._get_base_model(model, keras_build_func)
         multiclass = model_config.get('multiclass')
         if multiclass:
+            logger.info('multiclass: %s' % multiclass)
             if multiclass == 'onevsone':
                 multiclass = OneVsOneClassifier
             elif multiclass == 'onevsrest':
@@ -237,24 +238,34 @@ class Predicter(ConfigReader):
         params = model_config.get('params')
         if not params:
             params = {}
-        if self.configs['fit'].get('time_series'):
-            indexes = np.arange(len(Y_train))
-            cv_splits = []
-            cv_unit = int(len(indexes) / (cv + 1))
-            for i in range(cv):
-                if i == (cv - 1):
-                    end = len(indexes)
-                else:
-                    end = (i + 2) * cv_unit
-                cv_splits.append(
-                    (indexes[i * cv_unit: (i + 1) * cv_unit],
-                        indexes[(i + 1) * cv_unit: end]))
-            cv = cv_splits
+        # fold
+        fold = self.configs['fit'].get('fold')
+        if fold:
+            logger.info('fold: %s' % fold)
+            if fold == 'time_series':
+                indexes = np.arange(len(Y_train))
+                cv_splits = []
+                cv_unit = int(len(indexes) / (cv + 1))
+                for i in range(cv):
+                    if i == (cv - 1):
+                        end = len(indexes)
+                    else:
+                        end = (i + 2) * cv_unit
+                    cv_splits.append(
+                        (indexes[i * cv_unit: (i + 1) * cv_unit],
+                            indexes[(i + 1) * cv_unit: end]))
+                cv = cv_splits
+            elif fold == 'stratified':
+                cv = StratifiedKFold(
+                    n_splits=cv, shuffle=True, random_state=42)
+            elif fold == 'group':
+                cv = GroupKFold(
+                    n_splits=cv, shuffle=True, random_state=42)
         else:
             if self.configs['fit']['train_mode'] == 'reg':
                 cv = KFold(
                     n_splits=cv, shuffle=True, random_state=42)
-            else:
+            elif self.configs['fit']['train_mode'] == 'clf':
                 cv = StratifiedKFold(
                     n_splits=cv, shuffle=True, random_state=42)
 
