@@ -6,8 +6,9 @@ import importlib
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from sklearn.decomposition import PCA, NMF
-from xgboost import XGBClassifier
+from sklearn.cluster import KMeans
 from sklearn.feature_selection import RFE
+from xgboost import XGBClassifier
 from sklearn.ensemble import IsolationForest
 from imblearn.under_sampling import RandomUnderSampler
 from imblearn.over_sampling import RandomOverSampler, SMOTE
@@ -358,11 +359,16 @@ class TableDataTranslater(ConfigReader):
             logger.info('pca_ratio sum: %s' % sum(
                 model_obj.explained_variance_ratio_))
             logger.info('pca_ratio: %s' % model_obj.explained_variance_ratio_)
+        elif model == 'kmeans':
+            model_obj = KMeans(n_clusters=n, random_state=42)
+            model_obj.fit(self.X_train)
+            logger.info(
+                'kmeans inertia_: %s' % model_obj.inertia_)
         elif model == 'nmf':
             model_obj = NMF(n_components=n, random_state=42)
             model_obj.fit(self.X_train)
             logger.info(
-                'reconstruction_err_: %s' % model_obj.reconstruction_err_)
+                'nmf reconstruction_err_: %s' % model_obj.reconstruction_err_)
         elif model == 'rfe':
             # for warning
             Y_train = self.Y_train
