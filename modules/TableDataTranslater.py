@@ -6,6 +6,7 @@ import importlib
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from sklearn.decomposition import PCA, NMF
+from scipy.stats import ks_2samp
 from sklearn.cluster import KMeans
 from sklearn.feature_selection import RFE
 from xgboost import XGBClassifier
@@ -349,10 +350,23 @@ class TableDataTranslater(ConfigReader):
 
         n = di_config['n']
         model = di_config['model']
-        logger.info('reduce dimension to %s with %s' % (n, model))
         if n == 'all':
             n = self.X_train.shape[1]
 
+        if model == 'ks':
+            logger.info('reduce dimension with %s' % model)
+            for i, col in enumerate(self.feature_columns):
+                p_val = ks_2samp(self.X_train[:, i], self.X_test[:, i])[1]
+                if p_val < 0.1:
+                    logger.info(
+                        'Kolmogorov-Smirnov not same distriburion: %s'
+                        % self.feature_columns[i])
+                    self.X_train = np.delete(self.X_train, i, 1)
+                    self.X_test = np.delete(self.X_test, i, 1)
+                    del self.feature_columns[i]
+            return
+
+        logger.info('reduce dimension to %s with %s' % (n, model))
         if model == 'pca':
             model_obj = PCA(n_components=n, random_state=42)
             model_obj.fit(self.X_train)
