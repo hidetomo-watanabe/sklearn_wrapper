@@ -123,9 +123,9 @@ class TableDataTranslater(ConfigReader):
                 df = pd.DataFrame(data=fit_x_target, columns=['x'])
                 counts = df.groupby('x')['x'].count()
                 transed = trans_target
-                # only test, insert 1
+                # only test, insert 0
                 transed = np.where(
-                    ~np.in1d(transed, list(counts.index)), 1, transed)
+                    ~np.in1d(transed, list(counts.index)), 0, transed)
                 for i in counts.index:
                     transed = np.where(transed == i, counts[i], transed)
                 transed = transed.reshape(-1, 1)
@@ -153,6 +153,9 @@ class TableDataTranslater(ConfigReader):
                     ~np.in1d(transed, list(means.index)), 0, transed)
                 for i in means.index:
                     transed = np.where(transed == i, means[i], transed)
+                # add Laplace Noize for not data leak
+                np.random.seed(seed=42)
+                transed += [np.random.laplace() for _ in range(len(transed))]
                 transed = transed.reshape(-1, 1)
             else:
                 logger.error('NOT IMPLEMENTED CATEGORIZE: %s' % model)
