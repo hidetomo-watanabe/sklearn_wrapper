@@ -194,6 +194,33 @@ class Predicter(ConfigReader):
         logger.info('best score mean: %s' % best_score_mean)
         return best_params
 
+    def _check_importances(self, model, estimator, X_train, Y_train):
+        # feature_importances
+        if hasattr(estimator, 'feature_importances_'):
+            feature_importances = pd.DataFrame(
+                data=[estimator.feature_importances_],
+                columns=self.feature_columns)
+            feature_importances = feature_importances.ix[
+                :, np.argsort(feature_importances.values[0])[::-1]]
+            logger.info('feature importances:')
+            display(feature_importances)
+            logger.info('feature importances /sum:')
+            display(
+                feature_importances / np.sum(
+                    estimator.feature_importances_))
+
+        # permutation importance
+        if self.configs['fit'].get('permutation'):
+            if model not in ['keras_clf', 'keras_reg']:
+                perm = PermutationImportance(
+                    estimator, random_state=42).fit(
+                    X_train, Y_train)
+                logger.info('permutation importance:')
+                display(
+                    eli5.explain_weights_df(
+                        perm, feature_names=self.feature_columns))
+        return
+
     def calc_single_model(
         self,
         scorer, model_config, cv=3, n_jobs=-1,
@@ -249,30 +276,8 @@ class Predicter(ConfigReader):
         estimator.fit(X_train, Y_train, **fit_params)
         logger.info('estimator: %s' % estimator)
 
-        # feature_importances
-        if hasattr(estimator, 'feature_importances_'):
-            feature_importances = pd.DataFrame(
-                data=[estimator.feature_importances_],
-                columns=self.feature_columns)
-            feature_importances = feature_importances.ix[
-                :, np.argsort(feature_importances.values[0])[::-1]]
-            logger.info('feature importances:')
-            display(feature_importances)
-            logger.info('feature importances /sum:')
-            display(
-                feature_importances / np.sum(
-                    estimator.feature_importances_))
-
-        # permutation importance
-        if self.configs['fit'].get('permutation'):
-            if model not in ['keras_clf', 'keras_reg']:
-                perm = PermutationImportance(
-                    estimator, random_state=42).fit(
-                    X_train, Y_train)
-                logger.info('permutation importance:')
-                display(
-                    eli5.explain_weights_df(
-                        perm, feature_names=self.feature_columns))
+        # importances
+        self._check_importances(model, estimator, X_train, Y_train)
         return estimator
 
     def get_estimator_data(self):
