@@ -26,14 +26,24 @@ if __name__ == '__main__':
         f.write('"""\n')
     # modules
     _append_file_text('%s/modules/ConfigReader.py' % BASE_PATH, FILENAME)
-    _append_file_text('%s/modules/DataTranslater.py' % BASE_PATH, FILENAME)
+    _append_file_text('%s/modules/CommonDataTranslater.py' % BASE_PATH, FILENAME)
     _append_file_text('%s/modules/TableDataTranslater.py' % BASE_PATH, FILENAME)
+    _append_file_text('%s/modules/ImageDataTranslater.py' % BASE_PATH, FILENAME)
+    _append_file_text('%s/modules/DataTranslater.py' % BASE_PATH, FILENAME)
     _append_file_text('%s/modules/Predicter.py' % BASE_PATH, FILENAME)
-    # pre adhoc
+    # adhoc
     with open(config_path, 'r') as f:
         config_json = json.loads(f.read())
-    adhoc = config_json['pre']['adhoc']['myfunc']
-    if adhoc:
+    adhocs = []
+    if config_json['data']['type'] == 'table':
+        if config_json['pre']['table'].get('adhoc'):
+            adhocs.append(config_json['pre']['table']['adhoc']['myfunc'])
+    if config_json['fit'].get('myfunc'):
+        adhocs.append(config_json['fit']['myfunc'])
+    if config_json['post'].get('myfunc'):
+        adhocs.append(config_json['post']['myfunc'])
+    adhocs = list(set(adhocs))
+    for adhoc in adhocs:
         _append_file_text(
             '%s/modules/myfuncs/%s.py' % (BASE_PATH, adhoc), FILENAME)
     # base

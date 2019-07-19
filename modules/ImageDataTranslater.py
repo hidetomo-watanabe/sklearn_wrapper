@@ -1,21 +1,19 @@
 import os
 import math
 import numpy as np
-import pandas as pd
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 import cv2
 from keras.preprocessing import image
-from IPython.display import display
 from logging import getLogger
 
 logger = getLogger('predict').getChild('ImageDataTranslater')
 try:
-    from .ConfigReader import ConfigReader
+    from .CommonDataTranslater import CommonDataTranslater
 except Exception:
-    logger.warn('IN FOR KERNEL SCRIPT, ConfigReader import IS SKIPPED')
+    logger.warn('IN FOR KERNEL SCRIPT, CommonDataTranslater import IS SKIPPED')
 
 
-class ImageDataTranslater(ConfigReader):
+class ImageDataTranslater(CommonDataTranslater):
     def __init__(self, kernel=False):
         self.kernel = kernel
         self.BASE_PATH = '%s/..' % os.path.dirname(os.path.abspath(__file__))
@@ -25,51 +23,6 @@ class ImageDataTranslater(ConfigReader):
             self.OUTPUT_PATH = '%s/outputs' % self.BASE_PATH
         self.configs = {}
 
-    def display_data(self):
-        # to do
-        if self.configs['pre']['train_mode'] == 'clf':
-            logger.info('train pred counts')
-            for pred_col in self.pred_cols:
-                logger.info('%s:' % pred_col)
-                if pred_col not in self.train_df.columns:
-                    logger.warn('NOT %s IN TRAIN DF' % pred_col)
-                    continue
-                display(self.train_df[pred_col].value_counts())
-                display(self.train_df[pred_col].value_counts(normalize=True))
-        elif self.configs['pre']['train_mode'] == 'reg':
-            logger.info('train pred mean, std')
-            for pred_col in self.pred_cols:
-                logger.info('%s:' % pred_col)
-                display('mean: %f' % self.train_df[pred_col].mean())
-                display('std: %f' % self.train_df[pred_col].std())
-        else:
-            logger.error('TRAIN MODE SHOULD BE clf OR reg')
-            raise Exception('NOT IMPLEMENTED')
-        for label, df in [('train', self.train_df), ('test', self.test_df)]:
-            logger.info('%s:' % label)
-            display(df.head())
-            display(df.describe(include='all'))
-        return
-
-    def get_data_for_view(self):
-        output = {
-            'train_df': self.train_df,
-            'test_df': self.test_df,
-        }
-        return output
-
-    def create_data_for_view(self):
-        train_path = self.configs['data']['train_path']
-        test_path = self.configs['data']['test_path']
-        delim = self.configs['data'].get('delimiter')
-        if delim:
-            self.train_df = pd.read_csv(train_path, delimiter=delim)
-            self.test_df = pd.read_csv(test_path, delimiter=delim)
-        else:
-            self.train_df = pd.read_csv(train_path)
-            self.test_df = pd.read_csv(test_path)
-        return
-
     def translate_data_for_view(self):
         pass
 
@@ -78,29 +31,6 @@ class ImageDataTranslater(ConfigReader):
         if savename:
             logger.warn('WRITE DATA FOR VIEW OF IMAGE IS NOT IMPLEMENTED')
             return
-
-    def get_data_for_model(self):
-        output = {
-            'feature_columns': self.feature_columns,
-            'test_ids': self.test_ids,
-            'X_train': self.X_train,
-            'Y_train': self.Y_train,
-            'X_test': self.X_test,
-        }
-        return output
-
-    def get_pre_processers(self):
-        output = {
-        }
-        if hasattr(self, 'y_scaler'):
-            output['y_scaler'] = self.y_scaler
-        return output
-
-    def get_post_processers(self):
-        output = {}
-        if hasattr(self, 'y_scaler'):
-            output['y_scaler'] = self.y_scaler
-        return output
 
     def create_data_for_model(self):
         img_config = self.configs['pre']['image']
