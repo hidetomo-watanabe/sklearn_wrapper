@@ -4,6 +4,7 @@ import numpy as np
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 import cv2
 from keras.preprocessing import image
+from skimage import transform, util
 from logging import getLogger
 
 logger = getLogger('predict').getChild('ImageDataTranslater')
@@ -37,12 +38,16 @@ class ImageDataTranslater(CommonDataTranslater):
 
         def _translate_image2array(img_path):
             img = cv2.imread(img_path)
+            # resize
             resize_param = img_config['resize']
             if resize_param:
                 img = cv2.resize(
                     img, dsize=(resize_param['x'], resize_param['y']))
+            # array
             img = image.img_to_array(img)
             img = img / 255
+            # for memory reduction
+            img = img.astype('float32')
             return img
 
         train_df = self.train_df
@@ -63,6 +68,9 @@ class ImageDataTranslater(CommonDataTranslater):
         self.X_test = np.array(self.X_test)
         # feature_columns
         self.feature_columns = [img_path_col]
+        # for data augmentation
+        self.org_X_train = self.X_train
+        self.org_Y_train = self.Y_train
         return
 
     def _normalize_data_for_model(self):
@@ -92,6 +100,80 @@ class ImageDataTranslater(CommonDataTranslater):
                 self.y_scaler = None
         return
 
+    def _augment_data_for_model_with_horizontal_flip(self):
+        aug_conf = self.configs['pre']['image'].get('augmentation')
+        if not aug_conf:
+            return
+        if not aug_conf.get('flip'):
+            return
+
+        def _flip(array):
+            return array[:, ::-1, :]
+
+        logger.info('data augmentation with horizontal flip')
+        aug_array = np.array(list(map(_flip, self.org_X_train)))
+        self.X_train = np.append(self.X_train, aug_array, axis=0)
+        self.Y_train = np.append(self.Y_train, self.org_Y_train, axis=0)
+        return
+
+    def _augment_data_for_model_with_rotation(self):
+        aug_conf = self.configs['pre']['image'].get('augmentation')
+        if not aug_conf:
+            return
+        if not aug_conf.get('rotate'):
+            return
+
+        def _rotate(array):
+            np.random.seed(seed=42)
+            return transform.rotate(
+                array, angle=np.random.randint(-15, 15),
+                resize=False, center=None)
+
+        logger.info('data augmentation with rotation')
+        aug_array = np.array(list(map(_rotate, self.org_X_train)))
+        self.X_train = np.append(self.X_train, aug_array, axis=0)
+        self.Y_train = np.append(self.Y_train, self.org_Y_train, axis=0)
+        return
+
+    def _augment_data_for_model_with_noize(self):
+        aug_conf = self.configs['pre']['image'].get('augmentation')
+        if not aug_conf:
+            return
+        if not aug_conf.get('noize'):
+            return
+
+        def _add_noize(array):
+            return util.random_noise(array)
+
+        logger.info('data augmentation with noize')
+        aug_array = np.array(list(map(_add_noize, self.org_X_train)))
+        self.X_train = np.append(self.X_train, aug_array, axis=0)
+        self.Y_train = np.append(self.Y_train, self.org_Y_train, axis=0)
+        return
+
+    def _augment_data_for_model_with_invertion(self):
+        aug_conf = self.configs['pre']['image'].get('augmentation')
+        if not aug_conf:
+            return
+        if not aug_conf.get('invert'):
+            return
+
+        def _invert(array):
+            # float32 => int => float32
+            output = (np.invert((array * 255).astype(int)) / 255)
+            output = output.astype('float32')
+            return output
+
+        logger.info('data augmentation with invertion')
+        aug_array = np.array(list(map(_invert, self.org_X_train)))
+        self.X_train = np.append(self.X_train, aug_array, axis=0)
+        self.Y_train = np.append(self.Y_train, self.org_Y_train, axis=0)
+        return
+
     def translate_data_for_model(self):
         self._normalize_data_for_model()
+        self._augment_data_for_model_with_horizontal_flip()
+        self._augment_data_for_model_with_rotation()
+        self._augment_data_for_model_with_noize()
+        self._augment_data_for_model_with_invertion()
         return
