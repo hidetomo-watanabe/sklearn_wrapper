@@ -6,7 +6,7 @@ from logging import getLogger
 logger = getLogger('predict').getChild('CommonDataTranslater')
 try:
     from .ConfigReader import ConfigReader
-except Exception:
+except ImportError:
     logger.warn('IN FOR KERNEL SCRIPT, ConfigReader import IS SKIPPED')
 
 

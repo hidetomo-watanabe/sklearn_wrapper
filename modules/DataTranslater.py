@@ -3,15 +3,15 @@ from logging import getLogger
 logger = getLogger('predict').getChild('DataTranslater')
 try:
     from .ConfigReader import ConfigReader
-except Exception:
+except ImportError:
     logger.warn('IN FOR KERNEL SCRIPT, ConfigReader import IS SKIPPED')
 try:
     from .TableDataTranslater import TableDataTranslater
-except Exception:
+except ImportError:
     logger.warn('IN FOR KERNEL SCRIPT, TableDataTranslater import IS SKIPPED')
 try:
     from .ImageDataTranslater import ImageDataTranslater
-except Exception:
+except ImportError:
     logger.warn('IN FOR KERNEL SCRIPT, ImageDataTranslater import IS SKIPPED')
 
 

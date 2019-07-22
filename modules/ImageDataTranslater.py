@@ -10,7 +10,7 @@ from logging import getLogger
 logger = getLogger('predict').getChild('ImageDataTranslater')
 try:
     from .CommonDataTranslater import CommonDataTranslater
-except Exception:
+except ImportError:
     logger.warn('IN FOR KERNEL SCRIPT, CommonDataTranslater import IS SKIPPED')
 
 
