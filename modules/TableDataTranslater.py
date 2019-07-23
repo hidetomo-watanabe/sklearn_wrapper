@@ -5,7 +5,7 @@ import pandas as pd
 import importlib
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
-from sklearn.decomposition import PCA, NMF
+from sklearn.decomposition import PCA, TruncatedSVD, NMF
 from scipy.stats import ks_2samp
 from sklearn.cluster import KMeans
 from sklearn.feature_selection import RFE
@@ -306,6 +306,12 @@ class TableDataTranslater(CommonDataTranslater):
             logger.info('pca_ratio sum: %s' % sum(
                 model_obj.explained_variance_ratio_))
             logger.info('pca_ratio: %s' % model_obj.explained_variance_ratio_)
+        elif model == 'svd':
+            model_obj = TruncatedSVD(n_components=n, random_state=42)
+            model_obj.fit(self.X_train)
+            logger.info('svd_ratio sum: %s' % sum(
+                model_obj.explained_variance_ratio_))
+            logger.info('svd_ratio: %s' % model_obj.explained_variance_ratio_)
         elif model == 'kmeans':
             model_obj = KMeans(n_clusters=n, random_state=42)
             model_obj.fit(self.X_train)
