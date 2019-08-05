@@ -477,10 +477,6 @@ class TableDataTranslater(CommonDataTranslater):
                         [self.X_train] * label_num, 2)
                     self.X_test = np.concatenate(
                         [self.X_test] * label_num, 2)
-            elif mode == '1dcnn':
-                self.X_train = self.X_train.reshape(*self.X_train.shape, 1)
-                self.Y_train = self.Y_train.reshape(*self.Y_train.shape, 1)
-                self.X_test = self.X_test.reshape(*self.X_test.shape, 1)
             else:
                 logger.error('NOT IMPLEMENTED RESHAPE FOR KERAS: %s' % mode)
                 raise Exception('NOT IMPLEMENTED')
