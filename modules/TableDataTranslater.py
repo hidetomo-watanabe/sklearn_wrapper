@@ -1,5 +1,6 @@
 import os
 import math
+from tqdm import tqdm
 import numpy as np
 import pandas as pd
 import importlib
@@ -165,10 +166,10 @@ class TableDataTranslater(CommonDataTranslater):
                 del train_df[column]
                 del test_df[column]
         # missing
-        for column in test_df.columns:
+        for column, dtype in tqdm(test_df.dtypes.items()):
             if column in [self.id_col] + self.pred_cols:
                 continue
-            if test_df.dtypes[column] == 'object':
+            if dtype == 'object':
                 logger.warn('OBJECT MISSING IS NOT BE REPLACED: %s' % column)
                 continue
             column_mean = train_df[column].mean()
@@ -179,10 +180,10 @@ class TableDataTranslater(CommonDataTranslater):
         # category
         trans_category = self.configs['pre']['table'].get('category')
         logger.info('categorize model: %s' % trans_category['model'])
-        for column in test_df.columns:
+        for column, dtype in tqdm(test_df.dtypes.items()):
             if column in [self.id_col] + self.pred_cols:
                 continue
-            if test_df.dtypes[column] != 'object' \
+            if dtype != 'object' \
                 and trans_category \
                     and column not in trans_category['target']:
                 continue
@@ -190,7 +191,7 @@ class TableDataTranslater(CommonDataTranslater):
             train_df, test_df = self._categorize_dfs(
                 [train_df, test_df], column, trans_category['model'])
         # float
-        for column in test_df.columns:
+        for column in tqdm(test_df.columns):
             if column in [self.id_col]:
                 continue
             if self.configs['pre']['train_mode'] in ['clf'] \
