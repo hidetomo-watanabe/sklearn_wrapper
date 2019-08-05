@@ -53,6 +53,8 @@ _check
 echo '  DIGIT PART'
 # lgb
 err_msg=${err_msg}$(python -u predict.py tests/digit_part/test_config.json 2>&1 | grep ERROR)
+# keras(lstm)
+err_msg=${err_msg}$(python -u predict.py tests/digit_part/test_config2.json 2>&1 | grep ERROR)
 _check
 # cactus_part image binary classification
 echo '  CACTUS PART'

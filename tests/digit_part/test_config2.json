@@ -1,0 +1,67 @@
+{
+    "data": {
+        "train_path": "./tests/digit_part/train.csv",
+        "test_path": "./tests/digit_part/test.csv",
+        "type": "table",
+        "pred_cols": ["label"],
+        "id_col": "ImageId"
+    },
+    "pre": {
+        "train_mode": "clf",
+        "y_pre": false,
+        "y_scaler": "standard",
+        "table": {
+            "adhoc": {
+                "myfunc": "digit",
+                "methods": [
+                    "add_image_id"
+                ]
+            },
+            "del": [
+            ],
+            "category": {
+                "target": [
+                ],
+                "model": "onehot"
+            },
+            "x_scaler": "standard",
+            "dimension": {
+                "n": 100,
+                "model": "pca"
+            },
+            "adversarial": false,
+            "reshape_for_keras": "lstm"
+        }
+    },
+    "fit": {
+        "myfunc": "digit",
+        "train_mode": "clf",
+        "ensemble": {
+            "mode": "stacking",
+            "model": "log_reg",
+            "modelname": "tmp_digit2",
+            "k": 10,
+            "seed": 111
+        },
+        "scoring": "accuracy",
+        "single_models": [
+            {
+                "model": "keras_clf",
+                "modelname": "tmp",
+                "fit_params": {
+                },
+                "params": {
+                }
+            }
+        ]
+    },
+    "post": {
+        "myfunc": "digit",
+        "methods": [
+            "translate_label2upper"
+        ]
+    },
+    "notify": {
+        "slack": "https://hooks.slack.com/services/hogehoge"
+    }
+}

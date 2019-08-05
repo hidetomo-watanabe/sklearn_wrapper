@@ -583,20 +583,23 @@ class Predicter(ConfigReader):
                 pd.DataFrame(data=self.Y_pred, columns=self.pred_cols),
                 left_index=True, right_index=True)
         if isinstance(self.Y_pred_proba, np.ndarray):
-            self.Y_pred_proba_df = pd.DataFrame(
-                data=self.test_ids, columns=[self.id_col])
-            if len(self.pred_cols) == 1:
-                proba_columns = map(
-                    lambda x: '%s_%s' % (self.pred_cols[0], str(x)),
-                    self.classes)
+            if self.Y_pred_proba.shape[1] == self.classes.shape[0]:
+                self.Y_pred_proba_df = pd.DataFrame(
+                    data=self.test_ids, columns=[self.id_col])
+                if len(self.pred_cols) == 1:
+                    proba_columns = list(map(
+                        lambda x: '%s_%s' % (self.pred_cols[0], str(x)),
+                        self.classes))
+                else:
+                    proba_columns = self.pred_cols
+                self.Y_pred_proba_df = pd.merge(
+                    self.Y_pred_proba_df,
+                    pd.DataFrame(
+                        data=self.Y_pred_proba,
+                        columns=proba_columns),
+                    left_index=True, right_index=True)
             else:
-                proba_columns = self.pred_cols
-            self.Y_pred_proba_df = pd.merge(
-                self.Y_pred_proba_df,
-                pd.DataFrame(
-                    data=self.Y_pred_proba,
-                    columns=proba_columns),
-                left_index=True, right_index=True)
+                logger.warn('NOT MATCH DIMENSION OF Y_PRED_PROBA AND CLASSES')
 
         # post
         fit_post = self.configs.get('post')
