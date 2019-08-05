@@ -197,6 +197,7 @@ class TableDataTranslater(CommonDataTranslater):
             if self.configs['pre']['train_mode'] in ['clf'] \
                     and column in self.pred_cols:
                 continue
+            logger.info('to float: %s' % column)
             train_df, test_df = self._to_float_of_dfs(
                 [train_df, test_df], column)
         self.train_df = train_df
