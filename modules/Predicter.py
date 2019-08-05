@@ -295,13 +295,11 @@ class Predicter(ConfigReader):
                 if self.configs['fit']['train_mode'] == 'reg':
                     model = KFold(
                         shuffle=True, random_state=42)
-                    # cv = model.split(self.X_train, self.Y_train)
-                    cv = model
+                    cv = model.split(self.X_train, self.Y_train)
                 elif self.configs['fit']['train_mode'] == 'clf':
                     model = StratifiedKFold(
                         shuffle=True, random_state=42)
-                    # cv = model.split(self.X_train, self.Y_train)
-                    cv = model
+                    cv = model.split(self.X_train, self.Y_train)
                 return cv
 
             fold = cv_config['fold']
@@ -323,8 +321,7 @@ class Predicter(ConfigReader):
             elif fold == 'stratified':
                 model = StratifiedKFold(
                     n_splits=num, shuffle=True, random_state=42)
-                # cv = model.split(self.X_train, self.Y_train)
-                cv = model
+                cv = model.split(self.X_train, self.Y_train)
             elif fold == 'group':
                 logger.info('search with cv: group=%s' % cv_config['group'])
                 group_ind = self.feature_columns.index(cv_config['group'])
