@@ -52,7 +52,7 @@
             "no_anomaly": true,
             "undersampling": "random",
             "oversampling": "smote",
-            "reshape_for_keras": "lstm"
+            "reshape_for_keras": ["category", "lstm"]
         },
         "image": {
             "img_path": "img_path",

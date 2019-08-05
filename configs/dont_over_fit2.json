@@ -41,8 +41,7 @@
             },
             "no_anomaly": true,
             "undersampling": false,
-            "oversampling": false,
-            "reshape_for_keras": false
+            "oversampling": false
         }
     },
     "fit": {

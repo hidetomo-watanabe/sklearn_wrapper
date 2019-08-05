@@ -30,7 +30,7 @@
                 "model": "pca"
             },
             "adversarial": false,
-            "reshape_for_keras": "lstm"
+            "reshape_for_keras": ["category", "lstm"]
         }
     },
     "fit": {

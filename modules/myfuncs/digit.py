@@ -21,7 +21,7 @@ def create_keras_model():
     input_dim = 100
     n_hidden = 500
     # output_dim = self.Y_train.shape[1]
-    output_dim = 1
+    output_dim = 10
 
     model = Sequential()
     model.add(LSTM(
@@ -34,7 +34,7 @@ def create_keras_model():
 
     # compile model
     model.compile(
-        loss="mean_squared_error",
+        loss="categorical_crossentropy",
         optimizer=optimizer)
     model.summary()
     return model
