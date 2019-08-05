@@ -58,7 +58,7 @@ err_msg=${err_msg}$(python -u predict.py tests/digit_part/test_config2.json 2>&1
 _check
 # cactus_part image binary classification
 echo '  CACTUS PART'
-# keras
+# keras(vgg16)
 err_msg=${err_msg}$(python -u predict.py tests/cactus_part/test_config.json 2>&1 | grep ERROR)
 _check
 
