@@ -242,12 +242,15 @@ class TableDataTranslater(CommonDataTranslater):
         # x
         # scaler
         x_scaler = self.configs['pre']['table'].get('x_scaler')
-        logger.info(f'normalize x data: {x_scaler}')
         if x_scaler:
+            logger.info(f'normalize x data: {x_scaler}')
             if x_scaler == 'standard':
                 self.x_scaler = StandardScaler()
             elif x_scaler == 'minmax':
                 self.x_scaler = MinMaxScaler()
+            else:
+                logger.error('NOT IMPLEMENTED FIT X_SCALER: %s' % x_scaler)
+                raise Exception('NOT IMPLEMENTED')
             self.x_scaler.fit(self.X_train)
             self.X_train = self.x_scaler.transform(self.X_train)
             self.X_test = self.x_scaler.transform(self.X_test)
@@ -267,12 +270,15 @@ class TableDataTranslater(CommonDataTranslater):
                     raise Exception('NOT IMPLEMENTED')
             # scaler
             y_scaler = self.configs['pre'].get('y_scaler')
-            logger.info(f'normalize y data: {y_scaler}')
             if y_scaler:
+                logger.info(f'normalize y data: {y_scaler}')
                 if y_scaler == 'standard':
                     self.y_scaler = StandardScaler()
                 elif y_scaler == 'minmax':
                     self.y_scaler = MinMaxScaler()
+                else:
+                    logger.error('NOT IMPLEMENTED FIT Y_SCALER: %s' % y_scaler)
+                    raise Exception('NOT IMPLEMENTED')
                 self.y_scaler.fit(self.Y_train)
                 self.Y_train = self.y_scaler.transform(self.Y_train)
             else:
