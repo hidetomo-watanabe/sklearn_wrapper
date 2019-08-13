@@ -227,7 +227,7 @@
    "source": [
     "print('### VISUALIZE LEARNING CURVES')\n",
     "estimator_data = predicter_obj.get_estimator_data()\n",
-    "for _, estimator in estimator_data['single_estimators']:\n",
+    "for config, estimator in estimator_data['single_estimators']:\n",
     "    title = 'learning curves: %s' % config['modelname']\n",
     "    visualizer_obj.visualize_learning_curve(\n",
     "        title, estimator,\n",

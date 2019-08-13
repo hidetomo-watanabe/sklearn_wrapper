@@ -99,7 +99,7 @@ def translate_familystatus(train_df, test_df):
 
 def create_keras_model():
     # input_dim = self.X_train.shape[1]
-    input_dim = 9
+    input_dim = 7
     activation = 'relu'
     # output_dim = self.Y_train.shape[1]
     output_dim = 1

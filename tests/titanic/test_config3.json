@@ -29,7 +29,6 @@
             ],
             "category": {
                 "target": [
-                    "Pclass",
                     "FamilyStatus"
                 ],
                 "model": "onehot"
@@ -51,6 +50,11 @@
     "fit": {
         "myfunc": "titanic",
         "train_mode": "clf",
+        "cv": {
+            "fold": "group",
+            "num": 3,
+            "group": "Pclass"
+        },
         "ensemble": {
             "mode": "stacking",
             "model": "log_reg",
