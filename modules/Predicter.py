@@ -282,6 +282,7 @@ class Predicter(ConfigReader):
 
     def get_estimator_data(self):
         output = {
+            'cv': self.cv,
             'scorer': self.scorer,
             'single_estimators': self.single_estimators,
             'estimator': self.estimator,
@@ -295,11 +296,14 @@ class Predicter(ConfigReader):
                 if self.configs['fit']['train_mode'] == 'reg':
                     model = KFold(
                         shuffle=True, random_state=42)
-                    cv = model.split(self.X_train, self.Y_train)
+                    # cv = model.split(self.X_train, self.Y_train)
+                    cv = model
                 elif self.configs['fit']['train_mode'] == 'clf':
                     model = StratifiedKFold(
                         shuffle=True, random_state=42)
-                    cv = model.split(self.X_train, self.Y_train)
+                    # cv = model.split(self.X_train, self.Y_train)
+                    cv = model
+                self.cv = cv
                 return cv
 
             fold = cv_config['fold']
@@ -321,13 +325,15 @@ class Predicter(ConfigReader):
             elif fold == 'stratified':
                 model = StratifiedKFold(
                     n_splits=num, shuffle=True, random_state=42)
-                cv = model.split(self.X_train, self.Y_train)
+                # cv = model.split(self.X_train, self.Y_train)
+                cv = model
             elif fold == 'group':
                 logger.info('search with cv: group=%s' % cv_config['group'])
                 group_ind = self.feature_columns.index(cv_config['group'])
                 groups = self.X_train[:, group_ind]
                 model = GroupKFold(n_splits=num)
                 cv = model.split(self.X_train, self.Y_train, groups=groups)
+            self.cv = cv
             return cv
 
         def _get_scorer_from_config():

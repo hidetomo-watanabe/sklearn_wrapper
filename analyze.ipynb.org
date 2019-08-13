@@ -227,12 +227,12 @@
    "source": [
     "print('### VISUALIZE LEARNING CURVES')\n",
     "estimator_data = predicter_obj.get_estimator_data()\n",
-    "for config, estimator in estimator_data['single_estimators']:\n",
+    "for _, estimator in estimator_data['single_estimators']:\n",
     "    title = 'learning curves: %s' % config['modelname']\n",
     "    visualizer_obj.visualize_learning_curve(\n",
     "        title, estimator,\n",
     "        data_for_model['X_train'], data_for_model['Y_train'],\n",
-    "        estimator_data['scorer'], config['cv'])"
+    "        estimator_data['scorer'], estimator_data['cv'])"
    ]
   },
   {
