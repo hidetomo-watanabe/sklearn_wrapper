@@ -1,4 +1,3 @@
-import os
 import pandas as pd
 from IPython.display import display
 from logging import getLogger
@@ -11,14 +10,8 @@ except ImportError:
 
 
 class CommonDataTranslater(ConfigReader):
-    def __init__(self, kernel=False):
-        self.kernel = kernel
-        self.BASE_PATH = '%s/..' % os.path.dirname(os.path.abspath(__file__))
-        if self.kernel:
-            self.OUTPUT_PATH = '.'
-        else:
-            self.OUTPUT_PATH = '%s/outputs' % self.BASE_PATH
-        self.configs = {}
+    def __init__(self):
+        pass
 
     def display_data(self):
         if self.configs['pre']['train_mode'] == 'clf':
