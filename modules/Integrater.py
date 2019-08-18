@@ -1,5 +1,7 @@
 import os
 import pandas as pd
+from itertools import combinations
+from IPython.display import display
 from logging import getLogger
 from .ConfigReader import ConfigReader
 
@@ -11,6 +13,15 @@ class Integrater(ConfigReader):
         self.BASE_PATH = '%s/..' % os.path.dirname(os.path.abspath(__file__))
         self.OUTPUT_PATH = '%s/outputs' % self.BASE_PATH
         self.configs = {}
+
+    def display_correlations(self):
+        filenames = self.configs['integrate']['filenames']
+        for filename1, filename2 in combinations(filenames, 2):
+            logger.info(f'{filename1} vs {filename2}')
+            df1 = pd.read_csv(filename1).drop(self.id_col, axis=1)
+            df2 = pd.read_csv(filename2).drop(self.id_col, axis=1)
+            display(df1.corrwith(df2))
+        return
 
     def calc_average(self):
         filenames = self.configs['integrate']['filenames']

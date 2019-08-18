@@ -21,7 +21,13 @@ if __name__ == '__main__':
         integrater_obj = Integrater()
         integrater_obj.read_config_file(config_path)
 
+        logger.info('### DISPLAY CORRELATIONS')
+        integrater_obj.display_correlations()
+
+        logger.info('### CALC AVERAGE')
         integrater_obj.calc_average()
+
+        logger.info('### WRITE OUTPUT')
         integrater_obj.write_output()
     except Exception as e:
         logger.error('%s' % e)
