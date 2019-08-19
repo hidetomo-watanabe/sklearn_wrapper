@@ -170,6 +170,7 @@
         ]
     },
     "integrate": {
+        "mode": "average",
         "output": "integrate",
         "filenames": [
             "/path/1.csv",

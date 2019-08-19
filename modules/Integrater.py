@@ -23,7 +23,16 @@ class Integrater(ConfigReader):
             display(df1.corrwith(df2))
         return
 
-    def calc_average(self):
+    def integrate(self):
+        mode = self.configs['integrate']['mode']
+        logger.info(f'mode: {mode}')
+        if mode == 'average':
+            return self._calc_average()
+        else:
+            logger.error('NOT IMPLEMENTED INTEGRATE MODE: %s' % mode)
+            raise Exception('NOT IMPLEMENTED')
+
+    def _calc_average(self):
         filenames = self.configs['integrate']['filenames']
         weights = self.configs['integrate'].get('weights')
         if not weights:

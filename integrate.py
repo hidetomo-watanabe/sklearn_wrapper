@@ -24,8 +24,8 @@ if __name__ == '__main__':
         logger.info('### DISPLAY CORRELATIONS')
         integrater_obj.display_correlations()
 
-        logger.info('### CALC AVERAGE')
-        integrater_obj.calc_average()
+        logger.info('### INTEGRATE')
+        integrater_obj.integrate()
 
         logger.info('### WRITE OUTPUT')
         integrater_obj.write_output()
