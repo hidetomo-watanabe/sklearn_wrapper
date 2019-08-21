@@ -96,8 +96,8 @@
                 },
                 "params": {
                     "max_depth": [4, 6, 8, 10],
-                    "learning_rate": [0.01, 0.05, 0.1, 0.5, 1.0],
-                    "n_estimators": [100, 300, 500, 1000],
+                    "learning_rate": [0.1],
+                    "n_estimators": [1000],
                     "random_state": [42]
                 }
             },
@@ -110,8 +110,8 @@
                 },
                 "params": {
                     "max_depth": [7, 10, 30, 50],
-                    "learning_rate": [0.01, 0.05, 0.1, 0.5, 1.0],
-                    "n_estimators": [100, 300, 500, 1000],
+                    "learning_rate": [0.1],
+                    "n_estimators": [1000],
                     "reg_alpha": [0, 5, 15, 300],
                     "reg_lambda": [0, 5, 15, 300],
                     "random_state": [42]
@@ -127,8 +127,8 @@
                 "params": {
                     "max_depth": [7, 10, 30, 50],
                     "min_data_in_leaf": [10, 20, 30, 50, 100, 500, 1000],
-                    "learning_rate": [0.01, 0.05, 0.1, 0.5, 1.0],
-                    "num_rounds": [100, 300, 500, 1000],
+                    "learning_rate": [0.1],
+                    "num_rounds": [1000],
                     "num_leaves": [10, 31, 50, 70, 80],
                     "lambda_l1": [0, 5, 15, 300],
                     "lambda_l2": [0, 5, 15, 300],
