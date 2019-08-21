@@ -35,34 +35,34 @@ class Integrater(ConfigReader):
             logger.error('NOT IMPLEMENTED INTEGRATE MODE: %s' % mode)
             raise Exception('NOT IMPLEMENTED')
 
+    def _get_id_df(self, dfs):
+        id_dfs = []
+        for df in dfs:
+            id_dfs.append(df[self.id_col])
+        id_df = id_dfs[0]
+        for id_df_tmp in id_dfs:
+            if not id_df.equals(id_df_tmp):
+                logger.error('NOT SAME IDS OVER ALL FILES')
+                raise Exception('DATA INCOSISTENCY')
+        return id_df
+
+    def _get_val_columns(self, dfs):
+        cols_list = []
+        for df in dfs:
+            cols_list.append(df.drop(self.id_col, axis=1).columns)
+        cols = cols_list[0]
+        for cols_tmp in cols_list:
+            if set(cols) != set(cols_tmp):
+                logger.error('NOT SAME COLUMNS OVER ALL FILES')
+                raise Exception('DATA INCOSISTENCY')
+        return cols
+
     def _calc_vote(self):
         filenames = self.configs['integrate']['filenames']
         weights = self.configs['integrate'].get('weights')
         if not weights:
             weights = [1] * len(self.filenames)
         dfs = [pd.read_csv(filename) for filename in filenames]
-
-        def _get_id_df():
-            id_dfs = []
-            for df in dfs:
-                id_dfs.append(df[self.id_col])
-            id_df = id_dfs[0]
-            for id_df_tmp in id_dfs:
-                if not id_df.equals(id_df_tmp):
-                    logger.error('NOT SAME IDS OVER ALL FILES')
-                    raise Exception('DATA INCOSISTENCY')
-            return id_df
-
-        def _get_val_columns():
-            cols_list = []
-            for df in dfs:
-                cols_list.append(df.drop(self.id_col, axis=1).columns)
-            cols = cols_list[0]
-            for cols_tmp in cols_list:
-                if set(cols) != set(cols_tmp):
-                    logger.error('NOT SAME COLUMNS OVER ALL FILES')
-                    raise Exception('DATA INCOSISTENCY')
-            return cols
 
         def _calc_results(val_column):
             vals = []
@@ -83,8 +83,8 @@ class Integrater(ConfigReader):
             return results
 
         self.output = pd.DataFrame()
-        self.output[self.id_col] = _get_id_df()
-        for val_column in _get_val_columns():
+        self.output[self.id_col] = self._get_id_df(dfs)
+        for val_column in self._get_val_columns(dfs):
             self.output[val_column] = _calc_results(val_column)
         return self.output
 
@@ -93,18 +93,17 @@ class Integrater(ConfigReader):
         weights = self.configs['integrate'].get('weights')
         if not weights:
             weights = [1] * len(self.filenames)
+        dfs = [pd.read_csv(filename) for filename in filenames]
 
         self.output = pd.DataFrame()
-        for filename, weight in zip(filenames, weights):
-            df = pd.read_csv(filename)
-            id_df = df[self.id_col]
+        for df, weight in zip(dfs, weights):
             val_df = df.drop(self.id_col, axis=1)
             if len(self.output) == 0:
                 self.output = val_df * weight
             else:
                 self.output += val_df * weight
         self.output /= sum(weights)
-        self.output[self.id_col] = id_df
+        self.output[self.id_col] = self._get_id_df(dfs)
         return self.output
 
     def write_output(self, filename=None):
