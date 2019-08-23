@@ -29,6 +29,8 @@ class Integrater(ConfigReader):
         logger.info(f'mode: {mode}')
         if mode == 'average':
             return self._calc_average()
+        elif mode == 'rank_average':
+            return self._calc_rank_average()
         elif mode == 'vote':
             return self._calc_vote()
         else:
@@ -102,6 +104,24 @@ class Integrater(ConfigReader):
                 self.output = val_df * weight
             else:
                 self.output += val_df * weight
+        self.output /= sum(weights)
+        self.output[self.id_col] = self._get_id_df(dfs)
+        return self.output
+
+    def _calc_rank_average(self):
+        filenames = self.configs['integrate']['filenames']
+        weights = self.configs['integrate'].get('weights')
+        if not weights:
+            weights = [1] * len(self.filenames)
+        dfs = [pd.read_csv(filename) for filename in filenames]
+
+        self.output = pd.DataFrame()
+        for df, weight in zip(dfs, weights):
+            rank_df = df.drop(self.id_col, axis=1).rank(pct=True)
+            if len(self.output) == 0:
+                self.output = rank_df * weight
+            else:
+                self.output += rank_df * weight
         self.output /= sum(weights)
         self.output[self.id_col] = self._get_id_df(dfs)
         return self.output
