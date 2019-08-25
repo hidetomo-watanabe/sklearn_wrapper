@@ -1,5 +1,3 @@
-import sys
-import os
 import math
 import pickle
 import numpy as np
@@ -58,7 +56,6 @@ class Predicter(ConfigReader):
         self.X_test = X_test
         self.y_scaler = y_scaler
         self.kernel = kernel
-        self.BASE_PATH = '%s/..' % os.path.dirname(os.path.abspath(__file__))
         self.configs = {}
         # kerasのスコープ対策として、インスタンス作成時に読み込み
         # keras使う時しか使わないので、evalで定義してエラー回避
@@ -605,7 +602,6 @@ class Predicter(ConfigReader):
         if fit_post:
             if fit_post['myfunc']:
                 if not self.kernel:
-                    sys.path.append(self.BASE_PATH)
                     myfunc = importlib.import_module(
                         'modules.myfuncs.%s' % fit_post['myfunc'])
             for method_name in fit_post['methods']:

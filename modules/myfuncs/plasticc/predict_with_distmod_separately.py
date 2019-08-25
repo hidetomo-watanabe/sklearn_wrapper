@@ -12,7 +12,7 @@ from modules.Notifier import Notifier
 
 if __name__ == '__main__':
     logging.config.fileConfig(
-        '../../../configs/logging.conf',
+        f'{BASE_PATH}/configs/logging.conf',
         disable_existing_loggers=False)
     logger = getLogger('predict')
 
@@ -21,7 +21,7 @@ if __name__ == '__main__':
     if len(sys.argv) > 1:
         config_path = sys.argv[1]
     else:
-        config_path = '%s/configs/config.json' % BASE_PATH
+        config_path = f'{BASE_PATH}/configs/config.json'
     try:
         # data translate
         translater_obj = DataTranslater()
