@@ -1,4 +1,3 @@
-import os
 import math
 from tqdm import tqdm
 import numpy as np
@@ -32,11 +31,6 @@ except ImportError:
 class TableDataTranslater(CommonDataTranslater):
     def __init__(self, kernel=False):
         self.kernel = kernel
-        self.BASE_PATH = '%s/..' % os.path.dirname(os.path.abspath(__file__))
-        if self.kernel:
-            self.OUTPUT_PATH = '.'
-        else:
-            self.OUTPUT_PATH = '%s/outputs' % self.BASE_PATH
         self.configs = {}
 
     def _replace_missing_of_dfs(self, dfs, target, target_mean):
@@ -212,10 +206,11 @@ class TableDataTranslater(CommonDataTranslater):
             return
 
         savename += '.csv'
+        output_path = self.configs['data']['output_dir']
         self.train_df.to_csv(
-            '%s/train_%s' % (self.OUTPUT_PATH, savename), index=False)
+            '%s/train_%s' % (output_path, savename), index=False)
         self.test_df.to_csv(
-            '%s/test_%s' % (self.OUTPUT_PATH, savename), index=False)
+            '%s/test_%s' % (output_path, savename), index=False)
         return savename
 
     def create_data_for_model(self):

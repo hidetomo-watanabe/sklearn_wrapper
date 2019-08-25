@@ -59,10 +59,6 @@ class Predicter(ConfigReader):
         self.y_scaler = y_scaler
         self.kernel = kernel
         self.BASE_PATH = '%s/..' % os.path.dirname(os.path.abspath(__file__))
-        if self.kernel:
-            self.OUTPUT_PATH = '.'
-        else:
-            self.OUTPUT_PATH = '%s/outputs' % self.BASE_PATH
         self.configs = {}
         # kerasのスコープ対策として、インスタンス作成時に読み込み
         # keras使う時しか使わないので、evalで定義してエラー回避
@@ -478,12 +474,13 @@ class Predicter(ConfigReader):
             modelname = config.get('modelname')
             if not modelname:
                 modelname = 'tmp_model'
+            output_path = self.configs['data']['output_dir']
             if hasattr(estimator, 'save'):
                 estimator.save(
-                    '%s/%s.pickle' % (self.OUTPUT_PATH, modelname))
+                    '%s/%s.pickle' % (output_path, modelname))
             else:
                 with open(
-                    '%s/%s.pickle' % (self.OUTPUT_PATH, modelname), 'wb'
+                    '%s/%s.pickle' % (output_path, modelname), 'wb'
                 ) as f:
                     pickle.dump(estimator, f)
         return modelname
@@ -625,11 +622,11 @@ class Predicter(ConfigReader):
         if not modelname:
             modelname = 'tmp_model'
         filename = '%s.csv' % modelname
+        output_path = self.configs['data']['output_dir']
         if isinstance(self.Y_pred_df, pd.DataFrame):
             self.Y_pred_df.to_csv(
-                '%s/%s' % (self.OUTPUT_PATH, filename), index=False)
+                '%s/%s' % (output_path, filename), index=False)
         if isinstance(self.Y_pred_proba_df, pd.DataFrame):
             self.Y_pred_proba_df.to_csv(
-                '%s/proba_%s' % (self.OUTPUT_PATH, filename),
-                index=False)
+                '%s/proba_%s' % (output_path, filename), index=False)
         return filename

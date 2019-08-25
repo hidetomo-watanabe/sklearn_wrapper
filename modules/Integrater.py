@@ -1,4 +1,3 @@
-import os
 import numpy as np
 import pandas as pd
 from itertools import combinations
@@ -11,8 +10,6 @@ logger = getLogger('predict').getChild('Integrater')
 
 class Integrater(ConfigReader):
     def __init__(self):
-        self.BASE_PATH = '%s/..' % os.path.dirname(os.path.abspath(__file__))
-        self.OUTPUT_PATH = '%s/outputs' % self.BASE_PATH
         self.configs = {}
 
     def display_correlations(self):
@@ -129,5 +126,6 @@ class Integrater(ConfigReader):
     def write_output(self, filename=None):
         if not filename:
             filename = '%s.csv' % self.configs['integrate']['output']
+        output_path = self.configs['data']['output_dir']
         self.output.to_csv(
-            '%s/%s' % (self.OUTPUT_PATH, filename), index=False)
+            '%s/%s' % (output_path, filename), index=False)

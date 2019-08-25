@@ -2,6 +2,7 @@
     "data": {
         "train_path": "../input/titanic/train.csv",
         "test_path": "../input/titanic/test.csv",
+        "output_dir": ".",
         "type": "table",
         "pred_cols": ["Survived"],
         "id_col": "PassengerId"

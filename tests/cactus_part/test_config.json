@@ -2,6 +2,7 @@
     "data": {
         "train_path": "./tests/cactus_part/train.csv",
         "test_path": "./tests/cactus_part/test.csv",
+        "output_dir": "./outputs",
         "type": "image",
         "pred_cols": ["has_cactus"],
         "id_col": "id"

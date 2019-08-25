@@ -1,4 +1,3 @@
-import os
 import math
 import numpy as np
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
@@ -17,11 +16,6 @@ except ImportError:
 class ImageDataTranslater(CommonDataTranslater):
     def __init__(self, kernel=False):
         self.kernel = kernel
-        self.BASE_PATH = '%s/..' % os.path.dirname(os.path.abspath(__file__))
-        if self.kernel:
-            self.OUTPUT_PATH = '.'
-        else:
-            self.OUTPUT_PATH = '%s/outputs' % self.BASE_PATH
         self.configs = {}
 
     def translate_data_for_view(self):

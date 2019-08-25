@@ -2,6 +2,7 @@
     "data": {
         "train_path": "./tests/house/train.csv",
         "test_path": "./tests/house/test.csv",
+        "output_dir": "./outputs",
         "type": "table",
         "pred_cols": ["SalePrice"],
         "id_col": "Id"

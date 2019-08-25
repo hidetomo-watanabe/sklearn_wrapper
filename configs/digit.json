@@ -2,6 +2,7 @@
     "data": {
         "train_path": "../input/digit/train.csv",
         "test_path": "../input/digit/test.csv",
+        "output_dir": ".",
         "type": "table",
         "pred_cols": ["label"],
         "id_col": "ImageId"

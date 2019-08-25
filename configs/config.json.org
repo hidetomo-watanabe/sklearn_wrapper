@@ -2,6 +2,7 @@
     "data": {
         "train_path": "/path/train.csv",
         "test_path": "/path/test.csv",
+        "output_dir": "/path/outputs",
         "type": "table",
         "pred_cols": ["Hoge"],
         "id_col": "Id",

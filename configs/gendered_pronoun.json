@@ -2,6 +2,7 @@
     "data": {
         "train_path": "../input/gendered_pronoun/train.tsv",
         "test_path": "../input/gendered_pronoun/test_stage_2.tsv",
+        "output_dir": ".",
         "type": "table",
         "pred_cols": ["A","B","NEITHER"],
         "id_col": "ID",
