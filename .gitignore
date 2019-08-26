@@ -2,9 +2,8 @@ __pycache__
 .cache
 catboost_info
 *.ipynb
-configs/config.json
-modules/MyScoringFunc.py
+analysis_for_kaggle/configs/config.json
+analysis_for_kaggle/for_kernel/predict_for_kernel.py
 outputs/*.csv
 outputs/*.zip
 outputs/*.pickle
-for_kernel/predict_for_kernel.py

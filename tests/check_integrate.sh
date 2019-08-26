@@ -29,7 +29,7 @@ echo 'START INTEGRATE'
 # titanic table binary classification
 echo '  TITANIC'
 # vote
-err_msg=${err_msg}$(python -u integrate.py tests/titanic/test_config5.json 2>&1 | grep ERROR)
+err_msg=${err_msg}$(python -u analysis_for_kaggle/integrate.py tests/titanic/test_config5.json 2>&1 | grep ERROR)
 _check
 
 # diff
