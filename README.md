@@ -70,15 +70,10 @@
 - keras_reg
   - KerasRegressor
 
-### sample configs
-- titanic
-- digit
-- house
-
 ### CUI flow
-- cp configs/config.json.org configs/config.json
+- cp analysis_for_kaggle/configs/config.json.org configs/config.json
 - **update config.json**
-- python predict.py
+- python analysis_for_kaggle/predict.py
 
 ### environment
 - https://github.com/hidetomo-watanabe/analysis_dockerfiles
