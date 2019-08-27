@@ -120,10 +120,11 @@
             },
             {
                 "model": "lgb_clf",
-                "multiclass": "onevsrest",
+                "multiclass": false,
                 "modelname": "tmp_model3",
                 "max_evals": 1,
                 "fit_params": {
+                    "early_stopping_rounds": 100
                 },
                 "params": {
                     "max_depth": [7, 10, 30, 50],
