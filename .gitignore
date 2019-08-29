@@ -7,3 +7,4 @@ analysis_for_kaggle/for_kernel/predict_for_kernel.py
 outputs/*.csv
 outputs/*.zip
 outputs/*.pickle
+logs/*.log
