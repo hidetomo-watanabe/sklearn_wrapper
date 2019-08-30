@@ -148,7 +148,7 @@
                     "depth": [7, 10, 30, 50],
                     "learning_rate": [0.1],
                     "iterations": [1000],
-                    "num_leaves": [10, 31, 50, 70, 80],
+                    "max_leaves": [10, 31, 50, 70, 80],
                     "l2_leaf_reg": [0, 5, 15, 300],
                     "early_stopping_rounds": [100],
                     "random_state": [42]
