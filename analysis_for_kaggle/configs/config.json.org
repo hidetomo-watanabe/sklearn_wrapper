@@ -138,9 +138,26 @@
                 }
             },
             {
+                "model": "catb_clf",
+                "multiclass": false,
+                "modelname": "tmp_model4",
+                "max_evals": 1,
+                "fit_params": {
+                },
+                "params": {
+                    "depth": [7, 10, 30, 50],
+                    "learning_rate": [0.1],
+                    "iterations": [1000],
+                    "num_leaves": [10, 31, 50, 70, 80],
+                    "l2_leaf_reg": [0, 5, 15, 300],
+                    "early_stopping_rounds": [100],
+                    "random_state": [42]
+                }
+            },
+            {
                 "model": "svc",
                 "multiclass": "onevsone",
-                "modelname": "tmp_model4",
+                "modelname": "tmp_model5",
                 "max_evals": 1,
                 "fit_params": {
                 },
@@ -154,7 +171,7 @@
             },
             {
                 "model": "keras_clf",
-                "modelname": "tmp_model5",
+                "modelname": "tmp_model6",
                 "max_evals": 1,
                 "fit_params": {
                 },
