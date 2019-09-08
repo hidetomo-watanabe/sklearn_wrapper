@@ -50,7 +50,10 @@
                 "threshold": 0.5,
                 "add_column": false
             },
-            "no_anomaly": true,
+            "no_anomaly": {
+                "contamination": "auto",
+                "add_column": false
+            }
             "undersampling": "random",
             "oversampling": "smote",
             "reshape_for_keras": ["category", "lstm"]

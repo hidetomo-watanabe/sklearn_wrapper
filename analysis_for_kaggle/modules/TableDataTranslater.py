@@ -378,6 +378,7 @@ class TableDataTranslater(CommonDataTranslater):
             return
 
         logger.info('extract train data with adversarial validation')
+        logger.warn('IN DATA PREPROCESSING, USING TEST DATA')
         adv_train_preds, adv_test_preds = _get_adversarial_preds(
             self.X_train, self.X_test, adversarial)
         logger.info('adversarial train preds:')
@@ -387,7 +388,6 @@ class TableDataTranslater(CommonDataTranslater):
 
         if adversarial.get('add_column'):
             logger.info('add adversarial_test_proba column to X')
-            logger.warn('IN DATA PREPROCESSING, USING TEST DATA')
             self.feature_columns.append('adversarial_test_proba')
             self.X_train = np.append(
                 self.X_train, adv_train_preds.reshape(-1, 1), axis=1)
@@ -405,12 +405,29 @@ class TableDataTranslater(CommonDataTranslater):
         return
 
     def _extract_no_anomaly_train_data(self):
-        if not self.configs['pre']['table'].get('no_anomaly'):
+        no_anomaly = self.configs['pre']['table'].get('no_anomaly')
+        if not no_anomaly:
             return
 
         logger.info('extract no anomaly train data')
-        isf = IsolationForest(random_state=42, n_jobs=-1)
+        contamination = no_anomaly.get('contamination')
+        if not contamination and int(contamination) != 0:
+            contamination = 'auto'
+        isf = IsolationForest(
+            contamination=contamination,
+            behaviour='new', random_state=42, n_jobs=-1)
         preds = isf.fit_predict(self.X_train, self.Y_train)
+        train_scores = isf.decision_function(self.X_train)
+        test_scores = isf.decision_function(self.X_test)
+
+        if no_anomaly.get('add_column'):
+            logger.info('add no_anomaly_score column to X')
+            self.feature_columns.append('no_anomaly_score')
+            self.X_train = np.append(
+                self.X_train, train_scores.reshape(-1, 1), axis=1)
+            self.X_test = np.append(
+                self.X_test, test_scores.reshape(-1, 1), axis=1)
+
         org_len = len(self.X_train)
         self.X_train = self.X_train[preds == 1]
         self.Y_train = self.Y_train[preds == 1]

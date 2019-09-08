@@ -40,7 +40,10 @@
                 "threshold": 0.0,
                 "add_column": true
             },
-            "no_anomaly": true,
+            "no_anomaly": {
+                "contamination": 0.1,
+                "add_column": false
+            }
             "undersampling": false,
             "oversampling": false
         }
