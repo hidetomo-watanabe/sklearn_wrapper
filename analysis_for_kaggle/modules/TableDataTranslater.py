@@ -106,8 +106,8 @@ class TableDataTranslater(CommonDataTranslater):
                 for i in means.index:
                     transed = np.where(transed == i, means[i], transed)
                 # add Laplace Noize for not data leak
-                np.random.seed(seed=42)
-                transed += [np.random.laplace() for _ in range(len(transed))]
+                # np.random.seed(seed=42)
+                # transed += [np.random.laplace() for _ in range(len(transed))]
                 transed = transed.reshape(-1, 1)
             else:
                 logger.error('NOT IMPLEMENTED CATEGORIZE: %s' % model)
