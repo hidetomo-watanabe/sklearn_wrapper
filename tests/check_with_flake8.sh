@@ -14,5 +14,6 @@ catch()
 }
 
 flake8_msg=''
-flake8_msg=${flake8_msg}$(flake8 modules/ --ignore E402 | grep -v \'myfunc\')
-flake8_msg=${flake8_msg}$(flake8 for_kernel/ --ignore E402 --ignore F821 | grep -v predict_for_kernel.py)
+flake8_msg=${flake8_msg}$(flake8 analysis_for_kaggle/*.py --ignore E402)
+flake8_msg=${flake8_msg}$(flake8 analysis_for_kaggle/modules/ --ignore E402 | grep -v \'myfunc\')
+flake8_msg=${flake8_msg}$(flake8 analysis_for_kaggle/for_kernel/ --ignore E402 --ignore F821 | grep -v predict_for_kernel.py)
