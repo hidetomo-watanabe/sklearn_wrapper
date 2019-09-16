@@ -395,6 +395,11 @@ class Predictor(ConfigReader):
                 stack_dataset = pipeline.blend(
                     proportion=ensemble_config['proportion'],
                     seed=ensemble_config['seed'])
+            else:
+                logger.error(
+                    'NOT IMPLEMENTED ENSEMBLE MODE: %s'
+                    % ensemble_config['mode'])
+                raise Exception('NOT IMPLEMENTED')
             if self.configs['fit']['train_mode'] == 'clf':
                 stacker = Classifier(
                     dataset=stack_dataset,
@@ -446,8 +451,8 @@ class Predictor(ConfigReader):
                         parameters=single_estimator.get_params(),
                         name=modelname))
 
-        # pipeline
         ensemble_config = self.configs['fit']['ensemble']
+        # pipeline
         pipeline = ModelsPipeline(*models)
 
         # stacker
