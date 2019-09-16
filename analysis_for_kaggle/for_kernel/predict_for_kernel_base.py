@@ -44,7 +44,7 @@ if __name__ == '__main__':
     predictor_obj.read_config_text(config_text)
 
     logger.info('### FIT')
-    predictor_obj.calc_ensemble_model()
+    predictor_obj.calc_estimator()
 
     logger.info('### WRITE ESTIMATOR DATA')
     predictor_obj.write_estimator_data()

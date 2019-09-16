@@ -190,7 +190,7 @@
    "outputs": [],
    "source": [
     "print('### FIT')\n",
-    "predictor_obj.calc_ensemble_model()"
+    "predictor_obj.calc_estimator()"
    ]
   },
   {

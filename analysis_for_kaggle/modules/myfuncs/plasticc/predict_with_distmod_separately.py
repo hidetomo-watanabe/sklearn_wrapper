@@ -53,7 +53,7 @@ if __name__ == '__main__':
             predictor_obj.read_config_file(config_path)
 
             logger.info('### FIT')
-            predictor_obj.calc_ensemble_model()
+            predictor_obj.calc_estimator()
 
             logger.info('### PREDICT')
             predictor_obj.predict_y()

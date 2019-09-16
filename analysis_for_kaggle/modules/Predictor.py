@@ -214,65 +214,6 @@ class Predictor(ConfigReader):
                         perm, feature_names=self.feature_columns))
         return
 
-    def calc_single_model(
-        self,
-        scorer, model_config, cv=3, n_jobs=-1,
-        keras_build_func=None, X_train=None, Y_train=None
-    ):
-        if not isinstance(X_train, np.ndarray):
-            X_train = self.X_train
-        if not isinstance(Y_train, np.ndarray):
-            Y_train = self.Y_train
-
-        # params
-        model = model_config['model']
-        logger.info('model: %s' % model)
-        modelname = model_config.get('modelname')
-        if modelname:
-            logger.info('modelname: %s' % modelname)
-        base_model = self._get_base_model(model, keras_build_func)
-        multiclass = model_config.get('multiclass')
-        if multiclass:
-            logger.info('multiclass: %s' % multiclass)
-            if multiclass == 'onevsone':
-                multiclass = OneVsOneClassifier
-            elif multiclass == 'onevsrest':
-                multiclass = OneVsRestClassifier
-            else:
-                logger.error(
-                    f'NOT IMPLEMENTED MULTICLASS: {multiclass}')
-                raise Exception('NOT IMPLEMENTED')
-        max_evals = model_config.get('max_evals')
-        fit_params = model_config.get('fit_params')
-        if not fit_params:
-            fit_params = {}
-        if len(fit_params.keys()) > 0:
-            fit_params['eval_set'] = [[X_train, Y_train]]
-        params = model_config.get('params')
-        if not params:
-            params = {}
-
-        # for warning
-        if model not in ['keras_clf', 'keras_reg']:
-            if Y_train.ndim > 1 and Y_train.shape[1] == 1:
-                Y_train = Y_train.ravel()
-
-        # fit
-        best_params = self._calc_best_params(
-            base_model, X_train, Y_train, params,
-            scorer, cv, n_jobs, fit_params, max_evals, multiclass)
-        logger.info('best params: %s' % best_params)
-        estimator = base_model
-        estimator.set_params(**best_params)
-        if multiclass:
-            estimator = multiclass(estimator=estimator, n_jobs=n_jobs)
-        estimator.fit(X_train, Y_train, **fit_params)
-        logger.info('estimator: %s' % estimator)
-
-        # importances
-        self._check_importances(model, estimator, X_train, Y_train)
-        return estimator
-
     def get_estimator_data(self):
         output = {
             'cv': self.cv,
@@ -282,7 +223,7 @@ class Predictor(ConfigReader):
         }
         return output
 
-    def calc_ensemble_model(self):
+    def calc_estimator(self):
         def _get_cv_from_config():
             cv_config = self.configs['fit'].get('cv')
             if not cv_config:
@@ -344,6 +285,101 @@ class Predictor(ConfigReader):
                 self.scorer = get_scorer(scoring)
             return self.scorer
 
+        # configs
+        model_configs = self.configs['fit']['single_models']
+        cv = _get_cv_from_config()
+        n_jobs = self.configs['fit'].get('n_jobs')
+        if not n_jobs:
+            n_jobs = -1
+        self.scorer = _get_scorer_from_config()
+        myfunc = self.configs['fit'].get('myfunc')
+        self.classes = None
+        logger.info('X train shape: %s' % str(self.X_train.shape))
+        logger.info('Y train shape: %s' % str(self.Y_train.shape))
+
+        # single
+        if len(model_configs) == 1:
+            logger.warn('NO ENSEMBLE')
+            self.estimator = self.calc_single_model(
+                self.scorer, model_configs[0],
+                cv, n_jobs, keras_build_func=myfunc)
+            self.single_estimators = [(model_configs[0], self.estimator)]
+            if self.configs['fit']['train_mode'] == 'clf':
+                if hasattr(self.estimator, 'classes_'):
+                    self.classes = self.estimator.classes_
+                else:
+                    self.classes = sorted(np.unique(self.Y_train))
+            return self.estimator
+
+        # ensemble
+        estimator = self.calc_ensemble_model(
+            self.scorer, model_configs, cv, n_jobs, keras_build_func=myfunc)
+        return estimator
+
+    def calc_single_model(
+        self,
+        scorer, model_config, cv=3, n_jobs=-1,
+        keras_build_func=None, X_train=None, Y_train=None
+    ):
+        if not isinstance(X_train, np.ndarray):
+            X_train = self.X_train
+        if not isinstance(Y_train, np.ndarray):
+            Y_train = self.Y_train
+
+        # params
+        model = model_config['model']
+        logger.info('model: %s' % model)
+        modelname = model_config.get('modelname')
+        if modelname:
+            logger.info('modelname: %s' % modelname)
+        base_model = self._get_base_model(model, keras_build_func)
+        multiclass = model_config.get('multiclass')
+        if multiclass:
+            logger.info('multiclass: %s' % multiclass)
+            if multiclass == 'onevsone':
+                multiclass = OneVsOneClassifier
+            elif multiclass == 'onevsrest':
+                multiclass = OneVsRestClassifier
+            else:
+                logger.error(
+                    f'NOT IMPLEMENTED MULTICLASS: {multiclass}')
+                raise Exception('NOT IMPLEMENTED')
+        max_evals = model_config.get('max_evals')
+        fit_params = model_config.get('fit_params')
+        if not fit_params:
+            fit_params = {}
+        if len(fit_params.keys()) > 0:
+            fit_params['eval_set'] = [[X_train, Y_train]]
+        params = model_config.get('params')
+        if not params:
+            params = {}
+
+        # for warning
+        if model not in ['keras_clf', 'keras_reg']:
+            if Y_train.ndim > 1 and Y_train.shape[1] == 1:
+                Y_train = Y_train.ravel()
+
+        # fit
+        best_params = self._calc_best_params(
+            base_model, X_train, Y_train, params,
+            scorer, cv, n_jobs, fit_params, max_evals, multiclass)
+        logger.info('best params: %s' % best_params)
+        estimator = base_model
+        estimator.set_params(**best_params)
+        if multiclass:
+            estimator = multiclass(estimator=estimator, n_jobs=n_jobs)
+        estimator.fit(X_train, Y_train, **fit_params)
+        logger.info('estimator: %s' % estimator)
+
+        # importances
+        self._check_importances(model, estimator, X_train, Y_train)
+        return estimator
+
+    def calc_ensemble_model(
+        self,
+        scorer, model_configs, cv=3, n_jobs=-1,
+        keras_build_func=None, X_train=None, Y_train=None
+    ):
         def _get_stacker(pipeline, ensemble_config):
             # weighted_average
             if ensemble_config['mode'] == 'weighted':
@@ -372,33 +408,6 @@ class Predictor(ConfigReader):
             stacker.use_cache = False
             return stacker
 
-        # configs
-        model_configs = self.configs['fit']['single_models']
-        cv = _get_cv_from_config()
-        n_jobs = self.configs['fit'].get('n_jobs')
-        if not n_jobs:
-            n_jobs = -1
-        self.scorer = _get_scorer_from_config()
-        myfunc = self.configs['fit'].get('myfunc')
-        self.classes = None
-        logger.info('X train shape: %s' % str(self.X_train.shape))
-        logger.info('Y train shape: %s' % str(self.Y_train.shape))
-
-        # single
-        if len(model_configs) == 1:
-            logger.warn('NO ENSEMBLE')
-            self.estimator = self.calc_single_model(
-                self.scorer, model_configs[0],
-                cv, n_jobs, keras_build_func=myfunc)
-            self.single_estimators = [(model_configs[0], self.estimator)]
-            if self.configs['fit']['train_mode'] == 'clf':
-                if hasattr(self.estimator, 'classes_'):
-                    self.classes = self.estimator.classes_
-                else:
-                    self.classes = sorted(np.unique(self.Y_train))
-            return self.estimator
-
-        # ensemble
         logger.info('single fit in ensemble')
         models = []
         self.single_estimators = []
@@ -411,7 +420,8 @@ class Predictor(ConfigReader):
         # single fit
         for model_config in model_configs:
             single_estimator = self.calc_single_model(
-                self.scorer, model_config, cv, n_jobs, keras_build_func=myfunc)
+                self.scorer, model_config, cv, n_jobs,
+                keras_build_func=keras_build_func)
             self.single_estimators.append((model_config, single_estimator))
             modelname = model_config.get('modelname')
             if not modelname:
