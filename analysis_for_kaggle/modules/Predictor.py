@@ -35,14 +35,14 @@ from IPython.display import display
 from logging import getLogger
 
 
-logger = getLogger('predict').getChild('Predicter')
+logger = getLogger('predict').getChild('Predictor')
 try:
     from .ConfigReader import ConfigReader
 except ImportError:
     logger.warn('IN FOR KERNEL SCRIPT, ConfigReader import IS SKIPPED')
 
 
-class Predicter(ConfigReader):
+class Predictor(ConfigReader):
     def __init__(
         self,
         feature_columns, test_ids,

@@ -7,7 +7,7 @@ import pandas as pd
 BASE_PATH = '%s/../..' % os.path.dirname(os.path.abspath(__file__))
 sys.path.append(BASE_PATH)
 from modules.DataTranslater import DataTranslater
-from modules.Predicter import Predicter
+from modules.Predictor import Predictor
 from modules.Notifier import Notifier
 
 if __name__ == '__main__':
@@ -49,15 +49,15 @@ if __name__ == '__main__':
             post_processers = translater_obj.get_post_processers()
 
             # predict
-            predicter_obj = Predicter(**data_for_model, **post_processers)
-            predicter_obj.read_config_file(config_path)
+            predictor_obj = Predictor(**data_for_model, **post_processers)
+            predictor_obj.read_config_file(config_path)
 
             logger.info('### FIT')
-            predicter_obj.calc_ensemble_model()
+            predictor_obj.calc_ensemble_model()
 
             logger.info('### PREDICT')
-            predicter_obj.predict_y()
-            _, Y_pred_proba_df = predicter_obj.calc_predict_df()
+            predictor_obj.predict_y()
+            _, Y_pred_proba_df = predictor_obj.calc_predict_df()
 
             return Y_pred_proba_df
 
@@ -94,18 +94,18 @@ if __name__ == '__main__':
             ignore_index=True)
 
         # predict
-        predicter_obj = Predicter(**{
+        predictor_obj = Predictor(**{
             'feature_columns': [],
             'test_ids': [],
             'X_train': [],
             'Y_train': [],
             'X_test': [],
         })
-        predicter_obj.read_config_file(config_path)
-        predicter_obj.Y_pred_proba_df = all_proba_df
+        predictor_obj.read_config_file(config_path)
+        predictor_obj.Y_pred_proba_df = all_proba_df
 
         logger.info('### WRITE PREDICT DATA')
-        predicter_obj.write_predict_data()
+        predictor_obj.write_predict_data()
 
     except Exception as e:
         logger.error('%s' % e)

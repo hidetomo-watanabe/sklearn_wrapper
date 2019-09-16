@@ -23,9 +23,9 @@ try:
 except ImportError:
     logger.warn('IN FOR KERNEL SCRIPT, CommonDataTranslater import IS SKIPPED')
 try:
-    from .Predicter import Predicter
+    from .Predictor import Predictor
 except ImportError:
-    logger.warn('IN FOR KERNEL SCRIPT, Predicter import IS SKIPPED')
+    logger.warn('IN FOR KERNEL SCRIPT, Predictor import IS SKIPPED')
 
 
 class TableDataTranslater(CommonDataTranslater):
@@ -353,11 +353,11 @@ class TableDataTranslater(CommonDataTranslater):
             Y_adv = np.concatenate(
                 (np.zeros(len(X_train)), np.ones(len(X_test))), axis=0)
             # fit
-            predicter_obj = Predicter(
+            predictor_obj = Predictor(
                 **self.get_data_for_model(),
                 **self.get_post_processers())
-            predicter_obj.configs = self.configs
-            estimator = predicter_obj.calc_single_model(
+            predictor_obj.configs = self.configs
+            estimator = predictor_obj.calc_single_model(
                 adversarial['scoring'], adversarial,
                 X_train=X_adv, Y_train=Y_adv)
             if not hasattr(estimator, 'predict_proba'):

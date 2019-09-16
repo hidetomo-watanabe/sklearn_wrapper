@@ -30,7 +30,7 @@ if __name__ == '__main__':
     _append_file_text('%s/modules/TableDataTranslater.py' % BASE_PATH, FILENAME)
     _append_file_text('%s/modules/ImageDataTranslater.py' % BASE_PATH, FILENAME)
     _append_file_text('%s/modules/DataTranslater.py' % BASE_PATH, FILENAME)
-    _append_file_text('%s/modules/Predicter.py' % BASE_PATH, FILENAME)
+    _append_file_text('%s/modules/Predictor.py' % BASE_PATH, FILENAME)
     # adhoc
     with open(config_path, 'r') as f:
         config_json = json.loads(f.read())
