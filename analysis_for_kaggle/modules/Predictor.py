@@ -304,17 +304,22 @@ class Predictor(ConfigReader):
                 self.scorer, model_configs[0],
                 cv, n_jobs, keras_build_func=myfunc)
             self.single_estimators = [(model_configs[0], self.estimator)]
-            if self.configs['fit']['train_mode'] == 'clf':
-                if hasattr(self.estimator, 'classes_'):
-                    self.classes = self.estimator.classes_
+        # ensemble
+        else:
+            self.estimator, self.single_estimators = self.calc_ensemble_model(
+                self.scorer, model_configs, cv, n_jobs,
+                keras_build_func=myfunc)
+
+        # classes
+        if self.configs['fit']['train_mode'] == 'clf':
+            for _, single_estimator in self.single_estimators:
+                if isinstance(self.classes, pd.DataFrame):
+                    continue
+                if hasattr(single_estimator, 'classes_'):
+                    self.classes = single_estimator.classes_
                 else:
                     self.classes = sorted(np.unique(self.Y_train))
-            return self.estimator
-
-        # ensemble
-        estimator = self.calc_ensemble_model(
-            self.scorer, model_configs, cv, n_jobs, keras_build_func=myfunc)
-        return estimator
+        return self.estimator
 
     def calc_single_model(
         self,
@@ -415,7 +420,7 @@ class Predictor(ConfigReader):
 
         logger.info('single fit in ensemble')
         models = []
-        self.single_estimators = []
+        single_estimators = []
         # for warning
         if self.Y_train.ndim > 1 and self.Y_train.shape[1] == 1:
             dataset = Dataset(self.X_train, self.Y_train.ravel(), self.X_test)
@@ -427,7 +432,7 @@ class Predictor(ConfigReader):
             single_estimator = self.calc_single_model(
                 self.scorer, model_config, cv, n_jobs,
                 keras_build_func=keras_build_func)
-            self.single_estimators.append((model_config, single_estimator))
+            single_estimators.append((model_config, single_estimator))
             modelname = model_config.get('modelname')
             if not modelname:
                 modelname = 'tmp_model'
@@ -469,8 +474,8 @@ class Predictor(ConfigReader):
         stacker.validate(
             k=ensemble_config['k'], scorer=self.scorer._score_func)
 
-        self.estimator = stacker
-        return self.estimator
+        estimator = stacker
+        return estimator, single_estimators
 
     def write_estimator_data(self):
         modelname = self.configs['fit']['ensemble'].get('modelname')
