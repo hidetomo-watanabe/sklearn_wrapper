@@ -45,14 +45,13 @@ class Trainer(ConfigReader):
         self,
         feature_columns, test_ids,
         X_train, Y_train, X_test,
-        y_scaler=None, kernel=False
+        kernel=False
     ):
         self.feature_columns = feature_columns
         self.test_ids = test_ids
         self.X_train = X_train
         self.Y_train = Y_train
         self.X_test = X_test
-        self.y_scaler = y_scaler
         self.kernel = kernel
         self.configs = {}
         # kerasのスコープ対策として、インスタンス作成時に読み込み

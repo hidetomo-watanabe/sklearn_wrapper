@@ -179,7 +179,7 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "trainer_obj = Trainer(**data_for_model, **post_processers)\n",
+    "trainer_obj = Trainer(**data_for_model)\n",
     "trainer_obj.read_config_file(config_path)\n",
     "# trainer_obj.read_config_text(config_text)"
    ]

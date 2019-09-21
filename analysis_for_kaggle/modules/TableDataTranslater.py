@@ -353,9 +353,7 @@ class TableDataTranslater(CommonDataTranslater):
             Y_adv = np.concatenate(
                 (np.zeros(len(X_train)), np.ones(len(X_test))), axis=0)
             # fit
-            trainer_obj = Trainer(
-                **self.get_data_for_model(),
-                **self.get_post_processers())
+            trainer_obj = Trainer(**self.get_data_for_model())
             trainer_obj.configs = self.configs
             estimator = trainer_obj.calc_single_model(
                 adversarial['scoring'], adversarial,

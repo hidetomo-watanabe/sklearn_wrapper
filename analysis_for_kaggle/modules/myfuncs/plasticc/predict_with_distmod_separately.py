@@ -50,7 +50,7 @@ if __name__ == '__main__':
             post_processers = translater_obj.get_post_processers()
 
             # train
-            trainer_obj = Trainer(**data_for_model, **post_processers)
+            trainer_obj = Trainer(**data_for_model)
             trainer_obj.read_config_file(config_path)
 
             logger.info('### FIT')
