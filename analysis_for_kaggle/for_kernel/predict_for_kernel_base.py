@@ -39,21 +39,29 @@ if __name__ == '__main__':
     data_for_model = translater_obj.get_data_for_model()
     post_processers = translater_obj.get_post_processers()
 
-    # predict
-    predictor_obj = Predictor(**data_for_model, **post_processers, kernel=True)
-    predictor_obj.read_config_text(config_text)
+    # train
+    trainer_obj = Trainer(**data_for_model, **post_processers, kernel=True)
+    trainer_obj.read_config_text(config_text)
 
     logger.info('### FIT')
-    predictor_obj.calc_estimator()
+    trainer_obj.calc_estimator()
 
     logger.info('### WRITE ESTIMATOR DATA')
-    predictor_obj.write_estimator_data()
+    trainer_obj.write_estimator_data()
+
+    logger.info('### GET ESTIMATOR DATA')
+    estimator_data = trainer_obj.get_estimator_data()
+
+    # output
+    outputer_obj = Outputer(
+        **data_for_model, **estimator_data, **post_processers, kernel=True)
+    outputer_obj.read_config_text(config_text)
 
     logger.info('### PREDICT')
-    predictor_obj.predict_y()
-    predictor_obj.calc_predict_df()
+    outputer_obj.predict_y()
+    outputer_obj.calc_predict_df()
 
     logger.info('### WRITE PREDICT DATA')
-    predictor_obj.write_predict_data()
+    outputer_obj.write_predict_data()
 
     logger.info('# FINISHED')

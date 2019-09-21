@@ -22,7 +22,8 @@
     "sys.path.append('./modules')\n",
     "from modules.DataTranslater import DataTranslater\n",
     "from modules.Visualizer import Visualizer\n",
-    "from modules.Predictor import Predictor\n",
+    "from modules.Trainer import Trainer\n",
+    "from modules.Outputer import Outputer\n",
     "\n",
     "logging.config.fileConfig(\n",
     "    './configs/logging.conf', disable_existing_loggers=False)\n",
@@ -178,9 +179,9 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "predictor_obj = Predictor(**data_for_model, **post_processers)\n",
-    "predictor_obj.read_config_file(config_path)\n",
-    "# predictor_obj.read_config_text(config_text)"
+    "trainer_obj = Trainer(**data_for_model, **post_processers)\n",
+    "trainer_obj.read_config_file(config_path)\n",
+    "# trainer_obj.read_config_text(config_text)"
    ]
   },
   {
@@ -190,7 +191,7 @@
    "outputs": [],
    "source": [
     "print('### FIT')\n",
-    "predictor_obj.calc_estimator()"
+    "trainer_obj.calc_estimator()"
    ]
   },
   {
@@ -200,7 +201,17 @@
    "outputs": [],
    "source": [
     "print('### WRITE ESTIMATOR DATA')\n",
-    "predictor_obj.write_estimator_data()"
+    "trainer_obj.write_estimator_data()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "print('### GET ESTIMATOR DATA')\n",
+    "estimator_data = trainer_obj.get_estimator_data()"
    ]
   },
   {
@@ -212,7 +223,7 @@
     "print('### VISUALIZE SHAP')\n",
     "import shap\n",
     "shap.initjs()\n",
-    "explainer = shap.TreeExplainer(model=predictor_obj.estimator, feature_dependence='tree_path_dependent', model_output='margin')\n",
+    "explainer = shap.TreeExplainer(model=trainer_obj.estimator, feature_dependence='tree_path_dependent', model_output='margin')\n",
     "shap_values = explainer.shap_values(X=data_for_model['X_train'], y=data_for_model['Y_train'])\n",
     "shap.summary_plot(shap_values, data_for_model['X_train'], feature_names=data_for_model['feature_columns'])\n",
     "# shap.summary_plot(shap_values, data_for_model['X_train'], feature_names=data_for_model['feature_columns'], plot_type=\"bar\")\n",
@@ -226,7 +237,6 @@
    "outputs": [],
    "source": [
     "print('### VISUALIZE LEARNING CURVES')\n",
-    "estimator_data = predictor_obj.get_estimator_data()\n",
     "for config, estimator in estimator_data['single_estimators']:\n",
     "    title = 'learning curves: %s' % config['modelname']\n",
     "    visualizer_obj.visualize_learning_curve(\n",
@@ -241,9 +251,21 @@
    "metadata": {},
    "outputs": [],
    "source": [
+    "outputer_obj = Outputer(\n",
+    "    **data_for_model, **estimator_data, **post_processers)\n",
+    "outputer_obj.read_config_file(config_path)\n",
+    "# outputer_obj.read_config_text(config_text)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
     "print('### PREDICT')\n",
-    "predictor_obj.predict_y()\n",
-    "predictor_obj.calc_predict_df()"
+    "outputer_obj.predict_y()\n",
+    "outputer_obj.calc_predict_df()"
    ]
   },
   {
@@ -253,7 +275,7 @@
    "outputs": [],
    "source": [
     "print('### VISUALIZE Y TRAIN PRED DATA')\n",
-    "pred_data = predictor_obj.get_predict_data()\n",
+    "pred_data = outputer_obj.get_predict_data()\n",
     "visualizer_obj.visualize_y_train_pred_data(\n",
     "    data_for_model['Y_train'], pred_data['Y_train_pred'].reshape(-1, 1))"
    ]
@@ -265,7 +287,7 @@
    "outputs": [],
    "source": [
     "print('### WRITE PREDICT DATA')\n",
-    "predictor_obj.write_predict_data()"
+    "outputer_obj.write_predict_data()"
    ]
   }
  ],

@@ -7,7 +7,8 @@ import pandas as pd
 BASE_PATH = '%s/../..' % os.path.dirname(os.path.abspath(__file__))
 sys.path.append(BASE_PATH)
 from modules.DataTranslater import DataTranslater
-from modules.Predictor import Predictor
+from modules.Trainer import Trainer
+from modules.Outputer import Outputer
 from modules.Notifier import Notifier
 
 if __name__ == '__main__':
@@ -48,16 +49,24 @@ if __name__ == '__main__':
             data_for_model = translater_obj.get_data_for_model()
             post_processers = translater_obj.get_post_processers()
 
-            # predict
-            predictor_obj = Predictor(**data_for_model, **post_processers)
-            predictor_obj.read_config_file(config_path)
+            # train
+            trainer_obj = Trainer(**data_for_model, **post_processers)
+            trainer_obj.read_config_file(config_path)
 
             logger.info('### FIT')
-            predictor_obj.calc_estimator()
+            trainer_obj.calc_estimator()
+
+            logger.info('### GET ESTIMATOR DATA')
+            estimator_data = trainer_obj.get_estimator_data()
+
+            # output
+            outputer_obj = Outputer(
+                **data_for_model, **estimator_data, **post_processers)
+            outputer_obj.read_config_file(config_path)
 
             logger.info('### PREDICT')
-            predictor_obj.predict_y()
-            _, Y_pred_proba_df = predictor_obj.calc_predict_df()
+            outputer_obj.predict_y()
+            _, Y_pred_proba_df = outputer_obj.calc_predict_df()
 
             return Y_pred_proba_df
 
@@ -93,19 +102,24 @@ if __name__ == '__main__':
             [_fill_proba(isnull_proba_df), _fill_proba(notnull_proba_df)],
             ignore_index=True)
 
-        # predict
-        predictor_obj = Predictor(**{
+        # output
+        outputer_obj = Outputer(**{
             'feature_columns': [],
             'test_ids': [],
             'X_train': [],
             'Y_train': [],
             'X_test': [],
+            'cv': [],
+            'scorer': None,
+            'classes': [],
+            'single_estimators': [],
+            'estimator': None,
         })
-        predictor_obj.read_config_file(config_path)
-        predictor_obj.Y_pred_proba_df = all_proba_df
+        outputer_obj.read_config_file(config_path)
+        outputer_obj.Y_pred_proba_df = all_proba_df
 
         logger.info('### WRITE PREDICT DATA')
-        predictor_obj.write_predict_data()
+        outputer_obj.write_predict_data()
 
     except Exception as e:
         logger.error('%s' % e)
