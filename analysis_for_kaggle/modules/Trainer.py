@@ -378,59 +378,14 @@ class Trainer(ConfigReader):
         self._check_importances(model, estimator, X_train, Y_train)
         return estimator
 
-    def calc_ensemble_model(
-        self,
-        scorer, model_configs, cv=3, n_jobs=-1,
-        keras_build_func=None, X_train=None, Y_train=None
-    ):
-        def _get_stacker(pipeline, ensemble_config):
-            # weighted_average
-            if ensemble_config['mode'] == 'weighted':
-                weights = pipeline.find_weights(self.scorer._score_func)
-                stacker = pipeline.weight(weights)
-                return stacker
-
-            # stacking, blending
-            if ensemble_config['mode'] == 'stacking':
-                stack_dataset = pipeline.stack(
-                    k=ensemble_config['k'], seed=ensemble_config['seed'])
-            elif ensemble_config['mode'] == 'blending':
-                stack_dataset = pipeline.blend(
-                    proportion=ensemble_config['proportion'],
-                    seed=ensemble_config['seed'])
-            else:
-                logger.error(
-                    'NOT IMPLEMENTED ENSEMBLE MODE: %s'
-                    % ensemble_config['mode'])
-                raise Exception('NOT IMPLEMENTED')
-            if self.configs['fit']['train_mode'] == 'clf':
-                stacker = Classifier(
-                    dataset=stack_dataset,
-                    estimator=self._get_base_model(
-                        ensemble_config['model']).__class__)
-            elif self.configs['fit']['train_mode'] == 'reg':
-                stacker = Regressor(
-                    dataset=stack_dataset,
-                    estimator=self._get_base_model(
-                        ensemble_config['model']).__class__)
-            stacker.use_cache = False
-            return stacker
-
-        logger.info('single fit in ensemble')
-        models = []
-        single_estimators = []
+    def _get_pipeline(self, single_estimators):
         # for warning
         if self.Y_train.ndim > 1 and self.Y_train.shape[1] == 1:
             dataset = Dataset(self.X_train, self.Y_train.ravel(), self.X_test)
         else:
             dataset = Dataset(self.X_train, self.Y_train, self.X_test)
-
-        # single fit
-        for model_config in model_configs:
-            single_estimator = self.calc_single_model(
-                self.scorer, model_config, cv, n_jobs,
-                keras_build_func=keras_build_func)
-            single_estimators.append((model_config, single_estimator))
+        models = []
+        for model_config, single_estimator in single_estimators:
             modelname = model_config.get('modelname')
             if not modelname:
                 modelname = 'tmp_model'
@@ -448,26 +403,72 @@ class Trainer(ConfigReader):
                         dataset=dataset, estimator=single_estimator.__class__,
                         parameters=single_estimator.get_params(),
                         name=modelname))
-
-        ensemble_config = self.configs['fit']['ensemble']
-        # pipeline
         pipeline = ModelsPipeline(*models)
+        return pipeline
 
-        # stacker
-        if ensemble_config['mode'] == 'weighted' \
-                and self.configs['fit']['train_mode'] == 'clf':
-            logger.error(
-                'NOT IMPLEMENTED CLASSIFICATION AND WEIGHTED AVERAGE')
-            raise Exception('NOT IMPLEMENTED')
-        stacker = _get_stacker(pipeline, ensemble_config)
+    def _get_stacker(self, pipeline, ensemble_config):
+        # weighted_average
+        if ensemble_config['mode'] == 'weighted':
+            weights = pipeline.find_weights(self.scorer._score_func)
+            stacker = pipeline.weight(weights)
+            return stacker
 
-        # validate
+        # stacking, blending
+        if ensemble_config['mode'] == 'stacking':
+            stack_dataset = pipeline.stack(
+                k=ensemble_config['k'], seed=ensemble_config['seed'])
+        elif ensemble_config['mode'] == 'blending':
+            stack_dataset = pipeline.blend(
+                proportion=ensemble_config['proportion'],
+                seed=ensemble_config['seed'])
+        if self.configs['fit']['train_mode'] == 'clf':
+            stacker = Classifier(
+                dataset=stack_dataset,
+                estimator=self._get_base_model(
+                    ensemble_config['model']).__class__)
+        elif self.configs['fit']['train_mode'] == 'reg':
+            stacker = Regressor(
+                dataset=stack_dataset,
+                estimator=self._get_base_model(
+                    ensemble_config['model']).__class__)
+        stacker.use_cache = False
+        # default predict
         stacker.probability = False
-        logger.info('ensemble validation')
-        stacker.validate(
-            k=ensemble_config['k'], scorer=self.scorer._score_func)
+        return stacker
 
-        estimator = stacker
+    def calc_ensemble_model(
+        self,
+        scorer, model_configs, cv=3, n_jobs=-1,
+        keras_build_func=None, X_train=None, Y_train=None
+    ):
+        # single fit
+        logger.info('single fit in ensemble')
+        single_estimators = []
+        for model_config in model_configs:
+            single_estimator = self.calc_single_model(
+                self.scorer, model_config, cv, n_jobs,
+                keras_build_func=keras_build_func)
+            single_estimators.append((model_config, single_estimator))
+
+        # ensemble fit
+        logger.info('ensemble fit')
+        ensemble_config = self.configs['fit']['ensemble']
+        if ensemble_config['mode'] in ['weighted', 'stacking', 'blending']:
+            if ensemble_config['mode'] == 'weighted' \
+                    and self.configs['fit']['train_mode'] == 'clf':
+                logger.error(
+                    'NOT IMPLEMENTED CLASSIFICATION AND WEIGHTED AVERAGE')
+                raise Exception('NOT IMPLEMENTED')
+
+            pipeline = self._get_pipeline(single_estimators)
+            stacker = self._get_stacker(pipeline, ensemble_config)
+            stacker.validate(
+                k=ensemble_config['k'], scorer=self.scorer._score_func)
+            estimator = stacker
+        else:
+            logger.error(
+                'NOT IMPLEMENTED ENSEMBLE MODE: %s' % ensemble_config['mode'])
+            raise Exception('NOT IMPLEMENTED')
         return estimator, single_estimators
 
     def write_estimator_data(self):
