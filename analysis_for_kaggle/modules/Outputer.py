@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 import importlib
 from keras.engine.sequential import Sequential
+from sklearn.ensemble import VotingClassifier
 from heamy.dataset import Dataset
 from heamy.estimator import Classifier, Regressor
 from heamy.pipeline import PipeApply
@@ -57,7 +58,7 @@ class Outputer(ConfigReader):
                 self.Y_pred_proba = self.estimator.predict(self.X_test)
                 self.Y_train_pred = self.estimator.predict_classes(
                     self.X_train)
-            # ensemble clf
+            # stacker clf
             elif self.estimator.__class__ in [Classifier]:
                 # no proba
                 self.estimator.probability = False
@@ -72,6 +73,13 @@ class Outputer(ConfigReader):
                 dataset = Dataset(self.X_train, self.Y_train, self.X_train)
                 self.estimator.dataset = dataset
                 self.Y_train_pred = self.estimator.predict()
+            # voter clf
+            elif self.estimator.__class__ in [VotingClassifier]:
+                self.Y_pred = self.estimator.predict(self.X_test)
+                self.Y_train_pred = self.estimator.predict(self.X_train)
+                if self.estimator.voting == 'soft':
+                    self.Y_pred_proba = self.estimator.predict_proba(
+                        self.X_test)
             # single clf
             else:
                 self.Y_pred = self.estimator.predict(self.X_test)

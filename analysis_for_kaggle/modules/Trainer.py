@@ -23,6 +23,7 @@ from catboost import CatBoostClassifier, CatBoostRegressor
 from rgf.sklearn import RGFClassifier, RGFRegressor
 from keras.wrappers.scikit_learn import KerasClassifier, KerasRegressor
 from sklearn.multiclass import OneVsOneClassifier, OneVsRestClassifier
+from sklearn.ensemble import VotingClassifier, VotingRegressor
 from heamy.dataset import Dataset
 from heamy.estimator import Classifier, Regressor
 from heamy.pipeline import ModelsPipeline
@@ -297,7 +298,7 @@ class Trainer(ConfigReader):
 
         # single
         if len(model_configs) == 1:
-            logger.warn('NO ENSEMBLE')
+            logger.info('no ensemble')
             self.estimator = self.calc_single_model(
                 self.scorer, model_configs[0],
                 cv, n_jobs, keras_build_func=myfunc)
@@ -378,6 +379,20 @@ class Trainer(ConfigReader):
         self._check_importances(model, estimator, X_train, Y_train)
         return estimator
 
+    def _get_voter(self, mode, estimators):
+        if self.configs['fit']['train_mode'] == 'clf':
+            if mode == 'average':
+                voting = 'soft'
+            elif mode == 'vote':
+                voting = 'hard'
+            voter = VotingClassifier(
+                estimators=estimators, voting=voting, n_jobs=-1)
+        elif self.configs['fit']['train_mode'] == 'reg':
+            if mode == 'average':
+                voter = VotingRegressor(
+                    estimators=estimators, n_jobs=-1)
+        return voter
+
     def _get_pipeline(self, single_estimators):
         # for warning
         if self.Y_train.ndim > 1 and self.Y_train.shape[1] == 1:
@@ -385,10 +400,10 @@ class Trainer(ConfigReader):
         else:
             dataset = Dataset(self.X_train, self.Y_train, self.X_test)
         models = []
-        for model_config, single_estimator in single_estimators:
-            modelname = model_config.get('modelname')
+        for i, (config, single_estimator) in enumerate(single_estimators):
+            modelname = config.get('modelname')
             if not modelname:
-                modelname = 'tmp_model'
+                modelname = f'tmp_model_{i}'
             # clf
             if self.configs['fit']['train_mode'] == 'clf':
                 models.append(
@@ -441,19 +456,41 @@ class Trainer(ConfigReader):
         scorer, model_configs, cv=3, n_jobs=-1,
         keras_build_func=None, X_train=None, Y_train=None
     ):
+        if not isinstance(X_train, np.ndarray):
+            X_train = self.X_train
+        if not isinstance(Y_train, np.ndarray):
+            Y_train = self.Y_train
+
         # single fit
         logger.info('single fit in ensemble')
         single_estimators = []
-        for model_config in model_configs:
+        for config in model_configs:
             single_estimator = self.calc_single_model(
-                self.scorer, model_config, cv, n_jobs,
+                self.scorer, config, cv, n_jobs,
                 keras_build_func=keras_build_func)
-            single_estimators.append((model_config, single_estimator))
+            single_estimators.append((config, single_estimator))
 
         # ensemble fit
-        logger.info('ensemble fit')
         ensemble_config = self.configs['fit']['ensemble']
-        if ensemble_config['mode'] in ['weighted', 'stacking', 'blending']:
+        logger.info('ensemble fit: %s' % ensemble_config['mode'])
+        if ensemble_config['mode'] in ['average', 'vote']:
+            if ensemble_config['mode'] == 'vote' \
+                    and self.configs['fit']['train_mode'] == 'reg':
+                logger.error(
+                    'NOT IMPLEMENTED REGRESSION AND VOTE')
+                raise Exception('NOT IMPLEMENTED')
+
+            estimators = []
+            for i, (config, single_estimator) in enumerate(single_estimators):
+                modelname = config.get('modelname')
+                if not modelname:
+                    modelname = f'tmp_model_{i}'
+                estimators.append((modelname, single_estimator))
+
+            voter = self._get_voter(ensemble_config['mode'], estimators)
+            voter.fit(X_train, Y_train.ravel())
+            estimator = voter
+        elif ensemble_config['mode'] in ['weighted', 'stacking', 'blending']:
             if ensemble_config['mode'] == 'weighted' \
                     and self.configs['fit']['train_mode'] == 'clf':
                 logger.error(

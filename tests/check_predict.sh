@@ -39,7 +39,7 @@ err_msg=${err_msg}$(python -u analysis_for_kaggle/predict.py tests/titanic/test_
 err_msg=${err_msg}$(python -u analysis_for_kaggle/predict.py tests/titanic/test_config2.json 2>&1 | grep ERROR)
 # keras
 err_msg=${err_msg}$(python -u analysis_for_kaggle/predict.py tests/titanic/test_config3.json 2>&1 | grep ERROR)
-# ensemble
+# ensemble(stacker)
 err_msg=${err_msg}$(python -u analysis_for_kaggle/predict.py tests/titanic/test_config4.json 2>&1 | grep ERROR)
 _check
 # house table regression
