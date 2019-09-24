@@ -436,11 +436,6 @@ class Trainer(ConfigReader):
                 modelname = 'tmp_model'
             # clf
             if self.configs['fit']['train_mode'] == 'clf':
-                if self.classes is None:
-                    if hasattr(single_estimator, 'classes_'):
-                        self.classes = single_estimator.classes_
-                    else:
-                        self.classes = sorted(np.unique(self.Y_train))
                 models.append(
                     Classifier(
                         dataset=dataset, estimator=single_estimator.__class__,
