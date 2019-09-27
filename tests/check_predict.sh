@@ -39,8 +39,10 @@ err_msg=${err_msg}$(python -u analysis_for_kaggle/predict.py tests/titanic/test_
 err_msg=${err_msg}$(python -u analysis_for_kaggle/predict.py tests/titanic/test_config2.json 2>&1 | grep ERROR)
 # keras
 err_msg=${err_msg}$(python -u analysis_for_kaggle/predict.py tests/titanic/test_config3.json 2>&1 | grep ERROR)
-# ensemble(stacker)
+# ensemble(stacking)
 err_msg=${err_msg}$(python -u analysis_for_kaggle/predict.py tests/titanic/test_config4.json 2>&1 | grep ERROR)
+# ensemble(vote)
+err_msg=${err_msg}$(python -u analysis_for_kaggle/predict.py tests/titanic/test_config5.json 2>&1 | grep ERROR)
 _check
 # house table regression
 echo '  HOUSE'
@@ -68,6 +70,7 @@ echo '  TITANIC'
 err_msg=${err_msg}$(diff outputs/tmp_titanic.csv tests/titanic/output.csv)
 err_msg=${err_msg}$(diff outputs/tmp_titanic2.csv tests/titanic/output2.csv)
 err_msg=${err_msg}$(diff outputs/tmp_titanic4.csv tests/titanic/output4.csv)
+err_msg=${err_msg}$(diff outputs/tmp_titanic5.csv tests/titanic/output5.csv)
 echo '  HOUSE'
 err_msg=${err_msg}$(diff outputs/tmp_house.csv tests/house/output.csv)
 _check
