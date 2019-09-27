@@ -44,7 +44,8 @@
         "train_mode": "clf",
         "ensemble": {
             "mode": "vote",
-            "modelname": "tmp_titanic5"
+            "modelname": "tmp_titanic5",
+            "weights": [1, 1]
         },
         "scoring": "accuracy",
         "single_models": [

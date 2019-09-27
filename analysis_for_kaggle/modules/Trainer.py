@@ -379,18 +379,19 @@ class Trainer(ConfigReader):
         self._check_importances(model, estimator, X_train, Y_train)
         return estimator
 
-    def _get_voter(self, mode, estimators):
+    def _get_voter(self, mode, estimators, weights=None):
         if self.configs['fit']['train_mode'] == 'clf':
             if mode == 'average':
                 voting = 'soft'
             elif mode == 'vote':
                 voting = 'hard'
             voter = VotingClassifier(
-                estimators=estimators, voting=voting, n_jobs=-1)
+                estimators=estimators, voting=voting,
+                weights=weights, n_jobs=-1)
         elif self.configs['fit']['train_mode'] == 'reg':
             if mode == 'average':
                 voter = VotingRegressor(
-                    estimators=estimators, n_jobs=-1)
+                    estimators=estimators, weights=weights, n_jobs=-1)
         return voter
 
     def _get_pipeline(self, single_estimators):
@@ -487,7 +488,9 @@ class Trainer(ConfigReader):
                     modelname = f'tmp_model_{i}'
                 estimators.append((modelname, single_estimator))
 
-            voter = self._get_voter(ensemble_config['mode'], estimators)
+            voter = self._get_voter(
+                ensemble_config['mode'], estimators,
+                ensemble_config.get('weights'))
             voter.fit(X_train, Y_train.ravel())
             estimator = voter
         elif ensemble_config['mode'] in ['weighted', 'stacking', 'blending']:
