@@ -191,15 +191,6 @@
             "add_fuga"
         ]
     },
-    "integrate": {
-        "mode": "average",
-        "output": "integrate",
-        "filenames": [
-            "/path/1.csv",
-            "/path/2.csv"
-        ],
-        "weights": [3, 1]
-    },
     "notify": {
         "mode": "slack",
         "slack": "https://hooks.slack.com/services/hogehoge"
