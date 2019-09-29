@@ -104,6 +104,9 @@
                     "learning_rate": [0.1],
                     "n_estimators": [1000],
                     "random_state": [42]
+                },
+                "pseudo": {
+                    "threshold": 0.8
                 }
             },
             {

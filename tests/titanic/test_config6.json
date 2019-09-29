@@ -1,0 +1,77 @@
+{
+    "data": {
+        "train_path": "./tests/titanic/train.csv",
+        "test_path": "./tests/titanic/test.csv",
+        "output_dir": "./outputs",
+        "type": "table",
+        "pred_cols": ["Survived"],
+        "id_col": "PassengerId"
+    },
+    "pre": {
+        "train_mode": "clf",
+        "y_pre": false,
+        "y_scaler": "standard",
+        "table": {
+            "adhoc": {
+                "myfunc": "titanic",
+                "methods": [
+                    "translate_honorific_title",
+                    "translate_age",
+                    "translate_familystatus"
+                ]
+            },
+            "del": [
+                "HonorificTitle",
+                "Name",
+                "Ticket",
+                "Fare",
+                "Cabin",
+                "Embarked"
+            ],
+            "category": {
+                "target": [
+                    "Pclass",
+                    "FamilyStatus"
+                ],
+                "model": "onehot"
+            },
+            "x_scaler": "standard",
+            "dimension": false,
+            "adversarial": false
+        }
+    },
+    "fit": {
+        "train_mode": "clf",
+        "ensemble": {
+            "mode": "stacking",
+            "model": "log_reg",
+            "modelname": "tmp_titanic6",
+            "k": 10,
+            "seed": 111
+        },
+        "scoring": "accuracy",
+        "single_models": [
+            {
+                "model": "gbdt_clf",
+                "modelname": "tmp",
+                "fit_params": {
+                },
+                "params": {
+                    "n_estimators": [5],
+                    "max_depth": [3]
+                },
+                "pseudo": {
+                    "threshold": 0.7
+                }
+            }
+        ]
+    },
+    "post": {
+        "myfunc": false,
+        "methods": [
+        ]
+    },
+    "notify": {
+        "slack": "https://hooks.slack.com/services/hogehoge"
+    }
+}

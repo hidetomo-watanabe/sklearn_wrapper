@@ -39,6 +39,10 @@ try:
     from .ConfigReader import ConfigReader
 except ImportError:
     logger.warn('IN FOR KERNEL SCRIPT, ConfigReader import IS SKIPPED')
+try:
+    from .Outputer import Outputer
+except ImportError:
+    logger.warn('IN FOR KERNEL SCRIPT, Outputer import IS SKIPPED')
 
 
 class Trainer(ConfigReader):
@@ -320,6 +324,23 @@ class Trainer(ConfigReader):
                     self.classes = sorted(np.unique(self.Y_train))
         return self.estimator
 
+    def _calc_pseudo_label_data(
+        self, X_train, Y_train, estimator, classes, threshold
+    ):
+        outputer_obj = Outputer(
+            [], [], X_train, Y_train, self.X_test,
+            [], None, [], [], estimator)
+        outputer_obj.configs = self.configs
+        _, Y_pred_proba, _ = outputer_obj.predict_y()
+
+        data_indexes, label_indexes = np.where(Y_pred_proba > threshold)
+        pseudo_X_train = self.X_test[data_indexes]
+        pseudo_Y_train = []
+        for label_index in label_indexes:
+            pseudo_Y_train.append(classes[label_index])
+        pseudo_Y_train = np.array(pseudo_Y_train)
+        return pseudo_X_train, pseudo_Y_train
+
     def calc_single_model(
         self,
         scorer, model_config, cv=3, n_jobs=-1,
@@ -363,17 +384,46 @@ class Trainer(ConfigReader):
             if Y_train.ndim > 1 and Y_train.shape[1] == 1:
                 Y_train = Y_train.ravel()
 
+        def _fit(X_train, Y_train):
+            best_params = self._calc_best_params(
+                base_model, X_train, Y_train, params,
+                scorer, cv, n_jobs, fit_params, max_evals, multiclass)
+            logger.info('best params: %s' % best_params)
+            estimator = base_model
+            estimator.set_params(**best_params)
+            if multiclass:
+                estimator = multiclass(estimator=estimator, n_jobs=n_jobs)
+            estimator.fit(X_train, Y_train, **fit_params)
+            return estimator
+
         # fit
-        best_params = self._calc_best_params(
-            base_model, X_train, Y_train, params,
-            scorer, cv, n_jobs, fit_params, max_evals, multiclass)
-        logger.info('best params: %s' % best_params)
-        estimator = base_model
-        estimator.set_params(**best_params)
-        if multiclass:
-            estimator = multiclass(estimator=estimator, n_jobs=n_jobs)
-        estimator.fit(X_train, Y_train, **fit_params)
+        logger.info('fit')
+        estimator = _fit(X_train, Y_train)
         logger.info('estimator: %s' % estimator)
+        # pseudo
+        pseudo_config = model_config.get('pseudo')
+        if pseudo_config:
+            logger.info('refit with pseudo labeling')
+            if self.configs['fit']['train_mode'] == 'reg':
+                logger.error('NOT IMPLEMENTED PSEUDO LABELING WITH REGRESSION')
+                raise Exception('NOT IMPLEMENTED')
+
+            threshold = pseudo_config.get('threshold')
+            if not threshold and int(threshold) != 0:
+                threshold = 0.8
+            if hasattr(estimator, 'classes_'):
+                classes = estimator.classes_
+            else:
+                classes = sorted(np.unique(self.Y_train))
+            pseudo_X_train, pseudo_Y_train = self._calc_pseudo_label_data(
+                X_train, Y_train, estimator, classes, threshold)
+            new_X_train = np.concatenate([X_train, pseudo_X_train])
+            new_Y_train = np.concatenate([Y_train, pseudo_Y_train])
+            logger.info(
+                'with threshold %s, train data added %s => %s'
+                % (threshold, len(Y_train), len(new_Y_train)))
+            estimator = _fit(new_X_train, new_Y_train)
+            logger.info('estimator: %s' % estimator)
 
         # importances
         self._check_importances(model, estimator, X_train, Y_train)
