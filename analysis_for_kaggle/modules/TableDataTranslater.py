@@ -1,4 +1,5 @@
 import math
+import gc
 from tqdm import tqdm
 import numpy as np
 import pandas as pd
@@ -114,7 +115,9 @@ class TableDataTranslater(CommonDataTranslater):
             df = pd.merge(
                 df, pd.DataFrame(transed, columns=feature_names),
                 left_index=True, right_index=True)
-            del df[target]
+            df = df.drop([target], axis=1)
+            del transed
+            gc.collect()
             output.append(df)
 
         return output
