@@ -33,17 +33,6 @@ class TableDataTranslater(CommonDataTranslater):
         self.kernel = kernel
         self.configs = {}
 
-    def _replace_missing_of_dfs(self, dfs, target, target_mean):
-        replaced = False
-        output = []
-        for df in dfs:
-            if df[target].isna().any():
-                replaced = True
-                df[target] = df[target].fillna(target_mean)
-            output.append(df)
-        output.insert(0, replaced)
-        return output
-
     def _categorize_dfs(self, dfs, target, model):
         def _replace_nan(org):
             df = pd.DataFrame(org)
@@ -157,10 +146,9 @@ class TableDataTranslater(CommonDataTranslater):
         # del
         trans_del = self.configs['pre']['table'].get('del')
         if trans_del:
-            for column in trans_del:
-                logger.info('delete: %s' % column)
-                del train_df[column]
-                del test_df[column]
+            logger.info('delete: %s' % trans_del)
+            train_df = train_df.drop(trans_del, axis=1)
+            test_df = test_df.drop(trans_del, axis=1)
         # missing
         for column, dtype in tqdm(test_df.dtypes.items()):
             if column in [self.id_col] + self.pred_cols:
@@ -168,11 +156,13 @@ class TableDataTranslater(CommonDataTranslater):
             if dtype == 'object':
                 logger.warn('OBJECT MISSING IS NOT BE REPLACED: %s' % column)
                 continue
+            if (not train_df[column].isna().any()) \
+                    and (not test_df[column].isna().any()):
+                continue
+            logger.info('replace missing with mean: %s' % column)
             column_mean = train_df[column].mean()
-            replaced, train_df, test_df = self._replace_missing_of_dfs(
-                [train_df, test_df], column, column_mean)
-            if replaced:
-                logger.info('replace missing with mean: %s' % column)
+            train_df[column] = train_df[column].replace({np.nan: column_mean})
+            test_df[column] = test_df[column].replace({np.nan: column_mean})
         # category
         trans_category = self.configs['pre']['table'].get('category')
         logger.info('categorize model: %s' % trans_category['model'])
