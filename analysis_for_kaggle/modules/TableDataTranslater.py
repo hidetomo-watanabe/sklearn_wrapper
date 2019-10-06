@@ -119,13 +119,6 @@ class TableDataTranslater(CommonDataTranslater):
 
         return output
 
-    def _to_float_of_dfs(self, dfs, target):
-        output = []
-        for df in dfs:
-            df[target] = df[target].astype(float)
-            output.append(df)
-        return output
-
     def translate_data_for_view(self):
         train_df = self.train_df
         test_df = self.test_df
@@ -184,8 +177,8 @@ class TableDataTranslater(CommonDataTranslater):
                     and column in self.pred_cols:
                 continue
             logger.info('to float: %s' % column)
-            train_df, test_df = self._to_float_of_dfs(
-                [train_df, test_df], column)
+            train_df[column] = train_df[column].astype(float)
+            test_df[column] = test_df[column].astype(float)
         self.train_df = train_df
         self.test_df = test_df
         return
