@@ -122,8 +122,9 @@ class TableDataTranslater(CommonDataTranslater):
             trans_target = _replace_nan(df[target].values)
             model_obj, feature_names, transed = _get_transed_data(
                 model_obj, model, fit_x_target, fit_y_target, trans_target)
-            for i, column in enumerate(feature_names):
-                df[column] = transed[:, i]
+            df = pd.merge(
+                df, pd.DataFrame(transed, columns=feature_names),
+                left_index=True, right_index=True)
             del df[target]
             output.append(df)
 
