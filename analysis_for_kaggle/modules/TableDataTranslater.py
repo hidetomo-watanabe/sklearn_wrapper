@@ -1,5 +1,4 @@
 import math
-import gc
 from tqdm import tqdm
 import numpy as np
 import pandas as pd
@@ -34,37 +33,37 @@ class TableDataTranslater(CommonDataTranslater):
         self.kernel = kernel
         self.configs = {}
 
-    def _categorize_dfs(self, dfs, target, model):
+    def _categorize_ndarrays(self, model, X_train, Y_train, X_test, col_name):
         def _replace_nan(org):
             df = pd.DataFrame(org)
             df = df.replace({np.nan: 'REPLACED_NAN'})
             return df[0].values
 
         def _get_transed_data(
-            model_obj, model, fit_x_target, fit_y_target, trans_target
+            model_obj, model, X_train, Y_train, target, col_name
         ):
             if model == 'onehot':
                 if not model_obj:
                     model_obj = OneHotEncoder(
                         categories='auto', handle_unknown='ignore')
-                    model_obj.fit(fit_x_target.reshape(-1, 1))
+                    model_obj.fit(X_train.reshape(-1, 1))
                 feature_names = model_obj.get_feature_names(
-                    input_features=[target])
+                    input_features=[col_name])
                 transed = model_obj.transform(
-                    trans_target.reshape(-1, 1)).toarray()
+                    target.reshape(-1, 1)).toarray()
             elif model == 'label':
                 model_obj = None
-                feature_names = ['%s_label' % target]
-                df = pd.DataFrame(data=fit_x_target, columns=['x'])
+                feature_names = ['%s_label' % col_name]
+                df = pd.DataFrame(data=X_train, columns=['x'])
                 _, uniqs = pd.factorize(df['x'])
-                transed = uniqs.get_indexer(trans_target)
+                transed = uniqs.get_indexer(target)
                 transed = transed.reshape(-1, 1)
             elif model == 'count':
                 model_obj = None
-                feature_names = ['%s_count' % target]
-                df = pd.DataFrame(data=fit_x_target, columns=['x'])
+                feature_names = ['%s_count' % col_name]
+                df = pd.DataFrame(data=X_train, columns=['x'])
                 counts = df.groupby('x')['x'].count()
-                transed = trans_target
+                transed = target
                 # only test, insert 0
                 transed = np.where(
                     ~np.in1d(transed, list(counts.index)), 0, transed)
@@ -73,10 +72,10 @@ class TableDataTranslater(CommonDataTranslater):
                 transed = transed.reshape(-1, 1)
             elif model == 'rank':
                 model_obj = None
-                feature_names = ['%s_rank' % target]
-                df = pd.DataFrame(data=fit_x_target, columns=['x'])
+                feature_names = ['%s_rank' % col_name]
+                df = pd.DataFrame(data=X_train, columns=['x'])
                 ranks = df.groupby('x')['x'].count().rank(ascending=False)
-                transed = trans_target
+                transed = target
                 # only test, insert -1
                 transed = np.where(
                     ~np.in1d(transed, list(ranks.index)), -1, transed)
@@ -85,11 +84,11 @@ class TableDataTranslater(CommonDataTranslater):
                 transed = transed.reshape(-1, 1)
             elif model == 'target':
                 model_obj = None
-                feature_names = ['%s_target' % target]
-                df = pd.DataFrame(data=fit_x_target, columns=['x'])
-                df['y'] = fit_y_target
+                feature_names = ['%s_target' % col_name]
+                df = pd.DataFrame(data=X_train, columns=['x'])
+                df['y'] = Y_train
                 means = df.groupby('x')['y'].mean()
-                transed = trans_target
+                transed = target
                 # only test, insert 0
                 transed = np.where(
                     ~np.in1d(transed, list(means.index)), 0, transed)
@@ -105,22 +104,15 @@ class TableDataTranslater(CommonDataTranslater):
             return model_obj, feature_names, transed
 
         output = []
-        fit_x_target = _replace_nan(dfs[0][target].values)
-        fit_y_target = _replace_nan(dfs[0][self.pred_cols].values)
+        X_train = _replace_nan(X_train)
+        Y_train = _replace_nan(Y_train)
         model_obj = None
-        for df in dfs:
-            trans_target = _replace_nan(df[target].values)
+        for x in [X_train, X_test]:
+            target = _replace_nan(x)
             model_obj, feature_names, transed = _get_transed_data(
-                model_obj, model, fit_x_target, fit_y_target, trans_target)
-            df = pd.merge(
-                df, pd.DataFrame(transed, columns=feature_names),
-                left_index=True, right_index=True)
-            df = df.drop([target], axis=1)
-            del transed
-            gc.collect()
-            output.append(df)
-
-        return output
+                model_obj, model, X_train, Y_train, target, col_name)
+            output.append(transed)
+        return output[0], output[1], feature_names
 
     def translate_data_for_view(self):
         train_df = self.train_df
@@ -170,8 +162,19 @@ class TableDataTranslater(CommonDataTranslater):
                     and column not in trans_category['target']:
                 continue
             logger.info('categorize: %s' % column)
-            train_df, test_df = self._categorize_dfs(
-                [train_df, test_df], column, trans_category['model'])
+            train_transed, test_transed, feature_names = \
+                self._categorize_ndarrays(
+                    trans_category['model'],
+                    train_df[column].values, train_df[self.pred_cols].values,
+                    test_df[column].values, column)
+            train_df = pd.merge(
+                train_df, pd.DataFrame(train_transed, columns=feature_names),
+                left_index=True, right_index=True)
+            train_df = train_df.drop([column], axis=1)
+            test_df = pd.merge(
+                test_df, pd.DataFrame(test_transed, columns=feature_names),
+                left_index=True, right_index=True)
+            test_df = test_df.drop([column], axis=1)
         # float
         for column in tqdm(test_df.columns):
             if column in [self.id_col]:
