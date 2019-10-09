@@ -34,11 +34,6 @@ class TableDataTranslater(CommonDataTranslater):
         self.configs = {}
 
     def _categorize_ndarrays(self, model, X_train, Y_train, X_test, col_name):
-        def _replace_nan(org):
-            df = pd.DataFrame(org)
-            df = df.replace({np.nan: 'REPLACED_NAN'})
-            return df[0].values
-
         def _get_transed_data(
             model_obj, model, X_train, Y_train, target, col_name
         ):
@@ -104,11 +99,8 @@ class TableDataTranslater(CommonDataTranslater):
             return model_obj, feature_names, transed
 
         output = []
-        X_train = _replace_nan(X_train)
-        Y_train = _replace_nan(Y_train)
         model_obj = None
-        for x in [X_train, X_test]:
-            target = _replace_nan(x)
+        for target in [X_train, X_test]:
             model_obj, feature_names, transed = _get_transed_data(
                 model_obj, model, X_train, Y_train, target, col_name)
             output.append(transed)
@@ -149,8 +141,8 @@ class TableDataTranslater(CommonDataTranslater):
                 continue
             logger.info('replace missing with mean: %s' % column)
             column_mean = train_df[column].mean()
-            train_df[column] = train_df[column].replace({np.nan: column_mean})
-            test_df[column] = test_df[column].replace({np.nan: column_mean})
+            train_df = train_df.fillna({column: column_mean})
+            test_df = test_df.fillna({column: column_mean})
         # category
         trans_category = self.configs['pre']['table'].get('category')
         logger.info('categorize model: %s' % trans_category['model'])
@@ -162,17 +154,22 @@ class TableDataTranslater(CommonDataTranslater):
                     and column not in trans_category['target']:
                 continue
             logger.info('categorize: %s' % column)
+            train_df = train_df.fillna({column: 'REPLACED_NAN'})
+            test_df = test_df.fillna({column: 'REPLACED_NAN'})
             train_transed, test_transed, feature_names = \
                 self._categorize_ndarrays(
                     trans_category['model'],
-                    train_df[column].values, train_df[self.pred_cols].values,
+                    train_df[column].values,
+                    train_df[self.pred_cols].values,
                     test_df[column].values, column)
             train_df = pd.merge(
-                train_df, pd.DataFrame(train_transed, columns=feature_names),
+                train_df,
+                pd.DataFrame(train_transed, columns=feature_names),
                 left_index=True, right_index=True)
             train_df = train_df.drop([column], axis=1)
             test_df = pd.merge(
-                test_df, pd.DataFrame(test_transed, columns=feature_names),
+                test_df,
+                pd.DataFrame(test_transed, columns=feature_names),
                 left_index=True, right_index=True)
             test_df = test_df.drop([column], axis=1)
         # float
