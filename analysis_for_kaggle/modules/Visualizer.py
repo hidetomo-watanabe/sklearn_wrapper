@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 from sklearn.model_selection import learning_curve
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -16,7 +17,7 @@ class Visualizer(ConfigReader):
     def __init__(self):
         self.configs = {}
 
-    def visualize_train_df_histogram(self, train_df):
+    def visualize_train_df_histogram(self, train_df, pred_df):
         for key in train_df.keys():
             if key == self.id_col:
                 continue
@@ -26,14 +27,11 @@ class Visualizer(ConfigReader):
                 cmap = plt.get_cmap("tab10")
                 for pred_col in self.pred_cols:
                     logger.info('%s:' % pred_col)
-                    if pred_col not in train_df.columns:
-                        logger.warn('NOT %s IN TRAIN DF' % pred_col)
-                        continue
                     for i, pred_val in enumerate(
-                        np.unique(train_df[pred_col].values)
+                        np.unique(pred_df[pred_col].values)
                     ):
                         ax.hist(
-                            train_df[train_df[pred_col] == pred_val][key],
+                            train_df[pred_df[pred_col] == pred_val][key],
                             bins=20, color=cmap(i), alpha=0.5,
                             label='%s: %d' % (pred_col, pred_val))
             elif self.configs['fit']['train_mode'] == 'reg':
@@ -41,10 +39,13 @@ class Visualizer(ConfigReader):
             ax.legend()
             plt.show()
 
-    def visualize_train_df_heatmap(self, train_df):
+    def visualize_train_df_heatmap(self, train_df, pred_df):
         plt.figure(figsize=(10, 10))
         sns.heatmap(
-            train_df.drop(self.id_col, axis=1).corr(),
+            pd.merge(
+                train_df.drop(self.id_col, axis=1),
+                pred_df, left_index=True, right_index=True
+            ).corr(),
             fmt="1.2f", annot=True, lw=0.7, cmap='YlGnBu')
 
     def visualize_learning_curve(

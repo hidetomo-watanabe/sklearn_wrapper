@@ -3,7 +3,6 @@ from tqdm import tqdm
 import numpy as np
 import pandas as pd
 import importlib
-from sklearn.preprocessing import OneHotEncoder
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from sklearn.decomposition import PCA, TruncatedSVD, NMF
 from scipy.stats import ks_2samp
@@ -100,6 +99,7 @@ class TableDataTranslater(CommonDataTranslater):
     def translate_data_for_view(self):
         train_df = self.train_df
         test_df = self.test_df
+        pred_df = self.pred_df
 
         # adhoc
         trans_adhoc = self.configs['pre']['table'].get('adhoc')
@@ -108,12 +108,18 @@ class TableDataTranslater(CommonDataTranslater):
                 if not self.kernel:
                     myfunc = importlib.import_module(
                         'modules.myfuncs.%s' % trans_adhoc['myfunc'])
+            # temp merge
+            train_pred_df = pd.merge(
+                train_df, pred_df, left_index=True, right_index=True)
             for method_name in trans_adhoc['methods']:
                 logger.info('adhoc: %s' % method_name)
                 if not self.kernel:
                     method_name = 'myfunc.%s' % method_name
                 train_df, test_df = eval(
-                    method_name)(train_df, test_df)
+                    method_name)(train_pred_df, test_df)
+            # temp drop
+            train_df = train_pred_df.drop(self.pred_cols, axis=1)
+            del train_pred_df
         # del
         trans_del = self.configs['pre']['table'].get('del')
         if trans_del:
@@ -122,7 +128,7 @@ class TableDataTranslater(CommonDataTranslater):
             test_df = test_df.drop(trans_del, axis=1)
         # missing
         for column, dtype in tqdm(test_df.dtypes.items()):
-            if column in [self.id_col] + self.pred_cols:
+            if column in [self.id_col]:
                 continue
             if dtype == 'object':
                 logger.warn('OBJECT MISSING IS NOT BE REPLACED: %s' % column)
@@ -138,7 +144,7 @@ class TableDataTranslater(CommonDataTranslater):
         trans_category = self.configs['pre']['table'].get('category')
         logger.info('categorize model: %s' % trans_category['model'])
         for column, dtype in tqdm(test_df.dtypes.items()):
-            if column in [self.id_col] + self.pred_cols:
+            if column in [self.id_col]:
                 continue
             if dtype != 'object' \
                 and trans_category \
@@ -160,7 +166,7 @@ class TableDataTranslater(CommonDataTranslater):
                     self._categorize_ndarrays(
                         trans_category['model'],
                         train_df[column].values,
-                        train_df[self.pred_cols].values,
+                        pred_df.values,
                         test_df[column].values, column)
                 train_df = pd.merge(
                     train_df,
@@ -193,19 +199,20 @@ class TableDataTranslater(CommonDataTranslater):
     def create_data_for_model(self):
         train_df = self.train_df
         test_df = self.test_df
+        pred_df = self.pred_df
         # Y_train
-        self.Y_train = train_df[self.pred_cols].values
+        self.Y_train = pred_df.values
         # X_train
         self.X_train = train_df \
-            .drop(self.id_col, axis=1).drop(self.pred_cols, axis=1).values
+            .drop(self.id_col, axis=1).values
         # X_test
         self.test_ids = test_df[self.id_col].values
         self.X_test = test_df \
             .drop(self.id_col, axis=1).values
         # feature_columns
         self.feature_columns = []
-        for key in self.train_df.keys():
-            if key in self.pred_cols or key == self.id_col:
+        for key in train_df.keys():
+            if key == self.id_col:
                 continue
             self.feature_columns.append(key)
         return

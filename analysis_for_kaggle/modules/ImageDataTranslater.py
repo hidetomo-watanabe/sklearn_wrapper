@@ -46,9 +46,10 @@ class ImageDataTranslater(CommonDataTranslater):
 
         train_df = self.train_df
         test_df = self.test_df
+        pred_df = self.pred_df
         img_path_col = img_config['img_path']
         # Y_train
-        self.Y_train = train_df[self.pred_cols].values
+        self.Y_train = pred_df.values
         # X_train
         self.X_train = []
         for img_path in train_df[img_path_col].values:

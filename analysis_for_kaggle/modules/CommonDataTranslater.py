@@ -18,17 +18,14 @@ class CommonDataTranslater(ConfigReader):
             logger.info('train pred counts')
             for pred_col in self.pred_cols:
                 logger.info('%s:' % pred_col)
-                if pred_col not in self.train_df.columns:
-                    logger.warn('NOT %s IN TRAIN DF' % pred_col)
-                    continue
-                display(self.train_df[pred_col].value_counts())
-                display(self.train_df[pred_col].value_counts(normalize=True))
+                display(self.pred_df[pred_col].value_counts())
+                display(self.pred_df[pred_col].value_counts(normalize=True))
         elif self.configs['pre']['train_mode'] == 'reg':
             logger.info('train pred mean, std')
             for pred_col in self.pred_cols:
                 logger.info('%s:' % pred_col)
-                display('mean: %f' % self.train_df[pred_col].mean())
-                display('std: %f' % self.train_df[pred_col].std())
+                display('mean: %f' % self.pred_df[pred_col].mean())
+                display('std: %f' % self.pred_df[pred_col].std())
         else:
             logger.error('TRAIN MODE SHOULD BE clf OR reg')
             raise Exception('NOT IMPLEMENTED')
@@ -42,6 +39,7 @@ class CommonDataTranslater(ConfigReader):
         output = {
             'train_df': self.train_df,
             'test_df': self.test_df,
+            'pred_df': self.pred_df,
         }
         return output
 
@@ -50,11 +48,14 @@ class CommonDataTranslater(ConfigReader):
         test_path = self.configs['data']['test_path']
         delim = self.configs['data'].get('delimiter')
         if delim:
-            self.train_df = pd.read_csv(train_path, delimiter=delim)
-            self.test_df = pd.read_csv(test_path, delimiter=delim)
+            train_df = pd.read_csv(train_path, delimiter=delim)
+            test_df = pd.read_csv(test_path, delimiter=delim)
         else:
-            self.train_df = pd.read_csv(train_path)
-            self.test_df = pd.read_csv(test_path)
+            train_df = pd.read_csv(train_path)
+            test_df = pd.read_csv(test_path)
+        self.pred_df = train_df[self.pred_cols]
+        self.train_df = train_df.drop(self.pred_cols, axis=1)
+        self.test_df = test_df
         return
 
     def get_data_for_model(self):
