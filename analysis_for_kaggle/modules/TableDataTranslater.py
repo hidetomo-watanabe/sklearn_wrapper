@@ -172,16 +172,6 @@ class TableDataTranslater(CommonDataTranslater):
                     pd.DataFrame(test_transed, columns=feature_names),
                     left_index=True, right_index=True)
                 test_df = test_df.drop([column], axis=1)
-        # float
-        for column in tqdm(test_df.columns):
-            if column in [self.id_col]:
-                continue
-            if self.configs['pre']['train_mode'] in ['clf'] \
-                    and column in self.pred_cols:
-                continue
-            logger.info('to float: %s' % column)
-            train_df[column] = train_df[column].astype(float)
-            test_df[column] = test_df[column].astype(float)
         self.train_df = train_df
         self.test_df = test_df
         return
