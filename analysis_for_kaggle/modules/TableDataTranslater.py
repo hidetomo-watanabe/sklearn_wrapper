@@ -37,16 +37,7 @@ class TableDataTranslater(CommonDataTranslater):
         def _get_transed_data(
             model_obj, model, X_train, Y_train, target, col_name
         ):
-            if model == 'onehot':
-                if not model_obj:
-                    model_obj = OneHotEncoder(
-                        categories='auto', handle_unknown='ignore')
-                    model_obj.fit(X_train.reshape(-1, 1))
-                feature_names = model_obj.get_feature_names(
-                    input_features=[col_name])
-                transed = model_obj.transform(
-                    target.reshape(-1, 1)).toarray()
-            elif model == 'label':
+            if model == 'label':
                 model_obj = None
                 feature_names = ['%s_label' % col_name]
                 df = pd.DataFrame(data=X_train, columns=['x'])
@@ -156,22 +147,31 @@ class TableDataTranslater(CommonDataTranslater):
             logger.info('categorize: %s' % column)
             train_df = train_df.fillna({column: 'REPLACED_NAN'})
             test_df = test_df.fillna({column: 'REPLACED_NAN'})
-            train_transed, test_transed, feature_names = \
-                self._categorize_ndarrays(
-                    trans_category['model'],
-                    train_df[column].values,
-                    train_df[self.pred_cols].values,
-                    test_df[column].values, column)
-            train_df = pd.merge(
-                train_df,
-                pd.DataFrame(train_transed, columns=feature_names),
-                left_index=True, right_index=True)
-            train_df = train_df.drop([column], axis=1)
-            test_df = pd.merge(
-                test_df,
-                pd.DataFrame(test_transed, columns=feature_names),
-                left_index=True, right_index=True)
-            test_df = test_df.drop([column], axis=1)
+            if trans_category['model'] == 'onehot':
+                categories = train_df[column].unique()
+                train_df[column] = pd.Categorical(
+                    train_df[column], categories=categories)
+                test_df[column] = pd.Categorical(
+                    test_df[column], categories=categories)
+                train_df = pd.get_dummies(train_df, columns=[column])
+                test_df = pd.get_dummies(test_df, columns=[column])
+            else:
+                train_transed, test_transed, feature_names = \
+                    self._categorize_ndarrays(
+                        trans_category['model'],
+                        train_df[column].values,
+                        train_df[self.pred_cols].values,
+                        test_df[column].values, column)
+                train_df = pd.merge(
+                    train_df,
+                    pd.DataFrame(train_transed, columns=feature_names),
+                    left_index=True, right_index=True)
+                train_df = train_df.drop([column], axis=1)
+                test_df = pd.merge(
+                    test_df,
+                    pd.DataFrame(test_transed, columns=feature_names),
+                    left_index=True, right_index=True)
+                test_df = test_df.drop([column], axis=1)
         # float
         for column in tqdm(test_df.columns):
             if column in [self.id_col]:
