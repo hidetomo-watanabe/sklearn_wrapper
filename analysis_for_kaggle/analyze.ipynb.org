@@ -137,7 +137,8 @@
    "outputs": [],
    "source": [
     "print('### VISUALIZE TRAIN DF HISTOGRAM')\n",
-    "visualizer_obj.visualize_train_df_histogram(data_for_view['train_df'])"
+    "visualizer_obj.visualize_train_df_histogram(\n",
+    "    data_for_view['train_df'], data_for_view['pred_df'])"
    ]
   },
   {
@@ -148,7 +149,8 @@
    "source": [
     "print('### VISUALIZE TRAIN DF HEATMAP')\n",
     "# display(data_for_view['train_df'].drop(visualizer_obj.id_col, axis=1).corr())\n",
-    "visualizer_obj.visualize_train_df_heatmap(data_for_view['train_df'])"
+    "visualizer_obj.visualize_train_df_heatmap(\n",
+    "    data_for_view['train_df'], data_for_view['pred_df'])"
    ]
   },
   {
