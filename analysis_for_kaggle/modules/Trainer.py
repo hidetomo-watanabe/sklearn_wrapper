@@ -195,7 +195,7 @@ class Trainer(ConfigReader):
             feature_importances = pd.DataFrame(
                 data=[estimator.feature_importances_],
                 columns=self.feature_columns)
-            feature_importances = feature_importances.ix[
+            feature_importances = feature_importances.iloc[
                 :, np.argsort(feature_importances.values[0])[::-1]]
             logger.info('feature importances:')
             display(feature_importances)
