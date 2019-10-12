@@ -97,10 +97,6 @@ class TableDataTranslater(CommonDataTranslater):
         return output[0], output[1], feature_names
 
     def translate_data_for_view(self):
-        train_df = self.train_df
-        test_df = self.test_df
-        pred_df = self.pred_df
-
         # adhoc
         trans_adhoc = self.configs['pre']['table'].get('adhoc')
         if trans_adhoc:
@@ -110,40 +106,40 @@ class TableDataTranslater(CommonDataTranslater):
                         'modules.myfuncs.%s' % trans_adhoc['myfunc'])
             # temp merge
             train_pred_df = pd.merge(
-                train_df, pred_df, left_index=True, right_index=True)
+                self.train_df, self.pred_df, left_index=True, right_index=True)
             for method_name in trans_adhoc['methods']:
                 logger.info('adhoc: %s' % method_name)
                 if not self.kernel:
                     method_name = 'myfunc.%s' % method_name
-                train_df, test_df = eval(
-                    method_name)(train_pred_df, test_df)
+                self.train_df, self.test_df = eval(
+                    method_name)(train_pred_df, self.test_df)
             # temp drop
-            train_df = train_pred_df.drop(self.pred_cols, axis=1)
+            self.train_df = train_pred_df.drop(self.pred_cols, axis=1)
             del train_pred_df
         # del
         trans_del = self.configs['pre']['table'].get('del')
         if trans_del:
             logger.info('delete: %s' % trans_del)
-            train_df = train_df.drop(trans_del, axis=1)
-            test_df = test_df.drop(trans_del, axis=1)
+            self.train_df = self.train_df.drop(trans_del, axis=1)
+            self.test_df = self.test_df.drop(trans_del, axis=1)
         # missing
-        for column, dtype in tqdm(test_df.dtypes.items()):
+        for column, dtype in tqdm(self.test_df.dtypes.items()):
             if column in [self.id_col]:
                 continue
             if dtype == 'object':
                 logger.warn('OBJECT MISSING IS NOT BE REPLACED: %s' % column)
                 continue
-            if (not train_df[column].isna().any()) \
-                    and (not test_df[column].isna().any()):
+            if (not self.train_df[column].isna().any()) \
+                    and (not self.test_df[column].isna().any()):
                 continue
             logger.info('replace missing with mean: %s' % column)
-            column_mean = train_df[column].mean()
-            train_df = train_df.fillna({column: column_mean})
-            test_df = test_df.fillna({column: column_mean})
+            column_mean = self.train_df[column].mean()
+            self.train_df = self.train_df.fillna({column: column_mean})
+            self.test_df = self.test_df.fillna({column: column_mean})
         # category
         trans_category = self.configs['pre']['table'].get('category')
         logger.info('categorize model: %s' % trans_category['model'])
-        for column, dtype in tqdm(test_df.dtypes.items()):
+        for column, dtype in tqdm(self.test_df.dtypes.items()):
             if column in [self.id_col]:
                 continue
             if dtype != 'object' \
@@ -151,35 +147,33 @@ class TableDataTranslater(CommonDataTranslater):
                     and column not in trans_category['target']:
                 continue
             logger.info('categorize: %s' % column)
-            train_df = train_df.fillna({column: 'REPLACED_NAN'})
-            test_df = test_df.fillna({column: 'REPLACED_NAN'})
+            self.train_df = self.train_df.fillna({column: 'REPLACED_NAN'})
+            self.test_df = self.test_df.fillna({column: 'REPLACED_NAN'})
             if trans_category['model'] == 'onehot':
-                categories = train_df[column].unique()
-                train_df[column] = pd.Categorical(
-                    train_df[column], categories=categories)
-                test_df[column] = pd.Categorical(
-                    test_df[column], categories=categories)
-                train_df = pd.get_dummies(train_df, columns=[column])
-                test_df = pd.get_dummies(test_df, columns=[column])
+                categories = self.train_df[column].unique()
+                self.train_df[column] = pd.Categorical(
+                    self.train_df[column], categories=categories)
+                self.test_df[column] = pd.Categorical(
+                    self.test_df[column], categories=categories)
+                self.train_df = pd.get_dummies(self.train_df, columns=[column])
+                self.test_df = pd.get_dummies(self.test_df, columns=[column])
             else:
                 train_transed, test_transed, feature_names = \
                     self._categorize_ndarrays(
                         trans_category['model'],
-                        train_df[column].values,
-                        pred_df.values,
-                        test_df[column].values, column)
-                train_df = pd.merge(
-                    train_df,
+                        self.train_df[column].values,
+                        self.pred_df.values,
+                        self.test_df[column].values, column)
+                self.train_df = pd.merge(
+                    self.train_df,
                     pd.DataFrame(train_transed, columns=feature_names),
                     left_index=True, right_index=True)
-                train_df = train_df.drop([column], axis=1)
-                test_df = pd.merge(
-                    test_df,
+                self.train_df = self.train_df.drop([column], axis=1)
+                self.test_df = pd.merge(
+                    self.test_df,
                     pd.DataFrame(test_transed, columns=feature_names),
                     left_index=True, right_index=True)
-                test_df = test_df.drop([column], axis=1)
-        self.train_df = train_df
-        self.test_df = test_df
+                self.test_df = self.test_df.drop([column], axis=1)
         return
 
     def write_data_for_view(self):
@@ -197,21 +191,18 @@ class TableDataTranslater(CommonDataTranslater):
         return savename
 
     def create_data_for_model(self):
-        train_df = self.train_df
-        test_df = self.test_df
-        pred_df = self.pred_df
         # Y_train
-        self.Y_train = pred_df.values
+        self.Y_train = self.pred_df.values
         # X_train
-        self.X_train = train_df \
+        self.X_train = self.train_df \
             .drop(self.id_col, axis=1).values
         # X_test
-        self.test_ids = test_df[self.id_col].values
-        self.X_test = test_df \
+        self.test_ids = self.test_df[self.id_col].values
+        self.X_test = self.test_df \
             .drop(self.id_col, axis=1).values
         # feature_columns
         self.feature_columns = []
-        for key in train_df.keys():
+        for key in self.train_df.keys():
             if key == self.id_col:
                 continue
             self.feature_columns.append(key)
