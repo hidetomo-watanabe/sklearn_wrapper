@@ -32,6 +32,12 @@ class CommonDataTranslater(ConfigReader):
         for label, df in [('train', self.train_df), ('test', self.test_df)]:
             logger.info('%s:' % label)
             display(df.head())
+            can_describe = True
+            for dtype in df.dtypes:
+                if isinstance(dtype, pd.core.arrays.sparse.SparseDtype):
+                    can_describe = False
+            if not can_describe:
+                continue
             display(df.describe(include='all'))
         return
 

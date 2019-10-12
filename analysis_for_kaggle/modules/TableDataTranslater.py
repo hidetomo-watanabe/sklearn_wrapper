@@ -139,6 +139,7 @@ class TableDataTranslater(CommonDataTranslater):
         # category
         trans_category = self.configs['pre']['table'].get('category')
         logger.info('categorize model: %s' % trans_category['model'])
+        columns = []
         for column, dtype in tqdm(self.test_df.dtypes.items()):
             if column in [self.id_col]:
                 continue
@@ -146,7 +147,7 @@ class TableDataTranslater(CommonDataTranslater):
                 and trans_category \
                     and column not in trans_category['target']:
                 continue
-            logger.info('categorize: %s' % column)
+            columns.append(column)
             self.train_df = self.train_df.fillna({column: 'REPLACED_NAN'})
             self.test_df = self.test_df.fillna({column: 'REPLACED_NAN'})
             if trans_category['model'] == 'onehot':
@@ -155,9 +156,8 @@ class TableDataTranslater(CommonDataTranslater):
                     self.train_df[column], categories=categories)
                 self.test_df[column] = pd.Categorical(
                     self.test_df[column], categories=categories)
-                self.train_df = pd.get_dummies(self.train_df, columns=[column])
-                self.test_df = pd.get_dummies(self.test_df, columns=[column])
             else:
+                logger.info('categorize: %s' % column)
                 train_transed, test_transed, feature_names = \
                     self._categorize_ndarrays(
                         trans_category['model'],
@@ -174,6 +174,14 @@ class TableDataTranslater(CommonDataTranslater):
                     pd.DataFrame(test_transed, columns=feature_names),
                     left_index=True, right_index=True)
                 self.test_df = self.test_df.drop([column], axis=1)
+        # onehot should be together
+        if trans_category['model'] == 'onehot':
+            logger.info('categorize: %s' % columns)
+            if len(columns) > 0:
+                self.train_df = pd.get_dummies(
+                    self.train_df, columns=columns, sparse=True)
+                self.test_df = pd.get_dummies(
+                    self.test_df, columns=columns, sparse=True)
         return
 
     def write_data_for_view(self):
