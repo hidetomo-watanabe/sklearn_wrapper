@@ -70,7 +70,9 @@ class Outputer(ConfigReader):
                 self.Y_pred_proba = self.estimator.predict()
                 # train no proba
                 self.estimator.probability = False
-                dataset = Dataset(self.X_train, self.Y_train, self.X_train)
+                dataset = Dataset(
+                    self.X_train.toarray(), self.Y_train,
+                    self.X_train.toarray())
                 self.estimator.dataset = dataset
                 self.Y_train_pred = self.estimator.predict()
             # voter clf
@@ -181,9 +183,9 @@ class Outputer(ConfigReader):
         filename = '%s.csv' % modelname
         output_path = self.configs['data']['output_dir']
         if isinstance(self.Y_pred_df, pd.DataFrame):
-            self.Y_pred_df.to_csv(
+            self.Y_pred_df.round(5).to_csv(
                 '%s/%s' % (output_path, filename), index=False)
         if isinstance(self.Y_pred_proba_df, pd.DataFrame):
-            self.Y_pred_proba_df.to_csv(
+            self.Y_pred_proba_df.round(5).to_csv(
                 '%s/proba_%s' % (output_path, filename), index=False)
         return filename

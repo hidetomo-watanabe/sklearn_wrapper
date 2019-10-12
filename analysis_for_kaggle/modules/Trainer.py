@@ -1,4 +1,5 @@
 import pickle
+import scipy.sparse as sp
 import numpy as np
 import pandas as pd
 import importlib
@@ -264,7 +265,7 @@ class Trainer(ConfigReader):
             elif fold == 'group':
                 logger.info('search with cv: group=%s' % cv_config['group'])
                 group_ind = self.feature_columns.index(cv_config['group'])
-                groups = self.X_train[:, group_ind]
+                groups = self.X_train.toarray()[:, group_ind]
                 model = GroupKFold(n_splits=num)
                 cv_splits = model.split(
                     self.X_train, self.Y_train, groups=groups)
@@ -417,7 +418,7 @@ class Trainer(ConfigReader):
                 classes = sorted(np.unique(self.Y_train))
             pseudo_X_train, pseudo_Y_train = self._calc_pseudo_label_data(
                 X_train, Y_train, estimator, classes, threshold)
-            new_X_train = np.concatenate([X_train, pseudo_X_train])
+            new_X_train = sp.vstack((X_train, pseudo_X_train), format='csr')
             new_Y_train = np.concatenate([Y_train, pseudo_Y_train])
             logger.info(
                 'with threshold %s, train data added %s => %s'
@@ -447,9 +448,12 @@ class Trainer(ConfigReader):
     def _get_pipeline(self, single_estimators):
         # for warning
         if self.Y_train.ndim > 1 and self.Y_train.shape[1] == 1:
-            dataset = Dataset(self.X_train, self.Y_train.ravel(), self.X_test)
+            dataset = Dataset(
+                self.X_train.toarray(), self.Y_train.ravel(),
+                self.X_test.toarray())
         else:
-            dataset = Dataset(self.X_train, self.Y_train, self.X_test)
+            dataset = Dataset(
+                self.X_train.toarray(), self.Y_train, self.X_test.toarray())
         models = []
         for i, (config, single_estimator) in enumerate(single_estimators):
             modelname = config.get('modelname')

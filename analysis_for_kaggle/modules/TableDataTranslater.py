@@ -1,5 +1,6 @@
 import math
 from tqdm import tqdm
+import scipy.sparse as sp
 import numpy as np
 import pandas as pd
 import importlib
@@ -179,9 +180,9 @@ class TableDataTranslater(CommonDataTranslater):
             logger.info('categorize: %s' % columns)
             if len(columns) > 0:
                 self.train_df = pd.get_dummies(
-                    self.train_df, columns=columns, sparse=True)
+                    self.train_df, columns=columns)
                 self.test_df = pd.get_dummies(
-                    self.test_df, columns=columns, sparse=True)
+                    self.test_df, columns=columns)
         return
 
     def write_data_for_view(self):
@@ -202,12 +203,12 @@ class TableDataTranslater(CommonDataTranslater):
         # Y_train
         self.Y_train = self.pred_df.values
         # X_train
-        self.X_train = self.train_df \
-            .drop(self.id_col, axis=1).values
+        self.X_train = sp.csr_matrix(
+            self.train_df.drop(self.id_col, axis=1).values)
         # X_test
         self.test_ids = self.test_df[self.id_col].values
-        self.X_test = self.test_df \
-            .drop(self.id_col, axis=1).values
+        self.X_test = sp.csr_matrix(
+            self.test_df.drop(self.id_col, axis=1).values)
         # feature_columns
         self.feature_columns = []
         for key in self.train_df.keys():
@@ -223,9 +224,9 @@ class TableDataTranslater(CommonDataTranslater):
         if x_scaler:
             logger.info(f'normalize x data: {x_scaler}')
             if x_scaler == 'standard':
-                self.x_scaler = StandardScaler()
+                self.x_scaler = StandardScaler(with_mean=False)
             elif x_scaler == 'minmax':
-                self.x_scaler = MinMaxScaler()
+                self.x_scaler = MinMaxScaler(with_mean=False)
             else:
                 logger.error('NOT IMPLEMENTED FIT X_SCALER: %s' % x_scaler)
                 raise Exception('NOT IMPLEMENTED')
@@ -289,7 +290,7 @@ class TableDataTranslater(CommonDataTranslater):
         logger.info('reduce dimension to %s with %s' % (n, model))
         if model == 'pca':
             model_obj = PCA(n_components=n, random_state=42)
-            model_obj.fit(self.X_train)
+            model_obj.fit(self.X_train.toarray())
             logger.info('pca_ratio sum: %s' % sum(
                 model_obj.explained_variance_ratio_))
             logger.info('pca_ratio: %s' % model_obj.explained_variance_ratio_)
@@ -322,8 +323,8 @@ class TableDataTranslater(CommonDataTranslater):
             logger.error('NOT IMPLEMENTED DIMENSION MODEL: %s' % model)
             raise Exception('NOT IMPLEMENTED')
 
-        self.X_train = model_obj.transform(self.X_train)
-        self.X_test = model_obj.transform(self.X_test)
+        self.X_train = model_obj.transform(self.X_train.toarray())
+        self.X_test = model_obj.transform(self.X_test.toarray())
         self.feature_columns = list(map(
             lambda x: '%s_%d' % (model, x), range(n)))
         self.dimension_model = model_obj
@@ -332,9 +333,9 @@ class TableDataTranslater(CommonDataTranslater):
     def _extract_train_data_with_adversarial_validation(self):
         def _get_adversarial_preds(X_train, X_test, adversarial):
             # create data
-            X_adv = np.concatenate((X_train, X_test), axis=0)
+            X_adv = sp.vstack((X_train, X_test), format='csr').toarray()
             Y_adv = np.concatenate(
-                (np.zeros(len(X_train)), np.ones(len(X_test))), axis=0)
+                (np.zeros(X_train.shape[0]), np.ones(X_test.shape[0])), axis=0)
             # fit
             trainer_obj = Trainer(**self.get_data_for_model())
             trainer_obj.configs = self.configs
@@ -378,11 +379,11 @@ class TableDataTranslater(CommonDataTranslater):
         threshold = adversarial.get('threshold')
         if not threshold and int(threshold) != 0:
             threshold = 0.5
-        org_len = len(self.X_train)
+        org_len = self.X_train.shape[0]
         self.X_train = self.X_train[adv_train_preds > threshold]
         self.Y_train = self.Y_train[adv_train_preds > threshold]
         logger.info('with threshold %s, train data reduced %s => %s'
-                    % (threshold, org_len, len(self.X_train)))
+                    % (threshold, org_len, self.X_train.shape[0]))
         return
 
     def _extract_no_anomaly_train_data(self):
