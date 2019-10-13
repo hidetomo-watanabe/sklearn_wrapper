@@ -20,11 +20,11 @@ if __name__ == '__main__':
 
     logger.info('### DATA FOR VIEW')
     translater_obj.create_data_for_view()
-    translater_obj.display_data()
+    # translater_obj.display_data()
 
     logger.info('### TRANSLATE DATA FOR VIEW')
     translater_obj.translate_data_for_view()
-    translater_obj.display_data()
+    # translater_obj.display_data()
 
     logger.info('### WRITE DATA FOR VIEW')
     translater_obj.write_data_for_view()

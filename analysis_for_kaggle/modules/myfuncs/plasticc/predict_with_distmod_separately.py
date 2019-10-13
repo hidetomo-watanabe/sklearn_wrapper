@@ -31,13 +31,13 @@ if __name__ == '__main__':
 
         logger.info('### DATA FOR VIEW')
         translater_obj.create_data_for_view()
-        translater_obj.display_data()
+        # translater_obj.display_data()
         data_for_view = translater_obj.get_data_for_view()
 
         def _calc_proba_df(translater_obj):
             logger.info('### TRANSLATE DATA FOR VIEW')
             translater_obj.translate_data_for_view()
-            translater_obj.display_data()
+            # translater_obj.display_data()
 
             logger.info('### DATA FOR MODEL')
             translater_obj.create_data_for_model()
