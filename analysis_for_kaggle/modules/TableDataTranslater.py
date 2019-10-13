@@ -345,9 +345,10 @@ class TableDataTranslater(CommonDataTranslater):
     def _extract_train_data_with_adversarial_validation(self):
         def _get_adversarial_preds(X_train, X_test, adversarial):
             # create data
-            X_adv = sp.vstack((X_train, X_test), format='csr').toarray()
-            Y_adv = np.concatenate(
-                (np.zeros(X_train.shape[0]), np.ones(X_test.shape[0])), axis=0)
+            X_adv = sp.vstack((X_train, X_test), format='csr')
+            Y_adv = sp.csr_matrix(np.concatenate(
+                (np.zeros(X_train.shape[0]), np.ones(X_test.shape[0])),
+                axis=0))
             # fit
             trainer_obj = Trainer(**self.get_data_for_model())
             trainer_obj.configs = self.configs
