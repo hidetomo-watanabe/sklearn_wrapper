@@ -294,26 +294,32 @@ class TableDataTranslater(CommonDataTranslater):
             return
 
         logger.info('reduce dimension to %s with %s' % (n, model))
+        X_train = self.X_train
+        X_test = self.X_test
+        if model == 'pca':
+            X_train = X_train.toarray()
+            X_test = X_test.toarray()
+
         if model == 'pca':
             model_obj = PCA(n_components=n, random_state=42)
-            model_obj.fit(self.X_train.toarray())
+            model_obj.fit(X_train)
             logger.info('pca_ratio sum: %s' % sum(
                 model_obj.explained_variance_ratio_))
             logger.info('pca_ratio: %s' % model_obj.explained_variance_ratio_)
         elif model == 'svd':
             model_obj = TruncatedSVD(n_components=n, random_state=42)
-            model_obj.fit(self.X_train)
+            model_obj.fit(X_train)
             logger.info('svd_ratio sum: %s' % sum(
                 model_obj.explained_variance_ratio_))
             logger.info('svd_ratio: %s' % model_obj.explained_variance_ratio_)
         elif model == 'kmeans':
             model_obj = KMeans(n_clusters=n, random_state=42)
-            model_obj.fit(self.X_train)
+            model_obj.fit(X_train)
             logger.info(
                 'kmeans inertia_: %s' % model_obj.inertia_)
         elif model == 'nmf':
             model_obj = NMF(n_components=n, random_state=42)
-            model_obj.fit(self.X_train)
+            model_obj.fit(X_train)
             logger.info(
                 'nmf reconstruction_err_: %s' % model_obj.reconstruction_err_)
         elif model == 'rfe':
@@ -324,13 +330,13 @@ class TableDataTranslater(CommonDataTranslater):
             model_obj = RFE(
                 n_features_to_select=n,
                 estimator=XGBClassifier(random_state=42, n_jobs=-1))
-            model_obj.fit(self.X_train, Y_train)
+            model_obj.fit(X_train, Y_train)
         else:
             logger.error('NOT IMPLEMENTED DIMENSION MODEL: %s' % model)
             raise Exception('NOT IMPLEMENTED')
 
-        self.X_train = model_obj.transform(self.X_train.toarray())
-        self.X_test = model_obj.transform(self.X_test.toarray())
+        self.X_train = model_obj.transform(X_train)
+        self.X_test = model_obj.transform(X_test)
         self.feature_columns = list(map(
             lambda x: '%s_%d' % (model, x), range(n)))
         self.dimension_model = model_obj
