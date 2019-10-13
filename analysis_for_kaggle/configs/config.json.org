@@ -76,7 +76,7 @@
         "myfunc": "hoge",
         "train_mode": "clf",
         "cv": {
-            "fold": "group",
+            "fold": "groupk",
             "num": 3,
             "group": "Hoge"
         },

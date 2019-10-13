@@ -52,7 +52,7 @@
         "myfunc": false,
         "train_mode": "clf",
         "cv": {
-            "fold": "stratified",
+            "fold": "stratifiedk",
             "num": 5,
         },
         "ensemble": {

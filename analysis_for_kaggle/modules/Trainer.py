@@ -3,7 +3,7 @@ import scipy.sparse as sp
 import numpy as np
 import pandas as pd
 import importlib
-from sklearn.model_selection import StratifiedKFold, GroupKFold, KFold
+from sklearn.model_selection import KFold, StratifiedKFold, GroupKFold
 from sklearn.model_selection import cross_val_score
 from hyperopt import fmin, tpe, hp, space_eval, Trials, STATUS_OK
 from sklearn.linear_model import LogisticRegression, LinearRegression
@@ -258,11 +258,15 @@ class Trainer(ConfigReader):
                         (indexes[i * cv_unit: (i + 1) * cv_unit],
                             indexes[(i + 1) * cv_unit: end]))
                 cv = cv_splits
-            elif fold == 'stratified':
+            elif fold == 'k':
+                model = KFold(
+                    n_splits=num, shuffle=True, random_state=42)
+                cv = model
+            elif fold == 'stratifiedk':
                 model = StratifiedKFold(
                     n_splits=num, shuffle=True, random_state=42)
                 cv = model
-            elif fold == 'group':
+            elif fold == 'groupk':
                 logger.info('search with cv: group=%s' % cv_config['group'])
                 group_ind = self.feature_columns.index(cv_config['group'])
                 groups = self.X_train.toarray()[:, group_ind]
