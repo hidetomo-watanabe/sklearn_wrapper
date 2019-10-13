@@ -233,11 +233,11 @@ class Trainer(ConfigReader):
             if not cv_config:
                 if self.configs['fit']['train_mode'] == 'reg':
                     model = KFold(
-                        shuffle=True, random_state=42)
+                        n_splits=3, shuffle=True, random_state=42)
                     cv = model
                 elif self.configs['fit']['train_mode'] == 'clf':
                     model = StratifiedKFold(
-                        shuffle=True, random_state=42)
+                        n_splits=3, shuffle=True, random_state=42)
                     cv = model
                 self.cv = cv
                 return cv

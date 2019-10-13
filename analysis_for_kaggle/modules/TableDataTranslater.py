@@ -455,8 +455,11 @@ class TableDataTranslater(CommonDataTranslater):
             logger.error('NOT IMPLEMENTED OVERSAMPLING METHOD: %s' % method)
             raise Exception('NOT IMPLEMENTED')
         org_len = self.X_train.shape[0]
+        Y_train = self.Y_train
+        if Y_train.ndim > 1 and Y_train.shape[1] == 1:
+            Y_train = Y_train.ravel()
         self.X_train, self.Y_train = sampler_obj.fit_resample(
-            self.X_train, self.Y_train)
+            self.X_train, Y_train)
         logger.info('train data added %s => %s'
                     % (org_len, self.X_train.shape[0]))
         return
