@@ -416,11 +416,11 @@ class TableDataTranslater(CommonDataTranslater):
             self.X_test = np.append(
                 self.X_test, test_scores.reshape(-1, 1), axis=1)
 
-        org_len = len(self.X_train)
+        org_len = self.X_train.shape[0]
         self.X_train = self.X_train[preds == 1]
         self.Y_train = self.Y_train[preds == 1]
         logger.info('train data reduced %s => %s'
-                    % (org_len, len(self.X_train)))
+                    % (org_len, self.X_train.shape[0]))
         return
 
     def _extract_train_data_with_undersampling(self):
@@ -434,11 +434,11 @@ class TableDataTranslater(CommonDataTranslater):
         else:
             logger.error('NOT IMPLEMENTED UNDERSAMPLING METHOD: %s' % method)
             raise Exception('NOT IMPLEMENTED')
-        org_len = len(self.X_train)
+        org_len = self.X_train.shape[0]
         self.X_train, self.Y_train = sampler_obj.fit_resample(
             self.X_train, self.Y_train)
         logger.info('train data reduced %s => %s'
-                    % (org_len, len(self.X_train)))
+                    % (org_len, self.X_train.shape[0]))
         return
 
     def _add_train_data_with_oversampling(self):
@@ -454,11 +454,11 @@ class TableDataTranslater(CommonDataTranslater):
         else:
             logger.error('NOT IMPLEMENTED OVERSAMPLING METHOD: %s' % method)
             raise Exception('NOT IMPLEMENTED')
-        org_len = len(self.X_train)
+        org_len = self.X_train.shape[0]
         self.X_train, self.Y_train = sampler_obj.fit_resample(
             self.X_train, self.Y_train)
         logger.info('train data added %s => %s'
-                    % (org_len, len(self.X_train)))
+                    % (org_len, self.X_train.shape[0]))
         return
 
     def _reshape_data_for_model_for_keras(self):
