@@ -3,7 +3,8 @@ import scipy.sparse as sp
 import numpy as np
 import pandas as pd
 import importlib
-from sklearn.model_selection import KFold, StratifiedKFold, GroupKFold
+from sklearn.model_selection \
+    import KFold, StratifiedKFold, GroupKFold, TimeSeriesSplit
 from sklearn.model_selection import cross_val_score
 from hyperopt import fmin, tpe, hp, space_eval, Trials, STATUS_OK
 from sklearn.linear_model import LogisticRegression, LinearRegression
@@ -245,19 +246,9 @@ class Trainer(ConfigReader):
             fold = cv_config['fold']
             num = cv_config['num']
             logger.info('search with cv: fold=%s, num=%d' % (fold, num))
-            if fold == 'time_series':
-                indexes = np.arange(len(self.Y_train))
-                cv_splits = []
-                cv_unit = int(len(indexes) / (num + 1))
-                for i in range(num):
-                    if i == (num - 1):
-                        end = len(indexes)
-                    else:
-                        end = (i + 2) * cv_unit
-                    cv_splits.append(
-                        (indexes[i * cv_unit: (i + 1) * cv_unit],
-                            indexes[(i + 1) * cv_unit: end]))
-                cv = cv_splits
+            if fold == 'timeseries':
+                model = TimeSeriesSplit(n_splits=num)
+                cv = model
             elif fold == 'k':
                 model = KFold(
                     n_splits=num, shuffle=True, random_state=42)
