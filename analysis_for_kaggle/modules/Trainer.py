@@ -258,6 +258,9 @@ class Trainer(ConfigReader):
             elif fold == 'stratifiedk':
                 model = StratifiedKFold(
                     n_splits=num, shuffle=True, random_state=42)
+            else:
+                logger.error(f'NOT IMPLEMENTED CV: {fold}')
+                raise Exception('NOT IMPLEMENTED')
             self.cv = model
             return self.cv
 
