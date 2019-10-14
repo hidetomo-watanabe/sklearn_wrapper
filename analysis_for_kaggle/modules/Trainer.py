@@ -400,8 +400,10 @@ class Trainer(ConfigReader):
             scores, estimators = self._get_cv_scores_models(
                 estimator, X_train, Y_train, scorer, cv, fit_params)
             # nearest score mean
-            estimator = \
-                estimators[np.abs(np.array(scores) - np.mean(scores)).argmin()]
+            nearest_index = np.abs(np.array(scores) - np.mean(scores)).argmin()
+            logger.info(f'best score mean: {np.mean(scores)}')
+            logger.info(f'selected model score: {scores[nearest_index]}')
+            estimator = estimators[nearest_index]
             return estimator
 
         # fit
