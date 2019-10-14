@@ -3,9 +3,7 @@ import scipy.sparse as sp
 import numpy as np
 import pandas as pd
 import importlib
-from sklearn.model_selection \
-    import KFold, StratifiedKFold, GroupKFold, TimeSeriesSplit
-from sklearn.model_selection import cross_val_score
+from sklearn.model_selection import KFold, StratifiedKFold, TimeSeriesSplit
 from hyperopt import fmin, tpe, hp, space_eval, Trials, STATUS_OK
 from sklearn.linear_model import LogisticRegression, LinearRegression
 from sklearn.linear_model import Lasso, Ridge
@@ -143,8 +141,8 @@ class Trainer(ConfigReader):
 
     def _calc_best_params(
         self,
-        base_model, X_train, Y_train, params, scorer,
-        cv=3, n_jobs=-1, fit_params={}, max_evals=None, multiclass=None
+        base_model, X_train, Y_train, params, scorer, cv,
+        n_jobs=-1, fit_params={}, max_evals=None, multiclass=None
     ):
         def _hyperopt_objective(args):
             model = base_model
@@ -152,10 +150,17 @@ class Trainer(ConfigReader):
             if multiclass:
                 model = multiclass(estimator=model, n_jobs=n_jobs)
             try:
-                scores = cross_val_score(
-                    model, X_train, Y_train,
-                    scoring=scorer, cv=cv,
-                    n_jobs=n_jobs, fit_params=fit_params)
+                scores = []
+                if Y_train.ndim > 1 and Y_train.shape[1] > 1:
+                    tmp_Y_train = np.argmax(Y_train, axis=1)
+                else:
+                    tmp_Y_train = Y_train
+                for train_index, test_index in cv.split(X_train, tmp_Y_train):
+                    model.fit(
+                        X_train[train_index], Y_train[train_index],
+                        **fit_params)
+                    scores.append(scorer(
+                        model, X_train[test_index], tmp_Y_train[test_index]))
             except Exception as e:
                 logger.warn(e)
                 logger.warn('SET SCORE 0')
@@ -163,6 +168,7 @@ class Trainer(ConfigReader):
             score_mean = np.mean(scores)
             score_std = np.std(scores)
             logger.debug('  params: %s' % args)
+            logger.debug('  scores: %s' % scores)
             logger.debug('  score mean: %s' % score_mean)
             logger.debug('  score std: %s' % score_std)
             return {'loss': -1 * score_mean, 'status': STATUS_OK}
@@ -235,54 +241,25 @@ class Trainer(ConfigReader):
                 if self.configs['fit']['train_mode'] == 'reg':
                     model = KFold(
                         n_splits=3, shuffle=True, random_state=42)
-                    cv = model
                 elif self.configs['fit']['train_mode'] == 'clf':
                     model = StratifiedKFold(
                         n_splits=3, shuffle=True, random_state=42)
-                    cv = model
-                self.cv = cv
-                return cv
+                self.cv = model
+                return self.cv
 
             fold = cv_config['fold']
             num = cv_config['num']
             logger.info('search with cv: fold=%s, num=%d' % (fold, num))
             if fold == 'timeseries':
                 model = TimeSeriesSplit(n_splits=num)
-                cv = model
             elif fold == 'k':
                 model = KFold(
                     n_splits=num, shuffle=True, random_state=42)
-                cv = model
             elif fold == 'stratifiedk':
                 model = StratifiedKFold(
                     n_splits=num, shuffle=True, random_state=42)
-                cv = model
-            elif fold == 'groupk':
-                logger.info('search with cv: group=%s' % cv_config['group'])
-                group_ind = self.feature_columns.index(cv_config['group'])
-                groups = self.X_train.toarray()[:, group_ind]
-                model = GroupKFold(n_splits=num)
-                cv_splits = model.split(
-                    self.X_train, self.Y_train, groups=groups)
-                cv = [g for g in cv_splits]
-            self.cv = cv
-            return cv
-
-        def _get_scorer_from_config():
-            scoring = self.configs['fit']['scoring']
-            logger.info('scoring: %s' % scoring)
-            if scoring == 'my_scorer':
-                if not self.kernel:
-                    myfunc = importlib.import_module(
-                        'modules.myfuncs.%s'
-                        % self.configs['fit'].get('myfunc'))
-                method_name = 'get_my_scorer'
-                if not self.kernel:
-                    method_name = 'myfunc.%s' % method_name
-                self.scorer = eval(method_name)()
-            else:
-                self.scorer = get_scorer(scoring)
-            return self.scorer
+            self.cv = model
+            return self.cv
 
         # configs
         model_configs = self.configs['fit']['single_models']
@@ -290,7 +267,9 @@ class Trainer(ConfigReader):
         n_jobs = self.configs['fit'].get('n_jobs')
         if not n_jobs:
             n_jobs = -1
-        self.scorer = _get_scorer_from_config()
+        logger.info('scoring: %s' % self.configs['fit']['scoring'])
+        self.scorer = self._get_scorer_from_string(
+            self.configs['fit']['scoring'])
         myfunc = self.configs['fit'].get('myfunc')
         self.classes = None
         logger.info('X train shape: %s' % str(self.X_train.shape))
@@ -320,6 +299,20 @@ class Trainer(ConfigReader):
                     self.classes = sorted(np.unique(self.Y_train))
         return self.estimator
 
+    def _get_scorer_from_string(self, scoring):
+        if scoring == 'my_scorer':
+            if not self.kernel:
+                myfunc = importlib.import_module(
+                    'modules.myfuncs.%s'
+                    % self.configs['fit'].get('myfunc'))
+            method_name = 'get_my_scorer'
+            if not self.kernel:
+                method_name = 'myfunc.%s' % method_name
+            scorer = eval(method_name)()
+        else:
+            scorer = get_scorer(scoring)
+        return scorer
+
     def _calc_pseudo_label_data(
         self, X_train, Y_train, estimator, classes, threshold
     ):
@@ -339,9 +332,11 @@ class Trainer(ConfigReader):
 
     def calc_single_model(
         self,
-        scorer, model_config, cv=3, n_jobs=-1,
+        scorer, model_config, cv=KFold(), n_jobs=-1,
         keras_build_func=None, X_train=None, Y_train=None
     ):
+        if isinstance(scorer, str):
+            scorer = self._get_scorer_from_string(scorer)
         if not isinstance(X_train, np.ndarray):
             X_train = self.X_train
         if not isinstance(Y_train, np.ndarray):
@@ -385,11 +380,27 @@ class Trainer(ConfigReader):
                 base_model, X_train, Y_train, params,
                 scorer, cv, n_jobs, fit_params, max_evals, multiclass)
             logger.info('best params: %s' % best_params)
-            estimator = base_model
-            estimator.set_params(**best_params)
+            tmp_estimator = base_model
+            tmp_estimator.set_params(**best_params)
             if multiclass:
-                estimator = multiclass(estimator=estimator, n_jobs=n_jobs)
-            estimator.fit(X_train, Y_train, **fit_params)
+                tmp_estimator = multiclass(
+                    estimator=tmp_estimator, n_jobs=n_jobs)
+            score = -float('inf')
+            estimator = None
+            if Y_train.ndim > 1 and Y_train.shape[1] > 1:
+                tmp_Y_train = np.argmax(Y_train, axis=1)
+            else:
+                tmp_Y_train = Y_train
+            for train_index, test_index in cv.split(X_train, tmp_Y_train):
+                tmp_estimator.fit(
+                    X_train[train_index], Y_train[train_index],
+                    **fit_params)
+                tmp_score = scorer(
+                    tmp_estimator,
+                    X_train[test_index], tmp_Y_train[test_index])
+                if tmp_score > score:
+                    score = tmp_score
+                    estimator = tmp_estimator
             return estimator
 
         # fit
@@ -503,7 +514,7 @@ class Trainer(ConfigReader):
 
     def calc_ensemble_model(
         self,
-        scorer, model_configs, cv=3, n_jobs=-1,
+        scorer, model_configs, cv=KFold(), n_jobs=-1,
         keras_build_func=None, X_train=None, Y_train=None
     ):
         if not isinstance(X_train, np.ndarray):

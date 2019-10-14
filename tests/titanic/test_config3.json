@@ -52,9 +52,8 @@
         "myfunc": "titanic",
         "train_mode": "clf",
         "cv": {
-            "fold": "groupk",
-            "num": 3,
-            "group": "Pclass"
+            "fold": "stratifiedk",
+            "num": 3
         },
         "ensemble": {
             "mode": "stacking",
