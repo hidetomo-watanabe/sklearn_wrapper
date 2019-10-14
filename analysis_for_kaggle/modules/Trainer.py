@@ -149,12 +149,13 @@ class Trainer(ConfigReader):
         scores = []
         models = []
         for train_index, test_index in cv.split(X_train, tmp_Y_train):
-            model.fit(
+            tmp_model = model
+            tmp_model.fit(
                 X_train[train_index], Y_train[train_index],
                 **fit_params)
-            models.append(model)
+            models.append(tmp_model)
             scores.append(scorer(
-                model, X_train[test_index], tmp_Y_train[test_index]))
+                tmp_model, X_train[test_index], tmp_Y_train[test_index]))
         return scores, models
 
     def _calc_best_params(
@@ -398,8 +399,9 @@ class Trainer(ConfigReader):
                 estimator = multiclass(estimator=estimator, n_jobs=n_jobs)
             scores, estimators = self._get_cv_scores_models(
                 estimator, X_train, Y_train, scorer, cv, fit_params)
-            # max score
-            estimator = estimators[np.argsort(scores)[::-1][0]]
+            # nearest score mean
+            estimator = \
+                estimators[np.abs(np.array(scores) - np.mean(scores)).argmin()]
             return estimator
 
         # fit
