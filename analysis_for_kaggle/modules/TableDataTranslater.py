@@ -293,7 +293,9 @@ class TableDataTranslater(CommonDataTranslater):
                     del self.feature_columns[i]
             return
 
-        logger.info('reduce dimension to %s with %s' % (n, model))
+        logger.info(
+            'reduce dimension %s to %s with %s'
+            % (self.X_train.shape[1], n, model))
         X_train = self.X_train
         X_test = self.X_test
         if model == 'pca':
@@ -305,7 +307,8 @@ class TableDataTranslater(CommonDataTranslater):
             model_obj.fit(X_train)
             logger.info('pca_ratio sum: %s' % sum(
                 model_obj.explained_variance_ratio_))
-            logger.info('pca_ratio: %s' % model_obj.explained_variance_ratio_)
+            # logger.info(
+            #   'pca_ratio: %s' % model_obj.explained_variance_ratio_)
         elif model == 'svd':
             model_obj = TruncatedSVD(n_components=n, random_state=42)
             model_obj.fit(X_train)
