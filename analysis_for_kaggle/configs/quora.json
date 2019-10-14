@@ -51,13 +51,13 @@
                 "params": {
                 }
             }
-        ],
-        "post": {
-            "myfunc": "quora",
-            "methods": [
-                "translate_target2prediction"
-            ]
-        }
+        ]
+    },
+    "post": {
+        "myfunc": "quora",
+        "methods": [
+            "translate_target2prediction"
+        ]
     },
     "notify": {
         "slack": "https://hooks.slack.com/services/hogehoge"

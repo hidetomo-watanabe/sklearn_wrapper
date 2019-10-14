@@ -67,12 +67,12 @@
                 }
             }
         ],
-        "permutation": false,
-        "post": {
-            "myfunc": false,
-            "methods": [
-            ]
-        }
+        "permutation": false
+    },
+    "post": {
+        "myfunc": false,
+        "methods": [
+        ]
     },
     "notify": {
         "slack": "https://hooks.slack.com/services/hogehoge"

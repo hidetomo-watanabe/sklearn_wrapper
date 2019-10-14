@@ -10,7 +10,7 @@
     "pre": {
         "train_mode": "clf",
         "y_pre": false,
-        "y_scaler": "standard",
+        "y_scaler": false,
         "table": {
             "adhoc": {
                 "myfunc": "titanic",
@@ -21,22 +21,19 @@
                 ]
             },
             "del": [
-                "HonorificTitle",
-                "Name",
-                "Ticket",
-                "Fare",
-                "Cabin",
-                "Embarked"
             ],
             "category": {
                 "target": [
                     "Pclass",
                     "FamilyStatus"
                 ],
-                "model": "onehot"
+                "model": "onehot_with_test"
             },
             "x_scaler": "standard",
-            "dimension": false,
+            "dimension": {
+                "n": 750,
+                "model": "pca"
+            },
             "adversarial": false
         }
     },
@@ -52,21 +49,19 @@
         "scoring": "accuracy",
         "single_models": [
             {
-                "model": "gbdt_clf",
+                "model": "log_reg",
                 "modelname": "titanic_gbdt",
                 "fit_params": {
                 },
                 "params": {
-                    "n_estimators": [1, 2, 3, 4, 5],
-                    "max_depth": [1, 2, 3, 4, 5]
                 }
             }
-        ],
-        "post": {
-            "myfunc": false,
-            "methods": [
-            ]
-        }
+        ]
+    },
+    "post": {
+        "myfunc": false,
+        "methods": [
+        ]
     },
     "notify": {
         "slack": "https://hooks.slack.com/services/hogehoge"
