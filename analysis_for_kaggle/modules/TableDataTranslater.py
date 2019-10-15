@@ -388,9 +388,13 @@ class TableDataTranslater(CommonDataTranslater):
             logger.info('add adversarial_test_proba column to X')
             self.feature_columns.append('adversarial_test_proba')
             self.X_train = sp.hstack(
-                (self.X_train, adv_train_preds.reshape(-1, 1)), format='csr')
+                (self.X_train,
+                 sp.csr_matrix(adv_train_preds.reshape(-1, 1))),
+                format='csr')
             self.X_test = sp.hstack(
-                (self.X_test, adv_test_preds.reshape(-1, 1)), format='csr')
+                (self.X_test,
+                 sp.csr_matrix(adv_test_preds.reshape(-1, 1))),
+                format='csr')
 
         threshold = adversarial.get('threshold')
         if not threshold and int(threshold) != 0:
@@ -422,9 +426,13 @@ class TableDataTranslater(CommonDataTranslater):
             logger.info('add no_anomaly_score column to X')
             self.feature_columns.append('no_anomaly_score')
             self.X_train = sp.hstack(
-                (self.X_train, train_scores.reshape(-1, 1)), format='csr')
+                (self.X_train,
+                 sp.csr_matrix(train_scores.reshape(-1, 1))),
+                format='csr')
             self.X_test = sp.hstack(
-                (self.X_test, test_scores.reshape(-1, 1)), format='csr')
+                (self.X_test,
+                 sp.csr_matrix(test_scores.reshape(-1, 1))),
+                format='csr')
 
         org_len = self.X_train.shape[0]
         self.X_train = self.X_train[preds == 1]
