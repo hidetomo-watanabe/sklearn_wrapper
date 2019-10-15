@@ -223,8 +223,7 @@ class TableDataTranslater(CommonDataTranslater):
             self.feature_columns.append(key)
         return
 
-    def _normalize_data_for_model(self):
-        # x
+    def _normalize_x_data_for_model(self):
         # scaler
         x_scaler = self.configs['pre']['table'].get('x_scaler')
         if x_scaler:
@@ -241,33 +240,36 @@ class TableDataTranslater(CommonDataTranslater):
             self.X_test = self.x_scaler.transform(self.X_test)
         else:
             self.x_scaler = None
-        # y
-        if self.configs['pre']['train_mode'] == 'reg':
-            # pre
-            y_pre = self.configs['pre'].get('y_pre')
-            if y_pre:
-                logger.info('translate y_train with %s' % y_pre)
-                if y_pre == 'log':
-                    self.Y_train = np.array(list(map(math.log, self.Y_train)))
-                    self.Y_train = self.Y_train.reshape(-1, 1)
-                else:
-                    logger.error('NOT IMPLEMENTED FIT Y_PRE: %s' % y_pre)
-                    raise Exception('NOT IMPLEMENTED')
-            # scaler
-            y_scaler = self.configs['pre'].get('y_scaler')
-            if y_scaler:
-                logger.info(f'normalize y data: {y_scaler}')
-                if y_scaler == 'standard':
-                    self.y_scaler = StandardScaler()
-                elif y_scaler == 'minmax':
-                    self.y_scaler = MinMaxScaler()
-                else:
-                    logger.error('NOT IMPLEMENTED FIT Y_SCALER: %s' % y_scaler)
-                    raise Exception('NOT IMPLEMENTED')
-                self.y_scaler.fit(self.Y_train)
-                self.Y_train = self.y_scaler.transform(self.Y_train)
+        return
+
+    def _normalize_y_data_for_model(self):
+        if self.configs['pre']['train_mode'] != 'reg':
+            return
+        # pre
+        y_pre = self.configs['pre'].get('y_pre')
+        if y_pre:
+            logger.info('translate y_train with %s' % y_pre)
+            if y_pre == 'log':
+                self.Y_train = np.array(list(map(math.log, self.Y_train)))
+                self.Y_train = self.Y_train.reshape(-1, 1)
             else:
-                self.y_scaler = None
+                logger.error('NOT IMPLEMENTED FIT Y_PRE: %s' % y_pre)
+                raise Exception('NOT IMPLEMENTED')
+        # scaler
+        y_scaler = self.configs['pre'].get('y_scaler')
+        if y_scaler:
+            logger.info(f'normalize y data: {y_scaler}')
+            if y_scaler == 'standard':
+                self.y_scaler = StandardScaler()
+            elif y_scaler == 'minmax':
+                self.y_scaler = MinMaxScaler()
+            else:
+                logger.error('NOT IMPLEMENTED FIT Y_SCALER: %s' % y_scaler)
+                raise Exception('NOT IMPLEMENTED')
+            self.y_scaler.fit(self.Y_train)
+            self.Y_train = self.y_scaler.transform(self.Y_train)
+        else:
+            self.y_scaler = None
         return
 
     def _reduce_dimension_of_data_for_model(self):
@@ -510,7 +512,8 @@ class TableDataTranslater(CommonDataTranslater):
         return
 
     def translate_data_for_model(self):
-        self._normalize_data_for_model()
+        self._normalize_x_data_for_model()
+        self._normalize_y_data_for_model()
         self._reduce_dimension_of_data_for_model()
         self._extract_train_data_with_adversarial_validation()
         self._extract_no_anomaly_train_data()
