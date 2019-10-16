@@ -389,6 +389,11 @@ class TableDataTranslater(CommonDataTranslater):
         if adversarial.get('add_column'):
             logger.info('add adversarial_test_proba column to X')
             self.feature_columns.append('adversarial_test_proba')
+            if self.x_scaler:
+                adv_train_preds = self.x_scaler.transform(
+                    adv_train_preds)
+                adv_test_preds = self.x_scaler.transform(
+                    adv_test_preds)
             self.X_train = sp.hstack(
                 (self.X_train,
                  sp.csr_matrix(adv_train_preds.reshape(-1, 1))),
@@ -427,6 +432,9 @@ class TableDataTranslater(CommonDataTranslater):
         if no_anomaly.get('add_column'):
             logger.info('add no_anomaly_score column to X')
             self.feature_columns.append('no_anomaly_score')
+            if self.x_scaler:
+                train_scores = self.x_scaler.transform(train_scores)
+                test_scores = self.x_scaler.transform(test_scores)
             self.X_train = sp.hstack(
                 (self.X_train,
                  sp.csr_matrix(train_scores.reshape(-1, 1))),
