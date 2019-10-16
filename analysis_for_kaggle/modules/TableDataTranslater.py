@@ -519,5 +519,6 @@ class TableDataTranslater(CommonDataTranslater):
         self._extract_no_anomaly_train_data()
         self._extract_train_data_with_undersampling()
         self._add_train_data_with_oversampling()
+        self._normalize_x_data_for_model()
         self._reshape_data_for_model_for_keras()
         return
