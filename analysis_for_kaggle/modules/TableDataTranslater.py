@@ -4,7 +4,7 @@ import scipy.sparse as sp
 import numpy as np
 import pandas as pd
 import importlib
-from sklearn.preprocessing import StandardScaler, MinMaxScaler
+from sklearn.preprocessing import StandardScaler, MaxAbsScaler
 from sklearn.decomposition import PCA, TruncatedSVD, NMF
 from scipy.stats import ks_2samp
 from sklearn.cluster import KMeans
@@ -230,8 +230,8 @@ class TableDataTranslater(CommonDataTranslater):
             logger.info(f'normalize x data: {x_scaler}')
             if x_scaler == 'standard':
                 self.x_scaler = StandardScaler(with_mean=False)
-            elif x_scaler == 'minmax':
-                self.x_scaler = MinMaxScaler(with_mean=False)
+            elif x_scaler == 'maxabs':
+                self.x_scaler = MaxAbsScaler()
             else:
                 logger.error('NOT IMPLEMENTED FIT X_SCALER: %s' % x_scaler)
                 raise Exception('NOT IMPLEMENTED')
@@ -261,8 +261,8 @@ class TableDataTranslater(CommonDataTranslater):
             logger.info(f'normalize y data: {y_scaler}')
             if y_scaler == 'standard':
                 self.y_scaler = StandardScaler()
-            elif y_scaler == 'minmax':
-                self.y_scaler = MinMaxScaler()
+            elif y_scaler == 'maxabs':
+                self.y_scaler = MaxAbsScaler()
             else:
                 logger.error('NOT IMPLEMENTED FIT Y_SCALER: %s' % y_scaler)
                 raise Exception('NOT IMPLEMENTED')
@@ -519,6 +519,5 @@ class TableDataTranslater(CommonDataTranslater):
         self._extract_no_anomaly_train_data()
         self._extract_train_data_with_undersampling()
         self._add_train_data_with_oversampling()
-        self._normalize_x_data_for_model()
         self._reshape_data_for_model_for_keras()
         return
