@@ -307,10 +307,12 @@ class TableDataTranslater(CommonDataTranslater):
         if model == 'pca':
             model_obj = PCA(n_components=n, random_state=42)
             model_obj.fit(X_train)
-            logger.info('pca_ratio sum: %s' % sum(
-                model_obj.explained_variance_ratio_))
-            # logger.info(
-            #   'pca_ratio: %s' % model_obj.explained_variance_ratio_)
+            ratios = model_obj.explained_variance_ratio_
+            logger.info('pca_ratio sum: %s' % sum(ratios))
+            if len(np.unique(ratios)) != len(ratios):
+                logger.warn(
+                    'PCA VARIANCE RATIO IS NOT UNIQUE, SO NOT REPRODUCIBLE')
+            # logger.info('pca_ratio: %s' % ratios)
         elif model == 'svd':
             model_obj = TruncatedSVD(n_components=n, random_state=42)
             model_obj.fit(X_train)
