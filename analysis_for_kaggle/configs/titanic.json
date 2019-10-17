@@ -50,10 +50,11 @@
         "single_models": [
             {
                 "model": "log_reg",
-                "modelname": "titanic_gbdt",
+                "modelname": "titanic_logreg",
                 "fit_params": {
                 },
                 "params": {
+                    "random_state": [42]
                 }
             }
         ]
