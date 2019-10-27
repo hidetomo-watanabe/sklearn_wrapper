@@ -121,8 +121,8 @@ class TableDataTranslater(CommonDataTranslater):
         trans_del = self.configs['pre']['table'].get('del')
         if trans_del:
             logger.info('delete: %s' % trans_del)
-            self.train_df = self.train_df.drop(trans_del, axis=1)
-            self.test_df = self.test_df.drop(trans_del, axis=1)
+            self.train_df.drop(trans_del, axis=1, inplace=True)
+            self.test_df.drop(trans_del, axis=1, inplace=True)
         # missing
         for column, dtype in tqdm(self.test_df.dtypes.items()):
             if column in [self.id_col]:
@@ -135,8 +135,8 @@ class TableDataTranslater(CommonDataTranslater):
                 continue
             logger.info('replace missing with mean: %s' % column)
             column_mean = self.train_df[column].mean()
-            self.train_df = self.train_df.fillna({column: column_mean})
-            self.test_df = self.test_df.fillna({column: column_mean})
+            self.train_df.fillna({column: column_mean}, inplace=True)
+            self.test_df.fillna({column: column_mean}, inplace=True)
         # category
         trans_category = self.configs['pre']['table'].get('category')
         logger.info('categorize model: %s' % trans_category['model'])
@@ -149,8 +149,8 @@ class TableDataTranslater(CommonDataTranslater):
                     and column not in trans_category['target']:
                 continue
             columns.append(column)
-            self.train_df = self.train_df.fillna({column: 'REPLACED_NAN'})
-            self.test_df = self.test_df.fillna({column: 'REPLACED_NAN'})
+            self.train_df.fillna({column: 'REPLACED_NAN'}, inplace=True)
+            self.test_df.fillna({column: 'REPLACED_NAN'}, inplace=True)
             if trans_category['model'] in ['onehot', 'onehot_with_test']:
                 categories = self.train_df[column].unique()
                 if trans_category['model'] == 'onehot_with_test':
@@ -175,12 +175,12 @@ class TableDataTranslater(CommonDataTranslater):
                     self.train_df,
                     pd.DataFrame(train_transed, columns=feature_names),
                     left_index=True, right_index=True)
-                self.train_df = self.train_df.drop([column], axis=1)
+                self.train_df.drop([column], axis=1, inplace=True)
                 self.test_df = pd.merge(
                     self.test_df,
                     pd.DataFrame(test_transed, columns=feature_names),
                     left_index=True, right_index=True)
-                self.test_df = self.test_df.drop([column], axis=1)
+                self.test_df.drop([column], axis=1, inplace=True)
         # onehot should be together
         if trans_category['model'] in ['onehot', 'onehot_with_test']:
             logger.info('categorize: %s' % columns)
