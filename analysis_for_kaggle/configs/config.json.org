@@ -92,9 +92,24 @@
         "scoring": "accuracy",
         "single_models": [
             {
+                "model": "log_reg",
+                "modelname": "tmp_model1",
+                "max_evals": 1,
+                "fit_params": {
+                },
+                "params": {
+                    "C": [0.01, 0.03, 0.05, 0.1, 0.3, 0.5, 1, 5, 10],
+                    "class_weight": ["balanced"],
+                    "max_iter": [10000],
+                    "solver": ["sag", "liblinear"],
+                    "random_state": [42],
+                    "n_jobs": [-1]
+                }
+            },
+            {
                 "model": "gbdt_clf",
                 "multiclass": "onevsrest",
-                "modelname": "tmp_model1",
+                "modelname": "tmp_model2",
                 "max_evals": 1,
                 "fit_params": {
                 },
@@ -111,7 +126,7 @@
             {
                 "model": "xgb_clf",
                 "multiclass": "onevsrest",
-                "modelname": "tmp_model2",
+                "modelname": "tmp_model3",
                 "max_evals": 1,
                 "fit_params": {
                 },
@@ -127,7 +142,7 @@
             {
                 "model": "lgb_clf",
                 "multiclass": false,
-                "modelname": "tmp_model3",
+                "modelname": "tmp_model4",
                 "max_evals": 1,
                 "fit_params": {
                     "early_stopping_rounds": 100
@@ -146,7 +161,7 @@
             {
                 "model": "catb_clf",
                 "multiclass": false,
-                "modelname": "tmp_model4",
+                "modelname": "tmp_model5",
                 "max_evals": 1,
                 "fit_params": {
                 },
@@ -163,7 +178,7 @@
             {
                 "model": "svc",
                 "multiclass": "onevsone",
-                "modelname": "tmp_model5",
+                "modelname": "tmp_model6",
                 "max_evals": 1,
                 "fit_params": {
                 },
@@ -177,7 +192,7 @@
             },
             {
                 "model": "keras_clf",
-                "modelname": "tmp_model6",
+                "modelname": "tmp_model7",
                 "max_evals": 1,
                 "fit_params": {
                 },
