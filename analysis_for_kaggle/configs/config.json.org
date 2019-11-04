@@ -94,6 +94,7 @@
             {
                 "model": "log_reg",
                 "modelname": "tmp_model1",
+                "train_all": true,
                 "max_evals": 1,
                 "fit_params": {
                 },

@@ -148,7 +148,11 @@ class Trainer(ConfigReader):
             tmp_Y_train = Y_train
         scores = []
         models = []
-        for train_index, test_index in cv.split(X_train, tmp_Y_train):
+        if cv == 1:
+            indexes = [[range(X_train.shape[0]), range(tmp_Y_train.shape[0])]]
+        else:
+            indexes = cv.split(X_train, tmp_Y_train)
+        for train_index, test_index in indexes:
             tmp_model = model
             tmp_model.fit(
                 X_train[train_index], Y_train[train_index],
@@ -397,13 +401,23 @@ class Trainer(ConfigReader):
             estimator.set_params(**best_params)
             if multiclass:
                 estimator = multiclass(estimator=estimator, n_jobs=n_jobs)
-            scores, estimators = self._get_cv_scores_models(
-                estimator, X_train, Y_train, scorer, cv, fit_params)
-            # nearest score mean
-            nearest_index = np.abs(np.array(scores) - np.mean(scores)).argmin()
-            logger.info(f'selected model score mean: {np.mean(scores)}')
-            logger.info(f'selected model score: {scores[nearest_index]}')
-            estimator = estimators[nearest_index]
+            if model_config.get('train_all'):
+                logger.info('get estimator with train_all')
+                scores, estimators = self._get_cv_scores_models(
+                    estimator, X_train, Y_train, scorer,
+                    cv=1, fit_params=fit_params)
+                logger.info(f'model score: {scores[0]}')
+                estimator = estimators[0]
+            else:
+                logger.info('get estimator with nearest cv score mean')
+                scores, estimators = self._get_cv_scores_models(
+                    estimator, X_train, Y_train, scorer,
+                    cv=cv, fit_params=fit_params)
+                nearest_index \
+                    = np.abs(np.array(scores) - np.mean(scores)).argmin()
+                logger.info(f'selected model score mean: {np.mean(scores)}')
+                logger.info(f'selected model score: {scores[nearest_index]}')
+                estimator = estimators[nearest_index]
             return estimator
 
         # fit
