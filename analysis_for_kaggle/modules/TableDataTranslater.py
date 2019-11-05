@@ -35,77 +35,43 @@ class TableDataTranslater(CommonDataTranslater):
 
     def _categorize_ndarrays(self, model, X_train, Y_train, X_test, col_name):
         def _get_transed_data(
-            model_obj, model, X_train, Y_train, target, col_name
+            model, X_train, Y_train, target, col_name
         ):
+            feature_names = [f'{col_name}_{model}']
+            df = pd.DataFrame(data=X_train, columns=['x'])
             if model == 'label':
-                model_obj = None
-                feature_names = ['%s_label' % col_name]
-                df = pd.DataFrame(data=X_train, columns=['x'])
                 _, uniqs = pd.factorize(df['x'])
                 transed = uniqs.get_indexer(target)
-                transed = transed.reshape(-1, 1)
-            elif model == 'count':
-                model_obj = None
-                feature_names = ['%s_count' % col_name]
-                df = pd.DataFrame(data=X_train, columns=['x'])
-                counts = df.groupby('x')['x'].count()
+            elif model in ['count', 'freq', 'rank', 'target']:
                 transed = target
-                # only test, insert 0
+                if model == 'count':
+                    mapping = df.groupby('x')['x'].count()
+                    only_test = 0
+                elif model == 'freq':
+                    mapping = df.groupby('x')['x'].count() / len(df)
+                    only_test = 0
+                elif model == 'rank':
+                    mapping = df.groupby('x')['x'].count().rank(
+                        ascending=False)
+                    only_test = -1
+                elif model == 'target':
+                    df['y'] = Y_train
+                    mapping = df.groupby('x')['y'].mean()
+                    only_test = 0
+                for i in mapping.index:
+                    transed = np.where(transed == i, mapping[i], transed)
                 transed = np.where(
-                    ~np.in1d(transed, list(counts.index)), 0, transed)
-                for i in counts.index:
-                    transed = np.where(transed == i, counts[i], transed)
-                transed = transed.reshape(-1, 1)
-            elif model == 'freq':
-                model_obj = None
-                feature_names = ['%s_freq' % col_name]
-                df = pd.DataFrame(data=X_train, columns=['x'])
-                freqs = df.groupby('x')['x'].count() / len(df)
-                transed = target
-                # only test, insert 0
-                transed = np.where(
-                    ~np.in1d(transed, list(freqs.index)), 0, transed)
-                for i in freqs.index:
-                    transed = np.where(transed == i, freqs[i], transed)
-                transed = transed.reshape(-1, 1)
-            elif model == 'rank':
-                model_obj = None
-                feature_names = ['%s_rank' % col_name]
-                df = pd.DataFrame(data=X_train, columns=['x'])
-                ranks = df.groupby('x')['x'].count().rank(ascending=False)
-                transed = target
-                # only test, insert -1
-                transed = np.where(
-                    ~np.in1d(transed, list(ranks.index)), -1, transed)
-                for i in ranks.index:
-                    transed = np.where(transed == i, ranks[i], transed)
-                transed = transed.reshape(-1, 1)
-            elif model == 'target':
-                model_obj = None
-                feature_names = ['%s_target' % col_name]
-                df = pd.DataFrame(data=X_train, columns=['x'])
-                df['y'] = Y_train
-                means = df.groupby('x')['y'].mean()
-                transed = target
-                # only test, insert 0
-                transed = np.where(
-                    ~np.in1d(transed, list(means.index)), 0, transed)
-                for i in means.index:
-                    transed = np.where(transed == i, means[i], transed)
-                # add Laplace Noize for not data leak
-                # np.random.seed(seed=42)
-                # transed += [np.random.laplace() for _ in range(len(transed))]
-                transed = transed.reshape(-1, 1).astype(float)
+                    ~np.in1d(transed, list(mapping.index)), only_test, transed)
             else:
                 logger.error('NOT IMPLEMENTED CATEGORIZE: %s' % model)
                 raise Exception('NOT IMPLEMENTED')
-            return model_obj, feature_names, transed
+            transed = transed.reshape(-1, 1)
+            return feature_names, transed
 
         output = []
-        model_obj = None
         for target in [X_train, X_test]:
-            model_obj, feature_names, transed = _get_transed_data(
-                model_obj, model, X_train, Y_train, target, col_name)
+            feature_names, transed = _get_transed_data(
+                model, X_train, Y_train, target, col_name)
             output.append(transed)
         return output[0], output[1], feature_names
 
