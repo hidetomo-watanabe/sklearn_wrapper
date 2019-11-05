@@ -56,6 +56,18 @@ class TableDataTranslater(CommonDataTranslater):
                 for i in counts.index:
                     transed = np.where(transed == i, counts[i], transed)
                 transed = transed.reshape(-1, 1)
+            elif model == 'freq':
+                model_obj = None
+                feature_names = ['%s_freq' % col_name]
+                df = pd.DataFrame(data=X_train, columns=['x'])
+                freqs = df.groupby('x')['x'].count() / len(df)
+                transed = target
+                # only test, insert 0
+                transed = np.where(
+                    ~np.in1d(transed, list(freqs.index)), 0, transed)
+                for i in freqs.index:
+                    transed = np.where(transed == i, freqs[i], transed)
+                transed = transed.reshape(-1, 1)
             elif model == 'rank':
                 model_obj = None
                 feature_names = ['%s_rank' % col_name]
