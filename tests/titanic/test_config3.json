@@ -67,7 +67,7 @@
             {
                 "model": "keras_clf",
                 "modelname": "tmp",
-                "max_evals": 2,
+                "n_trials": 2,
                 "fit_params": {
                 },
                 "params": {

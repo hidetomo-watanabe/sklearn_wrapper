@@ -44,7 +44,7 @@
             {
                 "model": "svc",
                 "modelname": "digit_svc",
-                "max_evals": 5,
+                "n_trials": 5,
                 "fit_params": {
                 },
                 "params": {

@@ -68,7 +68,7 @@
             {
                 "model": "lasso",
                 "modelname": "tmp",
-                "max_evals": 10,
+                "n_trials": 10,
                 "fit_params": {
                 },
                 "params": {

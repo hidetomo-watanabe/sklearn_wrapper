@@ -165,7 +165,7 @@ class Trainer(ConfigReader):
     def _calc_best_params(
         self,
         base_model, X_train, Y_train, params, scorer, cv,
-        n_jobs=-1, fit_params={}, max_evals=None, multiclass=None
+        n_jobs=-1, fit_params={}, n_trials=None, multiclass=None
     ):
         def _objective(trial):
             model = base_model
@@ -196,18 +196,18 @@ class Trainer(ConfigReader):
             if all_comb_num == 0:
                 all_comb_num = 1
             all_comb_num *= len(val)
-        if not max_evals:
-            max_evals = all_comb_num
+        if not n_trials:
+            n_trials = all_comb_num
 
         # no search
-        if max_evals == 0:
+        if n_trials == 0:
             return {}
-        elif max_evals < 0:
-            logger.error(f'MAX EVALS SHOULD BE LARGER THAN 0: {max_evals}')
+        elif n_trials < 0:
+            logger.error(f'N_TRIALS SHOULD BE LARGER THAN 0: {n_trials}')
             raise Exception('ILLEGAL VALUE')
 
         study = optuna.create_study()
-        study.optimize(_objective, n_trials=max_evals)
+        study.optimize(_objective, n_trials=n_trials)
         best_params = study.best_params
         best_score_mean = -1 * study.best_trial.value
         logger.info('best score mean: %s' % best_score_mean)
@@ -379,7 +379,7 @@ class Trainer(ConfigReader):
                 logger.error(
                     f'NOT IMPLEMENTED MULTICLASS: {multiclass}')
                 raise Exception('NOT IMPLEMENTED')
-        max_evals = model_config.get('max_evals')
+        n_trials = model_config.get('n_trials')
         fit_params = model_config.get('fit_params')
         if not fit_params:
             fit_params = {}
@@ -397,7 +397,7 @@ class Trainer(ConfigReader):
         def _fit(X_train, Y_train):
             best_params = self._calc_best_params(
                 base_model, X_train, Y_train, params,
-                scorer, cv, n_jobs, fit_params, max_evals, multiclass)
+                scorer, cv, n_jobs, fit_params, n_trials, multiclass)
             logger.info('best params: %s' % best_params)
             estimator = base_model
             estimator.set_params(**best_params)

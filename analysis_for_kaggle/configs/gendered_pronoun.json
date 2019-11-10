@@ -57,7 +57,7 @@
                 "model": "lgb_clf",
                 "multiclass": "onevsrest",
                 "modelname": "tmp",
-                "max_evals": 50,
+                "n_trials": 50,
                 "fit_params" : {
                 },
                 "params" : {
