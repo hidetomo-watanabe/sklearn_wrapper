@@ -227,7 +227,7 @@ class Trainer(ConfigReader):
             raise Exception('ILLEGAL VALUE')
 
         study = optuna.create_study()
-        study.optimize(_objective, n_trials=n_trials)
+        study.optimize(_objective, n_trials=n_trials, n_jobs=n_jobs)
         best_params = study.best_params
         best_score_mean = -1 * study.best_trial.value
         logger.info('best score mean: %s' % best_score_mean)
@@ -475,7 +475,7 @@ class Trainer(ConfigReader):
         self._check_importances(model, estimator, X_train, Y_train)
         return estimator
 
-    def _get_voter(self, mode, estimators, weights=None):
+    def _get_voter(self, mode, estimators, weights=None, n_jobs=-1):
         if self.configs['fit']['train_mode'] == 'clf':
             if mode == 'average':
                 voting = 'soft'
@@ -483,11 +483,11 @@ class Trainer(ConfigReader):
                 voting = 'hard'
             voter = VotingClassifier(
                 estimators=estimators, voting=voting,
-                weights=weights, n_jobs=-1)
+                weights=weights, n_jobs=n_jobs)
         elif self.configs['fit']['train_mode'] == 'reg':
             if mode == 'average':
                 voter = VotingRegressor(
-                    estimators=estimators, weights=weights, n_jobs=-1)
+                    estimators=estimators, weights=weights, n_jobs=n_jobs)
         return voter
 
     def _get_pipeline(self, single_estimators):
@@ -589,7 +589,7 @@ class Trainer(ConfigReader):
 
             voter = self._get_voter(
                 ensemble_config['mode'], estimators,
-                ensemble_config.get('weights'))
+                ensemble_config.get('weights'), n_jobs)
             voter.fit(X_train, Y_train.ravel())
             estimator = voter
         elif ensemble_config['mode'] in ['weighted', 'stacking', 'blending']:
