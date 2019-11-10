@@ -179,6 +179,9 @@ class Trainer(ConfigReader):
                     elif val['type'] == 'float':
                         args[key] = trial.suggest_uniform(
                             key, val['from'], val['to'])
+                    elif val['type'] == 'log':
+                        args[key] = trial.suggest_loguniform(
+                            key, val['from'], val['to'])
                     else:
                         logger.error(
                             f'ILLEGAL PARAM TYPE ON {key}: {val["type"]}')
