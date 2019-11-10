@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import importlib
 from sklearn.model_selection import KFold, StratifiedKFold, TimeSeriesSplit
-from hyperopt import fmin, tpe, hp, space_eval, Trials, STATUS_OK
+import optuna
 from sklearn.linear_model import LogisticRegression, LinearRegression
 from sklearn.linear_model import Lasso, Ridge
 from sklearn.svm import SVC, SVR, LinearSVC, LinearSVR
@@ -167,8 +167,11 @@ class Trainer(ConfigReader):
         base_model, X_train, Y_train, params, scorer, cv,
         n_jobs=-1, fit_params={}, max_evals=None, multiclass=None
     ):
-        def _hyperopt_objective(args):
+        def _objective(trial):
             model = base_model
+            args = {}
+            for key, val in params.items():
+                args[key] = trial.suggest_categorical(key, val)
             model.set_params(**args)
             if multiclass:
                 model = multiclass(estimator=model, n_jobs=n_jobs)
@@ -185,12 +188,11 @@ class Trainer(ConfigReader):
             logger.debug('  scores: %s' % scores)
             logger.debug('  score mean: %s' % score_mean)
             logger.debug('  score std: %s' % score_std)
-            return {'loss': -1 * score_mean, 'status': STATUS_OK}
+            return -1 * score_mean
 
         params_space = {}
         all_comb_num = 0
-        for key, val in params.items():
-            params_space[key] = hp.choice(key, val)
+        for val in params.values():
             if all_comb_num == 0:
                 all_comb_num = 1
             all_comb_num *= len(val)
@@ -200,14 +202,14 @@ class Trainer(ConfigReader):
         # no search
         if max_evals == 0:
             return {}
+        elif max_evals < 0:
+            logger.error(f'MAX EVALS SHOULD BE LARGER THAN 0: {max_evals}')
+            raise Exception('ILLEGAL VALUE')
 
-        trials_obj = Trials()
-        best_params = fmin(
-            fn=_hyperopt_objective, space=params_space,
-            algo=tpe.suggest, max_evals=max_evals, trials=trials_obj)
-        best_params = space_eval(params_space, best_params)
-        best_score_mean = -1 * min(
-            [item['result']['loss'] for item in trials_obj.trials])
+        study = optuna.create_study()
+        study.optimize(_objective, n_trials=max_evals)
+        best_params = study.best_params
+        best_score_mean = -1 * study.best_trial.value
         logger.info('best score mean: %s' % best_score_mean)
         return best_params
 
