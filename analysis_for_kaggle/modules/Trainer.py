@@ -167,11 +167,31 @@ class Trainer(ConfigReader):
         base_model, X_train, Y_train, params, scorer, cv,
         n_jobs=-1, fit_params={}, n_trials=None, multiclass=None
     ):
-        def _objective(trial):
-            model = base_model
+        def _get_args(trial, params):
             args = {}
             for key, val in params.items():
-                args[key] = trial.suggest_categorical(key, val)
+                if isinstance(val, list):
+                    args[key] = trial.suggest_categorical(key, val)
+                elif isinstance(val, dict):
+                    if val['type'] == 'int':
+                        args[key] = trial.suggest_int(
+                            key, val['from'], val['to'])
+                    elif val['type'] == 'float':
+                        args[key] = trial.suggest_uniform(
+                            key, val['from'], val['to'])
+                    else:
+                        logger.error(
+                            f'ILLEGAL PARAM TYPE ON {key}: {val["type"]}')
+                        raise Exception('ILLEGAL VALUE')
+                else:
+                    logger.error(
+                        f'ILLEGAL DATA TYPE ON {key}: {type(val)}')
+                    raise Exception('ILLEGAL VALUE')
+            return args
+
+        def _objective(trial):
+            model = base_model
+            args = _get_args(trial, params)
             model.set_params(**args)
             if multiclass:
                 model = multiclass(estimator=model, n_jobs=n_jobs)
