@@ -587,7 +587,8 @@ class Trainer(ConfigReader):
             for i, (config, single_estimator) in enumerate(single_estimators):
                 modelname = config.get('modelname')
                 if not modelname:
-                    modelname = f'tmp_model_{i}'
+                    modelname = 'tmp_model'
+                modelname += f'_{i}'
                 estimators.append((modelname, single_estimator))
 
             voter = self._get_voter(
