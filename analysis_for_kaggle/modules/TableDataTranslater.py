@@ -33,6 +33,55 @@ class TableDataTranslater(CommonDataTranslater):
         self.kernel = kernel
         self.configs = {}
 
+    def _translate_adhoc(self):
+        trans_adhoc = self.configs['pre']['table'].get('adhoc')
+        if not trans_adhoc:
+            return
+
+        if trans_adhoc['myfunc']:
+            if not self.kernel:
+                myfunc = importlib.import_module(
+                    'modules.myfuncs.%s' % trans_adhoc['myfunc'])
+        # temp merge
+        train_pred_df = pd.merge(
+            self.train_df, self.pred_df, left_index=True, right_index=True)
+        for method_name in trans_adhoc['methods']:
+            logger.info('adhoc: %s' % method_name)
+            if not self.kernel:
+                method_name = 'myfunc.%s' % method_name
+            self.train_df, self.test_df = eval(
+                method_name)(train_pred_df, self.test_df)
+        # temp drop
+        self.train_df = train_pred_df.drop(self.pred_cols, axis=1)
+        del train_pred_df
+        return
+
+    def _delete_columns(self):
+        trans_del = self.configs['pre']['table'].get('del')
+        if not trans_del:
+            return
+
+        logger.info('delete: %s' % trans_del)
+        self.train_df.drop(trans_del, axis=1, inplace=True)
+        self.test_df.drop(trans_del, axis=1, inplace=True)
+        return
+
+    def _fill_missing_value_with_mean(self):
+        for column, dtype in tqdm(self.test_df.dtypes.items()):
+            if column in [self.id_col]:
+                continue
+            if (not self.train_df[column].isna().any()) \
+                    and (not self.test_df[column].isna().any()):
+                continue
+            if dtype == 'object':
+                logger.warn('OBJECT MISSING IS NOT BE REPLACED: %s' % column)
+                continue
+            logger.info('replace missing with mean: %s' % column)
+            column_mean = self.train_df[column].mean()
+            self.train_df.fillna({column: column_mean}, inplace=True)
+            self.test_df.fillna({column: column_mean}, inplace=True)
+        return
+
     def _categorize_ndarrays(self, model, X_train, Y_train, X_test, col_name):
         def _get_transed_data(
             model, X_train, Y_train, target, col_name
@@ -75,56 +124,17 @@ class TableDataTranslater(CommonDataTranslater):
             output.append(transed)
         return output[0], output[1], feature_names
 
-    def translate_data_for_view(self):
-        # adhoc
-        trans_adhoc = self.configs['pre']['table'].get('adhoc')
-        if trans_adhoc:
-            if trans_adhoc['myfunc']:
-                if not self.kernel:
-                    myfunc = importlib.import_module(
-                        'modules.myfuncs.%s' % trans_adhoc['myfunc'])
-            # temp merge
-            train_pred_df = pd.merge(
-                self.train_df, self.pred_df, left_index=True, right_index=True)
-            for method_name in trans_adhoc['methods']:
-                logger.info('adhoc: %s' % method_name)
-                if not self.kernel:
-                    method_name = 'myfunc.%s' % method_name
-                self.train_df, self.test_df = eval(
-                    method_name)(train_pred_df, self.test_df)
-            # temp drop
-            self.train_df = train_pred_df.drop(self.pred_cols, axis=1)
-            del train_pred_df
-        # del
-        trans_del = self.configs['pre']['table'].get('del')
-        if trans_del:
-            logger.info('delete: %s' % trans_del)
-            self.train_df.drop(trans_del, axis=1, inplace=True)
-            self.test_df.drop(trans_del, axis=1, inplace=True)
-        # missing
-        for column, dtype in tqdm(self.test_df.dtypes.items()):
-            if column in [self.id_col]:
-                continue
-            if dtype == 'object':
-                logger.warn('OBJECT MISSING IS NOT BE REPLACED: %s' % column)
-                continue
-            if (not self.train_df[column].isna().any()) \
-                    and (not self.test_df[column].isna().any()):
-                continue
-            logger.info('replace missing with mean: %s' % column)
-            column_mean = self.train_df[column].mean()
-            self.train_df.fillna({column: column_mean}, inplace=True)
-            self.test_df.fillna({column: column_mean}, inplace=True)
-        # category
+    def _categorize(self):
         trans_category = self.configs['pre']['table'].get('category')
+        if not trans_category:
+            return
+
         logger.info('categorize model: %s' % trans_category['model'])
         columns = []
         for column, dtype in tqdm(self.test_df.dtypes.items()):
             if column in [self.id_col]:
                 continue
-            if dtype != 'object' \
-                and trans_category \
-                    and column not in trans_category['target']:
+            if dtype != 'object' and column not in trans_category['target']:
                 continue
             columns.append(column)
             self.train_df.fillna({column: 'REPLACED_NAN'}, inplace=True)
@@ -167,6 +177,13 @@ class TableDataTranslater(CommonDataTranslater):
                     self.train_df, columns=columns)
                 self.test_df = pd.get_dummies(
                     self.test_df, columns=columns)
+        return
+
+    def translate_data_for_view(self):
+        self._translate_adhoc()
+        self._delete_columns()
+        self._fill_missing_value_with_mean()
+        self._categorize()
         return
 
     def write_data_for_view(self):
