@@ -139,6 +139,7 @@ class TableDataTranslater(CommonDataTranslater):
             columns.append(column)
             self.train_df.fillna({column: 'REPLACED_NAN'}, inplace=True)
             self.test_df.fillna({column: 'REPLACED_NAN'}, inplace=True)
+            # onehot
             if trans_category['model'] in ['onehot', 'onehot_with_test']:
                 categories = self.train_df[column].unique()
                 if trans_category['model'] == 'onehot_with_test':
@@ -147,10 +148,12 @@ class TableDataTranslater(CommonDataTranslater):
                         (categories, self.test_df[column].unique().tolist()),
                         axis=0)
                     categories = set(categories)
+                # pre onehot
                 self.train_df[column] = pd.Categorical(
                     self.train_df[column], categories=categories)
                 self.test_df[column] = pd.Categorical(
                     self.test_df[column], categories=categories)
+            # not onehot
             else:
                 logger.info('categorize: %s' % column)
                 train_transed, test_transed, feature_names = \
