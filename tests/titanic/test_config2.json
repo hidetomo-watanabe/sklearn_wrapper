@@ -27,6 +27,7 @@
                 "Cabin",
                 "Embarked"
             ],
+            "missing": true,
             "category": {
                 "target": [
                     "Pclass",

@@ -66,6 +66,10 @@ class TableDataTranslater(CommonDataTranslater):
         return
 
     def _fill_missing_value_with_mean(self):
+        trans_missing = self.configs['pre']['table'].get('missing')
+        if not trans_missing:
+            return
+
         for column, dtype in tqdm(self.test_df.dtypes.items()):
             if column in [self.id_col]:
                 continue

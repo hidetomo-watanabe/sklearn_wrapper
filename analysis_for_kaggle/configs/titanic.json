@@ -22,6 +22,7 @@
             },
             "del": [
             ],
+            "missing": true,
             "category": {
                 "target": [
                     "Pclass",

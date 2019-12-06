@@ -25,6 +25,7 @@
                 "Hoge",
                 "Foo"
             ],
+            "missing": true,
             "category": {
                 "target": [
                     "Hoge",
