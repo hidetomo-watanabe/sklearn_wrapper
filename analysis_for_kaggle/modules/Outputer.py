@@ -163,10 +163,9 @@ class Outputer(ConfigReader):
         # post
         fit_post = self.configs.get('post')
         if fit_post:
-            if fit_post['myfunc']:
-                if not self.kernel:
-                    myfunc = importlib.import_module(
-                        'modules.myfuncs.%s' % fit_post['myfunc'])
+            if not self.kernel:
+                myfunc = importlib.import_module(
+                    'modules.myfuncs.%s' % fit_post['myfunc'])
             for method_name in fit_post['methods']:
                 logger.info('fit post: %s' % method_name)
                 if not self.kernel:

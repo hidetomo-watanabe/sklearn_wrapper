@@ -38,10 +38,9 @@ class TableDataTranslater(CommonDataTranslater):
         if not trans_adhoc:
             return
 
-        if trans_adhoc['myfunc']:
-            if not self.kernel:
-                myfunc = importlib.import_module(
-                    'modules.myfuncs.%s' % trans_adhoc['myfunc'])
+        if not self.kernel:
+            myfunc = importlib.import_module(
+                'modules.myfuncs.%s' % trans_adhoc['myfunc'])
         # temp merge
         train_pred_df = pd.merge(
             self.train_df, self.pred_df, left_index=True, right_index=True)

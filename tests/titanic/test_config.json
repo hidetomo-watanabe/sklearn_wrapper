@@ -63,11 +63,7 @@
             }
         ]
     },
-    "post": {
-        "myfunc": false,
-        "methods": [
-        ]
-    },
+    "post": false,
     "notify": {
         "slack": "https://hooks.slack.com/services/hogehoge"
     }
