@@ -9,6 +9,8 @@
 ##### classification
 - log_reg
   - LogisticRegression
+- log_reg_cv
+  - LogisticRegressionCV
 - svc
   - SVC
 - l_svc

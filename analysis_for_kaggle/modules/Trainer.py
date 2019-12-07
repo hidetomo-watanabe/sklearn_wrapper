@@ -6,6 +6,7 @@ import importlib
 from sklearn.model_selection import KFold, StratifiedKFold, TimeSeriesSplit
 import optuna
 from sklearn.linear_model import LogisticRegression, LinearRegression
+from sklearn.linear_model import LogisticRegressionCV
 from sklearn.linear_model import Lasso, Ridge
 from sklearn.svm import SVC, SVR, LinearSVC, LinearSVR
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
@@ -75,6 +76,8 @@ class Trainer(ConfigReader):
 
         if model == 'log_reg':
             return LogisticRegression(solver='lbfgs')
+        elif model == 'log_reg_cv':
+            return LogisticRegressionCV()
         elif model == 'linear_reg':
             return LinearRegression()
         elif model == 'lasso':
