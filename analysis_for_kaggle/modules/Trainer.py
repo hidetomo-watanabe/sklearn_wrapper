@@ -223,11 +223,18 @@ class Trainer(ConfigReader):
                 all_comb_num = 1
             all_comb_num *= len(val)
         if not n_trials:
-            n_trials = all_comb_num
+            n_trials = 0
+        n_trials = max(n_trials, all_comb_num)
+        logger.info(f'n_trials: {n_trials}')
 
         # no search
         if n_trials == 0:
             return {}
+        elif n_trials == 1:
+            single_param = {}
+            for key, val in params.items():
+                single_param[key] = val[0]
+            return single_param
         elif n_trials < 0:
             logger.error(f'N_TRIALS SHOULD BE LARGER THAN 0: {n_trials}')
             raise Exception('ILLEGAL VALUE')
