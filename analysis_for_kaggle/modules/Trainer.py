@@ -298,6 +298,10 @@ class Trainer(ConfigReader):
 
             fold = cv_config['fold']
             num = cv_config['num']
+            if num == 1:
+                self.cv = 1
+                return self.cv
+
             logger.info('search with cv: fold=%s, num=%d' % (fold, num))
             if fold == 'timeseries':
                 model = TimeSeriesSplit(n_splits=num)
