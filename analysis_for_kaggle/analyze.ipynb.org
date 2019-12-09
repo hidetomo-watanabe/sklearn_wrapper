@@ -138,7 +138,8 @@
    "source": [
     "print('### VISUALIZE TRAIN DF HISTOGRAM')\n",
     "visualizer_obj.visualize_train_df_histogram(\n",
-    "    data_for_view['train_df'].sample(frac=1), data_for_view['pred_df'].sample(frac=1))"
+    "    data_for_view['train_df'].sample(frac=1, random_state=42),\n",
+    "    data_for_view['pred_df'].sample(frac=1, random_state=42))"
    ]
   },
   {
@@ -150,7 +151,8 @@
     "print('### VISUALIZE TRAIN DF HEATMAP')\n",
     "# display(data_for_view['train_df'].drop(visualizer_obj.id_col, axis=1).corr())\n",
     "visualizer_obj.visualize_train_df_heatmap(\n",
-    "    data_for_view['train_df'].sample(frac=1), data_for_view['pred_df'].sample(frac=1))"
+    "    data_for_view['train_df'].sample(frac=1, random_state=42),\n",
+    "    data_for_view['pred_df'].sample(frac=1, random_state=42))"
    ]
   },
   {
@@ -161,7 +163,7 @@
    "source": [
     "print('### VISUALIZE TRAIN DF SCATTER MATRIX')\n",
     "import pandas as pd\n",
-    "pd.plotting.scatter_matrix(data_for_view['train_df'].sample(frac=1))"
+    "pd.plotting.scatter_matrix(data_for_view['train_df'].sample(frac=1, random_state=42))"
    ]
   },
   {
@@ -172,7 +174,7 @@
    "source": [
     "print('### VISUALIZE TRAIN DF PROFILING')\n",
     "import pandas_profiling\n",
-    "pandas_profiling.ProfileReport(data_for_view['train_df'].sample(frac=1))"
+    "pandas_profiling.ProfileReport(data_for_view['train_df'].sample(frac=1, random_state=42))"
    ]
   },
   {
