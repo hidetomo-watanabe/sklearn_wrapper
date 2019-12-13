@@ -10,7 +10,7 @@ logger = getLogger('predict').getChild('Visualizer')
 try:
     from .ConfigReader import ConfigReader
 except ImportError:
-    logger.warn('IN FOR KERNEL SCRIPT, ConfigReader import IS SKIPPED')
+    logger.warning('IN FOR KERNEL SCRIPT, ConfigReader import IS SKIPPED')
 
 
 class Visualizer(ConfigReader):

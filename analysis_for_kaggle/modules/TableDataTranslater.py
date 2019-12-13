@@ -21,11 +21,12 @@ logger = getLogger('predict').getChild('TableDataTranslater')
 try:
     from .CommonDataTranslater import CommonDataTranslater
 except ImportError:
-    logger.warn('IN FOR KERNEL SCRIPT, CommonDataTranslater import IS SKIPPED')
+    logger.warning(
+        'IN FOR KERNEL SCRIPT, CommonDataTranslater import IS SKIPPED')
 try:
     from .Trainer import Trainer
 except ImportError:
-    logger.warn('IN FOR KERNEL SCRIPT, Trainer import IS SKIPPED')
+    logger.warning('IN FOR KERNEL SCRIPT, Trainer import IS SKIPPED')
 
 
 class TableDataTranslater(CommonDataTranslater):
@@ -77,7 +78,8 @@ class TableDataTranslater(CommonDataTranslater):
                     and (not self.test_df[column].isna().any()):
                 continue
             if dtype == 'object':
-                logger.warn('OBJECT MISSING IS NOT BE REPLACED: %s' % column)
+                logger.warning(
+                    'OBJECT MISSING IS NOT BE REPLACED: %s' % column)
                 continue
             logger.info('replace missing with mean: %s' % column)
             column_mean = self.train_df[column].mean()
@@ -146,7 +148,7 @@ class TableDataTranslater(CommonDataTranslater):
             if trans_category['model'] in ['onehot', 'onehot_with_test']:
                 categories = self.train_df[column].unique()
                 if trans_category['model'] == 'onehot_with_test':
-                    logger.warn('IN DATA PREPROCESSING, USING TEST DATA')
+                    logger.warning('IN DATA PREPROCESSING, USING TEST DATA')
                     categories = np.concatenate(
                         (categories, self.test_df[column].unique().tolist()),
                         axis=0)
@@ -195,7 +197,7 @@ class TableDataTranslater(CommonDataTranslater):
     def write_data_for_view(self):
         savename = self.configs['pre'].get('savename')
         if not savename:
-            logger.warn('NO SAVENAME')
+            logger.warning('NO SAVENAME')
             return
 
         savename += '.csv'
@@ -311,7 +313,7 @@ class TableDataTranslater(CommonDataTranslater):
             ratios = model_obj.explained_variance_ratio_
             logger.info('pca_ratio sum: %s' % sum(ratios))
             if len(np.unique(ratios)) != len(ratios):
-                logger.warn(
+                logger.warning(
                     'PCA VARIANCE RATIO IS NOT UNIQUE, SO NOT REPRODUCIBLE')
             # logger.info('pca_ratio: %s' % ratios)
         elif model == 'svd':
@@ -370,7 +372,7 @@ class TableDataTranslater(CommonDataTranslater):
             if hasattr(estimator, 'classes_'):
                 test_index = list(estimator.classes_).index(1)
             else:
-                logger.warn('CLASSES_ NOT IN ESTIMATOR')
+                logger.warning('CLASSES_ NOT IN ESTIMATOR')
                 test_index = 1
             adv_train_preds = estimator.predict_proba(X_train)[:, test_index]
             adv_test_preds = estimator.predict_proba(X_test)[:, test_index]
@@ -381,7 +383,7 @@ class TableDataTranslater(CommonDataTranslater):
             return
 
         logger.info('extract train data with adversarial validation')
-        logger.warn('IN DATA PREPROCESSING, USING TEST DATA')
+        logger.warning('IN DATA PREPROCESSING, USING TEST DATA')
         adv_train_preds, adv_test_preds = _get_adversarial_preds(
             self.X_train, self.X_test, adversarial)
         logger.info('adversarial train preds:')

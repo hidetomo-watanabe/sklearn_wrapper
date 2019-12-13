@@ -6,7 +6,7 @@ logger = getLogger('predict').getChild('CommonDataTranslater')
 try:
     from .ConfigReader import ConfigReader
 except ImportError:
-    logger.warn('IN FOR KERNEL SCRIPT, ConfigReader import IS SKIPPED')
+    logger.warning('IN FOR KERNEL SCRIPT, ConfigReader import IS SKIPPED')
 
 
 class CommonDataTranslater(ConfigReader):

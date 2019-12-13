@@ -10,7 +10,8 @@ logger = getLogger('predict').getChild('ImageDataTranslater')
 try:
     from .CommonDataTranslater import CommonDataTranslater
 except ImportError:
-    logger.warn('IN FOR KERNEL SCRIPT, CommonDataTranslater import IS SKIPPED')
+    logger.warning(
+        'IN FOR KERNEL SCRIPT, CommonDataTranslater import IS SKIPPED')
 
 
 class ImageDataTranslater(CommonDataTranslater):
@@ -24,7 +25,7 @@ class ImageDataTranslater(CommonDataTranslater):
     def write_data_for_view(self):
         savename = self.configs['pre'].get('savename')
         if savename:
-            logger.warn('WRITE DATA FOR VIEW OF IMAGE IS NOT IMPLEMENTED')
+            logger.warning('WRITE DATA FOR VIEW OF IMAGE IS NOT IMPLEMENTED')
             return
 
     def create_data_for_model(self):

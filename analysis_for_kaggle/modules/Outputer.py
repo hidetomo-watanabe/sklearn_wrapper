@@ -14,7 +14,7 @@ logger = getLogger('predict').getChild('Outputer')
 try:
     from .ConfigReader import ConfigReader
 except ImportError:
-    logger.warn('IN FOR KERNEL SCRIPT, ConfigReader import IS SKIPPED')
+    logger.warning('IN FOR KERNEL SCRIPT, ConfigReader import IS SKIPPED')
 
 
 class Outputer(ConfigReader):
@@ -115,7 +115,7 @@ class Outputer(ConfigReader):
                 self.Y_train_pred = \
                     self.y_scaler.inverse_transform(self.Y_train_pred)
             else:
-                logger.warn('NO Y_train_pred')
+                logger.warning('NO Y_train_pred')
             # pre
             y_pre = self.configs['pre'].get('y_pre')
             if y_pre:
@@ -158,7 +158,8 @@ class Outputer(ConfigReader):
                         columns=proba_columns),
                     left_index=True, right_index=True)
             else:
-                logger.warn('NOT MATCH DIMENSION OF Y_PRED_PROBA AND CLASSES')
+                logger.warning(
+                    'NOT MATCH DIMENSION OF Y_PRED_PROBA AND CLASSES')
 
         # post
         fit_post = self.configs.get('post')

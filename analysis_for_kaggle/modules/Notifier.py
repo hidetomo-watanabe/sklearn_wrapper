@@ -19,7 +19,7 @@ class Notifier(object):
     def notify_slack(self):
         mode = self.configs['notify'].get('mode')
         if not mode:
-            logger.warn('NO NOTIFICATION')
+            logger.warning('NO NOTIFICATION')
             return
 
         logger.info('notification: %s' % mode)

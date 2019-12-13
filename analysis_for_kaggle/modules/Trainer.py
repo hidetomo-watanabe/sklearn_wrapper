@@ -39,11 +39,11 @@ logger = getLogger('predict').getChild('Trainer')
 try:
     from .ConfigReader import ConfigReader
 except ImportError:
-    logger.warn('IN FOR KERNEL SCRIPT, ConfigReader import IS SKIPPED')
+    logger.warning('IN FOR KERNEL SCRIPT, ConfigReader import IS SKIPPED')
 try:
     from .Outputer import Outputer
 except ImportError:
-    logger.warn('IN FOR KERNEL SCRIPT, Outputer import IS SKIPPED')
+    logger.warning('IN FOR KERNEL SCRIPT, Outputer import IS SKIPPED')
 
 
 class Trainer(ConfigReader):
@@ -205,8 +205,8 @@ class Trainer(ConfigReader):
                 scores, _ = self._get_cv_scores_models(
                     model, X_train, Y_train, scorer, cv, fit_params)
             except Exception as e:
-                logger.warn(e)
-                logger.warn('SET SCORE 0')
+                logger.warning(e)
+                logger.warning('SET SCORE 0')
                 scores = [0]
             score_mean = np.mean(scores)
             score_std = np.std(scores)
