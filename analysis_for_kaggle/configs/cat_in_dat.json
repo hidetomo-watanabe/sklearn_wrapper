@@ -1,0 +1,102 @@
+{
+    "data": {
+        "train_path": "../input/cat_in_dat/train.csv",
+        "test_path": "../input/cat_in_dat/test.csv",
+        "output_dir": "./outputs",
+        "type": "table",
+        "pred_cols": ["target"],
+        "id_col": "id",
+        "delimiter": ","
+    },
+    "pre": {
+        "train_mode": "clf",
+        "y_pre": false,
+        "y_scaler": false,
+        "savename": false,
+        "table": {
+            "adhoc": {
+                "myfunc": "cat_in_dat",
+                "methods": [
+                    "add_ord_1_label",
+                    "add_ord_2_label",
+                    "add_ord_3_label",
+                    "add_ord_4_label",
+                    "split_ord_5"
+                ]
+            },
+            "del": [
+                "bin_0",
+                "ord_1",
+                "ord_2",
+                "ord_3",
+                "ord_4"
+            ],
+            "category": {
+                "target": [
+                    "bin_0",
+                    "bin_1",
+                    "bin_2",
+                    "day",
+                    "month"
+                ],
+                "model": "onehot_with_test"
+            },
+            "x_scaler": "standard",
+            "x_scaler": false,
+            "dimension": false,
+            "adversarial": false,
+            "no_anomaly": false,
+            "undersampling": false,
+            "oversampling": false,
+            "reshape_for_keras": false
+        },
+        "image": {
+        }
+    },
+    "fit": {
+        "myfunc": false,
+        "train_mode": "clf",
+        "cv": {
+            "fold": "stratifiedk",
+            "num": 5
+        },
+        "n_jobs": -1,
+        "ensemble": {
+            "mode": "average",
+            "model": "log_reg",
+            "modelname": "cat_in_dat",
+            "k": 10,
+            "proportion": 0.2,
+            "seed": 111
+        },
+        "scoring": "roc_auc",
+        "single_models": [
+            {
+                "model": "log_reg",
+                "multiclass": false,
+                "modelname": "log_reg_1",
+                "train_all": true,
+                "n_trials": 1,
+                "fit_params": {
+                },
+                "params": {
+                    "C": [0.09536298444122952],
+                    "class_weight": ["balanced"],
+                    "max_iter": [10000],
+                    "solver": ["lbfgs"],
+                    "n_jobs": [-1]
+                }
+            }
+        ],
+        "permutation": false
+    },
+    "post": {
+        "myfunc": "cat_in_dat",
+        "methods": [
+            "translate_proba2submission"
+        ]
+    },
+    "notify": {
+        "slack": "https://hooks.slack.com/services/hogehoge"
+    }
+}
