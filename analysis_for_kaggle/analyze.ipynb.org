@@ -149,7 +149,6 @@
    "outputs": [],
    "source": [
     "print('### VISUALIZE TRAIN DF HEATMAP')\n",
-    "# display(data_for_view['train_df'].drop(visualizer_obj.id_col, axis=1).corr())\n",
     "visualizer_obj.visualize_train_df_heatmap(\n",
     "    data_for_view['train_df'].sample(frac=1, replace=False, random_state=42),\n",
     "    data_for_view['pred_df'].sample(frac=1, replace=False, random_state=42))"
@@ -177,6 +176,18 @@
     "import pandas_profiling\n",
     "pandas_profiling.ProfileReport(\n",
     "    data_for_view['train_df'].sample(frac=1, replace=False, random_state=42))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "print('### VISUALIZE DECISION TREE')\n",
+    "visualizer_obj.visualize_decision_tree(\n",
+    "    data_for_model['X_train'].toarray(), data_for_model['Y_train'],\n",
+    "    data_for_model['feature_columns'])"
    ]
   },
   {

@@ -1,8 +1,11 @@
 import numpy as np
 import pandas as pd
+from sklearn.tree import DecisionTreeClassifier
+from dtreeviz.trees import dtreeviz
 from sklearn.model_selection import learning_curve
 import matplotlib.pyplot as plt
 import seaborn as sns
+from IPython.display import display
 from logging import getLogger
 
 
@@ -47,6 +50,19 @@ class Visualizer(ConfigReader):
                 pred_df, left_index=True, right_index=True
             ).corr(),
             fmt="1.2f", annot=True, lw=0.7, cmap='YlGnBu')
+
+    def visualize_decision_tree(
+        self, X_train, Y_train, feature_names, max_depth=3
+    ):
+        Y_train = Y_train.ravel()
+        clf = DecisionTreeClassifier(max_depth=max_depth)
+        clf.fit(X_train, Y_train)
+        for pred_col in self.pred_cols:
+            viz = dtreeviz(
+                clf, X_train, Y_train, target_name=pred_col,
+                feature_names=feature_names,
+                class_names=list(set([str(i) for i in Y_train])))
+            display(viz)
 
     def visualize_learning_curve(
         self, title, estimator, X_train, Y_train, scorer, cv, n_jobs=-1
