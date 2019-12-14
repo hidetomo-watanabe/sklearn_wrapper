@@ -94,37 +94,6 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "print('### DATA FOR MODEL')\n",
-    "translater_obj.create_data_for_model()"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": null,
-   "metadata": {},
-   "outputs": [],
-   "source": [
-    "print('### TRANSLATE DATA FOR MODEL')\n",
-    "translater_obj.translate_data_for_model()"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": null,
-   "metadata": {},
-   "outputs": [],
-   "source": [
-    "print('### GET DATA FOR MODEL')\n",
-    "data_for_model = translater_obj.get_data_for_model()\n",
-    "post_processers = translater_obj.get_post_processers()"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": null,
-   "metadata": {},
-   "outputs": [],
-   "source": [
     "visualizer_obj = Visualizer()\n",
     "visualizer_obj.read_config_file(config_path)\n",
     "# visualizer_obj.read_config_text(config_text)"
@@ -176,6 +145,37 @@
     "import pandas_profiling\n",
     "pandas_profiling.ProfileReport(\n",
     "    data_for_view['train_df'].sample(frac=1, replace=False, random_state=42))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "print('### DATA FOR MODEL')\n",
+    "translater_obj.create_data_for_model()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "print('### TRANSLATE DATA FOR MODEL')\n",
+    "translater_obj.translate_data_for_model()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "print('### GET DATA FOR MODEL')\n",
+    "data_for_model = translater_obj.get_data_for_model()\n",
+    "post_processers = translater_obj.get_post_processers()"
    ]
   },
   {
