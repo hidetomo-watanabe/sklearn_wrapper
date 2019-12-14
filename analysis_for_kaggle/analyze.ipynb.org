@@ -163,16 +163,6 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "print('### TRANSLATE DATA FOR MODEL')\n",
-    "translater_obj.translate_data_for_model()"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": null,
-   "metadata": {},
-   "outputs": [],
-   "source": [
     "print('### GET DATA FOR MODEL')\n",
     "data_for_model = translater_obj.get_data_for_model()\n",
     "post_processers = translater_obj.get_post_processers()"
@@ -188,6 +178,27 @@
     "visualizer_obj.visualize_decision_tree(\n",
     "    data_for_model['X_train'].toarray(), data_for_model['Y_train'],\n",
     "    data_for_model['feature_columns'])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "print('### TRANSLATE DATA FOR MODEL')\n",
+    "translater_obj.translate_data_for_model()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "print('### GET DATA FOR MODEL')\n",
+    "data_for_model = translater_obj.get_data_for_model()\n",
+    "post_processers = translater_obj.get_post_processers()"
    ]
   },
   {
@@ -239,10 +250,10 @@
    "source": [
     "print('### VISUALIZE PARTIAL DEPENDENCE')\n",
     "from sklearn.inspection import plot_partial_dependence\n",
-    "plot_partial_dependence(\n",
-    "    estimator=estimator_data['estimator'], X=data_for_model['X_train'].toarray(),\n",
-    "    features=data_for_model['feature_columns'],\n",
-    "    feature_names=data_for_model['feature_columns'])"
+    "for feature in data_for_model['feature_columns']:\n",
+    "    plot_partial_dependence(\n",
+    "        estimator=estimator_data['estimator'], X=data_for_model['X_train'].toarray(),\n",
+    "        features=[feature], feature_names=[feature])"
    ]
   },
   {
