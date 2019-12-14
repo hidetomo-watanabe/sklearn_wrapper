@@ -255,7 +255,7 @@
     "import shap\n",
     "shap.initjs()\n",
     "explainer = shap.TreeExplainer(\n",
-    "    model=estimator_data['estimator'], feature_dependence='tree_path_dependent',\n",
+    "    model=estimator_data['estimator'], feature_perturbation='tree_path_dependent',\n",
     "    model_output='margin')\n",
     "shap_values = explainer.shap_values(\n",
     "    X=data_for_model['X_train'].toarray(), y=data_for_model['Y_train'])\n",
