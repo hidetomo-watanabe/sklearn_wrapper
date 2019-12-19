@@ -10,6 +10,13 @@ from modules.Outputer import Outputer
 from modules.Notifier import Notifier
 
 
+BASE_PATH = os.path.dirname(os.path.abspath(__file__))
+logging.config.fileConfig(
+    f'{BASE_PATH}/configs/logging.conf',
+    disable_existing_loggers=False)
+logger = getLogger('predict')
+
+
 @profile
 def main(config_path):
     # data translate
@@ -66,12 +73,6 @@ def main(config_path):
 
 
 if __name__ == '__main__':
-    BASE_PATH = os.path.dirname(os.path.abspath(__file__))
-    logging.config.fileConfig(
-        f'{BASE_PATH}/configs/logging.conf',
-        disable_existing_loggers=False)
-    logger = getLogger('predict')
-
     logger.info('# START')
 
     if len(sys.argv) > 1:
