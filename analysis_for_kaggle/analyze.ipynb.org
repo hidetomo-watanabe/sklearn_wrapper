@@ -16,7 +16,6 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "import sys\n",
     "import logging.config\n",
     "from logging import getLogger\n",
     "from modules.DataTranslater import DataTranslater\n",
