@@ -216,7 +216,6 @@ class Trainer(ConfigReader):
             logger.debug('  score std: %s' % score_std)
             return -1 * score_mean
 
-        params_space = {}
         all_comb_num = 0
         for val in params.values():
             if all_comb_num == 0:

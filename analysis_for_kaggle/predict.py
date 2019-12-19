@@ -1,11 +1,9 @@
-import sys
 import os
+import sys
 import traceback
 from memory_profiler import profile
 import logging.config
 from logging import getLogger
-BASE_PATH = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(BASE_PATH)
 from modules.DataTranslater import DataTranslater
 from modules.Trainer import Trainer
 from modules.Outputer import Outputer
@@ -64,10 +62,11 @@ def main(config_path):
 
     logger.info('### WRITE PREDICT DATA')
     outputer_obj.write_predict_data()
-    return
+    return outputer_obj.get_predict_data()
 
 
 if __name__ == '__main__':
+    BASE_PATH = os.path.dirname(os.path.abspath(__file__))
     logging.config.fileConfig(
         f'{BASE_PATH}/configs/logging.conf',
         disable_existing_loggers=False)

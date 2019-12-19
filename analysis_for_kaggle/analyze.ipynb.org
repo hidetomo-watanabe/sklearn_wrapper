@@ -19,7 +19,6 @@
     "import sys\n",
     "import logging.config\n",
     "from logging import getLogger\n",
-    "sys.path.append('./modules')\n",
     "from modules.DataTranslater import DataTranslater\n",
     "from modules.Visualizer import Visualizer\n",
     "from modules.Trainer import Trainer\n",

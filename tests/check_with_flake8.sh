@@ -13,4 +13,4 @@ catch()
   fi
 }
 
-flake8_msg=$(flake8 analysis_for_kaggle/ --ignore E402,F821,F841)
+flake8_msg=$(flake8 . --ignore E402,F821,F841)
