@@ -9,13 +9,13 @@ def translate_honorific_title(train_df, test_df):
     #######################################
     train_values = []
     test_values = []
-    for i, val in enumerate(train_df['Name'].values):
+    for i, val in enumerate(train_df['Name'].to_numpy()):
         title = val.split(',')[1].split('.')[0].strip()
         if title in ['Mr', 'Mrs', 'Miss', 'Master']:
             train_values.append(title)
         else:
             train_values.append('Other')
-    for i, val in enumerate(test_df['Name'].values):
+    for i, val in enumerate(test_df['Name'].to_numpy()):
         title = val.split(',')[1].split('.')[0].strip()
         if title in ['Mr', 'Mrs', 'Miss', 'Master']:
             test_values.append(title)
@@ -37,9 +37,10 @@ def translate_age(train_df, test_df):
         t2m[key] = tmp.mean()[key]
     # age range
     for df in [train_df, test_df]:
-        for i, val in enumerate(df['Age'].values):
+        for i, val in enumerate(df['Age'].to_numpy()):
             if math.isnan(val):
-                df['Age'].values[i] = t2m[df['HonorificTitle'].values[i]]
+                df['Age'].to_numpy()[i] = \
+                    t2m[df['HonorificTitle'].to_numpy()[i]]
     return train_df, test_df
 
 
@@ -48,11 +49,11 @@ def translate_fare(train_df, test_df):
     # no fare => mean grouped by pclass
     #######################################
     for df in [train_df, test_df]:
-        for i, val in enumerate(df['Fare'].values):
+        for i, val in enumerate(df['Fare'].to_numpy()):
             if math.isnan(val):
-                df['Fare'].values[i] = \
+                df['Fare'].to_numpy()[i] = \
                     train_df.groupby('Pclass')['Fare'].mean()[
-                        df['Pclass'].values[i]]
+                        df['Pclass'].to_numpy()[i]]
     return train_df, test_df
 
 
@@ -65,9 +66,9 @@ def translate_familystatus(train_df, test_df):
     # categorize after
     #######################################
     # get family name
-    train_df['FamilyName'] = [''] * len(train_df['Name'].values)
-    for i, val in enumerate(train_df['Name'].values):
-        train_df['FamilyName'].values[i] = val.split(',')[0]
+    train_df['FamilyName'] = [''] * len(train_df['Name'].to_numpy())
+    for i, val in enumerate(train_df['Name'].to_numpy()):
+        train_df['FamilyName'].to_numpy()[i] = val.split(',')[0]
     # get family name => family status
     n2s = {}
     tmp = train_df.groupby('FamilyName')['Survived']
@@ -80,15 +81,15 @@ def translate_familystatus(train_df, test_df):
             n2s[key] = 2
     # main
     for df in [train_df, test_df]:
-        df['FamilyStatus'] = [0] * len(df['Name'].values)
-        for i, val in enumerate(df['Name'].values):
+        df['FamilyStatus'] = [0] * len(df['Name'].to_numpy())
+        for i, val in enumerate(df['Name'].to_numpy()):
             family_name = val.split(',')[0]
             # no family
-            if df['SibSp'].values[i] + df['Parch'].values[i] == 0:
+            if df['SibSp'].to_numpy()[i] + df['Parch'].to_numpy()[i] == 0:
                 continue
             # any family
             if family_name in n2s:
-                df['FamilyStatus'].values[i] = n2s[family_name]
+                df['FamilyStatus'].to_numpy()[i] = n2s[family_name]
         # del sibsp, parch
         del df['SibSp']
         del df['Parch']

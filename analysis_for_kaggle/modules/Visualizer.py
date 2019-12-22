@@ -31,7 +31,7 @@ class Visualizer(ConfigReader):
                 for pred_col in self.pred_cols:
                     logger.info('%s:' % pred_col)
                     for i, pred_val in enumerate(
-                        np.unique(pred_df[pred_col].values)
+                        np.unique(pred_df[pred_col].to_numpy())
                     ):
                         ax.hist(
                             train_df[pred_df[pred_col] == pred_val][key],

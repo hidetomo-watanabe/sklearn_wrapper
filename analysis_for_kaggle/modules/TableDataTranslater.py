@@ -164,9 +164,9 @@ class TableDataTranslater(CommonDataTranslater):
                 train_transed, test_transed, feature_names = \
                     self._categorize_ndarrays(
                         trans_category['model'],
-                        self.train_df[column].values,
-                        self.pred_df.values,
-                        self.test_df[column].values, column)
+                        self.train_df[column].to_numpy(),
+                        self.pred_df.to_numpy(),
+                        self.test_df[column].to_numpy(), column)
                 self.train_df = pd.merge(
                     self.train_df,
                     pd.DataFrame(train_transed, columns=feature_names),
@@ -210,14 +210,14 @@ class TableDataTranslater(CommonDataTranslater):
 
     def create_data_for_model(self):
         # Y_train
-        self.Y_train = self.pred_df.values
+        self.Y_train = self.pred_df.to_numpy()
         # X_train
         self.X_train = sp.csr_matrix(
-            self.train_df.drop(self.id_col, axis=1).values)
+            self.train_df.drop(self.id_col, axis=1).to_numpy())
         # X_test
-        self.test_ids = self.test_df[self.id_col].values
+        self.test_ids = self.test_df[self.id_col].to_numpy()
         self.X_test = sp.csr_matrix(
-            self.test_df.drop(self.id_col, axis=1).values)
+            self.test_df.drop(self.id_col, axis=1).to_numpy())
         # feature_columns
         self.feature_columns = []
         for key in self.train_df.keys():

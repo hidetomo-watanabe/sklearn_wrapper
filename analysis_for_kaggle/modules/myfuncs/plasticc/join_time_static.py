@@ -59,7 +59,7 @@ if __name__ == '__main__':
 
     logger.info('CREATE STAT')
     logger.info('GET OBJECT IDS')
-    object_ids = pd.read_csv(input_meta_filename)['object_id'].values
+    object_ids = pd.read_csv(input_meta_filename)['object_id'].to_numpy()
     # csvが大きすぎるため分割して処理
     logger.info('READ INPUT AND GROUPBY DIVIDEDLY')
     chunksize = 5000000
@@ -104,7 +104,7 @@ if __name__ == '__main__':
         if len(input_reader) > 1:
             r1 = input_reader[1]
             # r1の先頭のまたいだデータを追加
-            r0_last_id = r0['object_id'].values[-1]
+            r0_last_id = r0['object_id'].to_numpy()[-1]
             input_df_part = pd.concat(
                 [input_df_part, r1.loc[r1['object_id'] == r0_last_id]],
                 ignore_index=True)
@@ -116,7 +116,7 @@ if __name__ == '__main__':
             break
 
         # 次loop時に対象外にするID
-        before_last_id = input_df_part['object_id'].values[-1]
+        before_last_id = input_df_part['object_id'].to_numpy()[-1]
 
         # groupby
         grouped_df_part = input_df_part.groupby('object_id')

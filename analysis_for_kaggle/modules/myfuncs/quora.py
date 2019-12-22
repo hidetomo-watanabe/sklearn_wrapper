@@ -9,8 +9,8 @@ def translate_text2seq(train_df, test_df):
     maxlen = 100
     max_features = 50000
 
-    text_train = train_df['question_text'].fillna('dieter').values
-    text_test = test_df['question_text'].fillna('dieter').values
+    text_train = train_df['question_text'].fillna('dieter').to_numpy()
+    text_test = test_df['question_text'].fillna('dieter').to_numpy()
 
     tokenizer = text.Tokenizer(num_words=max_features)
     tokenizer.fit_on_texts(list(text_train) + list(text_test))

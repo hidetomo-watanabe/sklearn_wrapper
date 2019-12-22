@@ -252,7 +252,7 @@ class Trainer(ConfigReader):
                 data=[estimator.feature_importances_],
                 columns=self.feature_columns)
             feature_importances = feature_importances.iloc[
-                :, np.argsort(feature_importances.values[0])[::-1]]
+                :, np.argsort(feature_importances.to_numpy()[0])[::-1]]
             logger.info('feature importances:')
             display(feature_importances)
             logger.info('feature importances /sum:')

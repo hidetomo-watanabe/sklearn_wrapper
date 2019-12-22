@@ -50,16 +50,16 @@ class ImageDataTranslater(CommonDataTranslater):
         pred_df = self.pred_df
         img_path_col = img_config['img_path']
         # Y_train
-        self.Y_train = pred_df.values
+        self.Y_train = pred_df.to_numpy()
         # X_train
         self.X_train = []
-        for img_path in train_df[img_path_col].values:
+        for img_path in train_df[img_path_col].to_numpy():
             self.X_train.append(_translate_image2array(img_path))
         self.X_train = np.array(self.X_train)
         # X_test
-        self.test_ids = test_df[self.id_col].values
+        self.test_ids = test_df[self.id_col].to_numpy()
         self.X_test = []
-        for img_path in test_df[img_path_col].values:
+        for img_path in test_df[img_path_col].to_numpy():
             self.X_test.append(_translate_image2array(img_path))
         self.X_test = np.array(self.X_test)
         # feature_columns

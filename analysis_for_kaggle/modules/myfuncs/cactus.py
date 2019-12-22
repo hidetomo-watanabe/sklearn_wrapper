@@ -44,7 +44,7 @@ if __name__ == '__main__':
     # train
     train_df = pd.read_csv(f'{DATA_PATH}/train.csv')
     img_paths = []
-    for img_path in tqdm(train_df['id'].values):
+    for img_path in tqdm(train_df['id'].to_numpy()):
         img_path = f'{DATA_PATH}/train/{img_path}'
         img_paths.append(img_path)
     train_df['img_path'] = img_paths
