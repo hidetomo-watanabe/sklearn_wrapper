@@ -50,9 +50,8 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "print('### DATA FOR VIEW')\n",
-    "translater_obj.create_data_for_view()\n",
-    "translater_obj.display_data()"
+    "print('### TRANSLATE')\n",
+    "translater_obj.calc_train_data()"
    ]
   },
   {
@@ -61,9 +60,8 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "print('### TRANSLATE DATA FOR VIEW')\n",
-    "translater_obj.translate_data_for_view()\n",
-    "translater_obj.display_data()"
+    "print('### WRITE TRAIN DATA')\n",
+    "translater_obj.write_train_data()"
    ]
   },
   {
@@ -72,18 +70,9 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "print('### WRITE DATA FOR VIEW')\n",
-    "translater_obj.write_data_for_view()"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": null,
-   "metadata": {},
-   "outputs": [],
-   "source": [
-    "print('### GET DATA FOR VIEW')\n",
-    "data_for_view = translater_obj.get_data_for_view()"
+    "print('### GET TRAIN DATA')\n",
+    "train_data = translater_obj.get_train_data()\n",
+    "post_processers = translater_obj.get_post_processers()"
    ]
   },
   {
@@ -103,10 +92,8 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "print('### VISUALIZE TRAIN DF HISTOGRAM')\n",
-    "visualizer_obj.visualize_train_df_histogram(\n",
-    "    data_for_view['train_df'].sample(frac=1, replace=False, random_state=42),\n",
-    "    data_for_view['pred_df'].sample(frac=1, replace=False, random_state=42))"
+    "print('### GET RAW DATA')\n",
+    "raw_data = translater_obj.get_raw_data()"
    ]
   },
   {
@@ -115,10 +102,11 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "print('### VISUALIZE TRAIN DF HEATMAP')\n",
-    "visualizer_obj.visualize_train_df_heatmap(\n",
-    "    data_for_view['train_df'].sample(frac=1, replace=False, random_state=42),\n",
-    "    data_for_view['pred_df'].sample(frac=1, replace=False, random_state=42))"
+    "print('### DISPLAY DATA')\n",
+    "visualizer_obj.display_data(\n",
+    "    raw_data['train_df'].sample(frac=1, replace=False, random_state=42),\n",
+    "    raw_data['test_df'].sample(frac=1, replace=False, random_state=42),\n",
+    "    raw_data['pred_df'].sample(frac=1, replace=False, random_state=42))"
    ]
   },
   {
@@ -127,10 +115,34 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "print('### VISUALIZE TRAIN DF SCATTER MATRIX')\n",
+    "print('### PLOT TRAIN HISTOGRAM')\n",
+    "visualizer_obj.plot_train_histogram(\n",
+    "    raw_data['train_df'].sample(frac=1, replace=False, random_state=42),\n",
+    "    raw_data['pred_df'].sample(frac=1, replace=False, random_state=42))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "print('### PLOT TRAIN HEATMAP')\n",
+    "visualizer_obj.plot_train_heatmap(\n",
+    "    raw_data['train_df'].sample(frac=1, replace=False, random_state=42),\n",
+    "    raw_data['pred_df'].sample(frac=1, replace=False, random_state=42))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "print('### TRAIN SCATTER MATRIX')\n",
     "import pandas as pd\n",
     "pd.plotting.scatter_matrix(\n",
-    "    data_for_view['train_df'].sample(frac=1, replace=False, random_state=42))"
+    "    raw_data['train_df'].sample(frac=1, replace=False, random_state=42))"
    ]
   },
   {
@@ -139,31 +151,10 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "print('### VISUALIZE TRAIN DF PROFILING')\n",
+    "print('### TRAIN PROFILING')\n",
     "import pandas_profiling\n",
     "pandas_profiling.ProfileReport(\n",
-    "    data_for_view['train_df'].sample(frac=1, replace=False, random_state=42))"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": null,
-   "metadata": {},
-   "outputs": [],
-   "source": [
-    "print('### DATA FOR MODEL')\n",
-    "translater_obj.create_data_for_model()"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": null,
-   "metadata": {},
-   "outputs": [],
-   "source": [
-    "print('### GET DATA FOR MODEL')\n",
-    "data_for_model = translater_obj.get_data_for_model()\n",
-    "post_processers = translater_obj.get_post_processers()"
+    "    raw_data['train_df'].sample(frac=1, replace=False, random_state=42))"
    ]
   },
   {
@@ -174,8 +165,8 @@
    "source": [
     "print('### VISUALIZE DECISION TREE')\n",
     "visualizer_obj.visualize_decision_tree(\n",
-    "    data_for_model['X_train'].toarray(), data_for_model['Y_train'],\n",
-    "    data_for_model['feature_columns'])"
+    "    train_data['X_train'].toarray(), train_data['Y_train'],\n",
+    "    train_data['feature_columns'])"
    ]
   },
   {
@@ -184,28 +175,7 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "print('### TRANSLATE DATA FOR MODEL')\n",
-    "translater_obj.translate_data_for_model()"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": null,
-   "metadata": {},
-   "outputs": [],
-   "source": [
-    "print('### GET DATA FOR MODEL')\n",
-    "data_for_model = translater_obj.get_data_for_model()\n",
-    "post_processers = translater_obj.get_post_processers()"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": null,
-   "metadata": {},
-   "outputs": [],
-   "source": [
-    "trainer_obj = Trainer(**data_for_model)\n",
+    "trainer_obj = Trainer(**train_data)\n",
     "trainer_obj.read_config_file(config_path)\n",
     "# trainer_obj.read_config_text(config_text)"
    ]
@@ -248,9 +218,9 @@
    "source": [
     "print('### VISUALIZE PARTIAL DEPENDENCE')\n",
     "from sklearn.inspection import plot_partial_dependence\n",
-    "for feature in data_for_model['feature_columns']:\n",
+    "for feature in train_data['feature_columns']:\n",
     "    plot_partial_dependence(\n",
-    "        estimator=estimator_data['estimator'], X=data_for_model['X_train'].toarray(),\n",
+    "        estimator=estimator_data['estimator'], X=train_data['X_train'].toarray(),\n",
     "        features=[feature], feature_names=[feature])"
    ]
   },
@@ -267,17 +237,17 @@
     "    model=estimator_data['estimator'], feature_perturbation='tree_path_dependent',\n",
     "    model_output='margin')\n",
     "shap_values = explainer.shap_values(\n",
-    "    X=data_for_model['X_train'].toarray(), y=data_for_model['Y_train'])\n",
+    "    X=train_data['X_train'].toarray(), y=train_data['Y_train'])\n",
     "shap.summary_plot(\n",
-    "    shap_values, data_for_model['X_train'].toarray(),\n",
-    "    feature_names=data_for_model['feature_columns'])\n",
+    "    shap_values, train_data['X_train'].toarray(),\n",
+    "    feature_names=train_data['feature_columns'])\n",
     "# shap.summary_plot(\n",
-    "    # shap_values, data_for_model['X_train'].toarray(),\n",
-    "    # feature_names=data_for_model['feature_columns'],\n",
+    "    # shap_values, train_data['X_train'].toarray(),\n",
+    "    # feature_names=train_data['feature_columns'],\n",
     "    # plot_type=\"bar\")\n",
     "shap.force_plot(\n",
     "    base_value=explainer.expected_value, shap_values=shap_values,\n",
-    "    feature_names=data_for_model['feature_columns'])"
+    "    feature_names=train_data['feature_columns'])"
    ]
   },
   {
@@ -289,9 +259,9 @@
     "print('### VISUALIZE LEARNING CURVES')\n",
     "for config, estimator in estimator_data['single_estimators']:\n",
     "    title = 'learning curves: %s' % config['modelname']\n",
-    "    visualizer_obj.visualize_learning_curve(\n",
+    "    visualizer_obj.plot_learning_curve(\n",
     "        title, estimator,\n",
-    "        data_for_model['X_train'], data_for_model['Y_train'],\n",
+    "        train_data['X_train'], train_data['Y_train'],\n",
     "        estimator_data['scorer'], estimator_data['cv'])"
    ]
   },
@@ -302,7 +272,7 @@
    "outputs": [],
    "source": [
     "outputer_obj = Outputer(\n",
-    "    **data_for_model, **estimator_data, **post_processers)\n",
+    "    **train_data, **estimator_data, **post_processers)\n",
     "outputer_obj.read_config_file(config_path)\n",
     "# outputer_obj.read_config_text(config_text)"
    ]
@@ -326,8 +296,8 @@
    "source": [
     "print('### VISUALIZE Y TRAIN PRED DATA')\n",
     "pred_data = outputer_obj.get_predict_data()\n",
-    "visualizer_obj.visualize_y_train_pred_data(\n",
-    "    data_for_model['Y_train'], pred_data['Y_train_pred'].reshape(-1, 1))"
+    "visualizer_obj.plot_y_train_pred_data(\n",
+    "    train_data['Y_train'], pred_data['Y_train_pred'].reshape(-1, 1))"
    ]
   },
   {

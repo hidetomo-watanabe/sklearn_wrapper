@@ -35,37 +35,20 @@ class DataTranslater(ConfigReader):
         self.translater.__dict__.update(self.__dict__)
         return
 
-    def display_data(self):
-        self.translater.display_data()
-        return
+    def get_raw_data(self):
+        return self.translater.get_raw_data()
 
-    def get_data_for_view(self):
-        return self.translater.get_data_for_view()
+    def calc_train_data(self):
+        return self.translater.calc_train_data()
 
-    def create_data_for_view(self):
-        self.translater.create_data_for_view()
-        return
+    def write_train_data(self):
+        return self.translater.write_train_data()
 
-    def translate_data_for_view(self):
-        self.translater.translate_data_for_view()
-        return
-
-    def write_data_for_view(self):
-        return self.translater.write_data_for_view()
-
-    def get_data_for_model(self):
-        return self.translater.get_data_for_model()
+    def get_train_data(self):
+        return self.translater.get_train_data()
 
     def get_pre_processers(self):
         return self.translater.get_pre_processers()
 
     def get_post_processers(self):
         return self.translater.get_post_processers()
-
-    def create_data_for_model(self):
-        self.translater.create_data_for_model()
-        return
-
-    def translate_data_for_model(self):
-        self.translater.translate_data_for_model()
-        return

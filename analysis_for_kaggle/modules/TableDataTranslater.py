@@ -187,28 +187,7 @@ class TableDataTranslater(CommonDataTranslater):
                     self.test_df, columns=columns)
         return
 
-    def translate_data_for_view(self):
-        self._translate_adhoc()
-        self._delete_columns()
-        self._fill_missing_value_with_mean()
-        self._categorize()
-        return
-
-    def write_data_for_view(self):
-        savename = self.configs['pre'].get('savename')
-        if not savename:
-            logger.warning('NO SAVENAME')
-            return
-
-        savename += '.csv'
-        output_path = self.configs['data']['output_dir']
-        self.train_df.to_csv(
-            '%s/train_%s' % (output_path, savename), index=False)
-        self.test_df.to_csv(
-            '%s/test_%s' % (output_path, savename), index=False)
-        return savename
-
-    def create_data_for_model(self):
+    def _calc_base_train_data(self):
         # Y_train
         self.Y_train = self.pred_df.to_numpy()
         # X_train
@@ -360,7 +339,7 @@ class TableDataTranslater(CommonDataTranslater):
                 (np.zeros(X_train.shape[0]), np.ones(X_test.shape[0])),
                 axis=0))
             # fit
-            trainer_obj = Trainer(**self.get_data_for_model())
+            trainer_obj = Trainer(**self.get_train_data())
             trainer_obj.configs = self.configs
             estimator = trainer_obj.calc_single_model(
                 adversarial['scoring'], adversarial,
@@ -516,7 +495,13 @@ class TableDataTranslater(CommonDataTranslater):
                 raise Exception('NOT IMPLEMENTED')
         return
 
-    def translate_data_for_model(self):
+    def calc_train_data(self):
+        self._calc_raw_data()
+        self._translate_adhoc()
+        self._delete_columns()
+        self._fill_missing_value_with_mean()
+        self._categorize()
+        self._calc_base_train_data()
         self._normalize_x_data_for_model()
         self._normalize_y_data_for_model()
         self._reduce_dimension_of_data_for_model()

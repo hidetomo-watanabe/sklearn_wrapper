@@ -19,16 +19,7 @@ class ImageDataTranslater(CommonDataTranslater):
         self.kernel = kernel
         self.configs = {}
 
-    def translate_data_for_view(self):
-        pass
-
-    def write_data_for_view(self):
-        savename = self.configs['pre'].get('savename')
-        if savename:
-            logger.warning('WRITE DATA FOR VIEW OF IMAGE IS NOT IMPLEMENTED')
-            return
-
-    def create_data_for_model(self):
+    def _calc_base_train_data(self):
         img_config = self.configs['pre']['image']
 
         def _translate_image2array(img_path):
@@ -166,7 +157,9 @@ class ImageDataTranslater(CommonDataTranslater):
         self.Y_train = np.append(self.Y_train, self.org_Y_train, axis=0)
         return
 
-    def translate_data_for_model(self):
+    def calc_train_data(self):
+        self._calc_raw_data()
+        self._calc_base_train_data()
         self._normalize_data_for_model()
         self._augment_data_for_model_with_horizontal_flip()
         self._augment_data_for_model_with_rotation()

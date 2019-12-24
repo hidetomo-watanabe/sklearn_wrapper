@@ -20,7 +20,28 @@ class Visualizer(ConfigReader):
     def __init__(self):
         self.configs = {}
 
-    def visualize_train_df_histogram(self, train_df, pred_df):
+    def display_data(self, train_df, test_df, pred_df):
+        if self.configs['pre']['train_mode'] == 'clf':
+            logger.info('train pred counts')
+            for pred_col in self.pred_cols:
+                logger.info('%s:' % pred_col)
+                display(pred_df[pred_col].value_counts())
+                display(pred_df[pred_col].value_counts(normalize=True))
+        elif self.configs['pre']['train_mode'] == 'reg':
+            logger.info('train pred mean, std')
+            for pred_col in self.pred_cols:
+                logger.info('%s:' % pred_col)
+                display('mean: %f' % pred_df[pred_col].mean())
+                display('std: %f' % pred_df[pred_col].std())
+        else:
+            logger.error('TRAIN MODE SHOULD BE clf OR reg')
+            raise Exception('NOT IMPLEMENTED')
+        for label, df in [('train', train_df), ('test', test_df)]:
+            logger.info('%s:' % label)
+            display(df.head())
+            display(df.describe(include='all'))
+
+    def plot_train_histogram(self, train_df, pred_df):
         for key in train_df.keys():
             if key == self.id_col:
                 continue
@@ -42,7 +63,7 @@ class Visualizer(ConfigReader):
             ax.legend()
             plt.show()
 
-    def visualize_train_df_heatmap(self, train_df, pred_df):
+    def plot_train_heatmap(self, train_df, pred_df):
         plt.figure(figsize=(10, 10))
         sns.heatmap(
             pd.merge(
@@ -64,7 +85,7 @@ class Visualizer(ConfigReader):
                 class_names=list(set([str(i) for i in Y_train])))
             display(viz)
 
-    def visualize_learning_curve(
+    def plot_learning_curve(
         self, title, estimator, X_train, Y_train, scorer, cv, n_jobs=-1
     ):
         ylim = (0.7, 1.01)
@@ -99,9 +120,8 @@ class Visualizer(ConfigReader):
             label="Cross-validation score")
 
         plt.legend(loc="best")
-        return plt
 
-    def visualize_y_train_pred_data(self, Y_train, Y_train_pred):
+    def plot_y_train_pred_data(self, Y_train, Y_train_pred):
         g = sns.jointplot(Y_train, Y_train_pred, kind='kde')
         g.set_axis_labels('Y_train', 'Y_train_pred')
         g.fig.suptitle('estimator')

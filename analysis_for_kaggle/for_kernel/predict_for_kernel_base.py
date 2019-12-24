@@ -13,34 +13,23 @@ if __name__ == '__main__':
 
     logger.info('# START')
 
-    # data translate
+    # translate
     translater_obj = DataTranslater(kernel=True)
     translater_obj.read_config_text(config_text)
     translater_obj.get_translater()
 
-    logger.info('### DATA FOR VIEW')
-    translater_obj.create_data_for_view()
-    # translater_obj.display_data()
+    logger.info('### TRANSLATE')
+    translater_obj.calc_train_data()
 
-    logger.info('### TRANSLATE DATA FOR VIEW')
-    translater_obj.translate_data_for_view()
-    # translater_obj.display_data()
+    logger.info('### WRITE TRAIN DATA')
+    translater_obj.write_train_data()
 
-    logger.info('### WRITE DATA FOR VIEW')
-    translater_obj.write_data_for_view()
-
-    logger.info('### DATA FOR MODEL')
-    translater_obj.create_data_for_model()
-
-    logger.info('### TRANSLATE DATA FOR MODEL')
-    translater_obj.translate_data_for_model()
-
-    logger.info('### GET DATA FOR MODEL')
-    data_for_model = translater_obj.get_data_for_model()
+    logger.info('### GET TRAIN DATA')
+    train_data = translater_obj.get_train_data()
     post_processers = translater_obj.get_post_processers()
 
     # train
-    trainer_obj = Trainer(**data_for_model, kernel=True)
+    trainer_obj = Trainer(**train_data, kernel=True)
     trainer_obj.read_config_text(config_text)
 
     logger.info('### FIT')
@@ -54,7 +43,7 @@ if __name__ == '__main__':
 
     # output
     outputer_obj = Outputer(
-        **data_for_model, **estimator_data, **post_processers, kernel=True)
+        **train_data, **estimator_data, **post_processers, kernel=True)
     outputer_obj.read_config_text(config_text)
 
     logger.info('### PREDICT')
