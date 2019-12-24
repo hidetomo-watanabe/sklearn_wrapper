@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 from sklearn.tree import DecisionTreeClassifier
 from dtreeviz.trees import dtreeviz
 from sklearn.model_selection import learning_curve
@@ -72,6 +73,13 @@ class Visualizer(ConfigReader):
             yticklabels=feature_columns + self.pred_cols,
             fmt="1.2f", annot=True, lw=0.7, cmap='YlGnBu')
         ax.set_ylim(len(feature_columns + self.pred_cols), 0)
+
+    def plot_train_scatter_matrix(self, X_train, Y_train, feature_columns):
+        pd.plotting.scatter_matrix(
+            pd.DataFrame(
+                np.concatenate([X_train, Y_train], 1),
+                columns=(feature_columns + self.pred_cols)),
+            figsize=(10, 10))
 
     def visualize_decision_tree(
         self, X_train, Y_train, feature_names, max_depth=3

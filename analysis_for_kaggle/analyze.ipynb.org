@@ -139,8 +139,8 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "print('### PLOT TRAIN HEATMAP')\n",
-    "visualizer_obj.plot_train_heatmap(\n",
+    "print('### TRAIN SCATTER MATRIX')\n",
+    "visualizer_obj.plot_train_scatter_matrix(\n",
     "    train_data['X_train'].toarray(), train_data['Y_train'],\n",
     "    train_data['feature_columns'])"
    ]
@@ -151,10 +151,10 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "print('### TRAIN SCATTER MATRIX')\n",
-    "import pandas as pd\n",
-    "pd.plotting.scatter_matrix(\n",
-    "    raw_data['train_df'].sample(frac=1, replace=False, random_state=42))"
+    "print('### PLOT TRAIN HEATMAP')\n",
+    "visualizer_obj.plot_train_heatmap(\n",
+    "    train_data['X_train'].toarray(), train_data['Y_train'],\n",
+    "    train_data['feature_columns'])"
    ]
   },
   {
