@@ -115,6 +115,18 @@
    "metadata": {},
    "outputs": [],
    "source": [
+    "print('### TRAIN PROFILING')\n",
+    "import pandas_profiling\n",
+    "pandas_profiling.ProfileReport(\n",
+    "    raw_data['train_df'].sample(frac=1, replace=False, random_state=42))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
     "print('### PLOT TRAIN HISTOGRAM')\n",
     "visualizer_obj.plot_train_histogram(\n",
     "    raw_data['train_df'].sample(frac=1, replace=False, random_state=42),\n",
@@ -129,8 +141,8 @@
    "source": [
     "print('### PLOT TRAIN HEATMAP')\n",
     "visualizer_obj.plot_train_heatmap(\n",
-    "    raw_data['train_df'].sample(frac=1, replace=False, random_state=42),\n",
-    "    raw_data['pred_df'].sample(frac=1, replace=False, random_state=42))"
+    "    train_data['X_train'].toarray(), train_data['Y_train'],\n",
+    "    train_data['feature_columns'])"
    ]
   },
   {
@@ -142,18 +154,6 @@
     "print('### TRAIN SCATTER MATRIX')\n",
     "import pandas as pd\n",
     "pd.plotting.scatter_matrix(\n",
-    "    raw_data['train_df'].sample(frac=1, replace=False, random_state=42))"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": null,
-   "metadata": {},
-   "outputs": [],
-   "source": [
-    "print('### TRAIN PROFILING')\n",
-    "import pandas_profiling\n",
-    "pandas_profiling.ProfileReport(\n",
     "    raw_data['train_df'].sample(frac=1, replace=False, random_state=42))"
    ]
   },

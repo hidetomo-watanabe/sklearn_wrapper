@@ -1,5 +1,4 @@
 import numpy as np
-import pandas as pd
 from sklearn.tree import DecisionTreeClassifier
 from dtreeviz.trees import dtreeviz
 from sklearn.model_selection import learning_curve
@@ -65,14 +64,14 @@ class Visualizer(ConfigReader):
             ax.legend()
             plt.show()
 
-    def plot_train_heatmap(self, train_df, pred_df):
-        plt.figure(figsize=(10, 10))
+    def plot_train_heatmap(self, X_train, Y_train, feature_columns):
+        fig, ax = plt.subplots(figsize=(10, 10))
         sns.heatmap(
-            pd.merge(
-                train_df.drop(self.id_col, axis=1),
-                pred_df, left_index=True, right_index=True
-            ).corr(),
+            np.corrcoef(np.concatenate([X_train, Y_train], 1), rowvar=False),
+            xticklabels=feature_columns + self.pred_cols,
+            yticklabels=feature_columns + self.pred_cols,
             fmt="1.2f", annot=True, lw=0.7, cmap='YlGnBu')
+        ax.set_ylim(len(feature_columns + self.pred_cols), 0)
 
     def visualize_decision_tree(
         self, X_train, Y_train, feature_names, max_depth=3
