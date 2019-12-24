@@ -41,7 +41,7 @@ class Visualizer(ConfigReader):
             display(df.head())
             display(df.describe(include='all'))
 
-    def plot_train_histogram(self, train_df, pred_df):
+    def plot_train_pred_histogram(self, train_df, pred_df):
         for key in train_df.keys():
             if key == self.id_col:
                 continue
@@ -61,18 +61,26 @@ class Visualizer(ConfigReader):
                             bins=20, color=cmap(i), alpha=0.5,
                             label='%s: %d' % (pred_col, pred_val))
             elif self.configs['fit']['train_mode'] == 'reg':
-                ax.hist(train_df[key], bins=20, alpha=0.5)
+                ax.hist(train_df[key].dropna(), bins=20, alpha=0.5)
             ax.legend()
             plt.show()
 
-    def plot_train_heatmap(self, X_train, Y_train, feature_columns):
-        fig, ax = plt.subplots(figsize=(10, 10))
-        sns.heatmap(
-            np.corrcoef(np.concatenate([X_train, Y_train], 1), rowvar=False),
-            xticklabels=feature_columns + self.pred_cols,
-            yticklabels=feature_columns + self.pred_cols,
-            fmt="1.2f", annot=True, lw=0.7, cmap='YlGnBu')
-        ax.set_ylim(len(feature_columns + self.pred_cols), 0)
+    def plot_train_test_histogram(self, train_df, test_df):
+        for key in train_df.keys():
+            if key == self.id_col:
+                continue
+            ax = plt.subplot()
+            ax.set_title(key)
+            cmap = plt.get_cmap('tab10')
+            for i, (label, df) in enumerate(
+                [('train', train_df), ('test', test_df)]
+            ):
+                ax.hist(
+                    df[key].dropna(),
+                    bins=20, color=cmap(i), alpha=0.5,
+                    label='%s' % (label))
+            ax.legend()
+            plt.show()
 
     def plot_train_scatter_matrix(self, X_train, Y_train, feature_columns):
         pd.plotting.scatter_matrix(
@@ -80,6 +88,31 @@ class Visualizer(ConfigReader):
                 np.concatenate([X_train, Y_train], 1),
                 columns=(feature_columns + self.pred_cols)),
             figsize=(10, 10))
+
+    def plot_test_scatter_matrix(self, X_test, feature_columns):
+        pd.plotting.scatter_matrix(
+            pd.DataFrame(
+                X_test,
+                columns=feature_columns),
+            figsize=(10, 10))
+
+    def plot_train_corrcoef(self, X_train, Y_train, feature_columns):
+        fig, ax = plt.subplots(figsize=(10, 10))
+        sns.heatmap(
+            np.corrcoef(X_train, Y_train, rowvar=False),
+            xticklabels=feature_columns + self.pred_cols,
+            yticklabels=feature_columns + self.pred_cols,
+            fmt="1.2f", annot=True, lw=0.7, cmap='YlGnBu')
+        ax.set_ylim(len(feature_columns + self.pred_cols), 0)
+
+    def plot_test_corrcoef(self, X_test, feature_columns):
+        fig, ax = plt.subplots(figsize=(10, 10))
+        sns.heatmap(
+            np.corrcoef(X_test, rowvar=False),
+            xticklabels=feature_columns,
+            yticklabels=feature_columns,
+            fmt="1.2f", annot=True, lw=0.7, cmap='YlGnBu')
+        ax.set_ylim(len(feature_columns), 0)
 
     def visualize_decision_tree(
         self, X_train, Y_train, feature_names, max_depth=3

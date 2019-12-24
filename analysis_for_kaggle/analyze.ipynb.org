@@ -127,10 +127,34 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "print('### PLOT TRAIN HISTOGRAM')\n",
-    "visualizer_obj.plot_train_histogram(\n",
+    "print('### TEST PROFILING')\n",
+    "import pandas_profiling\n",
+    "pandas_profiling.ProfileReport(\n",
+    "    raw_data['test_df'].sample(frac=1, replace=False, random_state=42))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "print('### PLOT TRAIN PRED HISTOGRAM')\n",
+    "visualizer_obj.plot_train_pred_histogram(\n",
     "    raw_data['train_df'].sample(frac=1, replace=False, random_state=42),\n",
     "    raw_data['pred_df'].sample(frac=1, replace=False, random_state=42))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "print('### PLOT TRAIN TEST HISTOGRAM')\n",
+    "visualizer_obj.plot_train_test_histogram(\n",
+    "    raw_data['train_df'].sample(frac=1, replace=False, random_state=42),\n",
+    "    raw_data['test_df'].sample(frac=1, replace=False, random_state=42))"
    ]
   },
   {
@@ -151,9 +175,33 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "print('### PLOT TRAIN HEATMAP')\n",
-    "visualizer_obj.plot_train_heatmap(\n",
+    "print('### TEST SCATTER MATRIX')\n",
+    "visualizer_obj.plot_test_scatter_matrix(\n",
+    "    train_data['X_test'].toarray(),\n",
+    "    train_data['feature_columns'])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "print('### PLOT TRAIN CORRCOEF')\n",
+    "visualizer_obj.plot_train_corrcoef(\n",
     "    train_data['X_train'].toarray(), train_data['Y_train'],\n",
+    "    train_data['feature_columns'])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "print('### PLOT TEST CORRCOEF')\n",
+    "visualizer_obj.plot_test_corrcoef(\n",
+    "    train_data['X_test'].toarray(),\n",
     "    train_data['feature_columns'])"
    ]
   },
