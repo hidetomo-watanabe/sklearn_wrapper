@@ -48,14 +48,16 @@ class Visualizer(ConfigReader):
             ax = plt.subplot()
             ax.set_title(key)
             if self.configs['fit']['train_mode'] == 'clf':
-                cmap = plt.get_cmap("tab10")
+                cmap = plt.get_cmap('tab10')
                 for pred_col in self.pred_cols:
                     logger.info('%s:' % pred_col)
                     for i, pred_val in enumerate(
                         np.unique(pred_df[pred_col].to_numpy())
                     ):
                         ax.hist(
-                            train_df[pred_df[pred_col] == pred_val][key],
+                            train_df[
+                                pred_df[pred_col] == pred_val
+                            ][key].dropna(),
                             bins=20, color=cmap(i), alpha=0.5,
                             label='%s: %d' % (pred_col, pred_val))
             elif self.configs['fit']['train_mode'] == 'reg':
