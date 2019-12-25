@@ -6,27 +6,6 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "config_path = './configs/config.json'\n",
-    "config_text = {}"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": null,
-   "metadata": {},
-   "outputs": [],
-   "source": [
-    "import logging.config\n",
-    "from logging import getLogger\n",
-    "from modules.DataTranslater import DataTranslater\n",
-    "from modules.Visualizer import Visualizer\n",
-    "from modules.Trainer import Trainer\n",
-    "from modules.Outputer import Outputer\n",
-    "\n",
-    "# logging.config.fileConfig(\n",
-    "    # './configs/logging.conf', disable_existing_loggers=False)\n",
-    "logger = getLogger('predict')\n",
-    "\n",
     "%matplotlib inline\n",
     "%reload_ext autoreload\n",
     "%autoreload 2"
@@ -38,6 +17,35 @@
    "metadata": {},
    "outputs": [],
    "source": [
+    "import sys\n",
+    "from logging import getLogger, StreamHandler, INFO\n",
+    "# import logging.config\n",
+    "# logging.config.fileConfig(\n",
+    "    # './configs/logging.conf', disable_existing_loggers=False)\n",
+    "logger = getLogger('analyze')\n",
+    "handler = StreamHandler(sys.stdout)\n",
+    "handler.setLevel(INFO)\n",
+    "logger.addHandler(handler)\n",
+    "logger.setLevel(INFO)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "config_path = './configs/config.json'\n",
+    "config_text = {}"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from modules.DataTranslater import DataTranslater\n",
     "translater_obj = DataTranslater()\n",
     "translater_obj.read_config_file(config_path)\n",
     "# translater_obj.read_config_text(config_text)\n",
@@ -50,7 +58,7 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "print('### TRANSLATE')\n",
+    "logger.info('### TRANSLATE')\n",
     "translater_obj.calc_train_data()"
    ]
   },
@@ -81,6 +89,7 @@
    "metadata": {},
    "outputs": [],
    "source": [
+    "from modules.Visualizer import Visualizer\n",
     "visualizer_obj = Visualizer()\n",
     "visualizer_obj.read_config_file(config_path)\n",
     "# visualizer_obj.read_config_text(config_text)"
@@ -223,6 +232,7 @@
    "metadata": {},
    "outputs": [],
    "source": [
+    "from modules.Trainer import Trainer\n",
     "trainer_obj = Trainer(**train_data)\n",
     "trainer_obj.read_config_file(config_path)\n",
     "# trainer_obj.read_config_text(config_text)"
@@ -319,6 +329,7 @@
    "metadata": {},
    "outputs": [],
    "source": [
+    "from modules.Outputer import Outputer\n",
     "outputer_obj = Outputer(\n",
     "    **train_data, **estimator_data, **post_processers)\n",
     "outputer_obj.read_config_file(config_path)\n",

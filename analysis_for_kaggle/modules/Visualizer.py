@@ -9,7 +9,7 @@ from IPython.display import display
 from logging import getLogger
 
 
-logger = getLogger('predict').getChild('Visualizer')
+logger = getLogger('analyze').getChild('Visualizer')
 try:
     from .ConfigReader import ConfigReader
 except ImportError:
