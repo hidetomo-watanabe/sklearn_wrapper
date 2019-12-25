@@ -9,7 +9,7 @@ from IPython.display import display
 from logging import getLogger
 
 
-logger = getLogger('analyze').getChild('Visualizer')
+logger = getLogger('predict').getChild('Visualizer')
 try:
     from .ConfigReader import ConfigReader
 except ImportError:
@@ -50,7 +50,6 @@ class Visualizer(ConfigReader):
             if self.configs['fit']['train_mode'] == 'clf':
                 cmap = plt.get_cmap('tab10')
                 for pred_col in self.pred_cols:
-                    logger.info('%s:' % pred_col)
                     for i, pred_val in enumerate(
                         np.unique(pred_df[pred_col].to_numpy())
                     ):

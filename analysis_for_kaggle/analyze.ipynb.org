@@ -18,15 +18,12 @@
    "outputs": [],
    "source": [
     "import sys\n",
-    "from logging import getLogger, StreamHandler, INFO\n",
-    "# import logging.config\n",
-    "# logging.config.fileConfig(\n",
+    "from logging import getLogger, StreamHandler, Formatter, INFO\n",
+    "import logging.config\n",
+    "logging.config.fileConfig(\n",
+    "    './configs/logging.conf')\n",
     "    # './configs/logging.conf', disable_existing_loggers=False)\n",
-    "logger = getLogger('analyze')\n",
-    "handler = StreamHandler(sys.stdout)\n",
-    "handler.setLevel(INFO)\n",
-    "logger.addHandler(handler)\n",
-    "logger.setLevel(INFO)"
+    "logger = getLogger('predict')"
    ]
   },
   {

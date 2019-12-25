@@ -1,13 +1,13 @@
-from logging import getLogger, StreamHandler, Formatter, DEBUG
+from logging import getLogger, StreamHandler, Formatter, INFO
 
 if __name__ == '__main__':
     logger = getLogger('predict')
     handler = StreamHandler()
     formatter = Formatter(
         '[%(asctime)s][%(levelname)s](%(filename)s:%(lineno)s) %(message)s')
-    handler.setLevel(DEBUG)
+    handler.setLevel(INFO)
     handler.setFormatter(formatter)
-    logger.setLevel(DEBUG)
+    logger.setLevel(INFO)
     logger.addHandler(handler)
     logger.propagate = False
 
