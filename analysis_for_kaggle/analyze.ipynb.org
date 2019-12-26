@@ -169,6 +169,18 @@
    "metadata": {},
    "outputs": [],
    "source": [
+    "print('### TRAIN SHAPE')\n",
+    "print(train_data['X_train'].shape)\n",
+    "print('### TEST SHAPE')\n",
+    "print(train_data['X_test'].shape)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
     "print('### TRAIN SCATTER MATRIX')\n",
     "visualizer_obj.plot_train_scatter_matrix(\n",
     "    train_data['X_train'].toarray(), train_data['Y_train'],\n",
