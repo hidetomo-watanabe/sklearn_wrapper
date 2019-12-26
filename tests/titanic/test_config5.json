@@ -10,7 +10,7 @@
     "pre": {
         "train_mode": "clf",
         "y_pre": false,
-        "y_scaler": "standard",
+        "y_scaler": false,
         "table": {
             "adhoc": {
                 "myfunc": "titanic",
