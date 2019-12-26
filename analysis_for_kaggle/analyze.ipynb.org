@@ -65,7 +65,7 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "print('### WRITE TRAIN DATA')\n",
+    "logger.info('### WRITE TRAIN DATA')\n",
     "translater_obj.write_train_data()"
    ]
   },
@@ -75,7 +75,7 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "print('### GET TRAIN DATA')\n",
+    "logger.info('### GET TRAIN DATA')\n",
     "train_data = translater_obj.get_train_data()\n",
     "post_processers = translater_obj.get_post_processers()"
    ]
@@ -98,7 +98,7 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "print('### GET RAW DATA')\n",
+    "logger.info('### GET RAW DATA')\n",
     "raw_data = translater_obj.get_raw_data()"
    ]
   },
@@ -108,7 +108,7 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "print('### DISPLAY DATA')\n",
+    "logger.info('### DISPLAY DATA')\n",
     "visualizer_obj.display_data(\n",
     "    raw_data['train_df'].sample(frac=1, replace=False, random_state=42),\n",
     "    raw_data['test_df'].sample(frac=1, replace=False, random_state=42),\n",
@@ -121,7 +121,7 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "print('### TRAIN PROFILING')\n",
+    "logger.info('### TRAIN PROFILING')\n",
     "import pandas_profiling\n",
     "pandas_profiling.ProfileReport(\n",
     "    raw_data['train_df'].sample(frac=1, replace=False, random_state=42))"
@@ -133,7 +133,7 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "print('### TEST PROFILING')\n",
+    "logger.info('### TEST PROFILING')\n",
     "import pandas_profiling\n",
     "pandas_profiling.ProfileReport(\n",
     "    raw_data['test_df'].sample(frac=1, replace=False, random_state=42))"
@@ -145,7 +145,7 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "print('### PLOT TRAIN PRED HISTOGRAM')\n",
+    "logger.info('### PLOT TRAIN PRED HISTOGRAM')\n",
     "visualizer_obj.plot_train_pred_histogram(\n",
     "    raw_data['train_df'].sample(frac=1, replace=False, random_state=42),\n",
     "    raw_data['pred_df'].sample(frac=1, replace=False, random_state=42))"
@@ -157,7 +157,7 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "print('### PLOT TRAIN TEST HISTOGRAM')\n",
+    "logger.info('### PLOT TRAIN TEST HISTOGRAM')\n",
     "visualizer_obj.plot_train_test_histogram(\n",
     "    raw_data['train_df'].sample(frac=1, replace=False, random_state=42),\n",
     "    raw_data['test_df'].sample(frac=1, replace=False, random_state=42))"
@@ -169,10 +169,10 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "print('### TRAIN SHAPE')\n",
-    "print(train_data['X_train'].shape)\n",
-    "print('### TEST SHAPE')\n",
-    "print(train_data['X_test'].shape)"
+    "logger.info('### TRAIN SHAPE')\n",
+    "logger.info(train_data['X_train'].shape)\n",
+    "logger.info('### TEST SHAPE')\n",
+    "logger.info(train_data['X_test'].shape)"
    ]
   },
   {
@@ -181,7 +181,7 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "print('### TRAIN SCATTER MATRIX')\n",
+    "logger.info('### TRAIN SCATTER MATRIX')\n",
     "visualizer_obj.plot_train_scatter_matrix(\n",
     "    train_data['X_train'].toarray(), train_data['Y_train'],\n",
     "    train_data['feature_columns'])"
@@ -193,7 +193,7 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "print('### TEST SCATTER MATRIX')\n",
+    "logger.info('### TEST SCATTER MATRIX')\n",
     "visualizer_obj.plot_test_scatter_matrix(\n",
     "    train_data['X_test'].toarray(),\n",
     "    train_data['feature_columns'])"
@@ -205,7 +205,7 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "print('### PLOT TRAIN CORRCOEF')\n",
+    "logger.info('### PLOT TRAIN CORRCOEF')\n",
     "visualizer_obj.plot_train_corrcoef(\n",
     "    train_data['X_train'].toarray(), train_data['Y_train'],\n",
     "    train_data['feature_columns'])"
@@ -217,7 +217,7 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "print('### PLOT TEST CORRCOEF')\n",
+    "logger.info('### PLOT TEST CORRCOEF')\n",
     "visualizer_obj.plot_test_corrcoef(\n",
     "    train_data['X_test'].toarray(),\n",
     "    train_data['feature_columns'])"
@@ -229,7 +229,7 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "print('### VISUALIZE DECISION TREE')\n",
+    "logger.info('### VISUALIZE DECISION TREE')\n",
     "visualizer_obj.visualize_decision_tree(\n",
     "    train_data['X_train'].toarray(), train_data['Y_train'],\n",
     "    train_data['feature_columns'])"
@@ -253,7 +253,7 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "print('### FIT')\n",
+    "logger.info('### FIT')\n",
     "trainer_obj.calc_estimator()"
    ]
   },
@@ -263,7 +263,7 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "print('### WRITE ESTIMATOR DATA')\n",
+    "logger.info('### WRITE ESTIMATOR DATA')\n",
     "trainer_obj.write_estimator_data()"
    ]
   },
@@ -273,7 +273,7 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "print('### GET ESTIMATOR DATA')\n",
+    "logger.info('### GET ESTIMATOR DATA')\n",
     "estimator_data = trainer_obj.get_estimator_data()"
    ]
   },
@@ -283,7 +283,7 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "print('### VISUALIZE PARTIAL DEPENDENCE')\n",
+    "logger.info('### VISUALIZE PARTIAL DEPENDENCE')\n",
     "from sklearn.inspection import plot_partial_dependence\n",
     "for feature in train_data['feature_columns']:\n",
     "    plot_partial_dependence(\n",
@@ -297,7 +297,7 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "print('### VISUALIZE SHAP')\n",
+    "logger.info('### VISUALIZE SHAP')\n",
     "import shap\n",
     "shap.initjs()\n",
     "explainer = shap.TreeExplainer(\n",
@@ -323,7 +323,7 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "print('### VISUALIZE LEARNING CURVES')\n",
+    "logger.info('### VISUALIZE LEARNING CURVES')\n",
     "for config, estimator in estimator_data['single_estimators']:\n",
     "    title = 'learning curves: %s' % config['modelname']\n",
     "    visualizer_obj.plot_learning_curve(\n",
@@ -351,7 +351,7 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "print('### PREDICT')\n",
+    "logger.info('### PREDICT')\n",
     "outputer_obj.predict_y()\n",
     "outputer_obj.calc_predict_df()"
    ]
@@ -362,7 +362,7 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "print('### VISUALIZE Y TRAIN PRED DATA')\n",
+    "logger.info('### VISUALIZE Y TRAIN PRED DATA')\n",
     "pred_data = outputer_obj.get_predict_data()\n",
     "visualizer_obj.plot_y_train_pred_data(\n",
     "    train_data['Y_train'], pred_data['Y_train_pred'].reshape(-1, 1))"
@@ -374,7 +374,7 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "print('### WRITE PREDICT DATA')\n",
+    "logger.info('### WRITE PREDICT DATA')\n",
     "outputer_obj.write_predict_data()"
    ]
   }
