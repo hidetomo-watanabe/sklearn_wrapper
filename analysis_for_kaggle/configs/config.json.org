@@ -33,6 +33,13 @@
                 ],
                 "model": "onehot"
             },
+            "adhoc_ndarray": {
+                "myfunc": "hoge",
+                "methods": [
+                    "translate_hoge",
+                    "translate_fuga"
+                ]
+            },
             "x_scaler": "standard",
             "dimension": {
                 "n": 250,
