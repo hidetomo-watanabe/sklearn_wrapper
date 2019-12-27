@@ -34,22 +34,22 @@ class TableDataTranslater(CommonDataTranslater):
         self.kernel = kernel
         self.configs = {}
 
-    def _translate_adhoc(self):
-        trans_adhoc = self.configs['pre']['table'].get('adhoc')
-        if not trans_adhoc:
+    def _translate_adhoc_df(self):
+        trans_adhoc_df = self.configs['pre']['table'].get('adhoc_df')
+        if not trans_adhoc_df:
             return
 
         if not self.kernel:
             myfunc = importlib.import_module(
-                'modules.myfuncs.%s' % trans_adhoc['myfunc'])
+                'modules.myfuncs.%s' % trans_adhoc_df['myfunc'])
         # temp merge
         train_pred_df = pd.merge(
             self.train_df, self.pred_df, left_index=True, right_index=True)
-        for method_name in trans_adhoc['methods']:
-            logger.info('adhoc: %s' % method_name)
+        for method_name in trans_adhoc_df['methods']:
+            logger.info('adhoc_df: %s' % method_name)
             if not self.kernel:
                 method_name = 'myfunc.%s' % method_name
-            self.train_df, self.test_df = eval(
+            train_pred_df, self.test_df = eval(
                 method_name)(train_pred_df, self.test_df)
         # temp drop
         self.train_df = train_pred_df.drop(self.pred_cols, axis=1)
@@ -497,7 +497,7 @@ class TableDataTranslater(CommonDataTranslater):
 
     def calc_train_data(self):
         self._calc_raw_data()
-        self._translate_adhoc()
+        self._translate_adhoc_df()
         self._delete_columns()
         self._fill_missing_value_with_mean()
         self._categorize()

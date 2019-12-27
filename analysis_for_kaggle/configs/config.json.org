@@ -14,7 +14,7 @@
         "y_scaler": "standard",
         "savename": "tmp_file",
         "table": {
-            "adhoc": {
+            "adhoc_df": {
                 "myfunc": "hoge",
                 "methods": [
                     "translate_hoge",

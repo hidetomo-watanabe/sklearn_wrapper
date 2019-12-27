@@ -12,7 +12,7 @@
         "y_pre": false,
         "y_scaler": "standard",
         "table": {
-            "adhoc": {
+            "adhoc_df": {
                 "myfunc": "quora",
                 "methods": [
                     "translate_text2seq"

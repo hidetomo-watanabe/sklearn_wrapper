@@ -12,7 +12,7 @@
         "y_pre": false,
         "y_scaler": false,
         "table": {
-            "adhoc": {
+            "adhoc_df": {
                 "myfunc": "titanic",
                 "methods": [
                     "translate_honorific_title",

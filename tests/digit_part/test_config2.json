@@ -12,7 +12,7 @@
         "y_pre": false,
         "y_scaler": false,
         "table": {
-            "adhoc": {
+            "adhoc_df": {
                 "myfunc": "digit",
                 "methods": [
                     "add_image_id"

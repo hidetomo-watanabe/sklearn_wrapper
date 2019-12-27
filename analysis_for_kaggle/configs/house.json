@@ -12,7 +12,7 @@
         "y_pre": "log",
         "y_scaler": "standard",
         "table": {
-            "adhoc": false,
+            "adhoc_df": false,
             "del": [
             ],
             "missing": true,

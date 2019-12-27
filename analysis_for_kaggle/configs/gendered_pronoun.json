@@ -13,7 +13,7 @@
         "y_pre": false,
         "y_scaler": "standard",
         "table": {
-            "adhoc": {
+            "adhoc_df": {
                 "myfunc": "gendered_pronoun",
                 "methods": [
                     "rename_columns",

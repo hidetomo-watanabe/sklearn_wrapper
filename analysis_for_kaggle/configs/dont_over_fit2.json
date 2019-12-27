@@ -13,7 +13,7 @@
         "y_pre": false,
         "y_scaler": "standard",
         "table": {
-            "adhoc": {
+            "adhoc_df": {
                 "myfunc": "dont_over_fit2",
                 "methods": [
                     "translate_target2int"

@@ -14,7 +14,7 @@
         "y_scaler": false,
         "savename": false,
         "table": {
-            "adhoc": {
+            "adhoc_df": {
                 "myfunc": "cat_in_dat",
                 "methods": [
                     "add_ord_1_label",

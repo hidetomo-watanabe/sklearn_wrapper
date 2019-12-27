@@ -44,8 +44,8 @@ if __name__ == '__main__':
         config_json = json.loads(f.read())
     adhocs = []
     if config_json['data']['type'] == 'table':
-        if config_json['pre']['table'].get('adhoc'):
-            adhocs.append(config_json['pre']['table']['adhoc']['myfunc'])
+        if config_json['pre']['table'].get('adhoc_df'):
+            adhocs.append(config_json['pre']['table']['adhoc_df']['myfunc'])
     if config_json['fit'].get('myfunc'):
         adhocs.append(config_json['fit']['myfunc'])
     if config_json['post'].get('myfunc'):
