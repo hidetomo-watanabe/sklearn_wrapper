@@ -330,8 +330,6 @@ class Trainer(ConfigReader):
             self.configs['fit']['scoring'])
         myfunc = self.configs['fit'].get('myfunc')
         self.classes = None
-        logger.info('X train shape: %s' % str(self.X_train.shape))
-        logger.info('Y train shape: %s' % str(self.Y_train.shape))
 
         # single
         if len(model_configs) == 1:

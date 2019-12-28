@@ -57,6 +57,9 @@ class CommonDataTranslater(ConfigReader):
         return savename
 
     def get_train_data(self):
+        logger.info(f'X_train shape: {self.X_train.shape}')
+        logger.info(f'Y_train shape: {self.Y_train.shape}')
+        logger.info(f'X_test shape: {self.X_test.shape}')
         output = {
             'feature_columns': self.feature_columns,
             'test_ids': self.test_ids,
