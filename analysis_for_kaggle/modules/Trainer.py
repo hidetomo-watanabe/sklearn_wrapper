@@ -221,22 +221,25 @@ class Trainer(ConfigReader):
             if all_comb_num == 0:
                 all_comb_num = 1
             all_comb_num *= len(val)
-        if not n_trials:
-            n_trials = 0
-        n_trials = max(n_trials, all_comb_num)
-        logger.info(f'n_trials: {n_trials}')
-
         # no search
-        if n_trials == 0:
-            return {}
-        elif n_trials == 1:
-            single_param = {}
-            for key, val in params.items():
-                single_param[key] = val[0]
-            return single_param
-        elif n_trials < 0:
+        if all_comb_num in [0, 1]:
+            logger.info(f'no search because params pattern is {all_comb_num}')
+            if all_comb_num == 0:
+                return {}
+            elif all_comb_num == 1:
+                single_param = {}
+                for key, val in params.items():
+                    single_param[key] = val[0]
+                return single_param
+
+        if n_trials:
+            n_trials = min(n_trials, all_comb_num)
+        elif n_trials != 0:
+            n_trials = all_comb_num
+        if n_trials < 0:
             logger.error(f'N_TRIALS SHOULD BE LARGER THAN 0: {n_trials}')
             raise Exception('ILLEGAL VALUE')
+        logger.info(f'n_trials: {n_trials}')
 
         study = optuna.create_study()
         study.optimize(_objective, n_trials=n_trials, n_jobs=n_jobs)
