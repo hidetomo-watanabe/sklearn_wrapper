@@ -212,8 +212,8 @@ class TableDataTranslater(CommonDataTranslater):
             logger.info('adhoc_ndarray: %s' % method_name)
             if not self.kernel:
                 method_name = 'myfunc.%s' % method_name
-            self.X_train, self.X_test = eval(
-                method_name)(self.X_train, self.X_test)
+            self.X_train, self.X_test, self.feature_columns = eval(
+                method_name)(self.X_train, self.X_test, self.feature_columns)
         return
 
     def _to_sparse(self):
