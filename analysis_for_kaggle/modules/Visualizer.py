@@ -162,7 +162,7 @@ class Visualizer(ConfigReader):
 
         plt.legend(loc="best")
 
-    def plot_y_train_pred_data(self, Y_train, Y_train_pred):
-        g = sns.jointplot(Y_train, Y_train_pred, kind='kde')
-        g.set_axis_labels('Y_train', 'Y_train_pred')
+    def plot_confusion_matrix(self, Y_train, Y_train_pred):
+        g = sns.jointplot(Y_train_pred, Y_train, kind='kde')
+        g.set_axis_labels('Y_train_pred', 'Y_train')
         g.fig.suptitle('estimator')

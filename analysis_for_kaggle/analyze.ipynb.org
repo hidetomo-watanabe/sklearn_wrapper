@@ -283,7 +283,7 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "logger.info('### VISUALIZE PARTIAL DEPENDENCE')\n",
+    "logger.info('### PLOT PARTIAL DEPENDENCE')\n",
     "from sklearn.inspection import plot_partial_dependence\n",
     "for feature in train_data['feature_columns']:\n",
     "    plot_partial_dependence(\n",
@@ -297,7 +297,7 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "logger.info('### VISUALIZE SHAP')\n",
+    "logger.info('### SHAP')\n",
     "import shap\n",
     "shap.initjs()\n",
     "explainer = shap.TreeExplainer(\n",
@@ -323,7 +323,7 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "logger.info('### VISUALIZE LEARNING CURVES')\n",
+    "logger.info('### PLOT LEARNING CURVES')\n",
     "for config, estimator in estimator_data['single_estimators']:\n",
     "    title = 'learning curves: %s' % config['modelname']\n",
     "    visualizer_obj.plot_learning_curve(\n",
@@ -362,9 +362,9 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "logger.info('### VISUALIZE Y TRAIN PRED DATA')\n",
+    "logger.info('### PLOT CONFUSION MATRIX')\n",
     "pred_data = outputer_obj.get_predict_data()\n",
-    "visualizer_obj.plot_y_train_pred_data(\n",
+    "visualizer_obj.plot_confusion_matrix(\n",
     "    train_data['Y_train'], pred_data['Y_train_pred'].reshape(-1, 1))"
    ]
   },

@@ -7,6 +7,7 @@ from sklearn.ensemble import VotingClassifier
 from heamy.dataset import Dataset
 from heamy.estimator import Classifier, Regressor
 from heamy.pipeline import PipeApply
+from sklearn.metrics import confusion_matrix
 from logging import getLogger
 
 
@@ -89,6 +90,9 @@ class Outputer(ConfigReader):
                 if hasattr(self.estimator, 'predict_proba'):
                     self.Y_pred_proba = self.estimator.predict_proba(
                         self.X_test)
+            logger.info(
+                f'confusion_matrix:'
+                f' \n{confusion_matrix(self.Y_train, self.Y_train_pred)}')
         # reg
         elif self.configs['fit']['train_mode'] == 'reg':
             # weighted_average reg
