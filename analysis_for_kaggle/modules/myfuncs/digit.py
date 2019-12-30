@@ -17,10 +17,8 @@ def translate_label2upper(Y_pred, Y_pred_proba):
 
 
 def create_keras_model():
-    # input_dim = self.X_train.shape[1]
     input_dim = 100
     n_hidden = 500
-    # output_dim = self.Y_train.shape[1]
     output_dim = 10
 
     model = Sequential()
@@ -32,7 +30,6 @@ def create_keras_model():
     model.add(Activation("linear"))
     optimizer = Adam(lr=0.001)
 
-    # compile model
     model.compile(
         loss="categorical_crossentropy",
         optimizer=optimizer)
