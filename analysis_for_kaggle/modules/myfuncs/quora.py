@@ -52,6 +52,8 @@ def translate_target2prediction(Y_pred, Y_pred_proba):
 def create_keras_model():
     maxlen = 100
     max_features = 50000
+    output_dim = 2
+    optimizer = 'adam'
 
     inp = Input(shape=(maxlen, ))
     x = Embedding(max_features, 100)(inp)
@@ -59,10 +61,10 @@ def create_keras_model():
     avg_pool = GlobalAveragePooling1D()(x)
     max_pool = GlobalMaxPooling1D()(x)
     conc = concatenate([avg_pool, max_pool])
-    outp = Dense(1, activation="sigmoid")(conc)
+    outp = Dense(output_dim, activation="sigmoid")(conc)
 
     model = Model(inputs=inp, outputs=outp)
     model.compile(
         loss='binary_crossentropy',
-        optimizer='adam', metrics=['accuracy'])
+        optimizer=optimizer, metrics=['accuracy'])
     return model

@@ -29,6 +29,7 @@ from heamy.dataset import Dataset
 from heamy.estimator import Classifier, Regressor
 from heamy.pipeline import ModelsPipeline
 from sklearn.metrics import get_scorer
+from keras.utils.np_utils import to_categorical
 import eli5
 from eli5.sklearn import PermutationImportance
 from IPython.display import display
@@ -426,8 +427,11 @@ class Trainer(ConfigReader):
         if not params:
             params = {}
 
-        # for warning
-        if model not in ['keras_clf', 'keras_reg']:
+        # Y_train
+        if model in ['keras_clf']:
+            Y_train = to_categorical(Y_train)
+        elif model not in ['keras_reg']:
+            # for warning
             if Y_train.ndim > 1 and Y_train.shape[1] == 1:
                 Y_train = Y_train.ravel()
 

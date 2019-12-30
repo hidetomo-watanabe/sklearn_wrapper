@@ -13,7 +13,7 @@ def create_keras_model():
     input_dim1 = 32
     input_dim2 = 32
     input_dim3 = 3
-    output_dim = 1
+    output_dim = 2
 
     vgg16_net = VGG16(
         weights='imagenet',
@@ -29,7 +29,6 @@ def create_keras_model():
     model.add(Dense(output_dim))
     model.add(Activation('sigmoid'))
 
-    # compile model
     model.compile(
         loss='binary_crossentropy',
         optimizer=Adam(lr=1e-5),

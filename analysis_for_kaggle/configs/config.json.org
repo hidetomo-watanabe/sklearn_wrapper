@@ -64,7 +64,7 @@
             },
             "undersampling": "random",
             "oversampling": "smote",
-            "reshape_for_keras": ["category", "lstm"]
+            "reshape_for_keras": "lstm"
         },
         "image": {
             "img_path": "img_path",

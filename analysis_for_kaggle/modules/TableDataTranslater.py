@@ -13,7 +13,6 @@ from xgboost import XGBClassifier
 from sklearn.ensemble import IsolationForest
 from imblearn.under_sampling import RandomUnderSampler
 from imblearn.over_sampling import RandomOverSampler, SMOTE
-from keras.utils.np_utils import to_categorical
 from IPython.display import display
 from logging import getLogger
 
@@ -485,30 +484,20 @@ class TableDataTranslater(CommonDataTranslater):
         return
 
     def _reshape_data_for_model_for_keras(self):
-        modes = self.configs['pre']['table'].get('reshape_for_keras')
-        if not modes:
+        mode = self.configs['pre']['table'].get('reshape_for_keras')
+        if not mode:
             return
 
-        logger.info('reshape for keras: %s' % modes)
-        # first, category
-        if 'category' in modes:
-            Y_train_onehot = to_categorical(self.Y_train)
-            self.Y_train = Y_train_onehot
-        for mode in modes:
-            if mode == 'category':
-                pass
-            elif mode == 'lstm':
-                self.X_train = self.X_train.reshape(*self.X_train.shape, 1)
-                self.X_test = self.X_test.reshape(*self.X_test.shape, 1)
-                if 'category' in modes:
-                    label_num = Y_train_onehot.shape[1]
-                    self.X_train = np.concatenate(
-                        [self.X_train] * label_num, 2)
-                    self.X_test = np.concatenate(
-                        [self.X_test] * label_num, 2)
-            else:
-                logger.error('NOT IMPLEMENTED RESHAPE FOR KERAS: %s' % mode)
-                raise Exception('NOT IMPLEMENTED')
+        logger.info('reshape for keras: %s' % mode)
+        if mode == 'lstm':
+            self.X_train = self.X_train.reshape(*self.X_train.shape, 1)
+            self.X_test = self.X_test.reshape(*self.X_test.shape, 1)
+            label_num = len(np.unique(self.Y_train))
+            self.X_train = np.concatenate([self.X_train] * label_num, 2)
+            self.X_test = np.concatenate([self.X_test] * label_num, 2)
+        else:
+            logger.error('NOT IMPLEMENTED RESHAPE FOR KERAS: %s' % mode)
+            raise Exception('NOT IMPLEMENTED')
         return
 
     def calc_train_data(self):

@@ -99,11 +99,9 @@ def translate_familystatus(train_df, test_df):
 
 
 def create_keras_model():
-    # input_dim = self.X_train.shape[1]
     input_dim = 7
     activation = 'relu'
-    # output_dim = self.Y_train.shape[1]
-    output_dim = 1
+    output_dim = 2
     optimizer = 'adam'
 
     model = Sequential()
@@ -111,7 +109,6 @@ def create_keras_model():
     model.add(Dense(10, activation=activation))
     model.add(Dense(output_dim, activation="softmax"))
 
-    # compile model
     model.compile(
         loss='binary_crossentropy',
         optimizer=optimizer, metrics=['accuracy'])
