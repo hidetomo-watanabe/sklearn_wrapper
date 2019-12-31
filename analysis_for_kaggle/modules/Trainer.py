@@ -421,8 +421,6 @@ class Trainer(ConfigReader):
         fit_params = model_config.get('fit_params')
         if not fit_params:
             fit_params = {}
-        if len(fit_params.keys()) > 0:
-            fit_params['eval_set'] = [[X_train, Y_train]]
         params = model_config.get('params')
         if not params:
             params = {}

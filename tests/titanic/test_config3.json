@@ -68,12 +68,11 @@
             {
                 "model": "keras_clf",
                 "modelname": "tmp",
-                "n_trials": 2,
                 "fit_params": {
+                    "epochs": 3,
+                    "batch_size": 50
                 },
                 "params": {
-                    "nb_epoch": [10, 30],
-                    "batch_size": [50]
                 }
             }
         ]

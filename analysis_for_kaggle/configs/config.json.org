@@ -204,6 +204,8 @@
                 "modelname": "tmp_model7",
                 "n_trials": 1,
                 "fit_params": {
+                    "epochs": 3,
+                    "batch_size": 50
                 },
                 "params": {
                 }

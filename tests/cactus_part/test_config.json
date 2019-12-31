@@ -41,6 +41,8 @@
                 "model": "keras_clf",
                 "modelname": "tmp_cactus",
                 "fit_params": {
+                    "epochs": 3,
+                    "batch_size": 50
                 },
                 "params": {
                 }
