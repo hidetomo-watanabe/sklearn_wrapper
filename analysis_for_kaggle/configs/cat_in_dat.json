@@ -2,7 +2,7 @@
     "data": {
         "train_path": "../input/cat_in_dat/train.csv",
         "test_path": "../input/cat_in_dat/test.csv",
-        "output_dir": "./outputs",
+        "output_dir": ".",
         "type": "table",
         "pred_cols": ["target"],
         "id_col": "id",
