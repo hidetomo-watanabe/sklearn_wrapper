@@ -348,6 +348,11 @@ class TableDataTranslater(CommonDataTranslater):
 
     def _extract_train_data_with_adversarial_validation(self):
         def _get_adversarial_preds(X_train, X_test, adversarial):
+            if adversarial.get('cv_select') == 'all_folds':
+                logger.error(
+                    'NOT IMPLEMENTED ADVERSARIAL VALIDATION WITH ALL FOLDS')
+                raise Exception('NOT IMPLEMENTED')
+
             # create data
             X_adv = sp.vstack((X_train, X_test), format='csr')
             Y_adv = sp.csr_matrix(np.concatenate(
@@ -356,9 +361,10 @@ class TableDataTranslater(CommonDataTranslater):
             # fit
             trainer_obj = Trainer(**self.get_train_data())
             trainer_obj.configs = self.configs
-            _, estimator = trainer_obj.calc_single_model(
+            _, estimators = trainer_obj.calc_single_estimators(
                 adversarial['scoring'], adversarial,
                 X_train=X_adv, Y_train=Y_adv)
+            estimator = estimators[0]
             if not hasattr(estimator, 'predict_proba'):
                 logger.error(
                     'NOT PREDICT_PROBA METHOD IN ADVERSARIAL ESTIMATOR')

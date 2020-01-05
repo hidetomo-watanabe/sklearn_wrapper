@@ -337,21 +337,23 @@ class Trainer(ConfigReader):
         single_scores = []
         self.single_estimators = []
         for i, config in enumerate(model_configs):
-            single_score, single_estimator = self.calc_single_model(
+            _scores, _estimators = self.calc_single_estimators(
                 self.scorer, config, cv, n_jobs,
                 keras_build_func=myfunc)
-            single_scores.append(single_score)
+            single_scores.extend(_scores)
             modelname = config.get('modelname')
             if not modelname:
                 modelname = f'tmp_model_{i}'
-            self.single_estimators.append((modelname, single_estimator))
+            for j, _estimator in enumerate(_estimators):
+                self.single_estimators.append(
+                    (f'{modelname}_{j}', _estimator))
 
         # ensemble
         if len(self.single_estimators) == 1:
             logger.info('no ensemble')
             self.estimator = self.single_estimators[0][1]
         else:
-            self.estimator = self.calc_ensemble_model(
+            self.estimator = self.calc_ensemble_estimator(
                 self.single_estimators, single_scores, n_jobs)
 
         # classes
@@ -396,7 +398,7 @@ class Trainer(ConfigReader):
         pseudo_Y_train = np.array(pseudo_Y_train)
         return pseudo_X_train, pseudo_Y_train
 
-    def calc_single_model(
+    def calc_single_estimators(
         self,
         scorer, model_config, cv=KFold(), n_jobs=-1,
         keras_build_func=None, X_train=None, Y_train=None
@@ -415,22 +417,21 @@ class Trainer(ConfigReader):
                 scores, estimators = self._get_cv_scores_models(
                     estimator, X_train, Y_train, scorer,
                     cv=1, fit_params=fit_params)
-                estimator = estimators[0]
-                score = scores[0]
-            elif cv_select == 'nearest_mean':
+            elif cv_select in ['nearest_mean', 'all_folds']:
                 scores, estimators = self._get_cv_scores_models(
                     estimator, X_train, Y_train, scorer,
                     cv=cv, fit_params=fit_params)
                 logger.info(f'cv model scores mean: {np.mean(scores)}')
                 logger.info(f'cv model scores std: {np.std(scores)}')
-                nearest_index \
-                    = np.abs(np.array(scores) - np.mean(scores)).argmin()
-                estimator = estimators[nearest_index]
-                score = scores[nearest_index]
+                if cv_select == 'nearest_mean':
+                    nearest_index \
+                        = np.abs(np.array(scores) - np.mean(scores)).argmin()
+                    scores = scores[nearest_index: nearest_index + 1]
+                    estimators = estimators[nearest_index: nearest_index + 1]
             else:
                 logger.error(f'NOT IMPLEMENTED CV SELECT: {cv_select}')
                 raise Exception('NOT IMPLEMENTED')
-            return score, estimator
+            return scores, estimators
 
         if isinstance(scorer, str):
             scorer = self._get_scorer_from_string(scorer)
@@ -478,9 +479,9 @@ class Trainer(ConfigReader):
 
         # fit
         logger.info('fit')
-        score, estimator = _fit(X_train, Y_train)
-        logger.info(f'score: {score}')
-        logger.info(f'estimator: {estimator}')
+        scores, estimators = _fit(X_train, Y_train)
+        logger.info(f'scores: {scores}')
+        logger.info(f'estimators: {estimators}')
         # pseudo
         pseudo_config = model_config.get('pseudo')
         if pseudo_config:
@@ -488,7 +489,11 @@ class Trainer(ConfigReader):
             if self.configs['fit']['train_mode'] == 'reg':
                 logger.error('NOT IMPLEMENTED PSEUDO LABELING WITH REGRESSION')
                 raise Exception('NOT IMPLEMENTED')
+            if cv_select == 'all_folds':
+                logger.error('NOT IMPLEMENTED PSEUDO LABELING WITH ALL FOLDS')
+                raise Exception('NOT IMPLEMENTED')
 
+            estimator = estimators[0]
             threshold = pseudo_config.get('threshold')
             if not threshold and int(threshold) != 0:
                 threshold = 0.8
@@ -503,13 +508,15 @@ class Trainer(ConfigReader):
             logger.info(
                 'with threshold %s, train data added %s => %s'
                 % (threshold, len(Y_train), len(new_Y_train)))
-            score, estimator = _fit(new_X_train, new_Y_train)
-            logger.info(f'score: {score}')
-            logger.info(f'estimator: {estimator}')
+            scores, estimators = _fit(new_X_train, new_Y_train)
+            logger.info(f'scores: {scores}')
+            logger.info(f'estimators: {estimators}')
 
         # importances
-        self._check_importances(model, estimator, X_train, Y_train)
-        return score, estimator
+        if cv_select == 'all_folds':
+            logger.warning('CHECK IMPORTANCE FOR ONLY FIRST ESTIMATOR')
+        self._check_importances(model, estimators[0], X_train, Y_train)
+        return scores, estimators
 
     def _get_voter(self, mode, estimators, weights=None, n_jobs=-1):
         if self.configs['fit']['train_mode'] == 'clf':
@@ -583,7 +590,7 @@ class Trainer(ConfigReader):
         stacker.probability = False
         return stacker
 
-    def calc_ensemble_model(
+    def calc_ensemble_estimator(
         self, single_estimators, single_scores, n_jobs=-1,
         X_train=None, Y_train=None
     ):
