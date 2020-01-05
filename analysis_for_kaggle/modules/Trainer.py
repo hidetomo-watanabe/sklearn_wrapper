@@ -392,6 +392,34 @@ class Trainer(ConfigReader):
         scorer, model_config, cv=KFold(), n_jobs=-1,
         keras_build_func=None, X_train=None, Y_train=None
     ):
+        def _fit(X_train, Y_train):
+            best_params = self._calc_best_params(
+                base_model, X_train, Y_train, params,
+                scorer, cv, n_jobs, fit_params, n_trials, multiclass)
+            logger.info('best params: %s' % best_params)
+            estimator = base_model
+            estimator.set_params(**best_params)
+            if multiclass:
+                estimator = multiclass(estimator=estimator, n_jobs=n_jobs)
+            if model_config.get('train_all'):
+                logger.info('get estimator with train_all')
+                scores, estimators = self._get_cv_scores_models(
+                    estimator, X_train, Y_train, scorer,
+                    cv=1, fit_params=fit_params)
+                estimator = estimators[0]
+                score = scores[0]
+            else:
+                logger.info('get estimator with nearest cv score mean')
+                scores, estimators = self._get_cv_scores_models(
+                    estimator, X_train, Y_train, scorer,
+                    cv=cv, fit_params=fit_params)
+                logger.info(f'cv model scores mean: {np.mean(scores)}')
+                nearest_index \
+                    = np.abs(np.array(scores) - np.mean(scores)).argmin()
+                estimator = estimators[nearest_index]
+                score = scores[nearest_index]
+            return estimator, score
+
         if isinstance(scorer, str):
             scorer = self._get_scorer_from_string(scorer)
         if not isinstance(X_train, np.ndarray):
@@ -433,38 +461,11 @@ class Trainer(ConfigReader):
             if Y_train.ndim > 1 and Y_train.shape[1] == 1:
                 Y_train = Y_train.ravel()
 
-        def _fit(X_train, Y_train):
-            best_params = self._calc_best_params(
-                base_model, X_train, Y_train, params,
-                scorer, cv, n_jobs, fit_params, n_trials, multiclass)
-            logger.info('best params: %s' % best_params)
-            estimator = base_model
-            estimator.set_params(**best_params)
-            if multiclass:
-                estimator = multiclass(estimator=estimator, n_jobs=n_jobs)
-            if model_config.get('train_all'):
-                logger.info('get estimator with train_all')
-                scores, estimators = self._get_cv_scores_models(
-                    estimator, X_train, Y_train, scorer,
-                    cv=1, fit_params=fit_params)
-                logger.info(f'model score: {scores[0]}')
-                estimator = estimators[0]
-            else:
-                logger.info('get estimator with nearest cv score mean')
-                scores, estimators = self._get_cv_scores_models(
-                    estimator, X_train, Y_train, scorer,
-                    cv=cv, fit_params=fit_params)
-                nearest_index \
-                    = np.abs(np.array(scores) - np.mean(scores)).argmin()
-                logger.info(f'selected model score mean: {np.mean(scores)}')
-                logger.info(f'selected model score: {scores[nearest_index]}')
-                estimator = estimators[nearest_index]
-            return estimator
-
         # fit
         logger.info('fit')
-        estimator = _fit(X_train, Y_train)
-        logger.info('estimator: %s' % estimator)
+        estimator, score = _fit(X_train, Y_train)
+        logger.info(f'estimator: {estimator}')
+        logger.info(f'score: {score}')
         # pseudo
         pseudo_config = model_config.get('pseudo')
         if pseudo_config:
@@ -487,8 +488,9 @@ class Trainer(ConfigReader):
             logger.info(
                 'with threshold %s, train data added %s => %s'
                 % (threshold, len(Y_train), len(new_Y_train)))
-            estimator = _fit(new_X_train, new_Y_train)
-            logger.info('estimator: %s' % estimator)
+            estimator, score = _fit(new_X_train, new_Y_train)
+            logger.info(f'estimator: {estimator}')
+            logger.info(f'score: {score}')
 
         # importances
         self._check_importances(model, estimator, X_train, Y_train)
