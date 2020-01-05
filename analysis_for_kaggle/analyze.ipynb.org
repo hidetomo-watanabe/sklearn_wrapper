@@ -312,8 +312,8 @@
    "outputs": [],
    "source": [
     "logger.info('### PLOT LEARNING CURVES')\n",
-    "for config, estimator in estimator_data['single_estimators']:\n",
-    "    title = 'learning curves: %s' % config['modelname']\n",
+    "for modelname, estimator in estimator_data['single_estimators']:\n",
+    "    title = 'learning curves: %s' % modelname\n",
     "    visualizer_obj.plot_learning_curve(\n",
     "        title, estimator,\n",
     "        train_data['X_train'], train_data['Y_train'],\n",
