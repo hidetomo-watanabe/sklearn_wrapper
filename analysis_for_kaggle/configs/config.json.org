@@ -92,7 +92,6 @@
             "mode": "stacking",
             "model": "log_reg",
             "modelname": "stacker",
-            "weights": [1, 1, 1, 1, 1, 1],
             "k": 10,
             "proportion": 0.2
         },

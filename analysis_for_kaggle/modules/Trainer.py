@@ -335,7 +335,7 @@ class Trainer(ConfigReader):
         # single
         if len(model_configs) == 1:
             logger.info('no ensemble')
-            self.estimator = self.calc_single_model(
+            self.estimator, _ = self.calc_single_model(
                 self.scorer, model_configs[0],
                 cv, n_jobs, keras_build_func=myfunc)
             self.single_estimators = [(model_configs[0], self.estimator)]
@@ -494,7 +494,7 @@ class Trainer(ConfigReader):
 
         # importances
         self._check_importances(model, estimator, X_train, Y_train)
-        return estimator
+        return estimator, score
 
     def _get_voter(self, mode, estimators, weights=None, n_jobs=-1):
         if self.configs['fit']['train_mode'] == 'clf':
@@ -584,11 +584,13 @@ class Trainer(ConfigReader):
         # single fit
         logger.info('single fit in ensemble')
         single_estimators = []
+        single_scores = []
         for config in model_configs:
-            single_estimator = self.calc_single_model(
+            single_estimator, single_score = self.calc_single_model(
                 self.scorer, config, cv, n_jobs,
                 keras_build_func=keras_build_func)
             single_estimators.append((config, single_estimator))
+            single_scores.append(single_score)
 
         # ensemble fit
         ensemble_config = self.configs['fit']['ensemble']
@@ -608,9 +610,11 @@ class Trainer(ConfigReader):
                 modelname += f'_{i}'
                 estimators.append((modelname, single_estimator))
 
+            single_scores = np.array(single_scores)
+            weights = single_scores / np.sum(single_scores)
+            logger.info(f'weights: {weights}')
             voter = self._get_voter(
-                ensemble_config['mode'], estimators,
-                ensemble_config.get('weights'), n_jobs)
+                ensemble_config['mode'], estimators, weights, n_jobs)
             voter.fit(X_train, Y_train.ravel())
             estimator = voter
         elif ensemble_config['mode'] in ['weighted', 'stacking', 'blending']:
