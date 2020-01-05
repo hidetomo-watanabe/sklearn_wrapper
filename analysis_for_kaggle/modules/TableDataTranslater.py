@@ -356,7 +356,7 @@ class TableDataTranslater(CommonDataTranslater):
             # fit
             trainer_obj = Trainer(**self.get_train_data())
             trainer_obj.configs = self.configs
-            estimator, _ = trainer_obj.calc_single_model(
+            _, estimator = trainer_obj.calc_single_model(
                 adversarial['scoring'], adversarial,
                 X_train=X_adv, Y_train=Y_adv)
             if not hasattr(estimator, 'predict_proba'):

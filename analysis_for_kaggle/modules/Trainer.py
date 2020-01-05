@@ -334,14 +334,17 @@ class Trainer(ConfigReader):
 
         # single
         logger.info('single fit')
-        self.single_estimators = []
         single_scores = []
-        for config in model_configs:
-            single_estimator, single_score = self.calc_single_model(
+        self.single_estimators = []
+        for i, config in enumerate(model_configs):
+            single_score, single_estimator = self.calc_single_model(
                 self.scorer, config, cv, n_jobs,
                 keras_build_func=myfunc)
-            self.single_estimators.append((config, single_estimator))
             single_scores.append(single_score)
+            modelname = config.get('modelname')
+            if not modelname:
+                modelname = f'tmp_model_{i}'
+            self.single_estimators.append((modelname, single_estimator))
 
         # ensemble
         if len(self.single_estimators) == 1:
@@ -427,7 +430,7 @@ class Trainer(ConfigReader):
             else:
                 logger.error(f'NOT IMPLEMENTED CV SELECT: {cv_select}')
                 raise Exception('NOT IMPLEMENTED')
-            return estimator, score
+            return score, estimator
 
         if isinstance(scorer, str):
             scorer = self._get_scorer_from_string(scorer)
@@ -475,9 +478,9 @@ class Trainer(ConfigReader):
 
         # fit
         logger.info('fit')
-        estimator, score = _fit(X_train, Y_train)
-        logger.info(f'estimator: {estimator}')
+        score, estimator = _fit(X_train, Y_train)
         logger.info(f'score: {score}')
+        logger.info(f'estimator: {estimator}')
         # pseudo
         pseudo_config = model_config.get('pseudo')
         if pseudo_config:
@@ -500,13 +503,13 @@ class Trainer(ConfigReader):
             logger.info(
                 'with threshold %s, train data added %s => %s'
                 % (threshold, len(Y_train), len(new_Y_train)))
-            estimator, score = _fit(new_X_train, new_Y_train)
-            logger.info(f'estimator: {estimator}')
+            score, estimator = _fit(new_X_train, new_Y_train)
             logger.info(f'score: {score}')
+            logger.info(f'estimator: {estimator}')
 
         # importances
         self._check_importances(model, estimator, X_train, Y_train)
-        return estimator, score
+        return score, estimator
 
     def _get_voter(self, mode, estimators, weights=None, n_jobs=-1):
         if self.configs['fit']['train_mode'] == 'clf':
@@ -533,10 +536,7 @@ class Trainer(ConfigReader):
             dataset = Dataset(
                 self.X_train.toarray(), self.Y_train, self.X_test.toarray())
         models = []
-        for i, (config, single_estimator) in enumerate(single_estimators):
-            modelname = config.get('modelname')
-            if not modelname:
-                modelname = f'tmp_model_{i}'
+        for modelname, single_estimator in single_estimators:
             # clf
             if self.configs['fit']['train_mode'] == 'clf':
                 models.append(
@@ -601,19 +601,11 @@ class Trainer(ConfigReader):
                     'NOT IMPLEMENTED REGRESSION AND VOTE')
                 raise Exception('NOT IMPLEMENTED')
 
-            estimators = []
-            for i, (config, single_estimator) in enumerate(single_estimators):
-                modelname = config.get('modelname')
-                if not modelname:
-                    modelname = 'tmp_model'
-                modelname += f'_{i}'
-                estimators.append((modelname, single_estimator))
-
             single_scores = np.array(single_scores)
             weights = single_scores / np.sum(single_scores)
             logger.info(f'weights: {weights}')
             voter = self._get_voter(
-                ensemble_config['mode'], estimators, weights, n_jobs)
+                ensemble_config['mode'], single_estimators, weights, n_jobs)
             voter.fit(X_train, Y_train.ravel())
             estimator = voter
         elif ensemble_config['mode'] in ['weighted', 'stacking', 'blending']:
@@ -642,12 +634,9 @@ class Trainer(ConfigReader):
             targets = self.single_estimators
         else:
             targets = self.single_estimators + [
-                ({'modelname': modelname}, self.estimator)
+                (modelname, self.estimator)
             ]
-        for config, estimator in targets:
-            modelname = config.get('modelname')
-            if not modelname:
-                modelname = 'tmp_model'
+        for modelname, estimator in targets:
             output_path = self.configs['data']['output_dir']
             if hasattr(estimator, 'save'):
                 estimator.save(
