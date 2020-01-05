@@ -100,7 +100,7 @@
             {
                 "model": "log_reg",
                 "modelname": "tmp_model1",
-                "train_all": true,
+                "cv_select": "train_all",
                 "n_trials": 1,
                 "fit_params": {
                 },

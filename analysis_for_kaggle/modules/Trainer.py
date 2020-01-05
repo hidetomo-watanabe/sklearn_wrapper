@@ -407,23 +407,26 @@ class Trainer(ConfigReader):
             estimator.set_params(**best_params)
             if multiclass:
                 estimator = multiclass(estimator=estimator, n_jobs=n_jobs)
-            if model_config.get('train_all'):
-                logger.info('get estimator with train_all')
+            logger.info(f'get estimator with cv_select: {cv_select}')
+            if cv_select == 'train_all':
                 scores, estimators = self._get_cv_scores_models(
                     estimator, X_train, Y_train, scorer,
                     cv=1, fit_params=fit_params)
                 estimator = estimators[0]
                 score = scores[0]
-            else:
-                logger.info('get estimator with nearest cv score mean')
+            elif cv_select == 'nearest_mean':
                 scores, estimators = self._get_cv_scores_models(
                     estimator, X_train, Y_train, scorer,
                     cv=cv, fit_params=fit_params)
                 logger.info(f'cv model scores mean: {np.mean(scores)}')
+                logger.info(f'cv model scores std: {np.std(scores)}')
                 nearest_index \
                     = np.abs(np.array(scores) - np.mean(scores)).argmin()
                 estimator = estimators[nearest_index]
                 score = scores[nearest_index]
+            else:
+                logger.error(f'NOT IMPLEMENTED CV SELECT: {cv_select}')
+                raise Exception('NOT IMPLEMENTED')
             return estimator, score
 
         if isinstance(scorer, str):
@@ -451,6 +454,9 @@ class Trainer(ConfigReader):
                 logger.error(
                     f'NOT IMPLEMENTED MULTICLASS: {multiclass}')
                 raise Exception('NOT IMPLEMENTED')
+        cv_select = model_config.get('cv_select')
+        if not cv_select:
+            cv_select = 'nearest_mean'
         n_trials = model_config.get('n_trials')
         fit_params = model_config.get('fit_params')
         if not fit_params:
