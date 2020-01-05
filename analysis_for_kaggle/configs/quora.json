@@ -38,8 +38,7 @@
             "model": "log_reg",
             "modelname": "submission",
             "k": 10,
-            "proportion": 0.2,
-            "seed": 111
+            "proportion": 0.2
         },
         "scoring": "f1",
         "single_models": [

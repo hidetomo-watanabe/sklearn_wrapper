@@ -550,11 +550,10 @@ class Trainer(ConfigReader):
         # stacking, blending
         if ensemble_config['mode'] == 'stacking':
             stack_dataset = pipeline.stack(
-                k=ensemble_config['k'], seed=ensemble_config['seed'])
+                k=ensemble_config['k'], seed=42)
         elif ensemble_config['mode'] == 'blending':
             stack_dataset = pipeline.blend(
-                proportion=ensemble_config['proportion'],
-                seed=ensemble_config['seed'])
+                proportion=ensemble_config['proportion'], seed=42)
         if self.configs['fit']['train_mode'] == 'clf':
             stacker = Classifier(
                 dataset=stack_dataset,

@@ -66,8 +66,7 @@
             "model": "log_reg",
             "modelname": "cat_in_dat",
             "k": 10,
-            "proportion": 0.2,
-            "seed": 111
+            "proportion": 0.2
         },
         "scoring": "roc_auc",
         "single_models": [

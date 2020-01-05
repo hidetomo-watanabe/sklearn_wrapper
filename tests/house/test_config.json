@@ -35,8 +35,7 @@
             "mode": "stacking",
             "model": "linear_reg",
             "modelname": "tmp_house",
-            "k": 10,
-            "seed": 111
+            "k": 10
         },
         "scoring": "neg_mean_squared_error",
         "single_models": [

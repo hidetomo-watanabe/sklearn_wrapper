@@ -94,8 +94,7 @@
             "modelname": "stacker",
             "weights": [1, 1, 1, 1, 1, 1],
             "k": 10,
-            "proportion": 0.2,
-            "seed": 111
+            "proportion": 0.2
         },
         "scoring": "accuracy",
         "single_models": [

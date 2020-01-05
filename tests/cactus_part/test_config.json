@@ -32,8 +32,7 @@
             "mode": "stacking",
             "model": "log_reg",
             "modelname": "tmp_cactus",
-            "k": 10,
-            "seed": 111
+            "k": 10
         },
         "scoring": "roc_auc",
         "single_models": [

@@ -49,8 +49,7 @@
             "mode": "stacking",
             "model": "log_reg",
             "modelname": "tmp_gp",
-            "k": 10,
-            "seed": 111
+            "k": 10
         },
         "scoring": "neg_log_loss",
         "single_models": [

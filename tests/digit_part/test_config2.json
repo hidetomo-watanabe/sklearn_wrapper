@@ -42,8 +42,7 @@
             "mode": "stacking",
             "model": "log_reg",
             "modelname": "tmp_digit2",
-            "k": 10,
-            "seed": 111
+            "k": 10
         },
         "scoring": "accuracy",
         "single_models": [

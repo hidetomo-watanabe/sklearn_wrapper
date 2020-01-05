@@ -47,8 +47,7 @@
             "mode": "stacking",
             "model": "log_reg",
             "modelname": "tmp_titanic6",
-            "k": 10,
-            "seed": 111
+            "k": 10
         },
         "scoring": "accuracy",
         "single_models": [
