@@ -333,17 +333,23 @@ class Trainer(ConfigReader):
         self.classes = None
 
         # single
-        if len(model_configs) == 1:
-            logger.info('no ensemble')
-            self.estimator, _ = self.calc_single_model(
-                self.scorer, model_configs[0],
-                cv, n_jobs, keras_build_func=myfunc)
-            self.single_estimators = [(model_configs[0], self.estimator)]
-        # ensemble
-        else:
-            self.estimator, self.single_estimators = self.calc_ensemble_model(
-                self.scorer, model_configs, cv, n_jobs,
+        logger.info('single fit')
+        self.single_estimators = []
+        single_scores = []
+        for config in model_configs:
+            single_estimator, single_score = self.calc_single_model(
+                self.scorer, config, cv, n_jobs,
                 keras_build_func=myfunc)
+            self.single_estimators.append((config, single_estimator))
+            single_scores.append(single_score)
+
+        # ensemble
+        if len(self.single_estimators) == 1:
+            logger.info('no ensemble')
+            self.estimator = self.single_estimators[0][1]
+        else:
+            self.estimator = self.calc_ensemble_model(
+                self.single_estimators, single_scores, n_jobs)
 
         # classes
         if self.configs['fit']['train_mode'] == 'clf':
@@ -572,27 +578,14 @@ class Trainer(ConfigReader):
         return stacker
 
     def calc_ensemble_model(
-        self,
-        scorer, model_configs, cv=KFold(), n_jobs=-1,
-        keras_build_func=None, X_train=None, Y_train=None
+        self, single_estimators, single_scores, n_jobs=-1,
+        X_train=None, Y_train=None
     ):
         if not isinstance(X_train, np.ndarray):
             X_train = self.X_train
         if not isinstance(Y_train, np.ndarray):
             Y_train = self.Y_train
 
-        # single fit
-        logger.info('single fit in ensemble')
-        single_estimators = []
-        single_scores = []
-        for config in model_configs:
-            single_estimator, single_score = self.calc_single_model(
-                self.scorer, config, cv, n_jobs,
-                keras_build_func=keras_build_func)
-            single_estimators.append((config, single_estimator))
-            single_scores.append(single_score)
-
-        # ensemble fit
         ensemble_config = self.configs['fit']['ensemble']
         logger.info('ensemble fit: %s' % ensemble_config['mode'])
         if ensemble_config['mode'] in ['average', 'vote']:
@@ -633,7 +626,7 @@ class Trainer(ConfigReader):
             logger.error(
                 'NOT IMPLEMENTED ENSEMBLE MODE: %s' % ensemble_config['mode'])
             raise Exception('NOT IMPLEMENTED')
-        return estimator, single_estimators
+        return estimator
 
     def write_estimator_data(self):
         modelname = self.configs['fit']['ensemble'].get('modelname')
