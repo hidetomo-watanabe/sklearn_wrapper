@@ -49,7 +49,7 @@ def translate_target2prediction(Y_pred, Y_pred_proba):
     return Y_pred, Y_pred_proba
 
 
-def create_keras_model():
+def create_nn_model():
     maxlen = 100
     max_features = 50000
     output_dim = 2

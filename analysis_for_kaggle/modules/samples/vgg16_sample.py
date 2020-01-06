@@ -4,7 +4,8 @@ from keras.applications import VGG16
 from keras.optimizers import Adam
 
 
-def create_keras_model():
+# keras
+def create_nn_model():
     input_dim1 = 32
     input_dim2 = 32
     input_dim3 = 3

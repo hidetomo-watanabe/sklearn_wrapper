@@ -64,16 +64,16 @@ class Trainer(ConfigReader):
         # kerasのスコープ対策として、インスタンス作成時に読み込み
         # keras使う時しか使わないので、evalで定義してエラー回避
         if self.kernel:
-            self.create_keras_model = eval('create_keras_model')
+            self.create_nn_model = eval('create_nn_model')
 
-    def _get_base_model(self, model, keras_build_func=None):
+    def _get_base_model(self, model, nn_func=None):
         if model in ['keras_clf', 'keras_reg']:
             if self.kernel:
-                create_keras_model = self.create_keras_model
+                create_nn_model = self.create_nn_model
             else:
                 myfunc = importlib.import_module(
-                    'modules.myfuncs.%s' % keras_build_func)
-                create_keras_model = myfunc.create_keras_model
+                    'modules.myfuncs.%s' % nn_func)
+                create_nn_model = myfunc.create_nn_model
 
         if model == 'log_reg':
             return LogisticRegression(solver='lbfgs')
@@ -136,9 +136,9 @@ class Trainer(ConfigReader):
         elif model == 'rgf_reg':
             return RGFRegressor()
         elif model == 'keras_clf':
-            return KerasClassifier(build_fn=create_keras_model)
+            return KerasClassifier(build_fn=create_nn_model)
         elif model == 'keras_reg':
-            return KerasRegressor(build_fn=create_keras_model)
+            return KerasRegressor(build_fn=create_nn_model)
         else:
             logger.error('NOT IMPLEMENTED BASE MODEL: %s' % model)
             raise Exception('NOT IMPLEMENTED')
@@ -339,7 +339,7 @@ class Trainer(ConfigReader):
         for i, config in enumerate(model_configs):
             _scores, _estimators = self.calc_single_estimators(
                 self.scorer, config, cv, n_jobs,
-                keras_build_func=myfunc)
+                nn_func=myfunc)
             single_scores.extend(_scores)
             modelname = config.get('modelname')
             if not modelname:
@@ -401,7 +401,7 @@ class Trainer(ConfigReader):
     def calc_single_estimators(
         self,
         scorer, model_config, cv=KFold(), n_jobs=-1,
-        keras_build_func=None, X_train=None, Y_train=None
+        nn_func=None, X_train=None, Y_train=None
     ):
         def _fit(X_train, Y_train):
             best_params = self._calc_best_params(
@@ -446,7 +446,7 @@ class Trainer(ConfigReader):
         modelname = model_config.get('modelname')
         if modelname:
             logger.info('modelname: %s' % modelname)
-        base_model = self._get_base_model(model, keras_build_func)
+        base_model = self._get_base_model(model, nn_func)
         multiclass = model_config.get('multiclass')
         if multiclass:
             logger.info('multiclass: %s' % multiclass)

@@ -4,7 +4,8 @@ from keras.layers.recurrent import LSTM
 from keras.optimizers import Adam
 
 
-def create_keras_model():
+# keras
+def create_nn_model():
     # input_dim = self.X_train.shape[1]
     input_dim = 100
     n_hidden = 500

@@ -98,7 +98,7 @@ def translate_familystatus(train_df, test_df):
     return train_df, test_df
 
 
-def create_keras_model():
+def create_nn_model():
     input_dim = 7
     activation = 'relu'
     output_dim = 2

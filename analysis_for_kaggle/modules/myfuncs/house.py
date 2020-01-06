@@ -2,7 +2,7 @@ from keras.models import Sequential
 from keras.layers.core import Dense
 
 
-def create_keras_model():
+def create_nn_model():
     input_dim = 100
     activation = 'relu'
     output_dim = 1

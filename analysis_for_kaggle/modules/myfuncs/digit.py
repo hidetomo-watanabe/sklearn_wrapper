@@ -16,7 +16,7 @@ def translate_label2upper(Y_pred, Y_pred_proba):
     return Y_pred, Y_pred_proba
 
 
-def create_keras_model():
+def create_nn_model():
     input_dim = 100
     n_hidden = 500
     output_dim = 10
