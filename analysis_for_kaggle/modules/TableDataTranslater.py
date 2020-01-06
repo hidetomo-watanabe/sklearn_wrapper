@@ -188,9 +188,11 @@ class TableDataTranslater(CommonDataTranslater):
 
     def _calc_base_train_data(self):
         self.Y_train = self.pred_df.to_numpy()
-        self.X_train = self.train_df.drop(self.id_col, axis=1).to_numpy()
+        self.X_train = self.train_df.drop(
+            self.id_col, axis=1).to_numpy().astype('float32')
         self.test_ids = self.test_df[self.id_col].to_numpy()
-        self.X_test = self.test_df.drop(self.id_col, axis=1).to_numpy()
+        self.X_test = self.test_df.drop(
+            self.id_col, axis=1).to_numpy().astype('float32')
         self.feature_columns = []
         for key in self.train_df.keys():
             if key == self.id_col:
