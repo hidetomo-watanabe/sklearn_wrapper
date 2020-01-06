@@ -166,7 +166,7 @@ class Outputer(ConfigReader):
                     'NOT MATCH DIMENSION OF Y_PRED_PROBA AND CLASSES')
 
         # post
-        fit_post = self.configs.get('post')
+        fit_post = self.configs['post']
         if fit_post:
             if not self.kernel:
                 myfunc = importlib.import_module(

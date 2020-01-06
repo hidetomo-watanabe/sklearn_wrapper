@@ -48,7 +48,7 @@ if __name__ == '__main__':
             adhocs.append(config_json['pre']['table']['adhoc_df']['myfunc'])
     if config_json['fit'].get('myfunc'):
         adhocs.append(config_json['fit']['myfunc'])
-    if config_json.get('post'):
+    if config_json['post']:
         adhocs.append(config_json['post']['myfunc'])
     adhocs = list(set(adhocs))
     for adhoc in adhocs:
