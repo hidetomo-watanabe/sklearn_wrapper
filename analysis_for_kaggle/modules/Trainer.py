@@ -23,6 +23,8 @@ from lightgbm import LGBMClassifier, LGBMRegressor
 from catboost import CatBoostClassifier, CatBoostRegressor
 from rgf.sklearn import RGFClassifier, RGFRegressor
 from keras.wrappers.scikit_learn import KerasClassifier, KerasRegressor
+from skorch import NeuralNetClassifier, NeuralNetRegressor
+import torch
 from sklearn.multiclass import OneVsOneClassifier, OneVsRestClassifier
 from sklearn.ensemble import VotingClassifier, VotingRegressor
 from heamy.dataset import Dataset
@@ -61,19 +63,20 @@ class Trainer(ConfigReader):
         self.X_test = X_test
         self.kernel = kernel
         self.configs = {}
-        # kerasのスコープ対策として、インスタンス作成時に読み込み
-        # keras使う時しか使わないので、evalで定義してエラー回避
+        # keras, torchのスコープ対策として、インスタンス作成時に読み込み
+        # keras, torch使う時しか使わないので、evalで定義してエラー回避
         if self.kernel:
             self.create_nn_model = eval('create_nn_model')
 
     def _get_base_model(self, model, nn_func=None):
-        if model in ['keras_clf', 'keras_reg']:
+        if model in ['keras_clf', 'keras_reg', 'torch_clf', 'torch_reg']:
             if self.kernel:
                 create_nn_model = self.create_nn_model
             else:
                 myfunc = importlib.import_module(
                     'modules.myfuncs.%s' % nn_func)
                 create_nn_model = myfunc.create_nn_model
+        device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
         if model == 'log_reg':
             return LogisticRegression(solver='lbfgs')
@@ -139,6 +142,12 @@ class Trainer(ConfigReader):
             return KerasClassifier(build_fn=create_nn_model)
         elif model == 'keras_reg':
             return KerasRegressor(build_fn=create_nn_model)
+        elif model == 'torch_clf':
+            return NeuralNetClassifier(
+                module=create_nn_model(), device=device, train_split=None)
+        elif model == 'torch_reg':
+            return NeuralNetRegressor(
+                module=create_nn_model(), device=device, train_split=None)
         else:
             logger.error('NOT IMPLEMENTED BASE MODEL: %s' % model)
             raise Exception('NOT IMPLEMENTED')
@@ -266,7 +275,9 @@ class Trainer(ConfigReader):
 
         # permutation importance
         if self.configs['fit'].get('permutation'):
-            if model not in ['keras_clf', 'keras_reg']:
+            if model not in [
+                'keras_clf', 'keras_reg', 'torch_clf', 'torch_reg'
+            ]:
                 perm = PermutationImportance(
                     estimator, random_state=42).fit(
                     X_train, Y_train)
@@ -472,7 +483,14 @@ class Trainer(ConfigReader):
         # Y_train
         if model in ['keras_clf']:
             Y_train = to_categorical(Y_train)
-        elif model not in ['keras_reg']:
+        elif model in ['torch_clf']:
+            if Y_train.ndim > 1 and Y_train.shape[1] == 1:
+                Y_train = Y_train.ravel()
+            else:
+                logger.error('NOT IMPLEMENTED MULTI TARGET TORCH CLF')
+                raise Exception('NOT IMPLEMENTED')
+            Y_train = torch.LongTensor(Y_train)
+        elif model not in ['keras_reg', 'torch_reg']:
             # for warning
             if Y_train.ndim > 1 and Y_train.shape[1] == 1:
                 Y_train = Y_train.ravel()
@@ -645,7 +663,11 @@ class Trainer(ConfigReader):
             ]
         for modelname, estimator in targets:
             output_path = self.configs['data']['output_dir']
-            if hasattr(estimator, 'save'):
+            if estimator.__class__ in [
+                NeuralNetClassifier, NeuralNetRegressor
+            ]:
+                logger.warning('NOT IMPLEMENTED TORCH MODEL SAVE')
+            elif hasattr(estimator, 'save'):
                 estimator.save(
                     '%s/%s.pickle' % (output_path, modelname))
             else:

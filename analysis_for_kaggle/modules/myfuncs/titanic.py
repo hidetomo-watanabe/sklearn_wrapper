@@ -1,6 +1,8 @@
 import math
 from keras.models import Sequential
 from keras.layers.core import Dense
+from torch import nn
+import torch.nn.functional as F
 
 
 def translate_honorific_title(train_df, test_df):
@@ -98,7 +100,7 @@ def translate_familystatus(train_df, test_df):
     return train_df, test_df
 
 
-def create_nn_model():
+def _create_nn_model():
     input_dim = 7
     activation = 'relu'
     output_dim = 2
@@ -114,3 +116,23 @@ def create_nn_model():
         optimizer=optimizer, metrics=['accuracy'])
     model.summary()
     return model
+
+
+def create_nn_model():
+    input_dim = 7
+
+    class Net(nn.Module):
+        def __init__(self):
+            super(Net, self).__init__()
+            self.fc1 = nn.Linear(input_dim, 270)
+            self.fc2 = nn.Linear(270, 2)
+
+        def forward(self, x):
+            x = self.fc1(x)
+            x = F.dropout(x, p=0.1)
+            x = F.relu(x)
+            x = self.fc2(x)
+            x = F.softmax(x, dim=-1)
+            return x
+
+    return Net

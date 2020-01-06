@@ -30,7 +30,7 @@ class TestPredict(unittest.TestCase):
         assert_frame_equal(
             result['Y_pred_proba_df'].round(5),
             pd.read_csv(f'{TEST_PATH}/titanic/proba_output2.csv'))
-        # keras
+        # torch
         result = predict.main(f'{TEST_PATH}/titanic/test_config3.json')
         # ensemble(stacking)
         result = predict.main(f'{TEST_PATH}/titanic/test_config4.json')

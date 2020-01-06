@@ -26,19 +26,21 @@
 - perceptron
   - Perceptron
 - sgd_clf
-  - SGDClasssifier
+  - SGDClassifier
 - dt_clf
-  - DecisionTreeClasssifier
+  - DecisionTreeClassifier
 - xgb_clf
-  - XGBClasssifier
+  - XGBClassifier
 - lgb_clf
-  - LGBMClasssifier
+  - LGBMClassifier
 - catb_clf
-  - CatBoostClasssifier
+  - CatBoostClassifier
 - rgf_clf
-  - RGFClasssifier
+  - RGFClassifier
 - keras_clf
-  - KerasClasssifier
+  - KerasClassifier
+- torch_clf
+  - NeuralNetClassifier
 
 ##### regression
 - linear_reg
@@ -71,6 +73,8 @@
   - RGFRegressor
 - keras_reg
   - KerasRegressor
+- torch_reg
+  - NeuralNetRegressor
 
 ### CUI flow
 - cp analysis_for_kaggle/configs/config.json.org configs/config.json

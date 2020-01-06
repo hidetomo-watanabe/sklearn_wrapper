@@ -65,13 +65,13 @@
         "scoring": "accuracy",
         "single_models": [
             {
-                "model": "keras_clf",
+                "model": "torch_clf",
                 "modelname": "tmp",
                 "fit_params": {
-                    "epochs": 3,
-                    "batch_size": 50
                 },
                 "params": {
+                    "max_epochs": [3],
+                    "batch_size": [50]
                 }
             }
         ]
