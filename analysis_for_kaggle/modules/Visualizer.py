@@ -20,7 +20,6 @@ class Visualizer(ConfigReader):
     def __init__(self):
         self.configs = {}
         self.hist_params = {
-            'bins': 20,
             'alpha': 0.5,
             'density': True,
             'stacked': True,
