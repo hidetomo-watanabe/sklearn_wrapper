@@ -19,6 +19,12 @@ except ImportError:
 class Visualizer(ConfigReader):
     def __init__(self):
         self.configs = {}
+        self.hist_params = {
+            'bins': 20,
+            'alpha': 0.5,
+            'density': True,
+            'stacked': True,
+        }
 
     def display_data(self, train_df, test_df, pred_df):
         if self.configs['pre']['train_mode'] == 'clf':
@@ -48,19 +54,19 @@ class Visualizer(ConfigReader):
             ax = plt.subplot()
             ax.set_title(key)
             if self.configs['fit']['train_mode'] == 'clf':
-                cmap = plt.get_cmap('tab10')
                 for pred_col in self.pred_cols:
+                    cmap = plt.get_cmap('tab10')
                     for i, pred_val in enumerate(
                         np.unique(pred_df[pred_col].to_numpy())
                     ):
                         ax.hist(
                             train_df[
                                 pred_df[pred_col] == pred_val
-                            ][key].dropna(),
-                            bins=20, color=cmap(i), alpha=0.5,
-                            label=f'{pred_col}: {pred_val}')
+                            ][key].dropna(), **self.hist_params,
+                            color=cmap(i), label=f'{pred_col}: {pred_val}')
             elif self.configs['fit']['train_mode'] == 'reg':
-                ax.hist(train_df[key].dropna(), bins=20, alpha=0.5)
+                ax.hist(
+                    train_df[key].dropna(), **self.hist_params)
             ax.legend()
             plt.show()
 
@@ -75,8 +81,8 @@ class Visualizer(ConfigReader):
                 [('train', train_df), ('test', test_df)]
             ):
                 ax.hist(
-                    df[key].dropna(),
-                    bins=20, color=cmap(i), alpha=0.5, label=f'{label}')
+                    df[key].dropna(), **self.hist_params,
+                    color=cmap(i), label=f'{label}')
             ax.legend()
             plt.show()
 
@@ -174,7 +180,8 @@ class Visualizer(ConfigReader):
             [('train', Y_train_pred), ('test', Y_pred)]
         ):
             ax.hist(
-                ndarray, bins=20, color=cmap(i), alpha=0.5, label=f'{label}')
+                ndarray, **self.hist_params,
+                color=cmap(i), label=f'{label}')
         ax.legend()
         plt.show()
 
@@ -188,6 +195,7 @@ class Visualizer(ConfigReader):
             [('train', Y_train_pred_proba), ('test', Y_pred_proba)]
         ):
             ax.hist(
-                ndarray, bins=20, color=cmap(i), alpha=0.5, label=f'{label}')
+                ndarray, **self.hist_params,
+                color=cmap(i), label=f'{label}')
         ax.legend()
         plt.show()
