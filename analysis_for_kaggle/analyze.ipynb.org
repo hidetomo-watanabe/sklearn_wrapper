@@ -145,8 +145,8 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "logger.info('### PLOT TRAIN PRED HISTOGRAM')\n",
-    "visualizer_obj.plot_train_pred_histogram(\n",
+    "logger.info('### PLOT X TRAIN HISTOGRAM WITH PRED GROUP')\n",
+    "visualizer_obj.plot_x_train_histogram_with_pred_group(\n",
     "    raw_data['train_df'].sample(frac=1, replace=False, random_state=42),\n",
     "    raw_data['pred_df'].sample(frac=1, replace=False, random_state=42))"
    ]
@@ -157,8 +157,8 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "logger.info('### PLOT TRAIN TEST HISTOGRAM')\n",
-    "visualizer_obj.plot_train_test_histogram(\n",
+    "logger.info('### PLOT X TRAIN TEST HISTOGRAM')\n",
+    "visualizer_obj.plot_x_train_test_histogram(\n",
     "    raw_data['train_df'].sample(frac=1, replace=False, random_state=42),\n",
     "    raw_data['test_df'].sample(frac=1, replace=False, random_state=42))"
    ]
@@ -350,10 +350,30 @@
    "metadata": {},
    "outputs": [],
    "source": [
+    "logger.info('### GET PREDICT DATA')\n",
+    "pred_data = outputer_obj.get_predict_data()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
     "logger.info('### PLOT CONFUSION MATRIX')\n",
-    "pred_data = outputer_obj.get_predict_data()\n",
     "visualizer_obj.plot_confusion_matrix(\n",
     "    train_data['Y_train'], pred_data['Y_train_pred'].reshape(-1, 1))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "logger.info('### PLOT Y TRAIN TEST PRED HISTOGRAM')\n",
+    "visualizer_obj.plot_y_train_test_pred_histogram(\n",
+    "    pred_data['Y_train_pred'].reshape(-1, 1), pred_data['Y_pred'].reshape(-1, 1))"
    ]
   },
   {

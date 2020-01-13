@@ -41,7 +41,7 @@ class Visualizer(ConfigReader):
             display(df.head())
             display(df.describe(include='all'))
 
-    def plot_train_pred_histogram(self, train_df, pred_df):
+    def plot_x_train_histogram_with_pred_group(self, train_df, pred_df):
         for key in train_df.keys():
             if key == self.id_col:
                 continue
@@ -58,13 +58,13 @@ class Visualizer(ConfigReader):
                                 pred_df[pred_col] == pred_val
                             ][key].dropna(),
                             bins=20, color=cmap(i), alpha=0.5,
-                            label='%s: %d' % (pred_col, pred_val))
+                            label=f'{pred_col}: {pred_val}')
             elif self.configs['fit']['train_mode'] == 'reg':
                 ax.hist(train_df[key].dropna(), bins=20, alpha=0.5)
             ax.legend()
             plt.show()
 
-    def plot_train_test_histogram(self, train_df, test_df):
+    def plot_x_train_test_histogram(self, train_df, test_df):
         for key in train_df.keys():
             if key == self.id_col:
                 continue
@@ -76,8 +76,7 @@ class Visualizer(ConfigReader):
             ):
                 ax.hist(
                     df[key].dropna(),
-                    bins=20, color=cmap(i), alpha=0.5,
-                    label='%s' % (label))
+                    bins=20, color=cmap(i), alpha=0.5, label=f'{label}')
             ax.legend()
             plt.show()
 
@@ -166,3 +165,15 @@ class Visualizer(ConfigReader):
         g = sns.jointplot(Y_train_pred, Y_train, kind='kde')
         g.set_axis_labels('Y_train_pred', 'Y_train')
         g.fig.suptitle('estimator')
+
+    def plot_y_train_test_pred_histogram(self, Y_train_pred, Y_pred):
+        ax = plt.subplot()
+        ax.set_title('Y_train_test_pred')
+        cmap = plt.get_cmap('tab10')
+        for i, (label, ndarray) in enumerate(
+            [('train', Y_train_pred), ('test', Y_pred)]
+        ):
+            ax.hist(
+                ndarray, bins=20, color=cmap(i), alpha=0.5, label=f'{label}')
+        ax.legend()
+        plt.show()
