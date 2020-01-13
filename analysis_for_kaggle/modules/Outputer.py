@@ -42,6 +42,7 @@ class Outputer(ConfigReader):
             'Y_pred': self.Y_pred,
             'Y_pred_proba': self.Y_pred_proba,
             'Y_train_pred': self.Y_train_pred,
+            'Y_train_pred_proba': self.Y_train_pred_proba,
             'Y_pred_df': self.Y_pred_df,
             'Y_pred_proba_df': self.Y_pred_proba_df,
         }
@@ -51,13 +52,16 @@ class Outputer(ConfigReader):
         self.Y_pred = None
         self.Y_pred_proba = None
         self.Y_train_pred = None
+        self.Y_train_pred_proba = None
         # clf
         if self.configs['fit']['train_mode'] == 'clf':
             # keras clf
             if self.estimator.__class__ in [Sequential]:
                 self.Y_pred = self.estimator.predict_classes(self.X_test)
-                self.Y_pred_proba = self.estimator.predict(self.X_test)
                 self.Y_train_pred = self.estimator.predict_classes(
+                    self.X_train)
+                self.Y_pred_proba = self.estimator.predict(self.X_test)
+                self.Y_train_pred_proba = self.estimator.predict(
                     self.X_train)
             # stacker clf
             elif self.estimator.__class__ in [Classifier]:
@@ -76,6 +80,11 @@ class Outputer(ConfigReader):
                     self.X_train.toarray())
                 self.estimator.dataset = dataset
                 self.Y_train_pred = self.estimator.predict()
+                # train proba
+                self.estimator.probability = True
+                # from heamy sorce code, to make Y_pred_proba multi dimension
+                self.estimator.problem = ''
+                self.Y_train_pred_proba = self.estimator.predict()
             # voter clf
             elif self.estimator.__class__ in [VotingClassifier]:
                 self.Y_pred = self.estimator.predict(self.X_test)
@@ -83,6 +92,8 @@ class Outputer(ConfigReader):
                 if self.estimator.voting == 'soft':
                     self.Y_pred_proba = self.estimator.predict_proba(
                         self.X_test)
+                    self.Y_train_pred_proba = self.estimator.predict_proba(
+                        self.X_train)
             # single clf
             else:
                 self.Y_pred = self.estimator.predict(self.X_test)
@@ -90,6 +101,8 @@ class Outputer(ConfigReader):
                 if hasattr(self.estimator, 'predict_proba'):
                     self.Y_pred_proba = self.estimator.predict_proba(
                         self.X_test)
+                    self.Y_train_pred_proba = self.estimator.predict_proba(
+                        self.X_train)
             logger.info(
                 f'confusion_matrix:'
                 f' \n{confusion_matrix(self.Y_train, self.Y_train_pred)}')
@@ -134,7 +147,9 @@ class Outputer(ConfigReader):
         else:
             logger.error('TRAIN MODE SHOULD BE clf OR reg')
             raise Exception('NOT IMPLEMENTED')
-        return self.Y_pred, self.Y_pred_proba, self.Y_train_pred
+        return \
+            self.Y_pred, self.Y_pred_proba, \
+            self.Y_train_pred, self.Y_train_pred_proba
 
     def calc_predict_df(self):
         self.Y_pred_df = None

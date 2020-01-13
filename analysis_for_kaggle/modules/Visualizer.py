@@ -177,3 +177,17 @@ class Visualizer(ConfigReader):
                 ndarray, bins=20, color=cmap(i), alpha=0.5, label=f'{label}')
         ax.legend()
         plt.show()
+
+    def plot_y_train_test_pred_proba_histogram(
+        self, Y_train_pred_proba, Y_pred_proba
+    ):
+        ax = plt.subplot()
+        ax.set_title('Y_train_test_pred_proba')
+        cmap = plt.get_cmap('tab10')
+        for i, (label, ndarray) in enumerate(
+            [('train', Y_train_pred_proba), ('test', Y_pred_proba)]
+        ):
+            ax.hist(
+                ndarray, bins=20, color=cmap(i), alpha=0.5, label=f'{label}')
+        ax.legend()
+        plt.show()
