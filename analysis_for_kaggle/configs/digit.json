@@ -33,14 +33,14 @@
     },
     "fit": {
         "train_mode": "clf",
-        "ensemble": {
+        "scoring": "accuracy",
+        "ensemble_model_config": {
             "mode": "stacking",
             "model": "log_reg",
             "modelname": "digit",
             "k": 10
         },
-        "scoring": "accuracy",
-        "single_models": [
+        "single_model_configs": [
             {
                 "model": "svc",
                 "modelname": "digit_svc",

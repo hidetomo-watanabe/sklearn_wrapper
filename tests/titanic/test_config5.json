@@ -43,12 +43,12 @@
     },
     "fit": {
         "train_mode": "clf",
-        "ensemble": {
+        "scoring": "accuracy",
+        "ensemble_model_config": {
             "mode": "vote",
             "modelname": "tmp_titanic5"
         },
-        "scoring": "accuracy",
-        "single_models": [
+        "single_model_configs": [
             {
                 "model": "gbdt_clf",
                 "modelname": "tmp1",

@@ -332,7 +332,7 @@ class Trainer(ConfigReader):
             return self.cv
 
         # configs
-        model_configs = self.configs['fit']['single_models']
+        model_configs = self.configs['fit']['single_model_configs']
         cv = _get_cv_from_config()
         n_jobs = self.configs['fit'].get('n_jobs')
         if not n_jobs:
@@ -617,7 +617,7 @@ class Trainer(ConfigReader):
         if not isinstance(Y_train, np.ndarray):
             Y_train = self.Y_train
 
-        ensemble_config = self.configs['fit']['ensemble']
+        ensemble_config = self.configs['fit']['ensemble_model_config']
         logger.info('ensemble fit: %s' % ensemble_config['mode'])
         if ensemble_config['mode'] in ['average', 'vote']:
             if ensemble_config['mode'] == 'vote' \
@@ -652,7 +652,8 @@ class Trainer(ConfigReader):
         return estimator
 
     def write_estimator_data(self):
-        modelname = self.configs['fit']['ensemble'].get('modelname')
+        modelname = \
+            self.configs['fit']['ensemble_model_config'].get('modelname')
         if not modelname:
             modelname = 'tmp_model'
         if len(self.single_estimators) == 1:

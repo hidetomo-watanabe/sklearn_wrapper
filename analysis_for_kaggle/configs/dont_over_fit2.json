@@ -34,7 +34,7 @@
             },
             "adversarial": {
                 "scoring": "accuracy",
-                "model": {
+                "model_config": {
                     "model": "g_mix",
                     "params": {
                         "n_components": [2]
@@ -54,19 +54,19 @@
     "fit": {
         "myfunc": false,
         "train_mode": "clf",
+        "scoring": "roc_auc",
         "cv": {
             "fold": "stratifiedk",
             "num": 5
         },
-        "ensemble": {
+        "ensemble_model_config": {
             "mode": "stacking",
             "model": "log_reg",
             "modelname": "stacker",
             "k": 10,
             "proportion": 0.2
         },
-        "scoring": "roc_auc",
-        "single_models": [
+        "single_model_configs": [
             {
                 "model": "lasso",
                 "modelname": "tmp",

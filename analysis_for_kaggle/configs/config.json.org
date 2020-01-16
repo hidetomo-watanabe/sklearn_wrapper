@@ -47,7 +47,7 @@
             },
             "adversarial": {
                 "scoring": "accuracy",
-                "model": {
+                "model_config": {
                     "model": "rf_clf",
                     "modelname": "tmp_adv",
                     "cv_select": "train_all",
@@ -87,20 +87,20 @@
     "fit": {
         "myfunc": "hoge",
         "train_mode": "clf",
+        "scoring": "accuracy",
         "cv": {
             "fold": "stratifiedk",
             "num": 3
         },
         "n_jobs": -1,
-        "ensemble": {
+        "ensemble_model_config": {
             "mode": "stacking",
             "model": "log_reg",
             "modelname": "stacker",
             "k": 10,
             "proportion": 0.2
         },
-        "scoring": "accuracy",
-        "single_models": [
+        "single_model_configs": [
             {
                 "model": "log_reg",
                 "modelname": "tmp_model1",

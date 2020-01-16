@@ -39,7 +39,7 @@
             "dimension": false,
             "adversarial": {
                 "scoring": "accuracy",
-                "model": {
+                "model_config": {
                     "model": "rf_clf",
                     "params": {
                         "n_estimators": [3, 5, 10],
@@ -54,18 +54,18 @@
     "fit": {
         "myfunc": "titanic",
         "train_mode": "clf",
+        "scoring": "accuracy",
         "cv": {
             "fold": "stratifiedk",
             "num": 3
         },
-        "ensemble": {
+        "ensemble_model_config": {
             "mode": "stacking",
             "model": "log_reg",
             "modelname": "tmp_titanic3",
             "k": 10
         },
-        "scoring": "accuracy",
-        "single_models": [
+        "single_model_configs": [
             {
                 "model": "torch_clf",
                 "modelname": "tmp",

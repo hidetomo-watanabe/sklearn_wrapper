@@ -43,14 +43,14 @@
     },
     "fit": {
         "train_mode": "clf",
-        "ensemble": {
+        "scoring": "accuracy",
+        "ensemble_model_config": {
             "mode": "stacking",
             "model": "log_reg",
             "modelname": "tmp_titanic6",
             "k": 10
         },
-        "scoring": "accuracy",
-        "single_models": [
+        "single_model_configs": [
             {
                 "model": "gbdt_clf",
                 "modelname": "tmp",

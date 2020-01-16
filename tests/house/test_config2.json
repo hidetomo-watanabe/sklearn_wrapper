@@ -32,14 +32,14 @@
     "fit": {
         "myfunc": "house",
         "train_mode": "reg",
-        "ensemble": {
+        "scoring": "neg_mean_squared_error",
+        "ensemble_model_config": {
             "mode": "stacking",
             "model": "linear_reg",
             "modelname": "tmp_house2",
             "k": 10
         },
-        "scoring": "neg_mean_squared_error",
-        "single_models": [
+        "single_model_configs": [
             {
                 "model": "keras_reg",
                 "modelname": "tmp",

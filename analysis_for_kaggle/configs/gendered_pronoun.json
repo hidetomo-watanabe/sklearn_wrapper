@@ -45,14 +45,14 @@
     "fit": {
         "myfunc": "gendred_pronoun",
         "train_mode": "clf",
-        "ensemble": {
+        "scoring": "neg_log_loss",
+        "ensemble_model_config": {
             "mode": "stacking",
             "model": "log_reg",
             "modelname": "tmp_gp",
             "k": 10
         },
-        "scoring": "neg_log_loss",
-        "single_models": [
+        "single_model_configs": [
             {
                 "model": "lgb_clf",
                 "multiclass": "onevsrest",

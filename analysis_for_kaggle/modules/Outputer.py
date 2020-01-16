@@ -196,7 +196,8 @@ class Outputer(ConfigReader):
         return self.Y_pred_df, self.Y_pred_proba_df
 
     def write_predict_data(self):
-        modelname = self.configs['fit']['ensemble'].get('modelname')
+        modelname = \
+            self.configs['fit']['ensemble_model_config'].get('modelname')
         if not modelname:
             modelname = 'tmp_model'
         filename = '%s.csv' % modelname
