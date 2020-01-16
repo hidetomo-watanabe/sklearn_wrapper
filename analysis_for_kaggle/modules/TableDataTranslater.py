@@ -350,7 +350,7 @@ class TableDataTranslater(CommonDataTranslater):
 
     def _extract_train_data_with_adversarial_validation(self):
         def _get_adversarial_preds(X_train, X_test, adversarial):
-            if adversarial.get('cv_select') == 'all_folds':
+            if adversarial['model'].get('cv_select') == 'all_folds':
                 logger.error(
                     'NOT IMPLEMENTED ADVERSARIAL VALIDATION WITH ALL FOLDS')
                 raise Exception('NOT IMPLEMENTED')
@@ -364,7 +364,7 @@ class TableDataTranslater(CommonDataTranslater):
             trainer_obj = Trainer(**self.get_train_data())
             trainer_obj.configs = self.configs
             _, estimators = trainer_obj.calc_single_estimators(
-                adversarial['scoring'], adversarial,
+                adversarial['scoring'], adversarial['model'],
                 X_train=X_adv, Y_train=Y_adv)
             estimator = estimators[0]
             if not hasattr(estimator, 'predict_proba'):

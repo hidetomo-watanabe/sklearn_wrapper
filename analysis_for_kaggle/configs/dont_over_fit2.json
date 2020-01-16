@@ -34,9 +34,11 @@
             },
             "adversarial": {
                 "scoring": "accuracy",
-                "model": "g_mix",
-                "params": {
-                    "n_components": [2]
+                "model": {
+                    "model": "g_mix",
+                    "params": {
+                        "n_components": [2]
+                    }
                 },
                 "threshold": 0.0,
                 "add_column": true

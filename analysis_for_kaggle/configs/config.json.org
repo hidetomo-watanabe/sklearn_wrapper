@@ -47,15 +47,17 @@
             },
             "adversarial": {
                 "scoring": "accuracy",
-                "model": "rf_clf",
-                "modelname": "tmp_adv",
-                "cv_select": "train_all",
-                "n_trials": 3,
-                "fit_params": {
-                },
-                "params": {
-                    "n_estimators": [3, 5, 10],
-                    "max_depth": [3, 5, 10]
+                "model": {
+                    "model": "rf_clf",
+                    "modelname": "tmp_adv",
+                    "cv_select": "train_all",
+                    "n_trials": 3,
+                    "fit_params": {
+                    },
+                    "params": {
+                        "n_estimators": [3, 5, 10],
+                        "max_depth": [3, 5, 10]
+                    }
                 },
                 "threshold": 0.5,
                 "add_column": false
