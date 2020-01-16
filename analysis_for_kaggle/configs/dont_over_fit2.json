@@ -33,8 +33,8 @@
                 "model": "rfe"
             },
             "adversarial": {
-                "model": "g_mix",
                 "scoring": "accuracy",
+                "model": "g_mix",
                 "params": {
                     "n_components": [2]
                 },
@@ -44,7 +44,7 @@
             "no_anomaly": {
                 "contamination": 0.1,
                 "add_column": false
-            }
+            },
             "undersampling": false,
             "oversampling": false
         }
@@ -54,7 +54,7 @@
         "train_mode": "clf",
         "cv": {
             "fold": "stratifiedk",
-            "num": 5,
+            "num": 5
         },
         "ensemble": {
             "mode": "stacking",
