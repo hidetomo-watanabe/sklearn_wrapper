@@ -25,7 +25,7 @@
                 "model": "onehot"
             },
             "x_scaler": "standard",
-            "dimension": {
+            "dimension_reduction": {
                 "n": 100,
                 "model": "pca"
             },

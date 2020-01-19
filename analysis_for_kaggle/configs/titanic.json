@@ -29,7 +29,7 @@
                 "model": "onehot_with_test"
             },
             "x_scaler": "standard",
-            "dimension": {
+            "dimension_reduction": {
                 "n": 750,
                 "model": "pca"
             }

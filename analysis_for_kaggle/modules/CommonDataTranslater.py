@@ -75,8 +75,9 @@ class CommonDataTranslater(ConfigReader):
             output['x_scaler'] = self.x_scaler
         if hasattr(self, 'y_scaler'):
             output['y_scaler'] = self.y_scaler
-        if hasattr(self, 'dimension_model'):
-            output['dimension_model'] = self.dimension_model
+        if hasattr(self, 'dimension_reduction_model'):
+            output['dimension_reduction_model'] = \
+                self.dimension_reduction_model
         return output
 
     def get_post_processers(self):

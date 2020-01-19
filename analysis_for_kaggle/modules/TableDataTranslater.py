@@ -272,7 +272,7 @@ class TableDataTranslater(CommonDataTranslater):
         return
 
     def _reduce_dimension_of_data_for_model(self):
-        di_config = self.configs['pre']['table'].get('dimension')
+        di_config = self.configs['pre']['table'].get('dimension_reduction')
         if not di_config:
             return
 
@@ -338,14 +338,15 @@ class TableDataTranslater(CommonDataTranslater):
                 estimator=XGBClassifier(random_state=42, n_jobs=-1))
             model_obj.fit(X_train, Y_train)
         else:
-            logger.error('NOT IMPLEMENTED DIMENSION MODEL: %s' % model)
+            logger.error(
+                'NOT IMPLEMENTED DIMENSION REDUCTION MODEL: %s' % model)
             raise Exception('NOT IMPLEMENTED')
 
         self.X_train = model_obj.transform(X_train)
         self.X_test = model_obj.transform(X_test)
         self.feature_columns = list(map(
             lambda x: '%s_%d' % (model, x), range(n)))
-        self.dimension_model = model_obj
+        self.dimension_reduction_model = model_obj
         return
 
     def _extract_train_data_with_adversarial_validation(self):
