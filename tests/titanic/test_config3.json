@@ -34,7 +34,7 @@
                 "model": "onehot"
             },
             "x_scaler": "standard",
-            "adversarial": {
+            "adversarial_validation": {
                 "scoring": "accuracy",
                 "model_config": {
                     "model": "rf_clf",

@@ -45,7 +45,7 @@
                 "n": 250,
                 "model": "pca"
             },
-            "adversarial": {
+            "adversarial_validation": {
                 "scoring": "accuracy",
                 "model_config": {
                     "model": "rf_clf",
@@ -62,7 +62,7 @@
                 "threshold": 0.5,
                 "add_column": false
             },
-            "no_anomaly": {
+            "no_anomaly_validation": {
                 "contamination": "auto",
                 "add_column": false
             },

@@ -31,7 +31,7 @@
                 "n": 280,
                 "model": "rfe"
             },
-            "adversarial": {
+            "adversarial_validation": {
                 "scoring": "accuracy",
                 "model_config": {
                     "model": "g_mix",
@@ -42,7 +42,7 @@
                 "threshold": 0.0,
                 "add_column": true
             },
-            "no_anomaly": {
+            "no_anomaly_validation": {
                 "contamination": 0.1,
                 "add_column": false
             }

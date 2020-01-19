@@ -381,7 +381,8 @@ class TableDataTranslater(CommonDataTranslater):
             adv_test_preds = estimator.predict_proba(X_test)[:, test_index]
             return adv_train_preds, adv_test_preds
 
-        adversarial = self.configs['pre']['table'].get('adversarial')
+        adversarial = \
+            self.configs['pre']['table'].get('adversarial_validation')
         if not adversarial:
             return
 
@@ -417,7 +418,7 @@ class TableDataTranslater(CommonDataTranslater):
         return
 
     def _extract_no_anomaly_train_data(self):
-        no_anomaly = self.configs['pre']['table'].get('no_anomaly')
+        no_anomaly = self.configs['pre']['table'].get('no_anomaly_validation')
         if not no_anomaly:
             return
 
