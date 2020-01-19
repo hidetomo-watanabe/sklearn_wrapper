@@ -10,9 +10,6 @@
     },
     "pre": {
         "train_mode": "clf",
-        "y_pre": false,
-        "y_scaler": false,
-        "savename": false,
         "table": {
             "adhoc_df": {
                 "myfunc": "cat_in_dat",
@@ -41,20 +38,12 @@
                 ],
                 "model": "onehot_with_test"
             },
-            "x_scaler": "standard",
-            "x_scaler": false,
-            "dimension": false,
-            "adversarial": false,
-            "no_anomaly": false,
-            "undersampling": false,
-            "oversampling": false,
-            "reshape_for_keras": false
+            "x_scaler": "standard"
         },
         "image": {
         }
     },
     "fit": {
-        "myfunc": false,
         "train_mode": "clf",
         "scoring": "roc_auc",
         "cv": {
@@ -72,7 +61,6 @@
         "single_model_configs": [
             {
                 "model": "log_reg",
-                "multiclass": false,
                 "modelname": "log_reg_1",
                 "cv_select": "train_all",
                 "n_trials": 1,
@@ -86,8 +74,7 @@
                     "n_jobs": [-1]
                 }
             }
-        ],
-        "permutation": false
+        ]
     },
     "post": {
         "myfunc": "cat_in_dat",

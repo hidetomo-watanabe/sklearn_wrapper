@@ -9,8 +9,6 @@
     },
     "pre": {
         "train_mode": "clf",
-        "y_pre": false,
-        "y_scaler": false,
         "image": {
             "img_path": "img_path",
             "resize": {

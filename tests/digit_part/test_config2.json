@@ -9,8 +9,6 @@
     },
     "pre": {
         "train_mode": "clf",
-        "y_pre": false,
-        "y_scaler": false,
         "table": {
             "adhoc_df": {
                 "myfunc": "digit",
@@ -31,7 +29,6 @@
                 "n": 100,
                 "model": "pca"
             },
-            "adversarial": false,
             "reshape_for_keras": "lstm"
         }
     },

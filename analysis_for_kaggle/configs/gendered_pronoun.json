@@ -10,7 +10,6 @@
     },
     "pre": {
         "train_mode": "clf",
-        "y_pre": false,
         "y_scaler": "standard",
         "table": {
             "adhoc_df": {
@@ -36,10 +35,7 @@
                 "model": "onehot"
             },
             "x_scaler": "standard",
-            "dimension": false,
-            "adversarial": false,
-            "undersampling": "random",
-            "oversampling": false
+            "undersampling": "random"
         }
     },
     "fit": {
@@ -66,8 +62,7 @@
                     "n_estimators": [5, 10, 20, 30, 50, 100]
                 }
             }
-        ],
-        "permutation": false
+        ]
     },
     "post": false,
     "notify": {

@@ -9,8 +9,6 @@
     },
     "pre": {
         "train_mode": "clf",
-        "y_pre": false,
-        "y_scaler": false,
         "table": {
             "adhoc_df": {
                 "myfunc": "titanic",
@@ -36,7 +34,6 @@
                 "model": "onehot"
             },
             "x_scaler": "standard",
-            "dimension": false,
             "adversarial": {
                 "scoring": "accuracy",
                 "model_config": {
