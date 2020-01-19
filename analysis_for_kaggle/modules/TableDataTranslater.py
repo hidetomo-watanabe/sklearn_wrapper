@@ -222,7 +222,7 @@ class TableDataTranslater(CommonDataTranslater):
         self.X_test = sp.csr_matrix(self.X_test)
         return
 
-    def _normalize_x_data_for_model(self):
+    def _normalize_x(self):
         # scaler
         x_scaler = self.configs['pre']['table'].get('x_scaler')
         if x_scaler:
@@ -241,7 +241,7 @@ class TableDataTranslater(CommonDataTranslater):
             self.x_scaler = None
         return
 
-    def _normalize_y_data_for_model(self):
+    def _normalize_y(self):
         if self.configs['pre']['train_mode'] != 'reg':
             return
         # pre
@@ -271,7 +271,7 @@ class TableDataTranslater(CommonDataTranslater):
             self.y_scaler = None
         return
 
-    def _reduce_dimension_of_data_for_model(self):
+    def _reduce_dimension(self):
         di_config = self.configs['pre']['table'].get('dimension_reduction')
         if not di_config:
             return
@@ -349,7 +349,7 @@ class TableDataTranslater(CommonDataTranslater):
         self.dimension_reduction_model = model_obj
         return
 
-    def _extract_train_data_with_adversarial_validation(self):
+    def _extract_with_adversarial_validation(self):
         def _get_adversarial_preds(X_train, X_test, adversarial):
             if adversarial['model_config'].get('cv_select') == 'all_folds':
                 logger.error(
@@ -417,7 +417,7 @@ class TableDataTranslater(CommonDataTranslater):
                     % (threshold, org_len, self.X_train.shape[0]))
         return
 
-    def _extract_no_anomaly_train_data(self):
+    def _extract_with_no_anomaly_validation(self):
         no_anomaly = self.configs['pre']['table'].get('no_anomaly_validation')
         if not no_anomaly:
             return
@@ -452,7 +452,7 @@ class TableDataTranslater(CommonDataTranslater):
                     % (org_len, self.X_train.shape[0]))
         return
 
-    def _extract_train_data_with_undersampling(self):
+    def _sample_with_under(self):
         method = self.configs['pre']['table'].get('undersampling')
         if not method:
             return
@@ -470,7 +470,7 @@ class TableDataTranslater(CommonDataTranslater):
                     % (org_len, self.X_train.shape[0]))
         return
 
-    def _add_train_data_with_oversampling(self):
+    def _sample_with_over(self):
         method = self.configs['pre']['table'].get('oversampling')
         if not method:
             return
@@ -493,7 +493,7 @@ class TableDataTranslater(CommonDataTranslater):
                     % (org_len, self.X_train.shape[0]))
         return
 
-    def _reshape_data_for_model_for_keras(self):
+    def _reshape_for_keras(self):
         mode = self.configs['pre']['table'].get('reshape_for_keras')
         if not mode:
             return
@@ -521,12 +521,12 @@ class TableDataTranslater(CommonDataTranslater):
         self._calc_base_train_data()
         self._translate_adhoc_ndarray()
         self._to_sparse()
-        self._normalize_x_data_for_model()
-        self._normalize_y_data_for_model()
-        self._reduce_dimension_of_data_for_model()
-        self._extract_train_data_with_adversarial_validation()
-        self._extract_no_anomaly_train_data()
-        self._extract_train_data_with_undersampling()
-        self._add_train_data_with_oversampling()
-        self._reshape_data_for_model_for_keras()
+        self._normalize_x()
+        self._normalize_y()
+        self._reduce_dimension()
+        self._extract_with_adversarial_validation()
+        self._extract_with_no_anomaly_validation()
+        self._sample_with_under()
+        self._sample_with_over()
+        self._reshape_for_keras()
         return
