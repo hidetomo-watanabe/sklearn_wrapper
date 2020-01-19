@@ -45,6 +45,7 @@
                 "n": 250,
                 "model": "pca"
             },
+            "feature_selection": true,
             "adversarial_validation": {
                 "scoring": "accuracy",
                 "model_config": {

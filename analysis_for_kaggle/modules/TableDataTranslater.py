@@ -10,6 +10,8 @@ from scipy.stats import ks_2samp
 from sklearn.cluster import KMeans
 from sklearn.feature_selection import RFE
 from xgboost import XGBClassifier
+from boruta import BorutaPy
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.ensemble import IsolationForest
 from imblearn.under_sampling import RandomUnderSampler
 from imblearn.over_sampling import RandomOverSampler, SMOTE
@@ -349,6 +351,25 @@ class TableDataTranslater(CommonDataTranslater):
         self.dimension_reduction_model = model_obj
         return
 
+    def _select_feature(self):
+        selection = self.configs['pre']['table'].get('feature_selection')
+        if not selection:
+            return
+
+        rf = RandomForestClassifier(
+            n_jobs=-1, class_weight='balanced', max_depth=5)
+        selector = BorutaPy(
+            rf, n_estimators='auto', verbose=2, random_state=42)
+        selector.fit(self.X_train.toarray(), self.Y_train)
+        features = selector.support_
+        logger.info(
+            f'select feature {self.X_train.shape[1]}'
+            f' to {len(features[features])}')
+        self.X_train = self.X_train[:, features]
+        self.X_test = self.X_test[:, features]
+        self.feature_columns = list(np.array(self.feature_columns)[features])
+        return
+
     def _extract_with_adversarial_validation(self):
         def _get_adversarial_preds(X_train, X_test, adversarial):
             if adversarial['model_config'].get('cv_select') == 'all_folds':
@@ -524,6 +545,7 @@ class TableDataTranslater(CommonDataTranslater):
         self._normalize_x()
         self._normalize_y()
         self._reduce_dimension()
+        self._select_feature()
         self._extract_with_adversarial_validation()
         self._extract_with_no_anomaly_validation()
         self._sample_with_under()
