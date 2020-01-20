@@ -3,10 +3,8 @@ import pandas as pd
 from logging import getLogger
 
 logger = getLogger('predict').getChild('BaseDataTranslater')
-try:
+if 'ConfigReader' not in globals():
     from .ConfigReader import ConfigReader
-except ImportError:
-    logger.warning('IN FOR KERNEL SCRIPT, ConfigReader import IS SKIPPED')
 
 
 class BaseDataTranslater(ConfigReader):

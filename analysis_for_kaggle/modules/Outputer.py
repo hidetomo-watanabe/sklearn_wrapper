@@ -12,10 +12,8 @@ from logging import getLogger
 
 
 logger = getLogger('predict').getChild('Outputer')
-try:
+if 'ConfigReader' not in globals():
     from .ConfigReader import ConfigReader
-except ImportError:
-    logger.warning('IN FOR KERNEL SCRIPT, ConfigReader import IS SKIPPED')
 
 
 class Outputer(ConfigReader):

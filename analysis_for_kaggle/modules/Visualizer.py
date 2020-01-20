@@ -10,15 +10,10 @@ from logging import getLogger
 
 
 logger = getLogger('predict').getChild('Visualizer')
-try:
+if 'ConfigReader' not in globals():
     from .ConfigReader import ConfigReader
-except ImportError:
-    logger.warning('IN FOR KERNEL SCRIPT, ConfigReader import IS SKIPPED')
-try:
+if 'CommonMethodWrapper' not in globals():
     from .CommonMethodWrapper import CommonMethodWrapper
-except ImportError:
-    logger.warning(
-        'IN FOR KERNEL SCRIPT, CommonMethodWrapper import IS SKIPPED')
 
 
 class Visualizer(ConfigReader, CommonMethodWrapper):

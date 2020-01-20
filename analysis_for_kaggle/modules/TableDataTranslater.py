@@ -19,16 +19,12 @@ from IPython.display import display
 from logging import getLogger
 
 logger = getLogger('predict').getChild('TableDataTranslater')
-try:
+if 'CommonMethodWrapper' not in globals():
     from .CommonMethodWrapper import CommonMethodWrapper
-except ImportError:
-    logger.warning(
-        'IN FOR KERNEL SCRIPT, CommonMethodWrapper import IS SKIPPED')
-try:
+if 'BaseDataTranslater' not in globals():
     from .BaseDataTranslater import BaseDataTranslater
-except ImportError:
-    logger.warning(
-        'IN FOR KERNEL SCRIPT, BaseDataTranslater import IS SKIPPED')
+if 'Trainer' not in globals():
+    from .Trainer import Trainer
 
 
 class TableDataTranslater(CommonMethodWrapper, BaseDataTranslater):
@@ -383,8 +379,6 @@ class TableDataTranslater(CommonMethodWrapper, BaseDataTranslater):
                 (np.zeros(X_train.shape[0]), np.ones(X_test.shape[0])),
                 axis=0))
             # fit
-            if not self.kernel:
-                from .Trainer import Trainer
             trainer_obj = Trainer(**self.get_train_data())
             trainer_obj.configs = self.configs
             _, estimators = trainer_obj.calc_single_estimators(

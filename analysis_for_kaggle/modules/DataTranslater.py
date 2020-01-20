@@ -1,10 +1,12 @@
 from logging import getLogger
 
 logger = getLogger('predict').getChild('DataTranslater')
-try:
+if 'ConfigReader' not in globals():
     from .ConfigReader import ConfigReader
-except ImportError:
-    logger.warning('IN FOR KERNEL SCRIPT, ConfigReader import IS SKIPPED')
+if 'TableDataTranslater' not in globals():
+    from .TableDataTranslater import TableDataTranslater
+if 'ImageDataTranslater' not in globals():
+    from .ImageDataTranslater import ImageDataTranslater
 
 
 class DataTranslater(ConfigReader):
@@ -14,12 +16,8 @@ class DataTranslater(ConfigReader):
     def get_translater(self):
         data_type = self.configs['data']['type']
         if data_type == 'table':
-            if not self.kernel:
-                from .TableDataTranslater import TableDataTranslater
             self.translater = TableDataTranslater(self.kernel)
         elif data_type == 'image':
-            if not self.kernel:
-                from .ImageDataTranslater import ImageDataTranslater
             self.translater = ImageDataTranslater(self.kernel)
         else:
             logger.error('DATA MODE SHOULD BE table OR image')

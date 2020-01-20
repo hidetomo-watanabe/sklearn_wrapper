@@ -25,10 +25,15 @@ if __name__ == '__main__':
     with open(FILENAME, 'a') as f:
         f.write('"""\n')
     # modules
+    # keep append order
     _append_file_text(
         '%s/modules/ConfigReader.py' % BASE_PATH, FILENAME)
     _append_file_text(
         '%s/modules/CommonMethodWrapper.py' % BASE_PATH, FILENAME)
+    _append_file_text(
+        '%s/modules/Outputer.py' % BASE_PATH, FILENAME)
+    _append_file_text(
+        '%s/modules/Trainer.py' % BASE_PATH, FILENAME)
     _append_file_text(
         '%s/modules/BaseDataTranslater.py' % BASE_PATH, FILENAME)
     _append_file_text(
@@ -37,10 +42,6 @@ if __name__ == '__main__':
         '%s/modules/ImageDataTranslater.py' % BASE_PATH, FILENAME)
     _append_file_text(
         '%s/modules/DataTranslater.py' % BASE_PATH, FILENAME)
-    _append_file_text(
-        '%s/modules/Trainer.py' % BASE_PATH, FILENAME)
-    _append_file_text(
-        '%s/modules/Outputer.py' % BASE_PATH, FILENAME)
     # adhoc
     with open(config_path, 'r') as f:
         config_json = json.loads(f.read())

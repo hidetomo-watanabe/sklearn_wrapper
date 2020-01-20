@@ -39,15 +39,12 @@ from logging import getLogger
 
 
 logger = getLogger('predict').getChild('Trainer')
-try:
+if 'ConfigReader' not in globals():
     from .ConfigReader import ConfigReader
-except ImportError:
-    logger.warning('IN FOR KERNEL SCRIPT, ConfigReader import IS SKIPPED')
-try:
+if 'CommonMethodWrapper' not in globals():
     from .CommonMethodWrapper import CommonMethodWrapper
-except ImportError:
-    logger.warning(
-        'IN FOR KERNEL SCRIPT, CommonMethodWrapper import IS SKIPPED')
+if 'Outputer' not in globals():
+    from .Outputer import Outputer
 
 
 class Trainer(ConfigReader, CommonMethodWrapper):
@@ -396,8 +393,6 @@ class Trainer(ConfigReader, CommonMethodWrapper):
     def _calc_pseudo_label_data(
         self, X_train, Y_train, estimator, classes, threshold
     ):
-        if not self.kernel:
-            from .Outputer import Outputer
         outputer_obj = Outputer(
             [], [], X_train, Y_train, self.X_test,
             [], None, [], [], estimator)

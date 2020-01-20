@@ -7,11 +7,8 @@ from skimage import transform, util
 from logging import getLogger
 
 logger = getLogger('predict').getChild('ImageDataTranslater')
-try:
+if 'BaseDataTranslater' not in globals():
     from .BaseDataTranslater import BaseDataTranslater
-except ImportError:
-    logger.warning(
-        'IN FOR KERNEL SCRIPT, BaseDataTranslater import IS SKIPPED')
 
 
 class ImageDataTranslater(BaseDataTranslater):
