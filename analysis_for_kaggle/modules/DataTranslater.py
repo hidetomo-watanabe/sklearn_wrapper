@@ -5,16 +5,6 @@ try:
     from .ConfigReader import ConfigReader
 except ImportError:
     logger.warning('IN FOR KERNEL SCRIPT, ConfigReader import IS SKIPPED')
-try:
-    from .TableDataTranslater import TableDataTranslater
-except ImportError:
-    logger.warning(
-        'IN FOR KERNEL SCRIPT, TableDataTranslater import IS SKIPPED')
-try:
-    from .ImageDataTranslater import ImageDataTranslater
-except ImportError:
-    logger.warning(
-        'IN FOR KERNEL SCRIPT, ImageDataTranslater import IS SKIPPED')
 
 
 class DataTranslater(ConfigReader):
@@ -24,8 +14,12 @@ class DataTranslater(ConfigReader):
     def get_translater(self):
         data_type = self.configs['data']['type']
         if data_type == 'table':
+            if not self.kernel:
+                from .TableDataTranslater import TableDataTranslater
             self.translater = TableDataTranslater(self.kernel)
         elif data_type == 'image':
+            if not self.kernel:
+                from .ImageDataTranslater import ImageDataTranslater
             self.translater = ImageDataTranslater(self.kernel)
         else:
             logger.error('DATA MODE SHOULD BE table OR image')

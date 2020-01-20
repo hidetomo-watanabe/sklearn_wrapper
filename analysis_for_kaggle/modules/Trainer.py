@@ -43,10 +43,6 @@ try:
     from .ConfigReader import ConfigReader
 except ImportError:
     logger.warning('IN FOR KERNEL SCRIPT, ConfigReader import IS SKIPPED')
-try:
-    from .Outputer import Outputer
-except ImportError:
-    logger.warning('IN FOR KERNEL SCRIPT, Outputer import IS SKIPPED')
 
 
 class Trainer(ConfigReader):
@@ -395,6 +391,8 @@ class Trainer(ConfigReader):
     def _calc_pseudo_label_data(
         self, X_train, Y_train, estimator, classes, threshold
     ):
+        if not self.kernel:
+            from .Outputer import Outputer
         outputer_obj = Outputer(
             [], [], X_train, Y_train, self.X_test,
             [], None, [], [], estimator)

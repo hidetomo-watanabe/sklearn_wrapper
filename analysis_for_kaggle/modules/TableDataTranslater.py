@@ -24,10 +24,6 @@ try:
 except ImportError:
     logger.warning(
         'IN FOR KERNEL SCRIPT, BaseDataTranslater import IS SKIPPED')
-try:
-    from .Trainer import Trainer
-except ImportError:
-    logger.warning('IN FOR KERNEL SCRIPT, Trainer import IS SKIPPED')
 
 
 class TableDataTranslater(BaseDataTranslater):
@@ -383,6 +379,8 @@ class TableDataTranslater(BaseDataTranslater):
                 (np.zeros(X_train.shape[0]), np.ones(X_test.shape[0])),
                 axis=0))
             # fit
+            if not self.kernel:
+                from .Trainer import Trainer
             trainer_obj = Trainer(**self.get_train_data())
             trainer_obj.configs = self.configs
             _, estimators = trainer_obj.calc_single_estimators(
