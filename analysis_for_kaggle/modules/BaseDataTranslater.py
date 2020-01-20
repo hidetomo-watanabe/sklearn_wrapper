@@ -2,14 +2,14 @@ import numpy as np
 import pandas as pd
 from logging import getLogger
 
-logger = getLogger('predict').getChild('CommonDataTranslater')
+logger = getLogger('predict').getChild('BaseDataTranslater')
 try:
     from .ConfigReader import ConfigReader
 except ImportError:
     logger.warning('IN FOR KERNEL SCRIPT, ConfigReader import IS SKIPPED')
 
 
-class CommonDataTranslater(ConfigReader):
+class BaseDataTranslater(ConfigReader):
     def __init__(self):
         pass
 

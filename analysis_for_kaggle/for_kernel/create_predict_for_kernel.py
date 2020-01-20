@@ -28,7 +28,7 @@ if __name__ == '__main__':
     _append_file_text(
         '%s/modules/ConfigReader.py' % BASE_PATH, FILENAME)
     _append_file_text(
-        '%s/modules/CommonDataTranslater.py' % BASE_PATH, FILENAME)
+        '%s/modules/BaseDataTranslater.py' % BASE_PATH, FILENAME)
     _append_file_text(
         '%s/modules/TableDataTranslater.py' % BASE_PATH, FILENAME)
     _append_file_text(

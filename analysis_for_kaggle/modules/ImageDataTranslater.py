@@ -8,13 +8,13 @@ from logging import getLogger
 
 logger = getLogger('predict').getChild('ImageDataTranslater')
 try:
-    from .CommonDataTranslater import CommonDataTranslater
+    from .BaseDataTranslater import BaseDataTranslater
 except ImportError:
     logger.warning(
-        'IN FOR KERNEL SCRIPT, CommonDataTranslater import IS SKIPPED')
+        'IN FOR KERNEL SCRIPT, BaseDataTranslater import IS SKIPPED')
 
 
-class ImageDataTranslater(CommonDataTranslater):
+class ImageDataTranslater(BaseDataTranslater):
     def __init__(self, kernel=False):
         self.kernel = kernel
         self.configs = {}

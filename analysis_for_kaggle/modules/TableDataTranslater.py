@@ -20,17 +20,17 @@ from logging import getLogger
 
 logger = getLogger('predict').getChild('TableDataTranslater')
 try:
-    from .CommonDataTranslater import CommonDataTranslater
+    from .BaseDataTranslater import BaseDataTranslater
 except ImportError:
     logger.warning(
-        'IN FOR KERNEL SCRIPT, CommonDataTranslater import IS SKIPPED')
+        'IN FOR KERNEL SCRIPT, BaseDataTranslater import IS SKIPPED')
 try:
     from .Trainer import Trainer
 except ImportError:
     logger.warning('IN FOR KERNEL SCRIPT, Trainer import IS SKIPPED')
 
 
-class TableDataTranslater(CommonDataTranslater):
+class TableDataTranslater(BaseDataTranslater):
     def __init__(self, kernel=False):
         self.kernel = kernel
         self.configs = {}
