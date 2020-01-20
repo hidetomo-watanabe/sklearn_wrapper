@@ -43,9 +43,14 @@ try:
     from .ConfigReader import ConfigReader
 except ImportError:
     logger.warning('IN FOR KERNEL SCRIPT, ConfigReader import IS SKIPPED')
+try:
+    from .CommonMethodWrapper import CommonMethodWrapper
+except ImportError:
+    logger.warning(
+        'IN FOR KERNEL SCRIPT, CommonMethodWrapper import IS SKIPPED')
 
 
-class Trainer(ConfigReader):
+class Trainer(ConfigReader, CommonMethodWrapper):
     def __init__(
         self,
         feature_columns, test_ids,
@@ -490,8 +495,7 @@ class Trainer(ConfigReader):
             Y_train = torch.LongTensor(Y_train)
         elif model not in ['keras_reg', 'torch_reg']:
             # for warning
-            if Y_train.ndim > 1 and Y_train.shape[1] == 1:
-                Y_train = Y_train.ravel()
+            Y_train = self.ravel_like(Y_train)
 
         # fit
         logger.info('fit')
@@ -551,13 +555,9 @@ class Trainer(ConfigReader):
 
     def _get_pipeline(self, single_estimators):
         # for warning
-        if self.Y_train.ndim > 1 and self.Y_train.shape[1] == 1:
-            dataset = Dataset(
-                self.X_train.toarray(), self.Y_train.ravel(),
-                self.X_test.toarray())
-        else:
-            dataset = Dataset(
-                self.X_train.toarray(), self.Y_train, self.X_test.toarray())
+        Y_train = self.ravel_like(self.Y_train)
+        dataset = Dataset(
+            self.X_train.toarray(), Y_train, self.X_test.toarray())
         models = []
         for modelname, single_estimator in single_estimators:
             # clf
@@ -629,7 +629,8 @@ class Trainer(ConfigReader):
             logger.info(f'weights: {weights}')
             voter = self._get_voter(
                 ensemble_config['mode'], single_estimators, weights, n_jobs)
-            voter.fit(X_train, Y_train.ravel())
+            Y_train = self.ravel_like(Y_train)
+            voter.fit(X_train, Y_train)
             estimator = voter
         elif ensemble_config['mode'] in ['weighted', 'stacking', 'blending']:
             if ensemble_config['mode'] == 'weighted' \

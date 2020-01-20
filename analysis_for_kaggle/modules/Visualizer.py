@@ -14,9 +14,14 @@ try:
     from .ConfigReader import ConfigReader
 except ImportError:
     logger.warning('IN FOR KERNEL SCRIPT, ConfigReader import IS SKIPPED')
+try:
+    from .CommonMethodWrapper import CommonMethodWrapper
+except ImportError:
+    logger.warning(
+        'IN FOR KERNEL SCRIPT, CommonMethodWrapper import IS SKIPPED')
 
 
-class Visualizer(ConfigReader):
+class Visualizer(ConfigReader, CommonMethodWrapper):
     def __init__(self):
         self.configs = {}
         self.hist_params = {
@@ -120,7 +125,7 @@ class Visualizer(ConfigReader):
     def visualize_decision_tree(
         self, X_train, Y_train, feature_names, max_depth=3
     ):
-        Y_train = Y_train.ravel()
+        Y_train = self.ravel_like(Y_train)
         clf = DecisionTreeClassifier(max_depth=max_depth)
         clf.fit(X_train, Y_train)
         for pred_col in self.pred_cols:

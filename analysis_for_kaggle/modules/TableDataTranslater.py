@@ -20,13 +20,18 @@ from logging import getLogger
 
 logger = getLogger('predict').getChild('TableDataTranslater')
 try:
+    from .CommonMethodWrapper import CommonMethodWrapper
+except ImportError:
+    logger.warning(
+        'IN FOR KERNEL SCRIPT, CommonMethodWrapper import IS SKIPPED')
+try:
     from .BaseDataTranslater import BaseDataTranslater
 except ImportError:
     logger.warning(
         'IN FOR KERNEL SCRIPT, BaseDataTranslater import IS SKIPPED')
 
 
-class TableDataTranslater(BaseDataTranslater):
+class TableDataTranslater(CommonMethodWrapper, BaseDataTranslater):
     def __init__(self, kernel=False):
         self.kernel = kernel
         self.configs = {}
@@ -328,9 +333,7 @@ class TableDataTranslater(BaseDataTranslater):
                 'nmf reconstruction_err_: %s' % model_obj.reconstruction_err_)
         elif model == 'rfe':
             # for warning
-            Y_train = self.Y_train
-            if Y_train.ndim > 1 and Y_train.shape[1] == 1:
-                Y_train = Y_train.ravel()
+            Y_train = self.ravel_like(self.Y_train)
             model_obj = RFE(
                 n_features_to_select=n,
                 estimator=XGBClassifier(random_state=42, n_jobs=-1))
@@ -356,7 +359,8 @@ class TableDataTranslater(BaseDataTranslater):
             n_jobs=-1, class_weight='balanced', max_depth=5)
         selector = BorutaPy(
             rf, n_estimators='auto', verbose=2, random_state=42)
-        selector.fit(self.X_train.toarray(), self.Y_train)
+        Y_train = self.ravel_like(self.Y_train)
+        selector.fit(self.X_train.toarray(), Y_train)
         features = selector.support_
         logger.info(
             f'select feature {self.X_train.shape[1]}'
@@ -503,9 +507,7 @@ class TableDataTranslater(BaseDataTranslater):
             logger.error('NOT IMPLEMENTED OVERSAMPLING METHOD: %s' % method)
             raise Exception('NOT IMPLEMENTED')
         org_len = self.X_train.shape[0]
-        Y_train = self.Y_train
-        if Y_train.ndim > 1 and Y_train.shape[1] == 1:
-            Y_train = Y_train.ravel()
+        Y_train = self.ravel_like(self.Y_train)
         self.X_train, self.Y_train = sampler_obj.fit_resample(
             self.X_train, Y_train)
         logger.info('train data added %s => %s'
