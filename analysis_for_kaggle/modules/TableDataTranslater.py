@@ -188,10 +188,10 @@ class TableDataTranslater(CommonMethodWrapper, BaseDataTranslater):
     def _calc_base_train_data(self):
         self.Y_train = self.pred_df.to_numpy()
         self.X_train = self.train_df.drop(
-            self.id_col, axis=1).to_numpy().astype('float32')
+            self.id_col, axis=1).to_numpy()
         self.test_ids = self.test_df[self.id_col].to_numpy()
         self.X_test = self.test_df.drop(
-            self.id_col, axis=1).to_numpy().astype('float32')
+            self.id_col, axis=1).to_numpy()
         self.feature_columns = []
         for key in self.train_df.keys():
             if key == self.id_col:
@@ -217,8 +217,8 @@ class TableDataTranslater(CommonMethodWrapper, BaseDataTranslater):
         return
 
     def _to_sparse(self):
-        self.X_train = sp.csr_matrix(self.X_train)
-        self.X_test = sp.csr_matrix(self.X_test)
+        self.X_train = sp.csr_matrix(self.X_train.astype('float32'))
+        self.X_test = sp.csr_matrix(self.X_test.astype('float32'))
         return
 
     def _normalize_x(self):
