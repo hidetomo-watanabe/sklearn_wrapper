@@ -1,0 +1,52 @@
+{
+    "data": {
+        "train_path": "~/share/kaggle_data/disaster/train.csv",
+        "test_path": "~/share/kaggle_data/disaster/test.csv",
+        "output_dir": "./outputs",
+        "type": "table",
+        "pred_cols": ["target"],
+        "id_col": "id"
+    },
+    "pre": {
+        "train_mode": "clf",
+        "table": {
+            "del": [
+                "keyword",
+                "location"
+            ],
+            "adhoc_ndarray": {
+                "myfunc": "disaster",
+                "methods": [
+                    "translate_by_tfidf"
+                ]
+            }
+        }
+    },
+    "fit": {
+        "train_mode": "clf",
+        "ensemble_model_config": {
+            "mode": "stacking",
+            "model": "log_reg",
+            "modelname": "disaster",
+            "k": 10,
+            "proportion": 0.2
+        },
+        "scoring": "f1",
+        "single_model_configs": [
+            {
+                "model": "log_reg",
+                "modelname": "tmp",
+                "train_all": true,
+                "fit_params": {
+                },
+                "params": {
+                    "n_jobs": [-1]
+                }
+            }
+        ]
+    },
+    "post": false,
+    "notify": {
+        "slack": "https://hooks.slack.com/services/hogehoge"
+    }
+}
