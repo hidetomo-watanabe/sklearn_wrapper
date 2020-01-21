@@ -1,8 +1,8 @@
 {
     "data": {
-        "train_path": "../input/disaster/train.csv",
-        "test_path": "../input/disaster/test.csv",
-        "output_dir": ".",
+        "train_path": "./tests/disaster/train.csv",
+        "test_path": "./tests/disaster/test.csv",
+        "output_dir": "./outputs",
         "type": "table",
         "pred_cols": ["target"],
         "id_col": "id"
