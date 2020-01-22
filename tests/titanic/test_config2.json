@@ -50,6 +50,8 @@
                 "model": "lgb_clf",
                 "modelname": "tmp",
                 "fit_params": {
+                    "eval_metric": "accuracy",
+                    "early_stopping_rounds": 10
                 },
                 "params": {
                     "n_estimators": [5],

@@ -474,6 +474,8 @@ class Trainer(ConfigReader, CommonMethodWrapper):
         fit_params = model_config.get('fit_params')
         if not fit_params:
             fit_params = {}
+        if model in ['lgb_clf', 'lgb_reg']:
+            fit_params['eval_set'] = [(X_train, Y_train)]
         params = model_config.get('params')
         if not params:
             params = {}

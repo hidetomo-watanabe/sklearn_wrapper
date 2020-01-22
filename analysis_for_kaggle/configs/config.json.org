@@ -157,6 +157,7 @@
                 "modelname": "tmp_model4",
                 "n_trials": 1,
                 "fit_params": {
+                    "eval_metric": "accuracy",
                     "early_stopping_rounds": 100
                 },
                 "params": {
