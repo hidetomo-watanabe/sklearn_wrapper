@@ -244,18 +244,20 @@ class Trainer(ConfigReader, CommonMethodWrapper):
                     single_param[key] = val[0]
                 return single_param
 
-        if n_trials is None:
-            if all_comb_num:
+        if all_comb_num:
+            if n_trials is None:
                 n_trials = all_comb_num
-            else:
+            elif n_trials > all_comb_num:
+                logger.warning(
+                    f'N_TRIALS IS OVER MAX PATTERN THEN SET WITH MAX')
+                n_trials = all_comb_num
+            elif n_trials < 0:
+                logger.error(f'N_TRIALS SHOULD BE LARGER THAN 0: {n_trials}')
+                raise Exception('ILLEGAL VALUE')
+        else:
+            if n_trials is None:
                 logger.error(f'IF PARAMS HAVE DICT, N_TRIALS SHOULD BE SET')
                 raise Exception('ILLEGAL VALUE')
-        if n_trials > all_comb_num:
-            logger.warning(f'N_TRIALS IS OVER MAX PATTERN THEN SET WITH MAX')
-            n_trials = all_comb_num
-        if n_trials < 0:
-            logger.error(f'N_TRIALS SHOULD BE LARGER THAN 0: {n_trials}')
-            raise Exception('ILLEGAL VALUE')
         logger.info(f'n_trials: {n_trials}')
 
         study = optuna.create_study()
