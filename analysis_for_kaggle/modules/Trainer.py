@@ -226,9 +226,13 @@ class Trainer(ConfigReader, CommonMethodWrapper):
 
         all_comb_num = 0
         for val in params.values():
-            if all_comb_num == 0:
-                all_comb_num = 1
-            all_comb_num *= len(val)
+            if isinstance(val, list):
+                if all_comb_num == 0:
+                    all_comb_num = 1
+                all_comb_num *= len(val)
+            elif isinstance(val, dict):
+                all_comb_num = None
+                break
         # no search
         if all_comb_num in [0, 1]:
             logger.info(f'no search because params pattern is {all_comb_num}')
@@ -240,9 +244,14 @@ class Trainer(ConfigReader, CommonMethodWrapper):
                     single_param[key] = val[0]
                 return single_param
 
-        if n_trials:
-            n_trials = min(n_trials, all_comb_num)
-        elif n_trials != 0:
+        if n_trials is None:
+            if all_comb_num:
+                n_trials = all_comb_num
+            else:
+                logger.error(f'IF PARAMS HAVE DICT, N_TRIALS SHOULD BE SET')
+                raise Exception('ILLEGAL VALUE')
+        if n_trials > all_comb_num:
+            logger.warning(f'N_TRIALS IS OVER MAX PATTERN THEN SET WITH MAX')
             n_trials = all_comb_num
         if n_trials < 0:
             logger.error(f'N_TRIALS SHOULD BE LARGER THAN 0: {n_trials}')
