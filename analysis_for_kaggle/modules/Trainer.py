@@ -261,7 +261,7 @@ class Trainer(ConfigReader, CommonMethodWrapper):
         logger.info(f'n_trials: {n_trials}')
 
         study = optuna.create_study()
-        study.optimize(_objective, n_trials=n_trials, n_jobs=n_jobs)
+        study.optimize(_objective, n_trials=n_trials)
         best_params = study.best_params
         best_score_mean = -1 * study.best_trial.value
         logger.info('best score mean: %s' % best_score_mean)
