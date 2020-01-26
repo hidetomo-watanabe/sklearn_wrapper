@@ -492,15 +492,16 @@ class Trainer(ConfigReader, CommonMethodWrapper):
             params = {}
 
         # Y_train
-        if model in ['keras_clf']:
-            Y_train = to_categorical(Y_train)
-        elif model in ['torch_clf']:
+        if model in ['keras_clf', 'torch_clf']:
             if Y_train.ndim > 1 and Y_train.shape[1] == 1:
                 Y_train = Y_train.ravel()
             else:
-                logger.error('NOT IMPLEMENTED MULTI TARGET TORCH CLF')
+                logger.error('NOT IMPLEMENTED MULTI TARGET KERAS, TORCH CLF')
                 raise Exception('NOT IMPLEMENTED')
-            Y_train = torch.LongTensor(Y_train)
+            if model == 'keras_clf':
+                Y_train = to_categorical(Y_train)
+            elif model == 'torch_clf':
+                Y_train = torch.LongTensor(Y_train)
         elif model not in ['keras_reg', 'torch_reg']:
             # for warning
             Y_train = self.ravel_like(Y_train)
