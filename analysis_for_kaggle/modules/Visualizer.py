@@ -131,7 +131,7 @@ class Visualizer(ConfigReader, CommonMethodWrapper):
             display(viz)
 
     def plot_learning_curve(
-        self, title, estimator, X_train, Y_train, scorer, cv, n_jobs=-1
+        self, title, estimator, X_train, Y_train, scorer, cv
     ):
         ylim = (0.7, 1.01)
         train_sizes = np.linspace(.1, 1.0, 5)
@@ -143,7 +143,7 @@ class Visualizer(ConfigReader, CommonMethodWrapper):
         plt.ylabel("Score")
         train_sizes, train_scores, test_scores = learning_curve(
             estimator, X_train, Y_train, scoring=scorer,
-            cv=cv, n_jobs=n_jobs, train_sizes=train_sizes)
+            cv=cv, train_sizes=train_sizes, n_jobs=-1)
         train_scores_mean = np.mean(train_scores, axis=1)
         train_scores_std = np.std(train_scores, axis=1)
         test_scores_mean = np.mean(test_scores, axis=1)

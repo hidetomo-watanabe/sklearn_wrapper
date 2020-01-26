@@ -176,7 +176,7 @@ class Trainer(ConfigReader, CommonMethodWrapper):
     def _calc_best_params(
         self,
         base_model, X_train, Y_train, params, scorer, cv,
-        n_jobs=-1, fit_params={}, n_trials=None, multiclass=None
+        fit_params={}, n_trials=None, multiclass=None
     ):
         def _get_args(trial, params):
             args = {}
@@ -208,7 +208,7 @@ class Trainer(ConfigReader, CommonMethodWrapper):
             args = _get_args(trial, params)
             model.set_params(**args)
             if multiclass:
-                model = multiclass(estimator=model, n_jobs=n_jobs)
+                model = multiclass(estimator=model)
             try:
                 scores, _ = self._get_cv_scores_models(
                     model, X_train, Y_train, scorer, cv, fit_params)
@@ -343,9 +343,6 @@ class Trainer(ConfigReader, CommonMethodWrapper):
         # configs
         model_configs = self.configs['fit']['single_model_configs']
         cv = _get_cv_from_config()
-        n_jobs = self.configs['fit'].get('n_jobs')
-        if not n_jobs:
-            n_jobs = -1
         logger.info('scoring: %s' % self.configs['fit']['scoring'])
         self.scorer = self._get_scorer_from_string(
             self.configs['fit']['scoring'])
@@ -358,8 +355,7 @@ class Trainer(ConfigReader, CommonMethodWrapper):
         self.single_estimators = []
         for i, config in enumerate(model_configs):
             _scores, _estimators = self.calc_single_estimators(
-                self.scorer, config, cv, n_jobs,
-                nn_func=myfunc)
+                self.scorer, config, cv, nn_func=myfunc)
             single_scores.extend(_scores)
             modelname = config.get('modelname')
             if not modelname:
@@ -374,7 +370,7 @@ class Trainer(ConfigReader, CommonMethodWrapper):
             self.estimator = self.single_estimators[0][1]
         else:
             self.estimator = self.calc_ensemble_estimator(
-                self.single_estimators, single_scores, n_jobs)
+                self.single_estimators, single_scores)
 
         # classes
         if self.configs['fit']['train_mode'] == 'clf':
@@ -420,18 +416,18 @@ class Trainer(ConfigReader, CommonMethodWrapper):
 
     def calc_single_estimators(
         self,
-        scorer, model_config, cv=KFold(), n_jobs=-1,
+        scorer, model_config, cv=KFold(),
         nn_func=None, X_train=None, Y_train=None
     ):
         def _fit(X_train, Y_train):
             best_params = self._calc_best_params(
                 base_model, X_train, Y_train, params,
-                scorer, cv, n_jobs, fit_params, n_trials, multiclass)
+                scorer, cv, fit_params, n_trials, multiclass)
             logger.info('best params: %s' % best_params)
             estimator = base_model
             estimator.set_params(**best_params)
             if multiclass:
-                estimator = multiclass(estimator=estimator, n_jobs=n_jobs)
+                estimator = multiclass(estimator=estimator)
             logger.info(f'get estimator with cv_select: {cv_select}')
             if cv_select == 'train_all':
                 scores, estimators = self._get_cv_scores_models(
@@ -547,7 +543,7 @@ class Trainer(ConfigReader, CommonMethodWrapper):
         self._check_importances(model, estimators[0], X_train, Y_train)
         return scores, estimators
 
-    def _get_voter(self, mode, estimators, weights=None, n_jobs=-1):
+    def _get_voter(self, mode, estimators, weights=None):
         if self.configs['fit']['train_mode'] == 'clf':
             if mode == 'average':
                 voting = 'soft'
@@ -555,11 +551,11 @@ class Trainer(ConfigReader, CommonMethodWrapper):
                 voting = 'hard'
             voter = VotingClassifier(
                 estimators=estimators, voting=voting,
-                weights=weights, n_jobs=n_jobs)
+                weights=weights, n_jobs=-1)
         elif self.configs['fit']['train_mode'] == 'reg':
             if mode == 'average':
                 voter = VotingRegressor(
-                    estimators=estimators, weights=weights, n_jobs=n_jobs)
+                    estimators=estimators, weights=weights, n_jobs=-1)
         return voter
 
     def _get_pipeline(self, single_estimators):
@@ -616,8 +612,7 @@ class Trainer(ConfigReader, CommonMethodWrapper):
         return stacker
 
     def calc_ensemble_estimator(
-        self, single_estimators, single_scores, n_jobs=-1,
-        X_train=None, Y_train=None
+        self, single_estimators, single_scores, X_train=None, Y_train=None
     ):
         if not isinstance(X_train, np.ndarray):
             X_train = self.X_train
@@ -637,7 +632,7 @@ class Trainer(ConfigReader, CommonMethodWrapper):
             weights = single_scores / np.sum(single_scores)
             logger.info(f'weights: {weights}')
             voter = self._get_voter(
-                ensemble_config['mode'], single_estimators, weights, n_jobs)
+                ensemble_config['mode'], single_estimators, weights)
             Y_train = self.ravel_like(Y_train)
             voter.fit(X_train, Y_train)
             estimator = voter

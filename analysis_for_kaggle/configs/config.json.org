@@ -93,7 +93,6 @@
             "fold": "stratifiedk",
             "num": 3
         },
-        "n_jobs": -1,
         "ensemble_model_config": {
             "mode": "stacking",
             "model": "log_reg",
