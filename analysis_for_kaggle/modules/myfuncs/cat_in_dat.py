@@ -117,14 +117,6 @@ def add_ord_4_label(train_df, test_df):
     return train_df, test_df
 
 
-def add_ord_5_label(train_df, test_df):
-    mapping = sorted(list(set(train_df['ord_5'].to_numpy())))
-    mapping = dict(zip(mapping, range(len(mapping))))
-    for df in [train_df, test_df]:
-        df['ord_5_label'] = df['ord_5'].apply(lambda x: mapping[x]).astype(int)
-    return train_df, test_df
-
-
 def split_ord_5(train_df, test_df):
     for df in [train_df, test_df]:
         df['ord_5_1'] = df['ord_5'].str[0]
