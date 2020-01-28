@@ -133,32 +133,44 @@ class TableDataTranslater(CommonMethodWrapper, BaseDataTranslater):
             return
 
         logger.info('categorize model: %s' % trans_category['model'])
+        if trans_category['model'] in ['onehot_with_test']:
+            logger.warning('IN DATA PREPROCESSING, USING TEST DATA')
         columns = []
-        for column, dtype in tqdm(self.test_df.dtypes.items()):
+        for column, dtype in self.test_df.dtypes.items():
             if column in [self.id_col]:
                 continue
             if dtype != 'object' and column not in trans_category['target']:
                 continue
             columns.append(column)
-            self.train_df.fillna({column: 'REPLACED_NAN'}, inplace=True)
-            self.test_df.fillna({column: 'REPLACED_NAN'}, inplace=True)
-            # onehot
-            if trans_category['model'] in ['onehot', 'onehot_with_test']:
+        if len(columns) == 0:
+            return
+        logger.info('categorize: %s' % columns)
+
+        # onehot
+        if trans_category['model'] in ['onehot', 'onehot_with_test']:
+            for column in tqdm(columns):
+                self.train_df.fillna({column: 'REPLACED_NAN'}, inplace=True)
+                self.test_df.fillna({column: 'REPLACED_NAN'}, inplace=True)
+                # pre onehot
                 categories = self.train_df[column].unique()
                 if trans_category['model'] == 'onehot_with_test':
-                    logger.warning('IN DATA PREPROCESSING, USING TEST DATA')
                     categories = np.concatenate(
                         (categories, self.test_df[column].unique().tolist()),
                         axis=0)
                     categories = set(categories)
-                # pre onehot
                 self.train_df[column] = pd.Categorical(
                     self.train_df[column], categories=categories)
                 self.test_df[column] = pd.Categorical(
                     self.test_df[column], categories=categories)
-            # not onehot
-            else:
-                logger.info('categorize: %s' % column)
+            self.train_df = pd.get_dummies(
+                self.train_df, columns=columns)
+            self.test_df = pd.get_dummies(
+                self.test_df, columns=columns)
+        # not onehot
+        else:
+            for column in tqdm(columns):
+                self.train_df.fillna({column: 'REPLACED_NAN'}, inplace=True)
+                self.test_df.fillna({column: 'REPLACED_NAN'}, inplace=True)
                 train_transed, test_transed, feature_names = \
                     self._categorize_ndarrays(
                         trans_category['model'],
@@ -175,14 +187,6 @@ class TableDataTranslater(CommonMethodWrapper, BaseDataTranslater):
                     pd.DataFrame(test_transed, columns=feature_names),
                     left_index=True, right_index=True)
                 self.test_df.drop([column], axis=1, inplace=True)
-        # onehot should be together
-        if trans_category['model'] in ['onehot', 'onehot_with_test']:
-            logger.info('categorize: %s' % columns)
-            if len(columns) > 0:
-                self.train_df = pd.get_dummies(
-                    self.train_df, columns=columns)
-                self.test_df = pd.get_dummies(
-                    self.test_df, columns=columns)
         return
 
     def _calc_base_train_data(self):
