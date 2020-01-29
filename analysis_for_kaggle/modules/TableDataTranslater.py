@@ -85,17 +85,17 @@ class TableDataTranslater(CommonMethodWrapper, BaseDataTranslater):
             self.test_df.fillna({column: column_mean}, inplace=True)
         return
 
-    def _categorize_ndarrays(self, model, X_train, Y_train, X_test, col_name):
-        def _get_categorized_data(
+    def _encode_ndarrays(self, model, X_train, Y_train, X_test, col_name):
+        def _get_encoded_data(
             model, X_train, Y_train, target, col_name
         ):
             feature_names = [f'{col_name}_{model}']
             df = pd.DataFrame(data=X_train, columns=['x'])
             if model == 'label':
                 _, uniqs = pd.factorize(df['x'])
-                categorized = uniqs.get_indexer(target)
+                encoded = uniqs.get_indexer(target)
             elif model in ['count', 'freq', 'rank', 'target']:
-                categorized = target
+                encoded = target
                 if model == 'count':
                     mapping = df.groupby('x')['x'].count()
                     only_test = 0
@@ -111,25 +111,23 @@ class TableDataTranslater(CommonMethodWrapper, BaseDataTranslater):
                     mapping = df.groupby('x')['y'].mean()
                     only_test = 0
                 for i in mapping.index:
-                    categorized = np.where(
-                        categorized == i, mapping[i], categorized)
-                categorized = np.where(
-                    ~np.in1d(categorized, list(mapping.index)),
-                    only_test, categorized)
+                    encoded = np.where(encoded == i, mapping[i], encoded)
+                encoded = np.where(
+                    ~np.in1d(encoded, list(mapping.index)), only_test, encoded)
             else:
-                logger.error('NOT IMPLEMENTED CATEGORIZE: %s' % model)
+                logger.error('NOT IMPLEMENTED CATEGORY ENCODING: %s' % model)
                 raise Exception('NOT IMPLEMENTED')
-            categorized = categorized.reshape(-1, 1)
-            return feature_names, categorized
+            encoded = encoded.reshape(-1, 1)
+            return feature_names, encoded
 
         output = []
         for target in [X_train, X_test]:
-            feature_names, categorized = _get_categorized_data(
+            feature_names, encoded = _get_encoded_data(
                 model, X_train, Y_train, target, col_name)
-            output.append(categorized)
+            output.append(encoded)
         return output[0], output[1], feature_names
 
-    def _categorize(self):
+    def _encode_category(self):
         trans_category = self.configs['pre']['table'].get('category')
         if not trans_category:
             return
@@ -144,10 +142,10 @@ class TableDataTranslater(CommonMethodWrapper, BaseDataTranslater):
             columns.append(column)
         if len(columns) == 0:
             return
-        logger.info('categorize: %s' % columns)
+        logger.info('encode category: %s' % columns)
 
-        # categorize
-        logger.info('categorize model: %s' % trans_category['model'])
+        # encode
+        logger.info('encoding model: %s' % trans_category['model'])
         if trans_category['model'] in ['onehot_with_test']:
             logger.warning('IN DATA PREPROCESSING, USING TEST DATA')
         # onehot
@@ -166,38 +164,36 @@ class TableDataTranslater(CommonMethodWrapper, BaseDataTranslater):
                     self.train_df[column], categories=categories)
                 self.test_df[column] = pd.Categorical(
                     self.test_df[column], categories=categories)
-            train_categorized = pd.get_dummies(self.train_df[columns])
-            test_categorized = pd.get_dummies(self.test_df[columns])
+            train_encoded = pd.get_dummies(self.train_df[columns])
+            test_encoded = pd.get_dummies(self.test_df[columns])
         # not onehot
         else:
-            train_categorized = []
-            test_categorized = []
+            train_encoded = []
+            test_encoded = []
             feature_names = []
             for column in tqdm(columns):
                 self.train_df.fillna({column: 'REPLACED_NAN'}, inplace=True)
                 self.test_df.fillna({column: 'REPLACED_NAN'}, inplace=True)
-                _train_categorized, _test_categorized, _feature_names = \
-                    self._categorize_ndarrays(
+                _train_encoded, _test_encoded, _feature_names = \
+                    self._encode_ndarrays(
                         trans_category['model'],
                         self.train_df[column].to_numpy(),
                         self.pred_df.to_numpy(),
                         self.test_df[column].to_numpy(), column)
-                train_categorized.append(_train_categorized)
-                test_categorized.append(_test_categorized)
+                train_encoded.append(_train_encoded)
+                test_encoded.append(_test_encoded)
                 feature_names.extend(_feature_names)
-            train_categorized = pd.DataFrame(
-                np.concatenate(train_categorized, axis=1),
-                columns=feature_names)
-            test_categorized = pd.DataFrame(
-                np.concatenate(test_categorized, axis=1),
-                columns=feature_names)
+            train_encoded = pd.DataFrame(
+                np.concatenate(train_encoded, axis=1), columns=feature_names)
+            test_encoded = pd.DataFrame(
+                np.concatenate(test_encoded, axis=1), columns=feature_names)
 
         # merge
         self.train_df = pd.merge(
-            self.train_df, train_categorized,
+            self.train_df, train_encoded,
             left_index=True, right_index=True)
         self.test_df = pd.merge(
-            self.test_df, test_categorized,
+            self.test_df, test_encoded,
             left_index=True, right_index=True)
 
         # drop
@@ -551,7 +547,7 @@ class TableDataTranslater(CommonMethodWrapper, BaseDataTranslater):
         self._translate_adhoc_df()
         self._delete_columns()
         self._fill_missing_value_with_mean()
-        self._categorize()
+        self._encode_category()
         # ndarray
         self._calc_base_train_data()
         self._translate_adhoc_ndarray()
