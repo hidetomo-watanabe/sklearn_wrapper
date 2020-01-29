@@ -21,7 +21,7 @@
                     "get_train_neither"
                 ]
             },
-            "del": [
+            "deletion": [
                 "Pronoun",
                 "Text",
                 "A-noun",

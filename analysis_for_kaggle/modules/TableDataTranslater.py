@@ -55,7 +55,7 @@ class TableDataTranslater(CommonMethodWrapper, BaseDataTranslater):
         return
 
     def _delete_columns(self):
-        trans_del = self.configs['pre']['table'].get('del')
+        trans_del = self.configs['pre']['table'].get('deletion')
         if not trans_del:
             return
 

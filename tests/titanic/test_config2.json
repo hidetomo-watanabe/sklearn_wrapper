@@ -18,7 +18,7 @@
                     "translate_familystatus"
                 ]
             },
-            "del": [
+            "deletion": [
                 "Name",
                 "Ticket",
                 "Fare",

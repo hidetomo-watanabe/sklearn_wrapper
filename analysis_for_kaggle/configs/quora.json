@@ -17,8 +17,6 @@
                     "translate_text2seq"
                 ]
             },
-            "del": [
-            ],
             "missing": true,
             "category": {
                 "target": [
