@@ -132,6 +132,7 @@ class TableDataTranslater(CommonMethodWrapper, BaseDataTranslater):
         if not trans_category:
             return
 
+        # columns
         logger.info('categorize model: %s' % trans_category['model'])
         if trans_category['model'] in ['onehot_with_test']:
             logger.warning('IN DATA PREPROCESSING, USING TEST DATA')
@@ -146,6 +147,7 @@ class TableDataTranslater(CommonMethodWrapper, BaseDataTranslater):
             return
         logger.info('categorize: %s' % columns)
 
+        # categorize
         # onehot
         if trans_category['model'] in ['onehot', 'onehot_with_test']:
             for column in tqdm(columns):
@@ -162,31 +164,41 @@ class TableDataTranslater(CommonMethodWrapper, BaseDataTranslater):
                     self.train_df[column], categories=categories)
                 self.test_df[column] = pd.Categorical(
                     self.test_df[column], categories=categories)
-            self.train_df = pd.get_dummies(
-                self.train_df, columns=columns)
-            self.test_df = pd.get_dummies(
-                self.test_df, columns=columns)
+            train_transed = pd.get_dummies(self.train_df[columns])
+            test_transed = pd.get_dummies(self.test_df[columns])
         # not onehot
         else:
+            train_transed = []
+            test_transed = []
+            feature_names = []
             for column in tqdm(columns):
                 self.train_df.fillna({column: 'REPLACED_NAN'}, inplace=True)
                 self.test_df.fillna({column: 'REPLACED_NAN'}, inplace=True)
-                train_transed, test_transed, feature_names = \
+                _train_transed, _test_transed, _feature_names = \
                     self._categorize_ndarrays(
                         trans_category['model'],
                         self.train_df[column].to_numpy(),
                         self.pred_df.to_numpy(),
                         self.test_df[column].to_numpy(), column)
-                self.train_df = pd.merge(
-                    self.train_df,
-                    pd.DataFrame(train_transed, columns=feature_names),
-                    left_index=True, right_index=True)
-                self.train_df.drop([column], axis=1, inplace=True)
-                self.test_df = pd.merge(
-                    self.test_df,
-                    pd.DataFrame(test_transed, columns=feature_names),
-                    left_index=True, right_index=True)
-                self.test_df.drop([column], axis=1, inplace=True)
+                train_transed.append(_train_transed)
+                test_transed.append(_test_transed)
+                feature_names.extend(_feature_names)
+            train_transed = pd.DataFrame(
+                np.concatenate(train_transed, axis=1), columns=feature_names)
+            test_transed = pd.DataFrame(
+                np.concatenate(test_transed, axis=1), columns=feature_names)
+
+        # merge
+        self.train_df = pd.merge(
+            self.train_df, train_transed,
+            left_index=True, right_index=True)
+        self.test_df = pd.merge(
+            self.test_df, test_transed,
+            left_index=True, right_index=True)
+
+        # drop
+        self.train_df.drop(columns, axis=1, inplace=True)
+        self.test_df.drop(columns, axis=1, inplace=True)
         return
 
     def _calc_base_train_data(self):
