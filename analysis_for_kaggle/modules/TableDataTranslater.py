@@ -86,16 +86,16 @@ class TableDataTranslater(CommonMethodWrapper, BaseDataTranslater):
         return
 
     def _categorize_ndarrays(self, model, X_train, Y_train, X_test, col_name):
-        def _get_transed_data(
+        def _get_categorized_data(
             model, X_train, Y_train, target, col_name
         ):
             feature_names = [f'{col_name}_{model}']
             df = pd.DataFrame(data=X_train, columns=['x'])
             if model == 'label':
                 _, uniqs = pd.factorize(df['x'])
-                transed = uniqs.get_indexer(target)
+                categorized = uniqs.get_indexer(target)
             elif model in ['count', 'freq', 'rank', 'target']:
-                transed = target
+                categorized = target
                 if model == 'count':
                     mapping = df.groupby('x')['x'].count()
                     only_test = 0
@@ -111,20 +111,22 @@ class TableDataTranslater(CommonMethodWrapper, BaseDataTranslater):
                     mapping = df.groupby('x')['y'].mean()
                     only_test = 0
                 for i in mapping.index:
-                    transed = np.where(transed == i, mapping[i], transed)
-                transed = np.where(
-                    ~np.in1d(transed, list(mapping.index)), only_test, transed)
+                    categorized = np.where(
+                        categorized == i, mapping[i], categorized)
+                categorized = np.where(
+                    ~np.in1d(categorized, list(mapping.index)),
+                    only_test, categorized)
             else:
                 logger.error('NOT IMPLEMENTED CATEGORIZE: %s' % model)
                 raise Exception('NOT IMPLEMENTED')
-            transed = transed.reshape(-1, 1)
-            return feature_names, transed
+            categorized = categorized.reshape(-1, 1)
+            return feature_names, categorized
 
         output = []
         for target in [X_train, X_test]:
-            feature_names, transed = _get_transed_data(
+            feature_names, categorized = _get_categorized_data(
                 model, X_train, Y_train, target, col_name)
-            output.append(transed)
+            output.append(categorized)
         return output[0], output[1], feature_names
 
     def _categorize(self):
@@ -133,9 +135,6 @@ class TableDataTranslater(CommonMethodWrapper, BaseDataTranslater):
             return
 
         # columns
-        logger.info('categorize model: %s' % trans_category['model'])
-        if trans_category['model'] in ['onehot_with_test']:
-            logger.warning('IN DATA PREPROCESSING, USING TEST DATA')
         columns = []
         for column, dtype in self.test_df.dtypes.items():
             if column in [self.id_col]:
@@ -148,6 +147,9 @@ class TableDataTranslater(CommonMethodWrapper, BaseDataTranslater):
         logger.info('categorize: %s' % columns)
 
         # categorize
+        logger.info('categorize model: %s' % trans_category['model'])
+        if trans_category['model'] in ['onehot_with_test']:
+            logger.warning('IN DATA PREPROCESSING, USING TEST DATA')
         # onehot
         if trans_category['model'] in ['onehot', 'onehot_with_test']:
             for column in tqdm(columns):
@@ -164,36 +166,38 @@ class TableDataTranslater(CommonMethodWrapper, BaseDataTranslater):
                     self.train_df[column], categories=categories)
                 self.test_df[column] = pd.Categorical(
                     self.test_df[column], categories=categories)
-            train_transed = pd.get_dummies(self.train_df[columns])
-            test_transed = pd.get_dummies(self.test_df[columns])
+            train_categorized = pd.get_dummies(self.train_df[columns])
+            test_categorized = pd.get_dummies(self.test_df[columns])
         # not onehot
         else:
-            train_transed = []
-            test_transed = []
+            train_categorized = []
+            test_categorized = []
             feature_names = []
             for column in tqdm(columns):
                 self.train_df.fillna({column: 'REPLACED_NAN'}, inplace=True)
                 self.test_df.fillna({column: 'REPLACED_NAN'}, inplace=True)
-                _train_transed, _test_transed, _feature_names = \
+                _train_categorized, _test_categorized, _feature_names = \
                     self._categorize_ndarrays(
                         trans_category['model'],
                         self.train_df[column].to_numpy(),
                         self.pred_df.to_numpy(),
                         self.test_df[column].to_numpy(), column)
-                train_transed.append(_train_transed)
-                test_transed.append(_test_transed)
+                train_categorized.append(_train_categorized)
+                test_categorized.append(_test_categorized)
                 feature_names.extend(_feature_names)
-            train_transed = pd.DataFrame(
-                np.concatenate(train_transed, axis=1), columns=feature_names)
-            test_transed = pd.DataFrame(
-                np.concatenate(test_transed, axis=1), columns=feature_names)
+            train_categorized = pd.DataFrame(
+                np.concatenate(train_categorized, axis=1),
+                columns=feature_names)
+            test_categorized = pd.DataFrame(
+                np.concatenate(test_categorized, axis=1),
+                columns=feature_names)
 
         # merge
         self.train_df = pd.merge(
-            self.train_df, train_transed,
+            self.train_df, train_categorized,
             left_index=True, right_index=True)
         self.test_df = pd.merge(
-            self.test_df, test_transed,
+            self.test_df, test_categorized,
             left_index=True, right_index=True)
 
         # drop
