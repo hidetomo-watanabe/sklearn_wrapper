@@ -19,7 +19,7 @@
                 ]
             },
             "missing_imputation": true,
-            "category": {
+            "category_encoding": {
                 "target": [
                     "Pclass",
                     "FamilyStatus"

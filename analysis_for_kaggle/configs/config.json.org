@@ -26,7 +26,7 @@
                 "Foo"
             ],
             "missing_imputation": true,
-            "category": {
+            "category_encoding": {
                 "target": [
                     "Hoge",
                     "Fuga"

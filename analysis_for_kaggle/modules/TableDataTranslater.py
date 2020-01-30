@@ -128,7 +128,7 @@ class TableDataTranslater(CommonMethodWrapper, BaseDataTranslater):
         return output[0], output[1], feature_names
 
     def _encode_category(self):
-        trans_category = self.configs['pre']['table'].get('category')
+        trans_category = self.configs['pre']['table'].get('category_encoding')
         if not trans_category:
             return
 

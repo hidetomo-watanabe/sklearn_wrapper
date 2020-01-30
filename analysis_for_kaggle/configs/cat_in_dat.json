@@ -28,7 +28,7 @@
                 "ord_3",
                 "ord_4"
             ],
-            "category": {
+            "category_encoding": {
                 "target": [
                     "bin_0",
                     "bin_1",

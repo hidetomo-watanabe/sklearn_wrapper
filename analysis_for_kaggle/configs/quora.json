@@ -18,7 +18,7 @@
                 ]
             },
             "missing_imputation": true,
-            "category": {
+            "category_encoding": {
                 "target": [
                 ],
                 "model": "onehot"
