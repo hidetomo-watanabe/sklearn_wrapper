@@ -12,7 +12,7 @@
         "y_pre": "log",
         "y_scaler": "standard",
         "table": {
-            "missing": true,
+            "missing_imputation": true,
             "category": {
                 "target": [
                 ],

@@ -64,8 +64,8 @@ class TableDataTranslater(CommonMethodWrapper, BaseDataTranslater):
         self.test_df.drop(trans_del, axis=1, inplace=True)
         return
 
-    def _fill_missing_value_with_mean(self):
-        trans_missing = self.configs['pre']['table'].get('missing')
+    def _impute_missing_value_with_mean(self):
+        trans_missing = self.configs['pre']['table'].get('missing_imputation')
         if not trans_missing:
             return
 
@@ -77,9 +77,9 @@ class TableDataTranslater(CommonMethodWrapper, BaseDataTranslater):
                 continue
             if dtype == 'object':
                 logger.warning(
-                    'OBJECT MISSING IS NOT BE REPLACED: %s' % column)
+                    'OBJECT MISSING IS NOT BE IMPUTED: %s' % column)
                 continue
-            logger.info('replace missing with mean: %s' % column)
+            logger.info('impute missing with mean: %s' % column)
             column_mean = self.train_df[column].mean()
             self.train_df.fillna({column: column_mean}, inplace=True)
             self.test_df.fillna({column: column_mean}, inplace=True)
@@ -546,7 +546,7 @@ class TableDataTranslater(CommonMethodWrapper, BaseDataTranslater):
         self._calc_raw_data()
         self._translate_adhoc_df()
         self._delete_columns()
-        self._fill_missing_value_with_mean()
+        self._impute_missing_value_with_mean()
         self._encode_category()
         # ndarray
         self._calc_base_train_data()
