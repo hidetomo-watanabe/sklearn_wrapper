@@ -87,15 +87,15 @@ class TableDataTranslater(CommonMethodWrapper, BaseDataTranslater):
 
     def _encode_ndarrays(self, model, X_train, Y_train, X_test, col_name):
         def _get_encoded_data(
-            model, X_train, Y_train, target, col_name
+            model, X_train, Y_train, X_data, col_name
         ):
             feature_names = [f'{col_name}_{model}']
             df = pd.DataFrame(data=X_train, columns=['x'])
             if model == 'label':
                 _, uniqs = pd.factorize(df['x'])
-                encoded = uniqs.get_indexer(target)
+                encoded = uniqs.get_indexer(X_data)
             elif model in ['count', 'freq', 'rank', 'target']:
-                encoded = target
+                encoded = X_data
                 if model == 'count':
                     mapping = df.groupby('x')['x'].count()
                     only_test = 0
@@ -121,9 +121,9 @@ class TableDataTranslater(CommonMethodWrapper, BaseDataTranslater):
             return feature_names, encoded
 
         output = []
-        for target in [X_train, X_test]:
+        for X_data in [X_train, X_test]:
             feature_names, encoded = _get_encoded_data(
-                model, X_train, Y_train, target, col_name)
+                model, X_train, Y_train, X_data, col_name)
             output.append(encoded)
         return output[0], output[1], feature_names
 
@@ -137,7 +137,7 @@ class TableDataTranslater(CommonMethodWrapper, BaseDataTranslater):
         for column, dtype in self.test_df.dtypes.items():
             if column in [self.id_col]:
                 continue
-            if dtype != 'object' and column not in trans_category['target']:
+            if dtype != 'object' and column not in trans_category['option']:
                 continue
             columns.append(column)
         if len(columns) == 0:

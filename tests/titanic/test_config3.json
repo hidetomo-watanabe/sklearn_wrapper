@@ -28,7 +28,7 @@
             ],
             "missing_imputation": true,
             "category_encoding": {
-                "target": [
+                "option": [
                     "FamilyStatus"
                 ],
                 "model": "onehot"
