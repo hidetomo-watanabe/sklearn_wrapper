@@ -1,0 +1,67 @@
+{
+    "data": {
+        "train_path": "./tests/titanic/train.csv",
+        "test_path": "./tests/titanic/test.csv",
+        "output_dir": "./outputs",
+        "type": "table",
+        "pred_cols": ["Survived"],
+        "id_col": "PassengerId"
+    },
+    "pre": {
+        "train_mode": "clf",
+        "table": {
+            "adhoc_df": {
+                "myfunc": "titanic",
+                "methods": [
+                    "translate_honorific_title",
+                    "translate_age",
+                    "translate_familystatus"
+                ]
+            },
+            "deletion": [
+                "Name",
+                "Ticket",
+                "Fare",
+                "Cabin",
+                "Embarked"
+            ],
+            "missing_imputation": true,
+            "category_encoding": {
+                "option": [
+                    "Pclass",
+                    "FamilyStatus"
+                ],
+                "model": "target"
+            },
+            "x_scaler": "standard"
+        }
+    },
+    "fit": {
+        "train_mode": "clf",
+        "scoring": "accuracy",
+        "ensemble_model_config": {
+            "mode": "stacking",
+            "model": "log_reg",
+            "modelname": "tmp_titanic9",
+            "k": 10
+        },
+        "single_model_configs": [
+            {
+                "model": "lgb_clf",
+                "modelname": "tmp",
+                "fit_params": {
+                    "eval_metric": "accuracy",
+                    "early_stopping_rounds": 10
+                },
+                "params": {
+                    "n_estimators": [5],
+                    "max_depth": [3]
+                }
+            }
+        ]
+    },
+    "post": false,
+    "notify": {
+        "slack": "https://hooks.slack.com/services/hogehoge"
+    }
+}

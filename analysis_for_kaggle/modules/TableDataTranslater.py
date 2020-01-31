@@ -4,6 +4,7 @@ import scipy.sparse as sp
 import numpy as np
 import pandas as pd
 import importlib
+from category_encoders import TargetEncoder
 from sklearn.preprocessing import StandardScaler, MaxAbsScaler
 from sklearn.decomposition import PCA, TruncatedSVD, NMF
 from scipy.stats import ks_2samp
@@ -106,10 +107,6 @@ class TableDataTranslater(CommonMethodWrapper, BaseDataTranslater):
                     mapping = df.groupby('x')['x'].count().rank(
                         ascending=False)
                     only_test = -1
-                elif model == 'target':
-                    df['y'] = Y_train
-                    mapping = df.groupby('x')['y'].mean()
-                    only_test = 0
                 for i in mapping.index:
                     encoded = np.where(encoded == i, mapping[i], encoded)
                 encoded = np.where(
@@ -148,7 +145,6 @@ class TableDataTranslater(CommonMethodWrapper, BaseDataTranslater):
         logger.info('encoding model: %s' % trans_category['model'])
         if trans_category['model'] in ['onehot_with_test']:
             logger.warning('IN DATA PREPROCESSING, USING TEST DATA')
-        # onehot
         if trans_category['model'] in ['onehot', 'onehot_with_test']:
             for column in tqdm(columns):
                 self.train_df.fillna({column: 'REPLACED_NAN'}, inplace=True)
@@ -166,7 +162,17 @@ class TableDataTranslater(CommonMethodWrapper, BaseDataTranslater):
                     self.test_df[column], categories=categories)
             train_encoded = pd.get_dummies(self.train_df[columns])
             test_encoded = pd.get_dummies(self.test_df[columns])
-        # not onehot
+        elif trans_category['model'] == 'target':
+            model_obj = TargetEncoder(cols=columns)
+            model_obj.fit(self.train_df[columns], self.pred_df)
+            train_encoded = model_obj.transform(
+                self.train_df[columns], self.pred_df)
+            test_encoded = model_obj.transform(self.test_df[columns])
+            rename_mapping = {}
+            for column in columns:
+                rename_mapping[column] = f'{column}_target'
+            train_encoded.rename(columns=rename_mapping, inplace=True)
+            test_encoded.rename(columns=rename_mapping, inplace=True)
         else:
             train_encoded = []
             test_encoded = []
