@@ -170,7 +170,7 @@ class TableDataTranslater(CommonMethodWrapper, BaseDataTranslater):
             test_encoded = model_obj.transform(self.test_df[columns])
             rename_mapping = {}
             for column in columns:
-                rename_mapping[column] = f'{column}_target'
+                rename_mapping[column] = f'{column}_{trans_category["model"]}'
             train_encoded.rename(columns=rename_mapping, inplace=True)
             test_encoded.rename(columns=rename_mapping, inplace=True)
         else:
