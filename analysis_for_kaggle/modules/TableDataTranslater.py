@@ -4,7 +4,7 @@ import scipy.sparse as sp
 import numpy as np
 import pandas as pd
 import importlib
-from category_encoders import TargetEncoder
+from category_encoders import OrdinalEncoder, TargetEncoder
 from sklearn.preprocessing import StandardScaler, MaxAbsScaler
 from sklearn.decomposition import PCA, TruncatedSVD, NMF
 from scipy.stats import ks_2samp
@@ -92,28 +92,25 @@ class TableDataTranslater(CommonMethodWrapper, BaseDataTranslater):
         ):
             feature_names = [f'{col_name}_{model}']
             df = pd.DataFrame(data=X_train, columns=['x'])
-            if model == 'label':
-                _, uniqs = pd.factorize(df['x'])
-                encoded = uniqs.get_indexer(X_data)
-            elif model in ['count', 'freq', 'rank', 'target']:
-                encoded = X_data
-                if model == 'count':
-                    mapping = df.groupby('x')['x'].count()
-                    only_test = 0
-                elif model == 'freq':
-                    mapping = df.groupby('x')['x'].count() / len(df)
-                    only_test = 0
-                elif model == 'rank':
-                    mapping = df.groupby('x')['x'].count().rank(
-                        ascending=False)
-                    only_test = -1
-                for i in mapping.index:
-                    encoded = np.where(encoded == i, mapping[i], encoded)
-                encoded = np.where(
-                    ~np.in1d(encoded, list(mapping.index)), only_test, encoded)
+            encoded = X_data
+            if model == 'count':
+                mapping = df.groupby('x')['x'].count()
+                only_test = 0
+            elif model == 'freq':
+                mapping = df.groupby('x')['x'].count() / len(df)
+                only_test = 0
+            elif model == 'rank':
+                mapping = df.groupby('x')['x'].count().rank(
+                    ascending=False)
+                only_test = -1
             else:
                 logger.error('NOT IMPLEMENTED CATEGORY ENCODING: %s' % model)
                 raise Exception('NOT IMPLEMENTED')
+
+            for i in mapping.index:
+                encoded = np.where(encoded == i, mapping[i], encoded)
+            encoded = np.where(
+                ~np.in1d(encoded, list(mapping.index)), only_test, encoded)
             encoded = encoded.reshape(-1, 1)
             return feature_names, encoded
 
@@ -162,8 +159,11 @@ class TableDataTranslater(CommonMethodWrapper, BaseDataTranslater):
                     self.test_df[column], categories=categories)
             train_encoded = pd.get_dummies(self.train_df[columns])
             test_encoded = pd.get_dummies(self.test_df[columns])
-        elif trans_category['model'] == 'target':
-            model_obj = TargetEncoder(cols=columns)
+        elif trans_category['model'] in ['label', 'target']:
+            if trans_category['model'] == 'label':
+                model_obj = OrdinalEncoder(cols=columns)
+            elif trans_category['model'] == 'target':
+                model_obj = TargetEncoder(cols=columns)
             model_obj.fit(self.train_df[columns], self.pred_df)
             train_encoded = model_obj.transform(
                 self.train_df[columns], self.pred_df)
