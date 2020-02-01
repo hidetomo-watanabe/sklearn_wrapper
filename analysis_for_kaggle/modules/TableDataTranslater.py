@@ -4,7 +4,7 @@ import scipy.sparse as sp
 import numpy as np
 import pandas as pd
 import importlib
-from category_encoders import OrdinalEncoder, TargetEncoder
+from category_encoders import OneHotEncoder, OrdinalEncoder, TargetEncoder
 from sklearn.preprocessing import StandardScaler, MaxAbsScaler
 from sklearn.decomposition import PCA, TruncatedSVD, NMF
 from scipy.stats import ks_2samp
@@ -142,29 +142,22 @@ class TableDataTranslater(CommonMethodWrapper, BaseDataTranslater):
         logger.info('encoding model: %s' % trans_category['model'])
         if trans_category['model'] in ['onehot_with_test']:
             logger.warning('IN DATA PREPROCESSING, USING TEST DATA')
-        if trans_category['model'] in ['onehot', 'onehot_with_test']:
-            for column in tqdm(columns):
-                self.train_df.fillna({column: 'REPLACED_NAN'}, inplace=True)
-                self.test_df.fillna({column: 'REPLACED_NAN'}, inplace=True)
-                # pre onehot
-                categories = self.train_df[column].unique()
-                if trans_category['model'] == 'onehot_with_test':
-                    categories = np.concatenate(
-                        (categories, self.test_df[column].unique().tolist()),
-                        axis=0)
-                    categories = set(categories)
-                self.train_df[column] = pd.Categorical(
-                    self.train_df[column], categories=categories)
-                self.test_df[column] = pd.Categorical(
-                    self.test_df[column], categories=categories)
-            train_encoded = pd.get_dummies(self.train_df[columns])
-            test_encoded = pd.get_dummies(self.test_df[columns])
-        elif trans_category['model'] in ['label', 'target']:
-            if trans_category['model'] == 'label':
+        if trans_category['model'] in [
+            'onehot', 'onehot_with_test', 'label', 'target'
+        ]:
+            if trans_category['model'] in ['onehot', 'onehot_with_test']:
+                model_obj = OneHotEncoder(cols=columns, use_cat_names=True)
+            elif trans_category['model'] == 'label':
                 model_obj = OrdinalEncoder(cols=columns)
             elif trans_category['model'] == 'target':
                 model_obj = TargetEncoder(cols=columns)
-            model_obj.fit(self.train_df[columns], self.pred_df)
+            if trans_category['model'] == 'onehot_with_test':
+                model_obj.fit(
+                    pd.concat(
+                        [self.train_df[columns], self.test_df[columns]]
+                    ).reset_index())
+            else:
+                model_obj.fit(self.train_df[columns], self.pred_df)
             train_encoded = model_obj.transform(
                 self.train_df[columns], self.pred_df)
             test_encoded = model_obj.transform(self.test_df[columns])
