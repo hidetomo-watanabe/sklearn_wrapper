@@ -150,7 +150,7 @@ class Trainer(ConfigReader, CommonMethodWrapper):
             logger.error('NOT IMPLEMENTED BASE MODEL: %s' % model)
             raise Exception('NOT IMPLEMENTED')
 
-    def _get_cv_scores_models(
+    def _calc_cv_scores_models(
         self, model, X_train, Y_train, scorer, cv, fit_params={}
     ):
         if Y_train.ndim > 1 and Y_train.shape[1] > 1:
@@ -210,7 +210,7 @@ class Trainer(ConfigReader, CommonMethodWrapper):
             if multiclass:
                 model = multiclass(estimator=model)
             try:
-                scores, _ = self._get_cv_scores_models(
+                scores, _ = self._calc_cv_scores_models(
                     model, X_train, Y_train, scorer, cv, fit_params)
             except Exception as e:
                 logger.warning(e)
@@ -306,43 +306,57 @@ class Trainer(ConfigReader, CommonMethodWrapper):
         }
         return output
 
-    def calc_estimator(self):
-        def _get_cv_from_config():
-            cv_config = self.configs['fit'].get('cv')
-            if not cv_config:
-                if self.configs['fit']['train_mode'] == 'reg':
-                    model = KFold(
-                        n_splits=3, shuffle=True, random_state=42)
-                elif self.configs['fit']['train_mode'] == 'clf':
-                    model = StratifiedKFold(
-                        n_splits=3, shuffle=True, random_state=42)
-                self.cv = model
-                return self.cv
-
-            fold = cv_config['fold']
-            num = cv_config['num']
-            if num == 1:
-                self.cv = 1
-                return self.cv
-
-            logger.info('search with cv: fold=%s, num=%d' % (fold, num))
-            if fold == 'timeseries':
-                model = TimeSeriesSplit(n_splits=num)
-            elif fold == 'k':
+    def _get_cv_from_config(self):
+        cv_config = self.configs['fit'].get('cv')
+        if not cv_config:
+            if self.configs['fit']['train_mode'] == 'reg':
                 model = KFold(
-                    n_splits=num, shuffle=True, random_state=42)
-            elif fold == 'stratifiedk':
+                    n_splits=3, shuffle=True, random_state=42)
+            elif self.configs['fit']['train_mode'] == 'clf':
                 model = StratifiedKFold(
-                    n_splits=num, shuffle=True, random_state=42)
-            else:
-                logger.error(f'NOT IMPLEMENTED CV: {fold}')
-                raise Exception('NOT IMPLEMENTED')
-            self.cv = model
-            return self.cv
+                    n_splits=3, shuffle=True, random_state=42)
+            cv = model
+            return cv
 
+        fold = cv_config['fold']
+        num = cv_config['num']
+        if num == 1:
+            cv = 1
+            return cv
+
+        logger.info('search with cv: fold=%s, num=%d' % (fold, num))
+        if fold == 'timeseries':
+            model = TimeSeriesSplit(n_splits=num)
+        elif fold == 'k':
+            model = KFold(
+                n_splits=num, shuffle=True, random_state=42)
+        elif fold == 'stratifiedk':
+            model = StratifiedKFold(
+                n_splits=num, shuffle=True, random_state=42)
+        else:
+            logger.error(f'NOT IMPLEMENTED CV: {fold}')
+            raise Exception('NOT IMPLEMENTED')
+        cv = model
+        return cv
+
+    def _get_scorer_from_string(self, scoring):
+        if scoring == 'my_scorer':
+            if not self.kernel:
+                myfunc = importlib.import_module(
+                    'modules.myfuncs.%s'
+                    % self.configs['fit'].get('myfunc'))
+            method_name = 'get_my_scorer'
+            if not self.kernel:
+                method_name = 'myfunc.%s' % method_name
+            scorer = eval(method_name)()
+        else:
+            scorer = get_scorer(scoring)
+        return scorer
+
+    def calc_estimator(self):
         # configs
         model_configs = self.configs['fit']['single_model_configs']
-        cv = _get_cv_from_config()
+        self.cv = self._get_cv_from_config()
         logger.info('scoring: %s' % self.configs['fit']['scoring'])
         self.scorer = self._get_scorer_from_string(
             self.configs['fit']['scoring'])
@@ -355,7 +369,7 @@ class Trainer(ConfigReader, CommonMethodWrapper):
         self.single_estimators = []
         for i, config in enumerate(model_configs):
             _scores, _estimators = self.calc_single_estimators(
-                self.scorer, config, cv, nn_func=myfunc)
+                self.scorer, config, self.cv, nn_func=myfunc)
             single_scores.extend(_scores)
             modelname = config.get('modelname')
             if not modelname:
@@ -382,20 +396,6 @@ class Trainer(ConfigReader, CommonMethodWrapper):
                 else:
                     self.classes = sorted(np.unique(self.Y_train))
         return self.estimator
-
-    def _get_scorer_from_string(self, scoring):
-        if scoring == 'my_scorer':
-            if not self.kernel:
-                myfunc = importlib.import_module(
-                    'modules.myfuncs.%s'
-                    % self.configs['fit'].get('myfunc'))
-            method_name = 'get_my_scorer'
-            if not self.kernel:
-                method_name = 'myfunc.%s' % method_name
-            scorer = eval(method_name)()
-        else:
-            scorer = get_scorer(scoring)
-        return scorer
 
     def _calc_pseudo_label_data(
         self, X_train, Y_train, estimator, classes, threshold
@@ -430,11 +430,11 @@ class Trainer(ConfigReader, CommonMethodWrapper):
                 estimator = multiclass(estimator=estimator)
             logger.info(f'get estimator with cv_select: {cv_select}')
             if cv_select == 'train_all':
-                scores, estimators = self._get_cv_scores_models(
+                scores, estimators = self._calc_cv_scores_models(
                     estimator, X_train, Y_train, scorer,
                     cv=1, fit_params=fit_params)
             elif cv_select in ['nearest_mean', 'all_folds']:
-                scores, estimators = self._get_cv_scores_models(
+                scores, estimators = self._calc_cv_scores_models(
                     estimator, X_train, Y_train, scorer,
                     cv=cv, fit_params=fit_params)
                 logger.info(f'cv model scores mean: {np.mean(scores)}')
