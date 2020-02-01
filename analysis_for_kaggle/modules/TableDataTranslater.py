@@ -143,19 +143,22 @@ class TableDataTranslater(CommonMethodWrapper, BaseDataTranslater):
         if trans_category['model'] in ['onehot_with_test']:
             logger.warning('IN DATA PREPROCESSING, USING TEST DATA')
         if trans_category['model'] in [
-            'onehot', 'onehot_with_test', 'label', 'target'
+            'onehot', 'onehot_with_test', 'label', 'label_with_test', 'target'
         ]:
             if trans_category['model'] in ['onehot', 'onehot_with_test']:
                 model_obj = OneHotEncoder(cols=columns, use_cat_names=True)
-            elif trans_category['model'] == 'label':
+            elif trans_category['model'] in ['label', 'label_with_test']:
                 model_obj = OrdinalEncoder(cols=columns)
             elif trans_category['model'] == 'target':
                 model_obj = TargetEncoder(cols=columns)
-            if trans_category['model'] == 'onehot_with_test':
+            if trans_category['model'] in [
+                'onehot_with_test', 'label_with_test'
+            ]:
                 model_obj.fit(
                     pd.concat(
-                        [self.train_df[columns], self.test_df[columns]]
-                    ).reset_index())
+                        [self.train_df[columns], self.test_df[columns]],
+                        ignore_index=True
+                    ))
             else:
                 model_obj.fit(self.train_df[columns], self.pred_df)
             train_encoded = model_obj.transform(
