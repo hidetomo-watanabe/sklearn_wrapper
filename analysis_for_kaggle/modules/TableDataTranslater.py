@@ -86,11 +86,8 @@ class TableDataTranslater(CommonMethodWrapper, BaseDataTranslater):
             self.test_df.fillna({column: column_mean}, inplace=True)
         return
 
-    def _encode_ndarrays(self, model, X_train, Y_train, X_test, col_name):
-        def _get_encoded_data(
-            model, X_train, Y_train, X_data, col_name
-        ):
-            feature_names = [f'{col_name}_{model}']
+    def _encode_ndarrays(self, model, X_train, Y_train, X_test):
+        def _get_encoded_data(model, X_train, Y_train, X_data):
             df = pd.DataFrame(data=X_train, columns=['x'])
             encoded = X_data
             if model == 'count':
@@ -112,14 +109,11 @@ class TableDataTranslater(CommonMethodWrapper, BaseDataTranslater):
             encoded = np.where(
                 ~np.in1d(encoded, list(mapping.index)), only_test, encoded)
             encoded = encoded.reshape(-1, 1)
-            return feature_names, encoded
+            return encoded
 
-        output = []
-        for X_data in [X_train, X_test]:
-            feature_names, encoded = _get_encoded_data(
-                model, X_train, Y_train, X_data, col_name)
-            output.append(encoded)
-        return output[0], output[1], feature_names
+        train_encoded = _get_encoded_data(model, X_train, Y_train, X_train)
+        test_encoded = _get_encoded_data(model, X_train, Y_train, X_test)
+        return train_encoded, test_encoded
 
     def _encode_category(self):
         trans_category = self.configs['pre']['table'].get('category_encoding')
@@ -176,15 +170,15 @@ class TableDataTranslater(CommonMethodWrapper, BaseDataTranslater):
             for column in tqdm(columns):
                 self.train_df.fillna({column: 'REPLACED_NAN'}, inplace=True)
                 self.test_df.fillna({column: 'REPLACED_NAN'}, inplace=True)
-                _train_encoded, _test_encoded, _feature_names = \
+                _train_encoded, _test_encoded = \
                     self._encode_ndarrays(
                         trans_category['model'],
                         self.train_df[column].to_numpy(),
                         self.pred_df.to_numpy(),
-                        self.test_df[column].to_numpy(), column)
+                        self.test_df[column].to_numpy())
                 train_encoded.append(_train_encoded)
                 test_encoded.append(_test_encoded)
-                feature_names.extend(_feature_names)
+                feature_names.append(f'{column}_{trans_category["model"]}')
             train_encoded = pd.DataFrame(
                 np.concatenate(train_encoded, axis=1), columns=feature_names)
             test_encoded = pd.DataFrame(
