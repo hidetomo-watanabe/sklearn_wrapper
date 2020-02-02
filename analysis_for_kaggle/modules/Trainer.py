@@ -150,13 +150,13 @@ class Trainer(ConfigReader, CommonMethodWrapper):
             logger.error('NOT IMPLEMENTED BASE MODEL: %s' % model)
             raise Exception('NOT IMPLEMENTED')
 
-    def _get_cv_from_config(self):
-        cv_config = self.configs['fit'].get('cv')
+    @classmethod
+    def get_cv_from_json(self, cv_config, train_mode):
         if not cv_config:
-            if self.configs['fit']['train_mode'] == 'reg':
+            if train_mode == 'reg':
                 model = KFold(
                     n_splits=3, shuffle=True, random_state=42)
-            elif self.configs['fit']['train_mode'] == 'clf':
+            elif train_mode == 'clf':
                 model = StratifiedKFold(
                     n_splits=3, shuffle=True, random_state=42)
             cv = model
@@ -356,7 +356,8 @@ class Trainer(ConfigReader, CommonMethodWrapper):
     def calc_estimator(self):
         # configs
         model_configs = self.configs['fit']['single_model_configs']
-        self.cv = self._get_cv_from_config()
+        self.cv = self.get_cv_from_json(
+            self.configs['fit'].get('cv'), self.configs['fit']['train_mode'])
         logger.info('scoring: %s' % self.configs['fit']['scoring'])
         self.scorer = self._get_scorer_from_string(
             self.configs['fit']['scoring'])

@@ -139,25 +139,42 @@ class TableDataTranslater(CommonMethodWrapper, BaseDataTranslater):
         if trans_category['model'] in [
             'onehot', 'onehot_with_test', 'label', 'label_with_test', 'target'
         ]:
-            if trans_category['model'] in ['onehot', 'onehot_with_test']:
-                model_obj = OneHotEncoder(cols=columns, use_cat_names=True)
-            elif trans_category['model'] in ['label', 'label_with_test']:
-                model_obj = OrdinalEncoder(cols=columns)
-            elif trans_category['model'] == 'target':
+            if trans_category['model'] == 'target':
                 model_obj = TargetEncoder(cols=columns)
-            if trans_category['model'] in [
-                'onehot_with_test', 'label_with_test'
-            ]:
-                model_obj.fit(
-                    pd.concat(
-                        [self.train_df[columns], self.test_df[columns]],
-                        ignore_index=True
-                    ))
-            else:
+                cv = Trainer.get_cv_from_json(
+                    self.configs['fit'].get('cv'),
+                    self.configs['fit']['train_mode'])
+                indexes = cv.split(self.train_df, self.pred_df)
+                train_encoded = []
+                for train_index, pred_index in indexes:
+                    model_obj.fit(
+                        self.train_df.loc[train_index][columns],
+                        self.pred_df.loc[train_index])
+                    _train_encoded = model_obj.transform(
+                        self.train_df.loc[pred_index][columns])
+                    train_encoded.append(_train_encoded)
+                train_encoded = pd.concat(train_encoded, ignore_index=True)
                 model_obj.fit(self.train_df[columns], self.pred_df)
-            train_encoded = model_obj.transform(
-                self.train_df[columns], self.pred_df)
-            test_encoded = model_obj.transform(self.test_df[columns])
+                test_encoded = model_obj.transform(self.test_df[columns])
+            else:
+                if trans_category['model'] in ['onehot', 'onehot_with_test']:
+                    model_obj = OneHotEncoder(cols=columns, use_cat_names=True)
+                elif trans_category['model'] in ['label', 'label_with_test']:
+                    model_obj = OrdinalEncoder(cols=columns)
+                if trans_category['model'] in [
+                    'onehot_with_test', 'label_with_test'
+                ]:
+                    model_obj.fit(
+                        pd.concat(
+                            [self.train_df[columns], self.test_df[columns]],
+                            ignore_index=True
+                        ))
+                else:
+                    model_obj.fit(self.train_df[columns], self.pred_df)
+                train_encoded = model_obj.transform(
+                    self.train_df[columns], self.pred_df)
+                test_encoded = model_obj.transform(self.test_df[columns])
+            # rename
             rename_mapping = {}
             for column in columns:
                 rename_mapping[column] = f'{column}_{trans_category["model"]}'
