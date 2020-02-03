@@ -151,6 +151,48 @@ class TableDataTranslater(CommonMethodWrapper, BaseDataTranslater):
             np.concatenate(test_encoded, axis=1), columns=feature_names)
         return train_encoded, test_encoded
 
+    def _encode_category_single(self, model, columns):
+        if model in [
+            'onehot', 'onehot_with_test', 'label', 'label_with_test', 'target'
+        ]:
+            if model == 'target':
+                train_encoded, test_encoded = \
+                    self._encode_category_with_target(columns)
+            else:
+                if model in ['onehot', 'onehot_with_test']:
+                    model_obj = OneHotEncoder(cols=columns, use_cat_names=True)
+                elif model in ['label', 'label_with_test']:
+                    model_obj = OrdinalEncoder(cols=columns)
+                if model in ['onehot_with_test', 'label_with_test']:
+                    model_obj.fit(
+                        pd.concat(
+                            [self.train_df[columns], self.test_df[columns]],
+                            ignore_index=True
+                        ))
+                else:
+                    model_obj.fit(self.train_df[columns], self.pred_df)
+                train_encoded = model_obj.transform(
+                    self.train_df[columns], self.pred_df)
+                test_encoded = model_obj.transform(self.test_df[columns])
+            # rename
+            rename_mapping = {}
+            for column in columns:
+                rename_mapping[column] = f'{column}_{model}'
+            train_encoded.rename(columns=rename_mapping, inplace=True)
+            test_encoded.rename(columns=rename_mapping, inplace=True)
+        else:
+            train_encoded, test_encoded = \
+                self._encode_category_with_ndarray(columns)
+
+        # merge
+        self.train_df = pd.merge(
+            self.train_df, train_encoded,
+            left_index=True, right_index=True)
+        self.test_df = pd.merge(
+            self.test_df, test_encoded,
+            left_index=True, right_index=True)
+        return
+
     def _encode_category(self):
         trans_category = self.configs['pre']['table'].get('category_encoding')
         if not trans_category:
@@ -166,53 +208,13 @@ class TableDataTranslater(CommonMethodWrapper, BaseDataTranslater):
             columns.append(column)
         if len(columns) == 0:
             return
-        logger.info('encode category: %s' % columns)
 
         # encode
         logger.info('encoding model: %s' % trans_category['model'])
+        logger.info('encode category: %s' % columns)
         if 'with_test' in trans_category['model']:
             logger.warning('IN DATA PREPROCESSING, USING TEST DATA')
-        if trans_category['model'] in [
-            'onehot', 'onehot_with_test', 'label', 'label_with_test', 'target'
-        ]:
-            if trans_category['model'] == 'target':
-                train_encoded, test_encoded = \
-                    self._encode_category_with_target(columns)
-            else:
-                if trans_category['model'] in ['onehot', 'onehot_with_test']:
-                    model_obj = OneHotEncoder(cols=columns, use_cat_names=True)
-                elif trans_category['model'] in ['label', 'label_with_test']:
-                    model_obj = OrdinalEncoder(cols=columns)
-                if trans_category['model'] in [
-                    'onehot_with_test', 'label_with_test'
-                ]:
-                    model_obj.fit(
-                        pd.concat(
-                            [self.train_df[columns], self.test_df[columns]],
-                            ignore_index=True
-                        ))
-                else:
-                    model_obj.fit(self.train_df[columns], self.pred_df)
-                train_encoded = model_obj.transform(
-                    self.train_df[columns], self.pred_df)
-                test_encoded = model_obj.transform(self.test_df[columns])
-            # rename
-            rename_mapping = {}
-            for column in columns:
-                rename_mapping[column] = f'{column}_{trans_category["model"]}'
-            train_encoded.rename(columns=rename_mapping, inplace=True)
-            test_encoded.rename(columns=rename_mapping, inplace=True)
-        else:
-            train_encoded, test_encoded = \
-                self._encode_category_with_ndarray(columns)
-
-        # merge
-        self.train_df = pd.merge(
-            self.train_df, train_encoded,
-            left_index=True, right_index=True)
-        self.test_df = pd.merge(
-            self.test_df, test_encoded,
-            left_index=True, right_index=True)
+        self._encode_category_single(trans_category['model'], columns)
 
         # drop
         self.train_df.drop(columns, axis=1, inplace=True)
