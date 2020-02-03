@@ -101,7 +101,8 @@ class TableDataTranslater(CommonMethodWrapper, BaseDataTranslater):
             _train_encoded = model_obj.transform(
                 self.train_df.loc[pred_index][columns])
             train_encoded.append(_train_encoded)
-        train_encoded = pd.concat(train_encoded, ignore_index=True)
+        train_encoded = pd.concat(train_encoded)
+        train_encoded.sort_index(inplace=True)
         model_obj.fit(self.train_df[columns], self.pred_df)
         test_encoded = model_obj.transform(self.test_df[columns])
         return train_encoded, test_encoded
