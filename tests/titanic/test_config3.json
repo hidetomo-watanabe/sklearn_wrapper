@@ -28,10 +28,17 @@
             ],
             "missing_imputation": true,
             "category_encoding": {
-                "option": [
-                    "FamilyStatus"
-                ],
-                "model": "onehot"
+                "default": {
+                    "model": "onehot"
+                },
+                "options": [
+                    {
+                        "columns": [
+                            "FamilyStatus"
+                        ],
+                        "model": "onehot"
+                    }
+                ]
             },
             "x_scaler": "standard",
             "adversarial_validation": {

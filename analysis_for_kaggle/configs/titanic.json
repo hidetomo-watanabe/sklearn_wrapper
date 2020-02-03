@@ -20,11 +20,18 @@
             },
             "missing_imputation": true,
             "category_encoding": {
-                "option": [
-                    "Pclass",
-                    "FamilyStatus"
-                ],
-                "model": "onehot_with_test"
+                "default": {
+                    "model": "onehot_with_test"
+                },
+                "options": [
+                    {
+                        "columns": [
+                            "Pclass",
+                            "FamilyStatus"
+                        ],
+                        "model": "onehot_with_test"
+                    }
+                ]
             },
             "x_scaler": "standard",
             "dimension_reduction": {

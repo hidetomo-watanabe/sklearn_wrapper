@@ -20,9 +20,11 @@
             },
             "missing_imputation": true,
             "category_encoding": {
-                "option": [
-                ],
-                "model": "onehot"
+                "default": {
+                    "model": "onehot"
+                },
+                "options": [
+                ]
             },
             "x_scaler": "standard",
             "dimension_reduction": {

@@ -28,11 +28,18 @@
             ],
             "missing_imputation": true,
             "category_encoding": {
-                "option": [
-                    "Pclass",
-                    "FamilyStatus"
-                ],
-                "model": "onehot"
+                "default": {
+                    "model": "onehot"
+                },
+                "options": [
+                    {
+                        "columns": [
+                            "Pclass",
+                            "FamilyStatus"
+                        ],
+                        "model": "onehot"
+                    }
+                ]
             },
             "x_scaler": "standard"
         }

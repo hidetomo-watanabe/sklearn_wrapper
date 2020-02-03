@@ -27,11 +27,18 @@
             ],
             "missing_imputation": true,
             "category_encoding": {
-                "option": [
-                    "Hoge",
-                    "Fuga"
-                ],
-                "model": "onehot"
+                "default": {
+                    "model": "onehot"
+                },
+                "options": [
+                    {
+                        "columns": [
+                            "Hoge",
+                            "Fuga"
+                        ],
+                        "model": "target"
+                    }
+                ]
             },
             "adhoc_ndarray": {
                 "myfunc": "hoge",

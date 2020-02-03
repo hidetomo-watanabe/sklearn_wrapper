@@ -27,11 +27,18 @@
             ],
             "missing_imputation": true,
             "category_encoding": {
-                "option": [
-                    "Pclass",
-                    "FamilyStatus"
-                ],
-                "model": "target"
+                "default": {
+                    "model": "target"
+                },
+                "options": [
+                    {
+                        "columns": [
+                            "Pclass",
+                            "FamilyStatus"
+                        ],
+                        "model": "target"
+                    }
+                ]
             },
             "x_scaler": "standard"
         }

@@ -198,27 +198,33 @@ class TableDataTranslater(CommonMethodWrapper, BaseDataTranslater):
         if not trans_category:
             return
 
-        # columns
-        columns = []
+        # default columns
+        default_columns = []
         for column, dtype in self.test_df.dtypes.items():
             if column in [self.id_col]:
                 continue
-            if dtype != 'object' and column not in trans_category['option']:
+            if dtype != 'object':
                 continue
-            columns.append(column)
-        if len(columns) == 0:
-            return
+            for option in trans_category['options']:
+                if column not in option['columns']:
+                    continue
+            default_columns.append(column)
 
         # encode
-        logger.info('encoding model: %s' % trans_category['model'])
-        logger.info('encode category: %s' % columns)
-        if 'with_test' in trans_category['model']:
-            logger.warning('IN DATA PREPROCESSING, USING TEST DATA')
-        self._encode_category_single(trans_category['model'], columns)
+        drop_columns = []
+        trans_category['default']['columns'] = default_columns
+        for config in trans_category['options'] + [trans_category['default']]:
+            drop_columns.extend(config['columns'])
+            logger.info('encoding model: %s' % config['model'])
+            logger.info('encode category: %s' % config['columns'])
+            if 'with_test' in config['model']:
+                logger.warning('IN DATA PREPROCESSING, USING TEST DATA')
+            self._encode_category_single(config['model'], config['columns'])
+        drop_columns = list(set(drop_columns))
 
         # drop
-        self.train_df.drop(columns, axis=1, inplace=True)
-        self.test_df.drop(columns, axis=1, inplace=True)
+        self.train_df.drop(drop_columns, axis=1, inplace=True)
+        self.test_df.drop(drop_columns, axis=1, inplace=True)
         return
 
     def _calc_base_train_data(self):
