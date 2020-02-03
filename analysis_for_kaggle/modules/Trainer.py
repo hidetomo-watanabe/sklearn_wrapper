@@ -168,7 +168,6 @@ class Trainer(ConfigReader, CommonMethodWrapper):
             cv = 1
             return cv
 
-        logger.info('search with cv: fold=%s, num=%d' % (fold, num))
         if fold == 'timeseries':
             model = TimeSeriesSplit(n_splits=num)
         elif fold == 'k':
@@ -358,6 +357,7 @@ class Trainer(ConfigReader, CommonMethodWrapper):
         model_configs = self.configs['fit']['single_model_configs']
         self.cv = self.get_cv_from_json(
             self.configs['fit'].get('cv'), self.configs['fit']['train_mode'])
+        logger.info(f'cv: {self.cv}')
         logger.info('scoring: %s' % self.configs['fit']['scoring'])
         self.scorer = self._get_scorer_from_string(
             self.configs['fit']['scoring'])

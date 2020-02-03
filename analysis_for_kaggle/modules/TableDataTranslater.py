@@ -91,6 +91,7 @@ class TableDataTranslater(CommonMethodWrapper, BaseDataTranslater):
         cv = Trainer.get_cv_from_json(
             self.configs['fit'].get('cv'),
             self.configs['fit']['train_mode'])
+        logger.info(f'cv: {cv}')
         indexes = cv.split(self.train_df, self.pred_df)
         train_encoded = []
         for train_index, pred_index in indexes:
