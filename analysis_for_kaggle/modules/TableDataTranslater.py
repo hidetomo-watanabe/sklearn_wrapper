@@ -86,33 +86,69 @@ class TableDataTranslater(CommonMethodWrapper, BaseDataTranslater):
             self.test_df.fillna({column: column_mean}, inplace=True)
         return
 
-    def _encode_ndarrays(self, model, X_train, Y_train, X_test):
-        def _get_encoded_data(model, X_train, Y_train, X_data):
-            df = pd.DataFrame(data=X_train, columns=['x'])
-            encoded = X_data
-            if model == 'count':
-                mapping = df.groupby('x')['x'].count()
-                only_test = 0
-            elif model == 'freq':
-                mapping = df.groupby('x')['x'].count() / len(df)
-                only_test = 0
-            elif model == 'rank':
-                mapping = df.groupby('x')['x'].count().rank(
-                    ascending=False)
-                only_test = -1
-            else:
-                logger.error('NOT IMPLEMENTED CATEGORY ENCODING: %s' % model)
-                raise Exception('NOT IMPLEMENTED')
+    def _encode_category_with_target(self, columns):
+        model_obj = TargetEncoder(cols=columns)
+        cv = Trainer.get_cv_from_json(
+            self.configs['fit'].get('cv'),
+            self.configs['fit']['train_mode'])
+        indexes = cv.split(self.train_df, self.pred_df)
+        train_encoded = []
+        for train_index, pred_index in indexes:
+            model_obj.fit(
+                self.train_df.loc[train_index][columns],
+                self.pred_df.loc[train_index])
+            _train_encoded = model_obj.transform(
+                self.train_df.loc[pred_index][columns])
+            train_encoded.append(_train_encoded)
+        train_encoded = pd.concat(train_encoded, ignore_index=True)
+        model_obj.fit(self.train_df[columns], self.pred_df)
+        test_encoded = model_obj.transform(self.test_df[columns])
+        return train_encoded, test_encoded
 
-            for i in mapping.index:
-                encoded = np.where(encoded == i, mapping[i], encoded)
-            encoded = np.where(
-                ~np.in1d(encoded, list(mapping.index)), only_test, encoded)
-            encoded = encoded.reshape(-1, 1)
-            return encoded
+    def _encode_ndarray(self, model, X_train, Y_train, X_data):
+        df = pd.DataFrame(data=X_train, columns=['x'])
+        encoded = X_data
+        if model == 'count':
+            mapping = df.groupby('x')['x'].count()
+            only_test = 0
+        elif model == 'freq':
+            mapping = df.groupby('x')['x'].count() / len(df)
+            only_test = 0
+        elif model == 'rank':
+            mapping = df.groupby('x')['x'].count().rank(
+                ascending=False)
+            only_test = -1
+        else:
+            logger.error('NOT IMPLEMENTED CATEGORY ENCODING: %s' % model)
+            raise Exception('NOT IMPLEMENTED')
 
-        train_encoded = _get_encoded_data(model, X_train, Y_train, X_train)
-        test_encoded = _get_encoded_data(model, X_train, Y_train, X_test)
+        for i in mapping.index:
+            encoded = np.where(encoded == i, mapping[i], encoded)
+        encoded = np.where(
+            ~np.in1d(encoded, list(mapping.index)), only_test, encoded)
+        encoded = encoded.reshape(-1, 1)
+        return encoded
+
+    def _encode_category_with_ndarray(self, columns):
+        train_encoded = []
+        test_encoded = []
+        feature_names = []
+        for column in tqdm(columns):
+            self.train_df.fillna({column: 'REPLACED_NAN'}, inplace=True)
+            self.test_df.fillna({column: 'REPLACED_NAN'}, inplace=True)
+            _train_encoded = self._encode_ndarray(
+                trans_category['model'], self.train_df[column].to_numpy(),
+                self.pred_df.to_numpy(), self.train_df[column].to_numpy())
+            _test_encoded = self._encode_ndarray(
+                trans_category['model'], self.train_df[column].to_numpy(),
+                self.pred_df.to_numpy(), self.test_df[column].to_numpy())
+            train_encoded.append(_train_encoded)
+            test_encoded.append(_test_encoded)
+            feature_names.append(f'{column}_{trans_category["model"]}')
+        train_encoded = pd.DataFrame(
+            np.concatenate(train_encoded, axis=1), columns=feature_names)
+        test_encoded = pd.DataFrame(
+            np.concatenate(test_encoded, axis=1), columns=feature_names)
         return train_encoded, test_encoded
 
     def _encode_category(self):
@@ -134,28 +170,14 @@ class TableDataTranslater(CommonMethodWrapper, BaseDataTranslater):
 
         # encode
         logger.info('encoding model: %s' % trans_category['model'])
-        if trans_category['model'] in ['onehot_with_test']:
+        if 'with_test' in trans_category['model']:
             logger.warning('IN DATA PREPROCESSING, USING TEST DATA')
         if trans_category['model'] in [
             'onehot', 'onehot_with_test', 'label', 'label_with_test', 'target'
         ]:
             if trans_category['model'] == 'target':
-                model_obj = TargetEncoder(cols=columns)
-                cv = Trainer.get_cv_from_json(
-                    self.configs['fit'].get('cv'),
-                    self.configs['fit']['train_mode'])
-                indexes = cv.split(self.train_df, self.pred_df)
-                train_encoded = []
-                for train_index, pred_index in indexes:
-                    model_obj.fit(
-                        self.train_df.loc[train_index][columns],
-                        self.pred_df.loc[train_index])
-                    _train_encoded = model_obj.transform(
-                        self.train_df.loc[pred_index][columns])
-                    train_encoded.append(_train_encoded)
-                train_encoded = pd.concat(train_encoded, ignore_index=True)
-                model_obj.fit(self.train_df[columns], self.pred_df)
-                test_encoded = model_obj.transform(self.test_df[columns])
+                train_encoded, test_encoded = \
+                    self._encode_category_with_target(columns)
             else:
                 if trans_category['model'] in ['onehot', 'onehot_with_test']:
                     model_obj = OneHotEncoder(cols=columns, use_cat_names=True)
@@ -181,25 +203,8 @@ class TableDataTranslater(CommonMethodWrapper, BaseDataTranslater):
             train_encoded.rename(columns=rename_mapping, inplace=True)
             test_encoded.rename(columns=rename_mapping, inplace=True)
         else:
-            train_encoded = []
-            test_encoded = []
-            feature_names = []
-            for column in tqdm(columns):
-                self.train_df.fillna({column: 'REPLACED_NAN'}, inplace=True)
-                self.test_df.fillna({column: 'REPLACED_NAN'}, inplace=True)
-                _train_encoded, _test_encoded = \
-                    self._encode_ndarrays(
-                        trans_category['model'],
-                        self.train_df[column].to_numpy(),
-                        self.pred_df.to_numpy(),
-                        self.test_df[column].to_numpy())
-                train_encoded.append(_train_encoded)
-                test_encoded.append(_test_encoded)
-                feature_names.append(f'{column}_{trans_category["model"]}')
-            train_encoded = pd.DataFrame(
-                np.concatenate(train_encoded, axis=1), columns=feature_names)
-            test_encoded = pd.DataFrame(
-                np.concatenate(test_encoded, axis=1), columns=feature_names)
+            train_encoded, test_encoded = \
+                self._encode_category_with_ndarray(columns)
 
         # merge
         self.train_df = pd.merge(
