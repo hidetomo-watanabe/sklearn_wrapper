@@ -3,6 +3,7 @@ import pandas as pd
 from sklearn.tree import DecisionTreeClassifier
 from dtreeviz.trees import dtreeviz
 from sklearn.model_selection import learning_curve
+from sklearn import metrics
 import matplotlib.pyplot as plt
 import seaborn as sns
 from IPython.display import display
@@ -170,6 +171,16 @@ class Visualizer(ConfigReader, CommonMethodWrapper):
         g = sns.jointplot(Y_train_pred, Y_train, kind='kde')
         g.set_axis_labels('Y_train_pred', 'Y_train')
         g.fig.suptitle('estimator')
+
+    def plot_roc(self, Y_train, Y_train_pred_proba):
+        fpr, tpr, thresholds = metrics.roc_curve(
+            Y_train, Y_train_pred_proba[:, 1])
+        auc = metrics.auc(fpr, tpr)
+        plt.title('ROC curve')
+        plt.xlabel('False Positive Rate')
+        plt.ylabel('True Positive Rate')
+        plt.plot(fpr, tpr, label=f'AUC: {auc}')
+        plt.legend(loc="best")
 
     def plot_y_train_test_pred_histogram(self, Y_train_pred, Y_pred):
         ax = plt.subplot()
