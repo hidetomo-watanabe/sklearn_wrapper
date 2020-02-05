@@ -201,15 +201,18 @@ class TableDataTranslater(CommonMethodWrapper, BaseDataTranslater):
             return
 
         # default columns
+        option_columns = []
+        for option in trans_category['options']:
+            option_columns.extend(option['columns'])
+        option_columns = list(set(option_columns))
         default_columns = []
         for column, dtype in self.test_df.dtypes.items():
             if column in [self.id_col]:
                 continue
             if dtype != 'object':
                 continue
-            for option in trans_category['options']:
-                if column not in option['columns']:
-                    continue
+            if column in option_columns:
+                continue
             default_columns.append(column)
 
         # encode
