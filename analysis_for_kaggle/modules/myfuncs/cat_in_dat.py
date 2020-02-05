@@ -1,7 +1,3 @@
-import numpy as np
-import pandas as pd
-
-
 def add_ord_1_label(train_df, test_df):
     for df in [train_df, test_df]:
         df['ord_1_label'] = df['ord_1'].replace({
