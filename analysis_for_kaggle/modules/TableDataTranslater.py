@@ -131,7 +131,7 @@ class TableDataTranslater(CommonMethodWrapper, BaseDataTranslater):
         encoded = encoded.reshape(-1, 1)
         return encoded
 
-    def _encode_category_with_ndarray(self, columns):
+    def _encode_category_with_ndarray(self, model, columns):
         train_encoded = []
         test_encoded = []
         feature_names = []
@@ -139,14 +139,14 @@ class TableDataTranslater(CommonMethodWrapper, BaseDataTranslater):
             self.train_df.fillna({column: 'REPLACED_NAN'}, inplace=True)
             self.test_df.fillna({column: 'REPLACED_NAN'}, inplace=True)
             _train_encoded = self._encode_ndarray(
-                trans_category['model'], self.train_df[column].to_numpy(),
+                model, self.train_df[column].to_numpy(),
                 self.pred_df.to_numpy(), self.train_df[column].to_numpy())
             _test_encoded = self._encode_ndarray(
-                trans_category['model'], self.train_df[column].to_numpy(),
+                model, self.train_df[column].to_numpy(),
                 self.pred_df.to_numpy(), self.test_df[column].to_numpy())
             train_encoded.append(_train_encoded)
             test_encoded.append(_test_encoded)
-            feature_names.append(f'{column}_{trans_category["model"]}')
+            feature_names.append(f'{column}_{model}')
         train_encoded = pd.DataFrame(
             np.concatenate(train_encoded, axis=1), columns=feature_names)
         test_encoded = pd.DataFrame(
@@ -184,7 +184,7 @@ class TableDataTranslater(CommonMethodWrapper, BaseDataTranslater):
             test_encoded.rename(columns=rename_mapping, inplace=True)
         else:
             train_encoded, test_encoded = \
-                self._encode_category_with_ndarray(columns)
+                self._encode_category_with_ndarray(model, columns)
 
         # merge
         self.train_df = pd.merge(
