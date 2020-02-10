@@ -47,10 +47,6 @@ class Outputer(ConfigReader):
         return output
 
     def predict_y(self):
-        self.Y_pred = None
-        self.Y_pred_proba = None
-        self.Y_train_pred = None
-        self.Y_train_pred_proba = None
         # clf
         if self.configs['fit']['train_mode'] == 'clf':
             # keras clf
@@ -149,15 +145,12 @@ class Outputer(ConfigReader):
             self.Y_pred, self.Y_pred_proba, \
             self.Y_train_pred, self.Y_train_pred_proba
 
-    def calc_predict_df(self):
-        self.Y_pred_df = None
-        self.Y_pred_proba_df = None
+    def _calc_predict_df(self):
         # np => pd
-        if isinstance(self.Y_pred, np.ndarray):
-            self.Y_pred_df = pd.merge(
-                pd.DataFrame(data=self.test_ids, columns=[self.id_col]),
-                pd.DataFrame(data=self.Y_pred, columns=self.pred_cols),
-                left_index=True, right_index=True)
+        self.Y_pred_df = pd.merge(
+            pd.DataFrame(data=self.test_ids, columns=[self.id_col]),
+            pd.DataFrame(data=self.Y_pred, columns=self.pred_cols),
+            left_index=True, right_index=True)
         if isinstance(self.Y_pred_proba, np.ndarray):
             if self.Y_pred_proba.shape[1] == self.classes.shape[0]:
                 self.Y_pred_proba_df = pd.DataFrame(
@@ -191,6 +184,14 @@ class Outputer(ConfigReader):
                 self.Y_pred_df, self.Y_pred_proba_df = eval(
                     method_name)(self.Y_pred_df, self.Y_pred_proba_df)
 
+        return self.Y_pred_df, self.Y_pred_proba_df
+
+    def calc_predict_data(self):
+        self.Y_pred_proba = None
+        self.Y_train_pred_proba = None
+        self.Y_pred_proba_df = None
+        self.predict_y()
+        self._calc_predict_df()
         return self.Y_pred_df, self.Y_pred_proba_df
 
     def write_predict_data(self):

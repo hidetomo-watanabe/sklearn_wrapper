@@ -65,8 +65,7 @@ if __name__ == '__main__':
             outputer_obj.read_config_file(config_path)
 
             logger.info('### PREDICT')
-            outputer_obj.predict_y()
-            _, Y_pred_proba_df = outputer_obj.calc_predict_df()
+            _, Y_pred_proba_df = outputer_obj.calc_predict_data()
 
             return Y_pred_proba_df
 

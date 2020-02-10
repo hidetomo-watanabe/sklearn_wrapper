@@ -47,8 +47,7 @@ if __name__ == '__main__':
     outputer_obj.read_config_text(config_text)
 
     logger.info('### PREDICT')
-    outputer_obj.predict_y()
-    outputer_obj.calc_predict_df()
+    outputer_obj.calc_predict_data()
 
     logger.info('### WRITE PREDICT DATA')
     outputer_obj.write_predict_data()

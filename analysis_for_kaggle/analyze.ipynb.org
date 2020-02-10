@@ -340,8 +340,7 @@
    "outputs": [],
    "source": [
     "logger.info('### PREDICT')\n",
-    "outputer_obj.predict_y()\n",
-    "outputer_obj.calc_predict_df()"
+    "outputer_obj.calc_predict_data()"
    ]
   },
   {
