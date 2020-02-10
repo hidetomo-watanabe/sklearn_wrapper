@@ -33,7 +33,7 @@ if __name__ == '__main__':
     trainer_obj.read_config_text(config_text)
 
     logger.info('### FIT')
-    trainer_obj.calc_estimator()
+    trainer_obj.calc_estimator_data()
 
     logger.info('### WRITE ESTIMATOR DATA')
     trainer_obj.write_estimator_data()

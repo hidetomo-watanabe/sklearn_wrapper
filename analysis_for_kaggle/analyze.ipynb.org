@@ -242,7 +242,7 @@
    "outputs": [],
    "source": [
     "logger.info('### FIT')\n",
-    "trainer_obj.calc_estimator()"
+    "trainer_obj.calc_estimator_data()"
    ]
   },
   {

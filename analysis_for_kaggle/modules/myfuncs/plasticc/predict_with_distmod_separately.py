@@ -54,7 +54,7 @@ if __name__ == '__main__':
             trainer_obj.read_config_file(config_path)
 
             logger.info('### FIT')
-            trainer_obj.calc_estimator()
+            trainer_obj.calc_estimator_data()
 
             logger.info('### GET ESTIMATOR DATA')
             estimator_data = trainer_obj.get_estimator_data()

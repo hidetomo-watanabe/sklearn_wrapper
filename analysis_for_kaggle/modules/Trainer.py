@@ -352,7 +352,7 @@ class Trainer(ConfigReader, CommonMethodWrapper):
         }
         return output
 
-    def calc_estimator(self):
+    def calc_estimator_data(self):
         # configs
         model_configs = self.configs['fit']['single_model_configs']
         self.cv = self.get_cv_from_json(
