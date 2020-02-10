@@ -631,7 +631,10 @@ class Trainer(ConfigReader, CommonMethodWrapper):
 
             single_scores = np.array(single_scores)
             weights = single_scores / np.sum(single_scores)
-            logger.info(f'weights: {weights}')
+            logger.info('weights:')
+            display(pd.DataFrame(
+                    weights.reshape(-1, weights.shape[0]),
+                    columns=[_e[0] for _e in single_estimators]))
             voter = self._get_voter(
                 ensemble_config['mode'], single_estimators, weights)
             Y_train = self.ravel_like(Y_train)
