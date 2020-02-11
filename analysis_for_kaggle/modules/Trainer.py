@@ -1,4 +1,4 @@
-import pickle
+import dill
 import scipy.sparse as sp
 import numpy as np
 import pandas as pd
@@ -374,10 +374,10 @@ class Trainer(ConfigReader, CommonMethodWrapper):
             single_scores.extend(_scores)
             modelname = config.get('modelname')
             if not modelname:
-                modelname = f'tmp_model_{i}'
+                modelname = f'tmp_model'
             for j, _estimator in enumerate(_estimators):
                 self.single_estimators.append(
-                    (f'{modelname}_{j}', _estimator))
+                    (f'{i}_{modelname}_{j}', _estimator))
 
         # ensemble
         if len(self.single_estimators) == 1:
@@ -585,13 +585,6 @@ class Trainer(ConfigReader, CommonMethodWrapper):
         return pipeline
 
     def _get_stacker(self, pipeline, ensemble_config):
-        # weighted_average
-        if ensemble_config['mode'] == 'weighted':
-            weights = pipeline.find_weights(self.scorer._score_func)
-            stacker = pipeline.weight(weights)
-            return stacker
-
-        # stacking, blending
         if ensemble_config['mode'] == 'stacking':
             stack_dataset = pipeline.stack(
                 k=ensemble_config['k'], seed=42)
@@ -641,13 +634,7 @@ class Trainer(ConfigReader, CommonMethodWrapper):
             Y_train = self.ravel_like(Y_train)
             voter.fit(X_train, Y_train)
             estimator = voter
-        elif ensemble_config['mode'] in ['weighted', 'stacking', 'blending']:
-            if ensemble_config['mode'] == 'weighted' \
-                    and self.configs['fit']['train_mode'] == 'clf':
-                logger.error(
-                    'NOT IMPLEMENTED CLASSIFICATION AND WEIGHTED AVERAGE')
-                raise Exception('NOT IMPLEMENTED')
-
+        elif ensemble_config['mode'] in ['stacking', 'blending']:
             pipeline = self._get_pipeline(single_estimators)
             stacker = self._get_stacker(pipeline, ensemble_config)
             stacker.validate(
@@ -683,5 +670,5 @@ class Trainer(ConfigReader, CommonMethodWrapper):
                 with open(
                     '%s/%s.pickle' % (output_path, modelname), 'wb'
                 ) as f:
-                    pickle.dump(estimator, f)
+                    dill.dump(estimator, f)
         return modelname

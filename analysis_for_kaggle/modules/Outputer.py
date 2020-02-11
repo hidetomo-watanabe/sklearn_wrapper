@@ -91,11 +91,8 @@ class Outputer(ConfigReader, CommonMethodWrapper):
                         X_target)
         # reg
         elif self.configs['fit']['train_mode'] == 'reg':
-            # weighted_average
-            if self.estimator.__class__ in [PipeApply]:
-                Y_pred = self.estimator.execute()
             # ensemble
-            elif self.estimator.__class__ in [Regressor]:
+            if self.estimator.__class__ in [Regressor]:
                 self.estimator.dataset = dataset
                 Y_pred = self.estimator.predict()
             # single

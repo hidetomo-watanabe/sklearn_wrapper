@@ -1,0 +1,70 @@
+{
+    "data": {
+        "train_path": "./tests/house/train.csv",
+        "test_path": "./tests/house/test.csv",
+        "output_dir": "./outputs",
+        "type": "table",
+        "pred_cols": ["SalePrice"],
+        "id_col": "Id"
+    },
+    "pre": {
+        "train_mode": "reg",
+        "y_pre": "log",
+        "y_scaler": "standard",
+        "table": {
+            "missing_imputation": true,
+            "category_encoding": {
+                "default": {
+                    "model": "onehot"
+                },
+                "options": [
+                ]
+            },
+            "x_scaler": "standard",
+            "dimension_reduction": {
+                "n": 90,
+                "model": "pca"
+            }
+        }
+    },
+    "fit": {
+        "train_mode": "reg",
+        "scoring": "neg_mean_squared_error",
+        "ensemble_model_config": {
+            "mode": "average",
+            "model": "linear_reg",
+            "modelname": "tmp_house3",
+            "k": 10
+        },
+        "single_model_configs": [
+            {
+                "model": "svr",
+                "modelname": "tmp",
+                "fit_params": {
+                },
+                "params": {
+                    "C": [1],
+                    "degree": [1],
+                    "kernel": ["poly"],
+                    "gamma": ["auto"]
+                }
+            },
+            {
+                "model": "svr",
+                "modelname": "tmp",
+                "fit_params": {
+                },
+                "params": {
+                    "C": [10],
+                    "degree": [1],
+                    "kernel": ["poly"],
+                    "gamma": ["auto"]
+                }
+            }
+        ]
+    },
+    "post": false,
+    "notify": {
+        "slack": "https://hooks.slack.com/services/hogehoge"
+    }
+}

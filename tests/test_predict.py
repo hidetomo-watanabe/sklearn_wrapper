@@ -72,6 +72,8 @@ class TestPredict(unittest.TestCase):
             pd.read_csv(f'{TEST_PATH}/house/output.csv'))
         # keras
         result = predict.main(f'{TEST_PATH}/house/test_config2.json')
+        # ensemble(vote)
+        result = predict.main(f'{TEST_PATH}/house/test_config3.json')
 
     # digit_part table multi lable classification
     def test_digit_part(self):
