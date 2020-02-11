@@ -359,7 +359,7 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "logger.info('### CHECK CONFUSION MATRIX')\n",
+    "logger.info('### RAW CONFUSION MATRIX')\n",
     "from sklearn.metrics import confusion_matrix\n",
     "confusion_matrix(train_data['Y_train'], pred_data['Y_train_pred'].reshape(-1, 1))"
    ]
