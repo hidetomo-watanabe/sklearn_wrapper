@@ -39,8 +39,6 @@ class Outputer(ConfigReader, CommonMethodWrapper):
         output = {
             'Y_pred': self.Y_pred,
             'Y_pred_proba': self.Y_pred_proba,
-            'Y_train_pred': self.Y_train_pred,
-            'Y_train_pred_proba': self.Y_train_pred_proba,
             'Y_pred_df': self.Y_pred_df,
             'Y_pred_proba_df': self.Y_pred_proba_df,
         }
@@ -121,7 +119,9 @@ class Outputer(ConfigReader, CommonMethodWrapper):
             pd.DataFrame(data=self.test_ids, columns=[self.id_col]),
             pd.DataFrame(data=self.Y_pred, columns=self.pred_cols),
             left_index=True, right_index=True)
-        if isinstance(self.Y_pred_proba, np.ndarray):
+        if self.Y_pred_proba is None:
+            self.Y_pred_proba_df = None
+        else:
             if self.Y_pred_proba.shape[1] == self.classes.shape[0]:
                 self.Y_pred_proba_df = pd.DataFrame(
                     data=self.test_ids, columns=[self.id_col])
@@ -159,9 +159,6 @@ class Outputer(ConfigReader, CommonMethodWrapper):
     def calc_predict_data(self):
         self.Y_pred, self.Y_pred_proba = \
             self.predict_like(X_target=self.X_test)
-        self.Y_train_pred, self.Y_train_pred_proba = \
-            self.predict_like(X_target=self.X_train)
-        self.Y_pred_proba_df = None
         self._calc_predict_df()
         return self.Y_pred_df, self.Y_pred_proba_df
 

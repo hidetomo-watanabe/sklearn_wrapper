@@ -174,7 +174,7 @@ class Visualizer(ConfigReader, CommonMethodWrapper):
 
     def plot_roc(self, Y_train, Y_train_pred_proba):
         fpr, tpr, thresholds = metrics.roc_curve(
-            Y_train, Y_train_pred_proba[:, 1])
+            Y_train, Y_train_pred_proba)
         auc = metrics.auc(fpr, tpr)
         plt.title('ROC curve')
         plt.xlabel('False Positive Rate')

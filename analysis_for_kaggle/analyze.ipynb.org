@@ -350,7 +350,8 @@
    "outputs": [],
    "source": [
     "logger.info('### GET PREDICT DATA')\n",
-    "pred_data = outputer_obj.get_predict_data()"
+    "pred_data = outputer_obj.get_predict_data()\n",
+    "Y_train_pred, Y_train_pred_proba = outputer_obj.predict_like(X_target=train_data['X_train'])"
    ]
   },
   {
@@ -361,7 +362,7 @@
    "source": [
     "logger.info('### RAW CONFUSION MATRIX')\n",
     "from sklearn.metrics import confusion_matrix\n",
-    "confusion_matrix(train_data['Y_train'], pred_data['Y_train_pred'].reshape(-1, 1))"
+    "confusion_matrix(train_data['Y_train'], Y_train_pred.reshape(-1, 1))"
    ]
   },
   {
@@ -372,7 +373,7 @@
    "source": [
     "logger.info('### PLOT CONFUSION MATRIX')\n",
     "visualizer_obj.plot_confusion_matrix(\n",
-    "    train_data['Y_train'], pred_data['Y_train_pred'].reshape(-1, 1))"
+    "    train_data['Y_train'], Y_train_pred.reshape(-1, 1))"
    ]
   },
   {
@@ -383,7 +384,7 @@
    "source": [
     "logger.info('### PLOT ROC')\n",
     "visualizer_obj.plot_roc(\n",
-    "    train_data['Y_train'], pred_data['Y_train_pred_proba'])"
+    "    train_data['Y_train'], Y_train_pred_proba[:, 1])"
    ]
   },
   {
@@ -394,7 +395,7 @@
    "source": [
     "logger.info('### PLOT Y TRAIN TEST PRED HISTOGRAM')\n",
     "visualizer_obj.plot_y_train_test_pred_histogram(\n",
-    "    pred_data['Y_train_pred'].reshape(-1, 1), pred_data['Y_pred'].reshape(-1, 1))"
+    "    Y_train_pred.reshape(-1, 1), pred_data['Y_pred'].reshape(-1, 1))"
    ]
   },
   {
@@ -405,7 +406,7 @@
    "source": [
     "logger.info('### PLOT Y TRAIN TEST PRED PROBA HISTOGRAM')\n",
     "visualizer_obj.plot_y_train_test_pred_proba_histogram(\n",
-    "    pred_data['Y_train_pred_proba'].reshape(-1, 1), pred_data['Y_pred_proba'].reshape(-1, 1))"
+    "    Y_train_pred_proba[:, 1], pred_data['Y_pred_proba'][:, 1])"
    ]
   },
   {
