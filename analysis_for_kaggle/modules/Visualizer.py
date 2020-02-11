@@ -2,6 +2,8 @@ import numpy as np
 import pandas as pd
 from sklearn.tree import DecisionTreeClassifier
 from dtreeviz.trees import dtreeviz
+import eli5
+from eli5.sklearn import PermutationImportance
 from sklearn.model_selection import learning_curve
 from sklearn import metrics
 import matplotlib.pyplot as plt
@@ -130,6 +132,21 @@ class Visualizer(ConfigReader, CommonMethodWrapper):
                 feature_names=feature_names,
                 class_names=list(set([str(i) for i in Y_train])))
             display(viz)
+
+    def display_feature_importances(self, estimator, feature_columns):
+        feature_importances = pd.DataFrame(
+            data=[estimator.feature_importances_], columns=feature_columns)
+        feature_importances = feature_importances.iloc[
+            :, np.argsort(feature_importances.to_numpy()[0])[::-1]]
+        display(feature_importances)
+        display(feature_importances / np.sum(feature_importances.to_numpy()))
+
+    def display_permutation_importances(
+        self, estimator, X_train, Y_train, feature_columns
+    ):
+        perm = PermutationImportance(estimator, random_state=42).fit(
+            self.toarray_like(X_train), Y_train)
+        display(eli5.explain_weights_df(perm, feature_names=feature_columns))
 
     def plot_learning_curve(
         self, title, estimator, X_train, Y_train, scorer, cv

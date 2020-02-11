@@ -32,8 +32,6 @@ from heamy.estimator import Classifier, Regressor
 from heamy.pipeline import ModelsPipeline
 from sklearn.metrics import get_scorer
 from keras.utils.np_utils import to_categorical
-import eli5
-from eli5.sklearn import PermutationImportance
 from IPython.display import display
 from logging import getLogger
 
@@ -313,35 +311,6 @@ class Trainer(ConfigReader, CommonMethodWrapper):
         logger.info('best score mean: %s' % best_score_mean)
         return best_params
 
-    def _check_importances(self, model, estimator, X_train, Y_train):
-        # feature_importances
-        if hasattr(estimator, 'feature_importances_'):
-            feature_importances = pd.DataFrame(
-                data=[estimator.feature_importances_],
-                columns=self.feature_columns)
-            feature_importances = feature_importances.iloc[
-                :, np.argsort(feature_importances.to_numpy()[0])[::-1]]
-            logger.info('feature importances:')
-            display(feature_importances)
-            logger.info('feature importances /sum:')
-            display(
-                feature_importances / np.sum(
-                    estimator.feature_importances_))
-
-        # permutation importance
-        if self.configs['fit'].get('permutation'):
-            if model not in [
-                'keras_clf', 'keras_reg', 'torch_clf', 'torch_reg'
-            ]:
-                perm = PermutationImportance(
-                    estimator, random_state=42).fit(
-                    X_train, Y_train)
-                logger.info('permutation importance:')
-                display(
-                    eli5.explain_weights_df(
-                        perm, feature_names=self.feature_columns))
-        return
-
     def get_estimator_data(self):
         output = {
             'cv': self.cv,
@@ -538,10 +507,6 @@ class Trainer(ConfigReader, CommonMethodWrapper):
             logger.info(f'scores: {scores}')
             logger.info(f'estimators: {estimators}')
 
-        # importances
-        if cv_select == 'all_folds':
-            logger.warning('CHECK IMPORTANCE FOR ONLY FIRST ESTIMATOR')
-        self._check_importances(model, estimators[0], X_train, Y_train)
         return scores, estimators
 
     def _get_voter(self, mode, estimators, weights=None):

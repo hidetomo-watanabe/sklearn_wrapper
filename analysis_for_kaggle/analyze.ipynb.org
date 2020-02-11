@@ -271,6 +271,29 @@
    "metadata": {},
    "outputs": [],
    "source": [
+    "logger.info('### DISPLAY FEATURE IMPORTANCES')\n",
+    "visualizer_obj.display_feature_importances(\n",
+    "    estimator_data['estimator'], train_data['feature_columns'])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "logger.info('### DISPLAY PERMUTATION IMPORTANCES')\n",
+    "visualizer_obj.display_permutation_importances(\n",
+    "    estimator_data['estimator'],\n",
+    "    train_data['X_train'], train_data['Y_train'], train_data['feature_columns'])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
     "logger.info('### PLOT PARTIAL DEPENDENCE')\n",
     "from sklearn.inspection import plot_partial_dependence\n",
     "for feature in train_data['feature_columns']:\n",
