@@ -113,53 +113,57 @@ class Outputer(ConfigReader, CommonMethodWrapper):
             raise Exception('NOT IMPLEMENTED')
         return Y_pred, Y_pred_proba
 
-    def _calc_predict_df(self):
-        # np => pd
+    def _calc_base_predict_df(self):
         self.Y_pred_df = pd.merge(
             pd.DataFrame(data=self.test_ids, columns=[self.id_col]),
             pd.DataFrame(data=self.Y_pred, columns=self.pred_cols),
             left_index=True, right_index=True)
+
         if self.Y_pred_proba is None:
             self.Y_pred_proba_df = None
-        else:
-            if self.Y_pred_proba.shape[1] == self.classes.shape[0]:
-                self.Y_pred_proba_df = pd.DataFrame(
-                    data=self.test_ids, columns=[self.id_col])
-                if len(self.pred_cols) == 1:
-                    proba_columns = list(map(
-                        lambda x: '%s_%s' % (self.pred_cols[0], str(x)),
-                        self.classes))
-                else:
-                    proba_columns = self.pred_cols
-                self.Y_pred_proba_df = pd.merge(
-                    self.Y_pred_proba_df,
-                    pd.DataFrame(
-                        data=self.Y_pred_proba,
-                        columns=proba_columns),
-                    left_index=True, right_index=True)
+            return
+
+        if self.Y_pred_proba.shape[1] == self.classes.shape[0]:
+            self.Y_pred_proba_df = pd.DataFrame(
+                data=self.test_ids, columns=[self.id_col])
+            if len(self.pred_cols) == 1:
+                proba_columns = list(map(
+                    lambda x: '%s_%s' % (self.pred_cols[0], str(x)),
+                    self.classes))
             else:
-                logger.warning(
-                    'NOT MATCH DIMENSION OF Y_PRED_PROBA AND CLASSES')
+                proba_columns = self.pred_cols
+            self.Y_pred_proba_df = pd.merge(
+                self.Y_pred_proba_df,
+                pd.DataFrame(
+                    data=self.Y_pred_proba,
+                    columns=proba_columns),
+                left_index=True, right_index=True)
+        else:
+            logger.warning(
+                'NOT MATCH DIMENSION OF Y_PRED_PROBA AND CLASSES')
+        return
 
-        # post
+    def _calc_post_predict_df(self):
         fit_post = self.configs['post']
-        if fit_post:
-            if not self.kernel:
-                myfunc = importlib.import_module(
-                    'modules.myfuncs.%s' % fit_post['myfunc'])
-            for method_name in fit_post['methods']:
-                logger.info('fit post: %s' % method_name)
-                if not self.kernel:
-                    method_name = 'myfunc.%s' % method_name
-                self.Y_pred_df, self.Y_pred_proba_df = eval(
-                    method_name)(self.Y_pred_df, self.Y_pred_proba_df)
+        if not fit_post:
+            return
 
-        return self.Y_pred_df, self.Y_pred_proba_df
+        if not self.kernel:
+            myfunc = importlib.import_module(
+                'modules.myfuncs.%s' % fit_post['myfunc'])
+        for method_name in fit_post['methods']:
+            logger.info('fit post: %s' % method_name)
+            if not self.kernel:
+                method_name = 'myfunc.%s' % method_name
+            self.Y_pred_df, self.Y_pred_proba_df = eval(
+                method_name)(self.Y_pred_df, self.Y_pred_proba_df)
+        return
 
     def calc_predict_data(self):
         self.Y_pred, self.Y_pred_proba = \
             self.predict_like(X_target=self.X_test)
-        self._calc_predict_df()
+        self._calc_base_predict_df()
+        self._calc_post_predict_df()
         return self.Y_pred_df, self.Y_pred_proba_df
 
     def write_predict_data(self):
