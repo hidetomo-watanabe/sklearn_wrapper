@@ -374,7 +374,7 @@ class Trainer(ConfigReader, CommonMethodWrapper):
             [], [], X_train, Y_train, self.X_test,
             [], None, [], [], estimator)
         outputer_obj.configs = self.configs
-        _, Y_pred_proba = outputer_obj.predict_like(X_target=self.X_test)
+        _, Y_pred_proba = outputer_obj.predict_like()
 
         data_indexes, label_indexes = np.where(Y_pred_proba > threshold)
         pseudo_X_train = self.X_test[data_indexes]

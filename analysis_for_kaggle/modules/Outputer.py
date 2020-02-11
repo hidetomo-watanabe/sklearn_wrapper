@@ -44,7 +44,9 @@ class Outputer(ConfigReader, CommonMethodWrapper):
         }
         return output
 
-    def predict_like(self, X_target=None):
+    def predict_like(self, estimator=None, X_target=None):
+        if estimator is None:
+            estimator = self.estimator
         if X_target is None:
             X_target = self.X_test
 
@@ -59,41 +61,41 @@ class Outputer(ConfigReader, CommonMethodWrapper):
         # clf
         if self.configs['fit']['train_mode'] == 'clf':
             # keras
-            if self.estimator.__class__ in [Sequential]:
-                Y_pred = self.estimator.predict_classes(X_target)
-                Y_pred_proba = self.estimator.predict(X_target)
+            if estimator.__class__ in [Sequential]:
+                Y_pred = estimator.predict_classes(X_target)
+                Y_pred_proba = estimator.predict(X_target)
             # ensemble
-            elif self.estimator.__class__ in [Classifier]:
-                self.estimator.dataset = dataset
+            elif estimator.__class__ in [Classifier]:
+                estimator.dataset = dataset
                 # no proba
-                self.estimator.probability = False
-                Y_pred = self.estimator.predict()
+                estimator.probability = False
+                Y_pred = estimator.predict()
                 # proba
-                self.estimator.probability = True
+                estimator.probability = True
                 # from heamy sorce code, to make Y_pred_proba multi dimension
-                self.estimator.problem = ''
-                Y_pred_proba = self.estimator.predict()
+                estimator.problem = ''
+                Y_pred_proba = estimator.predict()
             # voter
-            elif self.estimator.__class__ in [VotingClassifier]:
-                Y_pred = self.estimator.predict(X_target)
-                if self.estimator.voting == 'soft':
-                    Y_pred_proba = self.estimator.predict_proba(
+            elif estimator.__class__ in [VotingClassifier]:
+                Y_pred = estimator.predict(X_target)
+                if estimator.voting == 'soft':
+                    Y_pred_proba = estimator.predict_proba(
                         X_target)
             # single
             else:
-                Y_pred = self.estimator.predict(X_target)
-                if hasattr(self.estimator, 'predict_proba'):
-                    Y_pred_proba = self.estimator.predict_proba(
+                Y_pred = estimator.predict(X_target)
+                if hasattr(estimator, 'predict_proba'):
+                    Y_pred_proba = estimator.predict_proba(
                         X_target)
         # reg
         elif self.configs['fit']['train_mode'] == 'reg':
             # ensemble
-            if self.estimator.__class__ in [Regressor]:
-                self.estimator.dataset = dataset
-                Y_pred = self.estimator.predict()
+            if estimator.__class__ in [Regressor]:
+                estimator.dataset = dataset
+                Y_pred = estimator.predict()
             # single
             else:
-                Y_pred = self.estimator.predict(X_target)
+                Y_pred = estimator.predict(X_target)
         else:
             logger.error('TRAIN MODE SHOULD BE clf OR reg')
             raise Exception('NOT IMPLEMENTED')
@@ -168,8 +170,7 @@ class Outputer(ConfigReader, CommonMethodWrapper):
         return
 
     def calc_predict_data(self):
-        self.Y_pred, self.Y_pred_proba = \
-            self.predict_like(X_target=self.X_test)
+        self.Y_pred, self.Y_pred_proba = self.predict_like()
         self._fix_y_scaler()
         self._fix_y_pre()
         self._calc_base_predict_df()

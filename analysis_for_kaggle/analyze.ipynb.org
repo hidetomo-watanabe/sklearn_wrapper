@@ -374,7 +374,10 @@
    "source": [
     "logger.info('### GET PREDICT DATA')\n",
     "pred_data = outputer_obj.get_predict_data()\n",
-    "Y_train_pred, Y_train_pred_proba = outputer_obj.predict_like(X_target=train_data['X_train'])"
+    "Y_train_pred, Y_train_pred_proba = outputer_obj.predict_like(X_target=train_data['X_train'])\n",
+    "single_y_preds = []\n",
+    "for _estimator in estimator_data['single_estimators']:\n",
+    "    single_y_preds.append(outputer_obj.predict_like(estimator=_estimator[1])[0])"
    ]
   },
   {
@@ -432,6 +435,17 @@
     "visualizer_obj.plot_y_targets_histogram(\n",
     "    [Y_train_pred_proba[:, 1], pred_data['Y_pred_proba'][:, 1]],\n",
     "    ['train', 'test'])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "logger.info('### PLOT SINGLE Y TRAIN PREDS HISTOGRAM')\n",
+    "visualizer_obj.plot_y_targets_histogram(\n",
+    "    single_y_preds, [_estimator[0] for _estimator in estimator_data['single_estimators']])"
    ]
   },
   {
