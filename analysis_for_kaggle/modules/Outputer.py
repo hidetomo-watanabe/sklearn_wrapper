@@ -6,8 +6,6 @@ from keras.engine.sequential import Sequential
 from sklearn.ensemble import VotingClassifier
 from heamy.dataset import Dataset
 from heamy.estimator import Classifier, Regressor
-from heamy.pipeline import PipeApply
-from sklearn.metrics import confusion_matrix
 from logging import getLogger
 
 
@@ -163,10 +161,6 @@ class Outputer(ConfigReader, CommonMethodWrapper):
             self.predict_like(X_target=self.X_test)
         self.Y_train_pred, self.Y_train_pred_proba = \
             self.predict_like(X_target=self.X_train)
-        if self.configs['fit']['train_mode'] == 'clf':
-            logger.info(
-                f'confusion_matrix:'
-                f' \n{confusion_matrix(self.Y_train, self.Y_train_pred)}')
         self.Y_pred_proba_df = None
         self._calc_predict_df()
         return self.Y_pred_df, self.Y_pred_proba_df
