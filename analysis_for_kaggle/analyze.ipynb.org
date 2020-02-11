@@ -417,8 +417,9 @@
    "outputs": [],
    "source": [
     "logger.info('### PLOT Y TRAIN TEST PRED HISTOGRAM')\n",
-    "visualizer_obj.plot_y_train_test_pred_histogram(\n",
-    "    Y_train_pred.reshape(-1, 1), pred_data['Y_pred'].reshape(-1, 1))"
+    "visualizer_obj.plot_y_targets_histogram(\n",
+    "    [Y_train_pred.reshape(-1, 1), pred_data['Y_pred'].reshape(-1, 1)],\n",
+    "    ['train', 'test'])"
    ]
   },
   {
@@ -428,8 +429,9 @@
    "outputs": [],
    "source": [
     "logger.info('### PLOT Y TRAIN TEST PRED PROBA HISTOGRAM')\n",
-    "visualizer_obj.plot_y_train_test_pred_proba_histogram(\n",
-    "    Y_train_pred_proba[:, 1], pred_data['Y_pred_proba'][:, 1])"
+    "visualizer_obj.plot_y_targets_histogram(\n",
+    "    [Y_train_pred_proba[:, 1], pred_data['Y_pred_proba'][:, 1]],\n",
+    "    ['train', 'test'])"
    ]
   },
   {

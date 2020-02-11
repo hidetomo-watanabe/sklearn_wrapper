@@ -199,30 +199,13 @@ class Visualizer(ConfigReader, CommonMethodWrapper):
         plt.plot(fpr, tpr, label=f'AUC: {auc}')
         plt.legend(loc="best")
 
-    def plot_y_train_test_pred_histogram(self, Y_train_pred, Y_pred):
+    def plot_y_targets_histogram(self, Y_targets, labels):
         ax = plt.subplot()
-        ax.set_title('Y_train_test_pred')
+        ax.set_title('Y_targets')
         cmap = plt.get_cmap('tab10')
-        for i, (label, ndarray) in enumerate(
-            [('train', Y_train_pred), ('test', Y_pred)]
-        ):
+        for i, (Y_target, label) in enumerate(zip(Y_targets, labels)):
             ax.hist(
-                ndarray, **self.hist_params,
-                color=cmap(i), label=f'{label}')
-        ax.legend()
-        plt.show()
-
-    def plot_y_train_test_pred_proba_histogram(
-        self, Y_train_pred_proba, Y_pred_proba
-    ):
-        ax = plt.subplot()
-        ax.set_title('Y_train_test_pred_proba')
-        cmap = plt.get_cmap('tab10')
-        for i, (label, ndarray) in enumerate(
-            [('train', Y_train_pred_proba), ('test', Y_pred_proba)]
-        ):
-            ax.hist(
-                ndarray, **self.hist_params,
+                Y_target, **self.hist_params,
                 color=cmap(i), label=f'{label}')
         ax.legend()
         plt.show()
