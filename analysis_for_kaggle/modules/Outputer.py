@@ -94,24 +94,32 @@ class Outputer(ConfigReader, CommonMethodWrapper):
             # single
             else:
                 Y_pred = self.estimator.predict(X_target)
-
-            # inverse normalize
-            # scaler
-            Y_pred = Y_pred.reshape(-1, 1)
-            Y_pred = self.y_scaler.inverse_transform(Y_pred)
-            # pre
-            y_pre = self.configs['pre'].get('y_pre')
-            if y_pre:
-                logger.info('inverse translate y_train with %s' % y_pre)
-                if y_pre == 'log':
-                    Y_pred = np.array(list(map(math.exp, Y_pred)))
-                else:
-                    logger.error('NOT IMPLEMENTED FIT Y_PRE: %s' % y_pre)
-                    raise Exception('NOT IMPLEMENTED')
         else:
             logger.error('TRAIN MODE SHOULD BE clf OR reg')
             raise Exception('NOT IMPLEMENTED')
         return Y_pred, Y_pred_proba
+
+    def _fix_y_scaler(self):
+        if not self.y_scaler:
+            return
+
+        logger.info('inverse translate y_pred with %s' % self.y_scaler)
+        self.Y_pred = self.y_scaler.inverse_transform(
+            self.Y_pred.reshape(-1, 1))
+        return
+
+    def _fix_y_pre(self):
+        y_pre = self.configs['pre'].get('y_pre')
+        if not y_pre:
+            return
+
+        logger.info('inverse translate y_pred with %s' % y_pre)
+        if y_pre == 'log':
+            self.Y_pred = np.array(list(map(math.exp, self.Y_pred)))
+        else:
+            logger.error('NOT IMPLEMENTED FIT Y_PRE: %s' % y_pre)
+            raise Exception('NOT IMPLEMENTED')
+        return
 
     def _calc_base_predict_df(self):
         self.Y_pred_df = pd.merge(
@@ -162,6 +170,8 @@ class Outputer(ConfigReader, CommonMethodWrapper):
     def calc_predict_data(self):
         self.Y_pred, self.Y_pred_proba = \
             self.predict_like(X_target=self.X_test)
+        self._fix_y_scaler()
+        self._fix_y_pre()
         self._calc_base_predict_df()
         self._calc_post_predict_df()
         return self.Y_pred_df, self.Y_pred_proba_df
