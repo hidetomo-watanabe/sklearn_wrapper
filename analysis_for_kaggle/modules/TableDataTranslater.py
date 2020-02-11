@@ -28,7 +28,7 @@ if 'Trainer' not in globals():
     from .Trainer import Trainer
 
 
-class TableDataTranslater(CommonMethodWrapper, BaseDataTranslater):
+class TableDataTranslater(BaseDataTranslater, CommonMethodWrapper):
     def __init__(self, kernel=False):
         self.kernel = kernel
         self.configs = {}
@@ -415,16 +415,16 @@ class TableDataTranslater(CommonMethodWrapper, BaseDataTranslater):
 
     def _extract_with_adversarial_validation(self):
         def _get_adversarial_preds(X_train, X_test, adversarial):
-            if adversarial['model_config'].get('cv_select') == 'all_folds':
+            if adversarial['model_config'].get('cv_select') != 'train_all':
                 logger.error(
-                    'NOT IMPLEMENTED ADVERSARIAL VALIDATION WITH ALL FOLDS')
+                    'ONLY IMPLEMENTED ADVERSARIAL VALIDATION WITH TRAIN ALL')
                 raise Exception('NOT IMPLEMENTED')
 
             # create data
             X_adv = sp.vstack((X_train, X_test), format='csr')
-            Y_adv = sp.csr_matrix(np.concatenate(
+            Y_adv = np.concatenate(
                 (np.zeros(X_train.shape[0]), np.ones(X_test.shape[0])),
-                axis=0))
+                axis=0)
             # fit
             trainer_obj = Trainer(**self.get_train_data())
             trainer_obj.configs = self.configs

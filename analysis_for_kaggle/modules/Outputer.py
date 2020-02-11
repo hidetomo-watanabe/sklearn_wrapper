@@ -14,9 +14,11 @@ from logging import getLogger
 logger = getLogger('predict').getChild('Outputer')
 if 'ConfigReader' not in globals():
     from .ConfigReader import ConfigReader
+if 'CommonMethodWrapper' not in globals():
+    from .CommonMethodWrapper import CommonMethodWrapper
 
 
-class Outputer(ConfigReader):
+class Outputer(ConfigReader, CommonMethodWrapper):
     def __init__(
         self,
         feature_columns, test_ids,
@@ -46,104 +48,77 @@ class Outputer(ConfigReader):
         }
         return output
 
-    def predict_y(self):
+    def predict_like(self, X_target=None):
+        if X_target is None:
+            X_target = self.X_test
+
+        # for ensemble
+        # for warning
+        Y_train = self.ravel_like(self.Y_train)
+        dataset = Dataset(
+            self.toarray_like(self.X_train), Y_train,
+            self.toarray_like(X_target))
+
+        Y_pred_proba = None
         # clf
         if self.configs['fit']['train_mode'] == 'clf':
-            # keras clf
+            # keras
             if self.estimator.__class__ in [Sequential]:
-                self.Y_pred = self.estimator.predict_classes(self.X_test)
-                self.Y_train_pred = self.estimator.predict_classes(
-                    self.X_train)
-                self.Y_pred_proba = self.estimator.predict(self.X_test)
-                self.Y_train_pred_proba = self.estimator.predict(
-                    self.X_train)
-            # stacker clf
+                Y_pred = self.estimator.predict_classes(X_target)
+                Y_pred_proba = self.estimator.predict(X_target)
+            # ensemble
             elif self.estimator.__class__ in [Classifier]:
+                self.estimator.dataset = dataset
                 # no proba
                 self.estimator.probability = False
-                self.Y_pred = self.estimator.predict()
+                Y_pred = self.estimator.predict()
                 # proba
                 self.estimator.probability = True
                 # from heamy sorce code, to make Y_pred_proba multi dimension
                 self.estimator.problem = ''
-                self.Y_pred_proba = self.estimator.predict()
-                # train no proba
-                self.estimator.probability = False
-                dataset = Dataset(
-                    self.X_train.toarray(), self.Y_train,
-                    self.X_train.toarray())
-                self.estimator.dataset = dataset
-                self.Y_train_pred = self.estimator.predict()
-                # train proba
-                self.estimator.probability = True
-                # from heamy sorce code, to make Y_pred_proba multi dimension
-                self.estimator.problem = ''
-                self.Y_train_pred_proba = self.estimator.predict()
-            # voter clf
+                Y_pred_proba = self.estimator.predict()
+            # voter
             elif self.estimator.__class__ in [VotingClassifier]:
-                self.Y_pred = self.estimator.predict(self.X_test)
-                self.Y_train_pred = self.estimator.predict(self.X_train)
+                Y_pred = self.estimator.predict(X_target)
                 if self.estimator.voting == 'soft':
-                    self.Y_pred_proba = self.estimator.predict_proba(
-                        self.X_test)
-                    self.Y_train_pred_proba = self.estimator.predict_proba(
-                        self.X_train)
-            # single clf
+                    Y_pred_proba = self.estimator.predict_proba(
+                        X_target)
+            # single
             else:
-                self.Y_pred = self.estimator.predict(self.X_test)
-                self.Y_train_pred = self.estimator.predict(self.X_train)
+                Y_pred = self.estimator.predict(X_target)
                 if hasattr(self.estimator, 'predict_proba'):
-                    self.Y_pred_proba = self.estimator.predict_proba(
-                        self.X_test)
-                    self.Y_train_pred_proba = self.estimator.predict_proba(
-                        self.X_train)
-            logger.info(
-                f'confusion_matrix:'
-                f' \n{confusion_matrix(self.Y_train, self.Y_train_pred)}')
+                    Y_pred_proba = self.estimator.predict_proba(
+                        X_target)
         # reg
         elif self.configs['fit']['train_mode'] == 'reg':
-            # weighted_average reg
+            # weighted_average
             if self.estimator.__class__ in [PipeApply]:
-                self.Y_pred = self.estimator.execute()
-            # ensemble reg
+                Y_pred = self.estimator.execute()
+            # ensemble
             elif self.estimator.__class__ in [Regressor]:
-                self.Y_pred = self.estimator.predict()
-                # train
-                dataset = Dataset(self.X_train, self.Y_train, self.X_train)
                 self.estimator.dataset = dataset
-                self.Y_train_pred = self.estimator.predict()
-            # single reg
+                Y_pred = self.estimator.predict()
+            # single
             else:
-                self.Y_pred = self.estimator.predict(self.X_test)
-                self.Y_train_pred = self.estimator.predict(self.X_train)
+                Y_pred = self.estimator.predict(X_target)
 
             # inverse normalize
             # scaler
-            self.Y_pred = self.Y_pred.reshape(-1, 1)
-            self.Y_pred = self.y_scaler.inverse_transform(self.Y_pred)
-            if isinstance(self.Y_train_pred, np.ndarray):
-                self.Y_train_pred = self.Y_train_pred.reshape(-1, 1)
-                self.Y_train_pred = \
-                    self.y_scaler.inverse_transform(self.Y_train_pred)
-            else:
-                logger.warning('NO Y_train_pred')
+            Y_pred = Y_pred.reshape(-1, 1)
+            Y_pred = self.y_scaler.inverse_transform(Y_pred)
             # pre
             y_pre = self.configs['pre'].get('y_pre')
             if y_pre:
                 logger.info('inverse translate y_train with %s' % y_pre)
                 if y_pre == 'log':
-                    self.Y_pred = np.array(list(map(math.exp, self.Y_pred)))
-                    self.Y_train_pred = np.array(list(map(
-                        math.exp, self.Y_train_pred)))
+                    Y_pred = np.array(list(map(math.exp, Y_pred)))
                 else:
                     logger.error('NOT IMPLEMENTED FIT Y_PRE: %s' % y_pre)
                     raise Exception('NOT IMPLEMENTED')
         else:
             logger.error('TRAIN MODE SHOULD BE clf OR reg')
             raise Exception('NOT IMPLEMENTED')
-        return \
-            self.Y_pred, self.Y_pred_proba, \
-            self.Y_train_pred, self.Y_train_pred_proba
+        return Y_pred, Y_pred_proba
 
     def _calc_predict_df(self):
         # np => pd
@@ -187,10 +162,15 @@ class Outputer(ConfigReader):
         return self.Y_pred_df, self.Y_pred_proba_df
 
     def calc_predict_data(self):
-        self.Y_pred_proba = None
-        self.Y_train_pred_proba = None
+        self.Y_pred, self.Y_pred_proba = \
+            self.predict_like(X_target=self.X_test)
+        self.Y_train_pred, self.Y_train_pred_proba = \
+            self.predict_like(X_target=self.X_train)
+        if self.configs['fit']['train_mode'] == 'clf':
+            logger.info(
+                f'confusion_matrix:'
+                f' \n{confusion_matrix(self.Y_train, self.Y_train_pred)}')
         self.Y_pred_proba_df = None
-        self.predict_y()
         self._calc_predict_df()
         return self.Y_pred_df, self.Y_pred_proba_df
 

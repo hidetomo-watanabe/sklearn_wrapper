@@ -390,7 +390,7 @@ class Trainer(ConfigReader, CommonMethodWrapper):
         # classes
         if self.configs['fit']['train_mode'] == 'clf':
             for _, single_estimator in self.single_estimators:
-                if isinstance(self.classes, pd.DataFrame):
+                if self.classes is not None:
                     continue
                 if hasattr(single_estimator, 'classes_'):
                     self.classes = single_estimator.classes_
@@ -405,7 +405,7 @@ class Trainer(ConfigReader, CommonMethodWrapper):
             [], [], X_train, Y_train, self.X_test,
             [], None, [], [], estimator)
         outputer_obj.configs = self.configs
-        _, Y_pred_proba, _, _ = outputer_obj.predict_y()
+        _, Y_pred_proba = outputer_obj.predict_like(X_target=self.X_test)
 
         data_indexes, label_indexes = np.where(Y_pred_proba > threshold)
         pseudo_X_train = self.X_test[data_indexes]
@@ -452,9 +452,9 @@ class Trainer(ConfigReader, CommonMethodWrapper):
 
         if isinstance(scorer, str):
             scorer = self._get_scorer_from_string(scorer)
-        if not isinstance(X_train, np.ndarray):
+        if X_train is None:
             X_train = self.X_train
-        if not isinstance(Y_train, np.ndarray):
+        if Y_train is None:
             Y_train = self.Y_train
 
         # params
@@ -563,7 +563,8 @@ class Trainer(ConfigReader, CommonMethodWrapper):
         # for warning
         Y_train = self.ravel_like(self.Y_train)
         dataset = Dataset(
-            self.X_train.toarray(), Y_train, self.X_test.toarray())
+            self.toarray_like(self.X_train), Y_train,
+            self.toarray_like(self.X_test))
         models = []
         for modelname, single_estimator in single_estimators:
             # clf
@@ -615,9 +616,9 @@ class Trainer(ConfigReader, CommonMethodWrapper):
     def calc_ensemble_estimator(
         self, single_estimators, single_scores, X_train=None, Y_train=None
     ):
-        if not isinstance(X_train, np.ndarray):
+        if X_train is None:
             X_train = self.X_train
-        if not isinstance(Y_train, np.ndarray):
+        if Y_train is None:
             Y_train = self.Y_train
 
         ensemble_config = self.configs['fit']['ensemble_model_config']
