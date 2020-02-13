@@ -217,6 +217,17 @@
    "metadata": {},
    "outputs": [],
    "source": [
+    "logger.info('### PLOT X TRAIN WITH 2 DIMENSIONS')\n",
+    "visualizer_obj.plot_x_train_with_2_dimensions(\n",
+    "    train_data['X_train'].toarray(), train_data['Y_train'])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
     "logger.info('### PLOT X TRAIN TEST WITH 2 DIMENSIONS')\n",
     "visualizer_obj.plot_x_train_test_with_2_dimensions(\n",
     "    train_data['X_train'].toarray(), train_data['X_test'].toarray())"

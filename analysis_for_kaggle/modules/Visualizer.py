@@ -121,6 +121,24 @@ class Visualizer(ConfigReader, CommonMethodWrapper):
             fmt="1.2f", annot=True, lw=0.7, cmap='YlGnBu')
         ax.set_ylim(len(feature_columns), 0)
 
+    def plot_x_train_with_2_dimensions(self, X_train, Y_train):
+        model_obj = TSNE(n_components=2, random_state=42)
+        X_train = model_obj.fit_transform(X_train)
+
+        cmap = plt.get_cmap('tab10')
+        plt.title('X_train')
+        plt.xlabel('tsne_0')
+        plt.ylabel('tsne_1')
+        plt.scatter(
+            X_train[np.where(Y_train == 0), 0],
+            X_train[np.where(Y_train == 0), 1], alpha=0.5,
+            color=cmap(0), label='Y_train: 0')
+        plt.scatter(
+            X_train[np.where(Y_train == 1), 0],
+            X_train[np.where(Y_train == 1), 1], alpha=0.5,
+            color=cmap(1), label='Y_train: 1')
+        plt.legend(loc="best")
+
     def plot_x_train_test_with_2_dimensions(self, X_train, X_test):
         model_obj = TSNE(n_components=2, random_state=42)
         X_train_test = model_obj.fit_transform(
