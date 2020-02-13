@@ -126,6 +126,7 @@ class Visualizer(ConfigReader, CommonMethodWrapper):
         X_train = model_obj.fit_transform(X_train)
 
         cmap = plt.get_cmap('tab10')
+        plt.figure()
         plt.title('X_train')
         plt.xlabel('tsne_0')
         plt.ylabel('tsne_1')
@@ -147,6 +148,7 @@ class Visualizer(ConfigReader, CommonMethodWrapper):
         X_test = X_train_test[len(X_train):]
 
         cmap = plt.get_cmap('tab10')
+        plt.figure()
         plt.title('X_train_test')
         plt.xlabel('tsne_0')
         plt.ylabel('tsne_1')
@@ -222,15 +224,11 @@ class Visualizer(ConfigReader, CommonMethodWrapper):
 
         plt.legend(loc="best")
 
-    def plot_confusion_matrix(self, Y_train, Y_train_pred):
-        g = sns.jointplot(Y_train_pred, Y_train, kind='kde')
-        g.set_axis_labels('Y_train_pred', 'Y_train')
-        g.fig.suptitle('estimator')
-
     def plot_roc(self, Y_train, Y_train_pred_proba):
         fpr, tpr, thresholds = metrics.roc_curve(
             Y_train, Y_train_pred_proba)
         auc = metrics.auc(fpr, tpr)
+        plt.figure()
         plt.title('ROC curve')
         plt.xlabel('False Positive Rate')
         plt.ylabel('True Positive Rate')

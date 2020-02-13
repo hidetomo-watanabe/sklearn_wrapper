@@ -411,7 +411,7 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "logger.info('### RAW CONFUSION MATRIX')\n",
+    "logger.info('### CONFUSION MATRIX')\n",
     "from sklearn.metrics import confusion_matrix\n",
     "confusion_matrix(train_data['Y_train'], Y_train_pred.reshape(-1, 1))"
    ]
@@ -422,9 +422,13 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "logger.info('### PLOT CONFUSION MATRIX')\n",
-    "visualizer_obj.plot_confusion_matrix(\n",
-    "    train_data['Y_train'], Y_train_pred.reshape(-1, 1))"
+    "logger.info('### PLOT X TRAIN WITH 2 DIMENSIONS')\n",
+    "logger.info('### Y_train')\n",
+    "visualizer_obj.plot_x_train_with_2_dimensions(\n",
+    "    train_data['X_train'].toarray(), train_data['Y_train'])\n",
+    "logger.info('### Y_train_pred')\n",
+    "visualizer_obj.plot_x_train_with_2_dimensions(\n",
+    "    train_data['X_train'].toarray(), Y_train_pred.reshape(-1, 1))"
    ]
   },
   {
