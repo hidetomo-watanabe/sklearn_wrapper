@@ -145,8 +145,8 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "logger.info('### PLOT X TRAIN HISTOGRAM WITH PRED GROUP')\n",
-    "visualizer_obj.plot_x_train_histogram_with_pred_group(\n",
+    "logger.info('### PLOT X TRAIN HISTOGRAM')\n",
+    "visualizer_obj.plot_x_train_histogram(\n",
     "    raw_data['train_df'].sample(frac=1, replace=False, random_state=42),\n",
     "    raw_data['pred_df'].sample(frac=1, replace=False, random_state=42))"
    ]
@@ -209,6 +209,17 @@
     "visualizer_obj.plot_test_corrcoef(\n",
     "    train_data['X_test'].toarray(),\n",
     "    train_data['feature_columns'])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "logger.info('### PLOT X TRAIN TEST WITH 2 DIMENSIONS')\n",
+    "visualizer_obj.plot_x_train_test_with_2_dimensions(\n",
+    "    train_data['X_train'].toarray(), train_data['X_test'].toarray())"
    ]
   },
   {

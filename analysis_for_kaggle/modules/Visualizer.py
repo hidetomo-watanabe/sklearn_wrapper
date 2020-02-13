@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+from sklearn.manifold import TSNE
 from sklearn.tree import DecisionTreeClassifier
 from dtreeviz.trees import dtreeviz
 import eli5
@@ -49,7 +50,7 @@ class Visualizer(ConfigReader, CommonMethodWrapper):
             display(df.head())
             display(df.describe(include='all'))
 
-    def plot_x_train_histogram_with_pred_group(self, train_df, pred_df):
+    def plot_x_train_histogram(self, train_df, pred_df):
         for key in train_df.keys():
             if key == self.id_col:
                 continue
@@ -119,6 +120,25 @@ class Visualizer(ConfigReader, CommonMethodWrapper):
             yticklabels=feature_columns,
             fmt="1.2f", annot=True, lw=0.7, cmap='YlGnBu')
         ax.set_ylim(len(feature_columns), 0)
+
+    def plot_x_train_test_with_2_dimensions(self, X_train, X_test):
+        model_obj = TSNE(n_components=2, random_state=42)
+        X_train_test = model_obj.fit_transform(
+            np.concatenate((X_train, X_test), axis=0))
+        X_train = X_train_test[:len(X_train)]
+        X_test = X_train_test[len(X_train):]
+
+        cmap = plt.get_cmap('tab10')
+        plt.title('X_train_test')
+        plt.xlabel('tsne_0')
+        plt.ylabel('tsne_1')
+        plt.scatter(
+            X_train[:, 0], X_train[:, 1], alpha=0.5,
+            color=cmap(0), label='X_train')
+        plt.scatter(
+            X_test[:, 0], X_test[:, 1], alpha=0.5,
+            color=cmap(1), label='X_test')
+        plt.legend(loc="best")
 
     def visualize_decision_tree(
         self, X_train, Y_train, feature_names, max_depth=3

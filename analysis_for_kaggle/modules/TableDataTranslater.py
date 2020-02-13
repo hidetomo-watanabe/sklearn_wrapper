@@ -343,11 +343,8 @@ class TableDataTranslater(BaseDataTranslater, CommonMethodWrapper):
         logger.info(
             'reduce dimension %s to %s with %s'
             % (self.X_train.shape[1], n, model))
-        X_train = self.X_train
-        X_test = self.X_test
-        if model == 'pca':
-            X_train = X_train.toarray()
-            X_test = X_test.toarray()
+        X_train = self.toarray_like(self.X_train)
+        X_test = self.toarray_like(self.X_test)
 
         if model == 'pca':
             model_obj = PCA(n_components=n, random_state=42)
