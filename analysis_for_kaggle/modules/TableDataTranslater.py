@@ -562,8 +562,8 @@ class TableDataTranslater(BaseDataTranslater, CommonMethodWrapper):
             self.X_train = self.X_train.reshape(*self.X_train.shape, 1)
             self.X_test = self.X_test.reshape(*self.X_test.shape, 1)
             label_num = len(np.unique(self.Y_train))
-            self.X_train = np.concatenate([self.X_train] * label_num, 2)
-            self.X_test = np.concatenate([self.X_test] * label_num, 2)
+            self.X_train = np.concatenate([self.X_train] * label_num, axis=2)
+            self.X_test = np.concatenate([self.X_test] * label_num, axis=2)
         else:
             logger.error('NOT IMPLEMENTED RESHAPE FOR KERAS: %s' % mode)
             raise Exception('NOT IMPLEMENTED')

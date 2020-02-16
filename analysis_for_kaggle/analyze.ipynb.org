@@ -170,9 +170,10 @@
    "outputs": [],
    "source": [
     "logger.info('### TRAIN SCATTER MATRIX')\n",
-    "visualizer_obj.plot_train_scatter_matrix(\n",
-    "    train_data['X_train'].toarray(), train_data['Y_train'],\n",
-    "    train_data['feature_columns'])"
+    "import numpy as np\n",
+    "visualizer_obj.plot_scatter_matrix(\n",
+    "    np.concatenate([train_data['X_train'].toarray(), train_data['Y_train']], axis=1),\n",
+    "    train_data['feature_columns'] + visualizer_obj.pred_cols)"
    ]
   },
   {
@@ -182,7 +183,7 @@
    "outputs": [],
    "source": [
     "logger.info('### TEST SCATTER MATRIX')\n",
-    "visualizer_obj.plot_test_scatter_matrix(\n",
+    "visualizer_obj.plot_scatter_matrix(\n",
     "    train_data['X_test'].toarray(),\n",
     "    train_data['feature_columns'])"
    ]

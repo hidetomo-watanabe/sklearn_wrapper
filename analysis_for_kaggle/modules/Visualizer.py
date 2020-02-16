@@ -89,19 +89,9 @@ class Visualizer(ConfigReader, CommonMethodWrapper):
             ax.legend()
             plt.show()
 
-    def plot_train_scatter_matrix(self, X_train, Y_train, feature_columns):
-        pd.plotting.scatter_matrix(
-            pd.DataFrame(
-                np.concatenate([X_train, Y_train], 1),
-                columns=(feature_columns + self.pred_cols)),
-            figsize=(10, 10))
-
-    def plot_test_scatter_matrix(self, X_test, feature_columns):
-        pd.plotting.scatter_matrix(
-            pd.DataFrame(
-                X_test,
-                columns=feature_columns),
-            figsize=(10, 10))
+    def plot_scatter_matrix(self, target, feature_columns):
+        pd.plotting.scatter_matrix(pd.DataFrame(
+            target, columns=feature_columns), figsize=(10, 10))
 
     def plot_train_corrcoef(self, X_train, Y_train, feature_columns):
         fig, ax = plt.subplots(figsize=(10, 10))
