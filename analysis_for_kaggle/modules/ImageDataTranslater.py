@@ -40,6 +40,7 @@ class ImageDataTranslater(BaseDataTranslater):
         # Y_train
         self.Y_train = pred_df.to_numpy()
         # X_train
+        self.train_ids = train_df[self.id_col].to_numpy()
         self.X_train = []
         for img_path in train_df[img_path_col].to_numpy():
             self.X_train.append(_translate_image2array(img_path))

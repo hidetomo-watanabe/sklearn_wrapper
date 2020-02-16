@@ -19,12 +19,13 @@ if 'CommonMethodWrapper' not in globals():
 class Outputer(ConfigReader, CommonMethodWrapper):
     def __init__(
         self,
-        feature_columns, test_ids,
+        feature_columns, train_ids, test_ids,
         X_train, Y_train, X_test,
         cv, scorer, classes, single_estimators, estimator,
         y_scaler=None, kernel=False
     ):
         self.feature_columns = feature_columns
+        self.train_ids = train_ids
         self.test_ids = test_ids
         self.X_train = X_train
         self.Y_train = Y_train

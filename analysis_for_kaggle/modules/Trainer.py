@@ -48,11 +48,12 @@ if 'Outputer' not in globals():
 class Trainer(ConfigReader, CommonMethodWrapper):
     def __init__(
         self,
-        feature_columns, test_ids,
+        feature_columns, train_ids, test_ids,
         X_train, Y_train, X_test,
         kernel=False
     ):
         self.feature_columns = feature_columns
+        self.train_ids = train_ids
         self.test_ids = test_ids
         self.X_train = X_train
         self.Y_train = Y_train
@@ -371,7 +372,7 @@ class Trainer(ConfigReader, CommonMethodWrapper):
         self, X_train, Y_train, estimator, classes, threshold
     ):
         outputer_obj = Outputer(
-            [], [], X_train, Y_train, self.X_test,
+            [], [], [], X_train, Y_train, self.X_test,
             [], None, [], [], estimator)
         outputer_obj.configs = self.configs
         _, Y_pred_proba = outputer_obj.predict_like()

@@ -48,6 +48,7 @@ class BaseDataTranslater(ConfigReader):
         np.save(
             f'{output_path}/feature_columns_{savename}',
             self.feature_columns)
+        np.save(f'{output_path}/train_ids_{savename}', self.train_ids)
         np.save(f'{output_path}/test_ids_{savename}', self.test_ids)
         np.save(f'{output_path}/X_train_{savename}', self.X_train)
         np.save(f'{output_path}/Y_train_{savename}', self.Y_train)
@@ -60,6 +61,7 @@ class BaseDataTranslater(ConfigReader):
         logger.info(f'X_test shape: {self.X_test.shape}')
         output = {
             'feature_columns': self.feature_columns,
+            'train_ids': self.train_ids,
             'test_ids': self.test_ids,
             'X_train': self.X_train,
             'Y_train': self.Y_train,
