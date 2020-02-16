@@ -371,9 +371,10 @@ class Trainer(ConfigReader, CommonMethodWrapper):
     def _calc_pseudo_label_data(
         self, X_train, Y_train, estimator, classes, threshold
     ):
+        _ = None
         outputer_obj = Outputer(
-            [], [], [], X_train, Y_train, self.X_test,
-            [], None, [], [], estimator)
+            _, _, _, X_train, Y_train, self.X_test,
+            _, _, _, _, estimator)
         outputer_obj.configs = self.configs
         _, Y_pred_proba = outputer_obj.predict_like()
 
