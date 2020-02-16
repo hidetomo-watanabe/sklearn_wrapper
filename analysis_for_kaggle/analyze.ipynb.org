@@ -87,7 +87,7 @@
    "outputs": [],
    "source": [
     "from modules.Visualizer import Visualizer\n",
-    "visualizer_obj = Visualizer()\n",
+    "visualizer_obj = Visualizer(sample_frac=0.5)\n",
     "visualizer_obj.read_config_file(config_path)\n",
     "# visualizer_obj.read_config_text(config_text)"
    ]
@@ -109,10 +109,7 @@
    "outputs": [],
    "source": [
     "logger.info('### DISPLAY DATA')\n",
-    "visualizer_obj.display_data(\n",
-    "    Visualizer.sample_like(raw_data['train_df'], frac=0.5),\n",
-    "    Visualizer.sample_like(raw_data['test_df'], frac=0.5),\n",
-    "    Visualizer.sample_like(raw_data['pred_df'], frac=0.5))"
+    "visualizer_obj.display_data(raw_data['train_df'], raw_data['test_df'], raw_data['pred_df'])"
    ]
   },
   {
@@ -123,8 +120,7 @@
    "source": [
     "logger.info('### TRAIN PROFILING')\n",
     "import pandas_profiling\n",
-    "pandas_profiling.ProfileReport(\n",
-    "    Visualizer.sample_like(raw_data['train_df'], frac=0.5))"
+    "pandas_profiling.ProfileReport(Visualizer.sample_like(raw_data['train_df'], frac=0.5))"
    ]
   },
   {
@@ -135,8 +131,7 @@
    "source": [
     "logger.info('### TEST PROFILING')\n",
     "import pandas_profiling\n",
-    "pandas_profiling.ProfileReport(\n",
-    "    Visualizer.sample_like(raw_data['test_df'], frac=0.5))"
+    "pandas_profiling.ProfileReport(Visualizer.sample_like(raw_data['test_df'], frac=0.5))"
    ]
   },
   {
@@ -146,9 +141,7 @@
    "outputs": [],
    "source": [
     "logger.info('### PLOT X TRAIN HISTOGRAM')\n",
-    "visualizer_obj.plot_x_train_histogram(\n",
-    "    Visualizer.sample_like(raw_data['train_df'], frac=0.5),\n",
-    "    Visualizer.sample_like(raw_data['pred_df'], frac=0.5))"
+    "visualizer_obj.plot_x_train_histogram(raw_data['train_df'], raw_data['pred_df'])"
    ]
   },
   {
@@ -158,9 +151,7 @@
    "outputs": [],
    "source": [
     "logger.info('### PLOT X TRAIN TEST HISTOGRAM')\n",
-    "visualizer_obj.plot_x_train_test_histogram(\n",
-    "    Visualizer.sample_like(raw_data['train_df'], frac=0.5),\n",
-    "    Visualizer.sample_like(raw_data['test_df'], frac=0.5))"
+    "visualizer_obj.plot_x_train_test_histogram(raw_data['train_df'], raw_data['test_df'])"
    ]
   },
   {
@@ -172,9 +163,7 @@
     "logger.info('### TRAIN SCATTER MATRIX')\n",
     "import numpy as np\n",
     "visualizer_obj.plot_scatter_matrix(\n",
-    "    Visualizer.sample_like(\n",
-    "        np.concatenate([train_data['X_train'].toarray(), train_data['Y_train']], axis=1),\n",
-    "        frac=0.5),\n",
+    "    np.concatenate([train_data['X_train'].toarray(), train_data['Y_train']], axis=1),\n",
     "    train_data['feature_columns'] + visualizer_obj.pred_cols)"
    ]
   },
@@ -186,7 +175,7 @@
    "source": [
     "logger.info('### TEST SCATTER MATRIX')\n",
     "visualizer_obj.plot_scatter_matrix(\n",
-    "    Visualizer.sample_like(train_data['X_test'].toarray(), frac=0.5),\n",
+    "    train_data['X_test'].toarray(),\n",
     "    train_data['feature_columns'])"
    ]
   },
@@ -198,9 +187,7 @@
    "source": [
     "logger.info('### PLOT TRAIN CORRCOEF')\n",
     "visualizer_obj.plot_train_corrcoef(\n",
-    "    Visualizer.sample_like(train_data['X_train'].toarray(), frac=0.5),\n",
-    "    Visualizer.sample_like(train_data['Y_train'], frac=0.5),\n",
-    "    train_data['feature_columns'])"
+    "    train_data['X_train'].toarray(), train_data['Y_train'], train_data['feature_columns'])"
    ]
   },
   {
@@ -211,8 +198,7 @@
    "source": [
     "logger.info('### PLOT TEST CORRCOEF')\n",
     "visualizer_obj.plot_test_corrcoef(\n",
-    "    Visualizer.sample_like(train_data['X_test'].toarray(), frac=0.5),\n",
-    "    train_data['feature_columns'])"
+    "    train_data['X_test'].toarray(), train_data['feature_columns'])"
    ]
   },
   {
@@ -223,8 +209,7 @@
    "source": [
     "logger.info('### PLOT X TRAIN WITH 2 DIMENSIONS')\n",
     "visualizer_obj.plot_x_train_with_2_dimensions(\n",
-    "    Visualizer.sample_like(train_data['X_train'].toarray(), frac=0.5),\n",
-    "    Visualizer.sample_like(train_data['Y_train'], frac=0.5))"
+    "    train_data['X_train'].toarray(), train_data['Y_train'])"
    ]
   },
   {
@@ -235,8 +220,7 @@
    "source": [
     "logger.info('### PLOT X TRAIN TEST WITH 2 DIMENSIONS')\n",
     "visualizer_obj.plot_x_train_test_with_2_dimensions(\n",
-    "    Visualizer.sample_like(train_data['X_train'].toarray(), frac=0.5),\n",
-    "    Visualizer.sample_like(train_data['X_test'].toarray(), frac=0.5))"
+    "    train_data['X_train'].toarray(), train_data['X_test'].toarray())"
    ]
   },
   {
@@ -247,9 +231,7 @@
    "source": [
     "logger.info('### VISUALIZE DECISION TREE')\n",
     "visualizer_obj.visualize_decision_tree(\n",
-    "    Visualizer.sample_like(train_data['X_train'].toarray(), frac=0.5),\n",
-    "    Visualizer.sample_like(train_data['Y_train'], frac=0.5),\n",
-    "    train_data['feature_columns'])"
+    "    train_data['X_train'].toarray(), train_data['Y_train'], train_data['feature_columns'])"
    ]
   },
   {
@@ -432,12 +414,10 @@
     "logger.info('### PLOT X TRAIN WITH 2 DIMENSIONS')\n",
     "logger.info('### Y_train')\n",
     "visualizer_obj.plot_x_train_with_2_dimensions(\n",
-    "    Visualizer.sample_like(train_data['X_train'].toarray(), frac=0.5),\n",
-    "    Visualizer.sample_like(train_data['Y_train'], frac=0.5))\n",
+    "    train_data['X_train'].toarray(), train_data['Y_train'])\n",
     "logger.info('### Y_train_pred')\n",
     "visualizer_obj.plot_x_train_with_2_dimensions(\n",
-    "    Visualizer.sample_like(train_data['X_train'].toarray(), frac=0.5),\n",
-    "    Visualizer.sample_like(Y_train_pred.reshape(-1, 1), frac=0.5))"
+    "    train_data['X_train'].toarray(), Y_train_pred.reshape(-1, 1))"
    ]
   },
   {

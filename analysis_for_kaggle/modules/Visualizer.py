@@ -21,8 +21,9 @@ if 'CommonMethodWrapper' not in globals():
 
 
 class Visualizer(ConfigReader, CommonMethodWrapper):
-    def __init__(self):
+    def __init__(self, sample_frac=1.0):
         self.configs = {}
+        self.sample_frac = sample_frac
         self.hist_params = {
             'alpha': 0.5,
             'density': True,
@@ -39,6 +40,10 @@ class Visualizer(ConfigReader, CommonMethodWrapper):
         return target
 
     def display_data(self, train_df, test_df, pred_df):
+        train_df = self.sample_like(train_df, frac=self.sample_frac)
+        test_df = self.sample_like(test_df, frac=self.sample_frac)
+        pred_df = self.sample_like(pred_df, frac=self.sample_frac)
+
         if self.configs['pre']['train_mode'] == 'clf':
             logger.info('train pred counts')
             for pred_col in self.pred_cols:
@@ -60,6 +65,9 @@ class Visualizer(ConfigReader, CommonMethodWrapper):
             display(df.describe(include='all'))
 
     def plot_x_train_histogram(self, train_df, pred_df):
+        train_df = self.sample_like(train_df, frac=self.sample_frac)
+        pred_df = self.sample_like(pred_df, frac=self.sample_frac)
+
         for key in train_df.keys():
             if key == self.id_col:
                 continue
@@ -83,6 +91,9 @@ class Visualizer(ConfigReader, CommonMethodWrapper):
             plt.show()
 
     def plot_x_train_test_histogram(self, train_df, test_df):
+        train_df = self.sample_like(train_df, frac=self.sample_frac)
+        test_df = self.sample_like(test_df, frac=self.sample_frac)
+
         for key in train_df.keys():
             if key == self.id_col:
                 continue
@@ -99,10 +110,15 @@ class Visualizer(ConfigReader, CommonMethodWrapper):
             plt.show()
 
     def plot_scatter_matrix(self, target, feature_columns):
+        target = self.sample_like(target, frac=self.sample_frac)
+
         pd.plotting.scatter_matrix(pd.DataFrame(
             target, columns=feature_columns), figsize=(10, 10))
 
     def plot_train_corrcoef(self, X_train, Y_train, feature_columns):
+        X_train = self.sample_like(X_train, frac=self.sample_frac)
+        Y_train = self.sample_like(Y_train, frac=self.sample_frac)
+
         fig, ax = plt.subplots(figsize=(10, 10))
         sns.heatmap(
             np.corrcoef(X_train, Y_train, rowvar=False),
@@ -112,6 +128,8 @@ class Visualizer(ConfigReader, CommonMethodWrapper):
         ax.set_ylim(len(feature_columns + self.pred_cols), 0)
 
     def plot_test_corrcoef(self, X_test, feature_columns):
+        X_test = self.sample_like(X_test, frac=self.sample_frac)
+
         fig, ax = plt.subplots(figsize=(10, 10))
         sns.heatmap(
             np.corrcoef(X_test, rowvar=False),
@@ -121,6 +139,9 @@ class Visualizer(ConfigReader, CommonMethodWrapper):
         ax.set_ylim(len(feature_columns), 0)
 
     def plot_x_train_with_2_dimensions(self, X_train, Y_train):
+        X_train = self.sample_like(X_train, frac=self.sample_frac)
+        Y_train = self.sample_like(Y_train, frac=self.sample_frac)
+
         model_obj = TSNE(n_components=2, random_state=42)
         X_train = model_obj.fit_transform(X_train)
 
@@ -140,6 +161,9 @@ class Visualizer(ConfigReader, CommonMethodWrapper):
         plt.legend(loc="best")
 
     def plot_x_train_test_with_2_dimensions(self, X_train, X_test):
+        X_train = self.sample_like(X_train, frac=self.sample_frac)
+        X_test = self.sample_like(X_test, frac=self.sample_frac)
+
         model_obj = TSNE(n_components=2, random_state=42)
         X_train_test = model_obj.fit_transform(
             np.concatenate((X_train, X_test), axis=0))
@@ -162,6 +186,9 @@ class Visualizer(ConfigReader, CommonMethodWrapper):
     def visualize_decision_tree(
         self, X_train, Y_train, feature_names, max_depth=3
     ):
+        X_train = self.sample_like(X_train, frac=self.sample_frac)
+        Y_train = self.sample_like(Y_train, frac=self.sample_frac)
+
         Y_train = self.ravel_like(Y_train)
         clf = DecisionTreeClassifier(max_depth=max_depth)
         clf.fit(X_train, Y_train)
