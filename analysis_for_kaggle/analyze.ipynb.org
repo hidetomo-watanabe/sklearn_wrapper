@@ -208,8 +208,9 @@
    "outputs": [],
    "source": [
     "logger.info('### PLOT X TRAIN WITH 2 DIMENSIONS')\n",
-    "visualizer_obj.plot_x_train_with_2_dimensions(\n",
-    "    train_data['X_train'].toarray(), train_data['Y_train'])"
+    "df_2d_train = visualizer_obj.plot_x_train_with_2_dimensions(\n",
+    "    train_data['X_train'].toarray(), train_data['Y_train'], train_data['train_ids'])\n",
+    "display(df_2d_train)"
    ]
   },
   {
@@ -219,8 +220,10 @@
    "outputs": [],
    "source": [
     "logger.info('### PLOT X TRAIN TEST WITH 2 DIMENSIONS')\n",
-    "visualizer_obj.plot_x_train_test_with_2_dimensions(\n",
-    "    train_data['X_train'].toarray(), train_data['X_test'].toarray())"
+    "df_2d_train_test = visualizer_obj.plot_x_train_test_with_2_dimensions(\n",
+    "    train_data['X_train'].toarray(), train_data['X_test'].toarray(),\n",
+    "    train_data['train_ids'], train_data['test_ids'])\n",
+    "display(df_2d_train_test)"
    ]
   },
   {
@@ -413,11 +416,12 @@
    "source": [
     "logger.info('### PLOT X TRAIN WITH 2 DIMENSIONS')\n",
     "logger.info('### Y_train')\n",
-    "visualizer_obj.plot_x_train_with_2_dimensions(\n",
-    "    train_data['X_train'].toarray(), train_data['Y_train'])\n",
+    "df_2d_train_y_train = visualizer_obj.plot_x_train_with_2_dimensions(\n",
+    "    train_data['X_train'].toarray(), train_data['Y_train'], train_data['train_ids'])\n",
     "logger.info('### Y_train_pred')\n",
-    "visualizer_obj.plot_x_train_with_2_dimensions(\n",
-    "    train_data['X_train'].toarray(), Y_train_pred.reshape(-1, 1))"
+    "df_2d_train_y_train_pred = visualizer_obj.plot_x_train_with_2_dimensions(\n",
+    "    train_data['X_train'].toarray(), Y_train_pred.reshape(-1, 1), train_data['train_ids'])\n",
+    "display(df_2d_train_y_train_pred)"
    ]
   },
   {

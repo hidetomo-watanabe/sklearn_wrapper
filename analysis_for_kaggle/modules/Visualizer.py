@@ -140,12 +140,15 @@ class Visualizer(ConfigReader, CommonMethodWrapper):
             fmt="1.2f", annot=True, lw=0.7, cmap='YlGnBu')
         ax.set_ylim(len(feature_columns), 0)
 
-    def plot_x_train_with_2_dimensions(self, X_train, Y_train):
+    def plot_x_train_with_2_dimensions(self, X_train, Y_train, train_ids):
         X_train = self.sample_like(X_train, frac=self.sample_frac)
         Y_train = self.sample_like(Y_train, frac=self.sample_frac)
+        train_ids = self.sample_like(train_ids, frac=self.sample_frac)
 
         model_obj = TSNE(n_components=2, random_state=42)
         X_train = model_obj.fit_transform(X_train)
+        indexes_0 = np.where(Y_train == 0)
+        indexes_1 = np.where(Y_train == 1)
 
         cmap = plt.get_cmap('tab10')
         plt.figure()
@@ -153,18 +156,26 @@ class Visualizer(ConfigReader, CommonMethodWrapper):
         plt.xlabel('tsne_0')
         plt.ylabel('tsne_1')
         plt.scatter(
-            X_train[np.where(Y_train == 0), 0],
-            X_train[np.where(Y_train == 0), 1], alpha=0.5,
+            X_train[indexes_0, 0],
+            X_train[indexes_0, 1], alpha=0.5,
             color=cmap(0), label='Y_train: 0')
         plt.scatter(
-            X_train[np.where(Y_train == 1), 0],
-            X_train[np.where(Y_train == 1), 1], alpha=0.5,
+            X_train[indexes_1, 0],
+            X_train[indexes_1, 1], alpha=0.5,
             color=cmap(1), label='Y_train: 1')
         plt.legend(loc="best")
 
-    def plot_x_train_test_with_2_dimensions(self, X_train, X_test):
+        return pd.DataFrame(
+            np.concatenate((train_ids, X_train, Y_train), axis=1),
+            columns=[self.id_col, 'tsne_0', 'tsne_1'] + self.pred_cols)
+
+    def plot_x_train_test_with_2_dimensions(
+        self, X_train, X_test, train_ids, test_ids
+    ):
         X_train = self.sample_like(X_train, frac=self.sample_frac)
         X_test = self.sample_like(X_test, frac=self.sample_frac)
+        train_ids = self.sample_like(train_ids, frac=self.sample_frac)
+        test_ids = self.sample_like(test_ids, frac=self.sample_frac)
 
         model_obj = TSNE(n_components=2, random_state=42)
         X_train_test = model_obj.fit_transform(
@@ -184,6 +195,19 @@ class Visualizer(ConfigReader, CommonMethodWrapper):
             X_test[:, 0], X_test[:, 1], alpha=0.5,
             color=cmap(1), label='X_test')
         plt.legend(loc="best")
+
+        is_test = np.concatenate(
+            (np.zeros(X_train.shape[0]), np.ones(X_test.shape[0])),
+            axis=0).reshape(-1, 1)
+        return pd.DataFrame(
+            np.concatenate(
+                (
+                    np.concatenate((train_ids, test_ids), axis=0),
+                    np.concatenate((X_train, X_test), axis=0),
+                    is_test
+                ),
+                axis=1),
+            columns=[self.id_col, 'tsne_0', 'tsne_1', 'is_test'])
 
     def visualize_decision_tree(
         self, X_train, Y_train, feature_names, max_depth=3
