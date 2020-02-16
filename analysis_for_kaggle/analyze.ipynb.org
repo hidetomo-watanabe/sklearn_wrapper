@@ -110,9 +110,9 @@
    "source": [
     "logger.info('### DISPLAY DATA')\n",
     "visualizer_obj.display_data(\n",
-    "    raw_data['train_df'].sample(frac=1, replace=False, random_state=42),\n",
-    "    raw_data['test_df'].sample(frac=1, replace=False, random_state=42),\n",
-    "    raw_data['pred_df'].sample(frac=1, replace=False, random_state=42))"
+    "    Visualizer.sample_like(raw_data['train_df'], frac=1.0),\n",
+    "    Visualizer.sample_like(raw_data['test_df'], frac=1.0),\n",
+    "    Visualizer.sample_like(raw_data['pred_df'], frac=1.0))"
    ]
   },
   {
@@ -124,7 +124,7 @@
     "logger.info('### TRAIN PROFILING')\n",
     "import pandas_profiling\n",
     "pandas_profiling.ProfileReport(\n",
-    "    raw_data['train_df'].sample(frac=1, replace=False, random_state=42))"
+    "    Visualizer.sample_like(raw_data['train_df'], frac=1.0))"
    ]
   },
   {
@@ -136,7 +136,7 @@
     "logger.info('### TEST PROFILING')\n",
     "import pandas_profiling\n",
     "pandas_profiling.ProfileReport(\n",
-    "    raw_data['test_df'].sample(frac=1, replace=False, random_state=42))"
+    "    Visualizer.sample_like(raw_data['test_df'], frac=1.0))"
    ]
   },
   {
@@ -147,8 +147,8 @@
    "source": [
     "logger.info('### PLOT X TRAIN HISTOGRAM')\n",
     "visualizer_obj.plot_x_train_histogram(\n",
-    "    raw_data['train_df'].sample(frac=1, replace=False, random_state=42),\n",
-    "    raw_data['pred_df'].sample(frac=1, replace=False, random_state=42))"
+    "    Visualizer.sample_like(raw_data['train_df'], frac=1.0),\n",
+    "    Visualizer.sample_like(raw_data['pred_df'], frac=1.0))"
    ]
   },
   {
@@ -159,8 +159,8 @@
    "source": [
     "logger.info('### PLOT X TRAIN TEST HISTOGRAM')\n",
     "visualizer_obj.plot_x_train_test_histogram(\n",
-    "    raw_data['train_df'].sample(frac=1, replace=False, random_state=42),\n",
-    "    raw_data['test_df'].sample(frac=1, replace=False, random_state=42))"
+    "    Visualizer.sample_like(raw_data['train_df'], frac=1.0),\n",
+    "    Visualizer.sample_like(raw_data['test_df'], frac=1.0))"
    ]
   },
   {

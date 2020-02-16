@@ -29,6 +29,15 @@ class Visualizer(ConfigReader, CommonMethodWrapper):
             'stacked': True,
         }
 
+    @classmethod
+    def sample_like(self, target, frac):
+        if isinstance(target, pd.DataFrame):
+            return target.sample(frac=1, replace=False, random_state=42)
+        elif isinstance(target, np.ndarray):
+            df = pd.DataFrame(target)
+            return df.sample(frac=1, replace=False, random_state=42).to_numpy()
+        return target
+
     def display_data(self, train_df, test_df, pred_df):
         if self.configs['pre']['train_mode'] == 'clf':
             logger.info('train pred counts')
