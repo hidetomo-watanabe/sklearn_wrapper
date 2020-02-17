@@ -117,24 +117,12 @@ class Visualizer(ConfigReader, CommonMethodWrapper):
         pd.plotting.scatter_matrix(pd.DataFrame(
             target, columns=feature_columns), figsize=(10, 10))
 
-    def plot_train_corrcoef(self, X_train, Y_train, feature_columns):
-        X_train = self.sample_like(X_train, frac=self.sample_frac)
-        Y_train = self.sample_like(Y_train, frac=self.sample_frac)
+    def plot_corrcoef(self, target, feature_columns):
+        target = self.sample_like(target, frac=self.sample_frac)
 
         fig, ax = plt.subplots(figsize=(10, 10))
         sns.heatmap(
-            np.corrcoef(X_train, Y_train, rowvar=False),
-            xticklabels=feature_columns + self.pred_cols,
-            yticklabels=feature_columns + self.pred_cols,
-            fmt="1.2f", annot=True, lw=0.7, cmap='YlGnBu')
-        ax.set_ylim(len(feature_columns + self.pred_cols), 0)
-
-    def plot_test_corrcoef(self, X_test, feature_columns):
-        X_test = self.sample_like(X_test, frac=self.sample_frac)
-
-        fig, ax = plt.subplots(figsize=(10, 10))
-        sns.heatmap(
-            np.corrcoef(X_test, rowvar=False),
+            np.corrcoef(target, rowvar=False),
             xticklabels=feature_columns,
             yticklabels=feature_columns,
             fmt="1.2f", annot=True, lw=0.7, cmap='YlGnBu')

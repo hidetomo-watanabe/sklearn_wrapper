@@ -186,8 +186,9 @@
    "outputs": [],
    "source": [
     "logger.info('### PLOT TRAIN CORRCOEF')\n",
-    "visualizer_obj.plot_train_corrcoef(\n",
-    "    train_data['X_train'].toarray(), train_data['Y_train'], train_data['feature_columns'])"
+    "visualizer_obj.plot_corrcoef(\n",
+    "    np.concatenate((train_data['X_train'].toarray(), train_data['Y_train']), axis=1),\n",
+    "    train_data['feature_columns'] + visualizer_obj.pred_cols)"
    ]
   },
   {
@@ -197,7 +198,7 @@
    "outputs": [],
    "source": [
     "logger.info('### PLOT TEST CORRCOEF')\n",
-    "visualizer_obj.plot_test_corrcoef(\n",
+    "visualizer_obj.plot_corrcoef(\n",
     "    train_data['X_test'].toarray(), train_data['feature_columns'])"
    ]
   },
