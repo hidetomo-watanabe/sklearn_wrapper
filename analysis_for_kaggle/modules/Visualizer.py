@@ -135,22 +135,17 @@ class Visualizer(ConfigReader, CommonMethodWrapper):
 
         model_obj = TSNE(n_components=2, random_state=42)
         target = model_obj.fit_transform(target)
-        indexes_0 = np.where(label == 0)
-        indexes_1 = np.where(label == 1)
 
         cmap = plt.get_cmap('tab10')
         plt.figure()
         plt.title('target')
         plt.xlabel('tsne_0')
         plt.ylabel('tsne_1')
-        plt.scatter(
-            target[indexes_0, 0],
-            target[indexes_0, 1], alpha=0.5,
-            color=cmap(0), label='label: 0')
-        plt.scatter(
-            target[indexes_1, 0],
-            target[indexes_1, 1], alpha=0.5,
-            color=cmap(1), label='label: 1')
+        for i, l in enumerate(np.sort(np.unique(label))):
+            plt.scatter(
+                target[np.where(label == l), 0],
+                target[np.where(label == l), 1], alpha=0.5,
+                color=cmap(i), label=f'label: {l}')
         plt.legend(loc="best")
 
         return pd.DataFrame(
