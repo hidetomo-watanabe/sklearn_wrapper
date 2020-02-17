@@ -18,6 +18,7 @@
    "outputs": [],
    "source": [
     "import sys\n",
+    "import numpy as np\n",
     "from logging import getLogger, StreamHandler, Formatter, INFO\n",
     "import logging.config\n",
     "logging.config.fileConfig(\n",
@@ -161,7 +162,6 @@
    "outputs": [],
    "source": [
     "logger.info('### TRAIN SCATTER MATRIX')\n",
-    "import numpy as np\n",
     "visualizer_obj.plot_scatter_matrix(\n",
     "    np.concatenate([train_data['X_train'].toarray(), train_data['Y_train']], axis=1),\n",
     "    train_data['feature_columns'] + visualizer_obj.pred_cols)"
@@ -209,7 +209,7 @@
    "outputs": [],
    "source": [
     "logger.info('### PLOT X TRAIN WITH 2 DIMENSIONS')\n",
-    "df_2d_train = visualizer_obj.plot_x_train_with_2_dimensions(\n",
+    "df_2d_train = visualizer_obj.plot_with_2_dimensions(\n",
     "    train_data['X_train'].toarray(), train_data['Y_train'], train_data['train_ids'])\n",
     "display(df_2d_train)"
    ]
@@ -221,9 +221,12 @@
    "outputs": [],
    "source": [
     "logger.info('### PLOT X TRAIN TEST WITH 2 DIMENSIONS')\n",
-    "df_2d_train_test = visualizer_obj.plot_x_train_test_with_2_dimensions(\n",
-    "    train_data['X_train'].toarray(), train_data['X_test'].toarray(),\n",
-    "    train_data['train_ids'], train_data['test_ids'])\n",
+    "df_2d_train_test = visualizer_obj.plot_with_2_dimensions(\n",
+    "    np.concatenate((train_data['X_train'].toarray(), train_data['X_test'].toarray()), axis=0),\n",
+    "    np.concatenate(\n",
+    "        (np.zeros(train_data['X_train'].shape[0]), np.ones(train_data['X_test'].shape[0])),\n",
+    "        axis=0).reshape(-1, 1),\n",
+    "    np.concatenate((train_data['train_ids'], train_data['test_ids']), axis=0))\n",
     "display(df_2d_train_test)"
    ]
   },
@@ -417,10 +420,10 @@
    "source": [
     "logger.info('### PLOT X TRAIN WITH 2 DIMENSIONS')\n",
     "logger.info('### Y_train')\n",
-    "df_2d_train_y_train = visualizer_obj.plot_x_train_with_2_dimensions(\n",
+    "df_2d_train_y_train = visualizer_obj.plot_with_2_dimensions(\n",
     "    train_data['X_train'].toarray(), train_data['Y_train'], train_data['train_ids'])\n",
     "logger.info('### Y_train_pred')\n",
-    "df_2d_train_y_train_pred = visualizer_obj.plot_x_train_with_2_dimensions(\n",
+    "df_2d_train_y_train_pred = visualizer_obj.plot_with_2_dimensions(\n",
     "    train_data['X_train'].toarray(), Y_train_pred.reshape(-1, 1), train_data['train_ids'])\n",
     "display(df_2d_train_y_train_pred)"
    ]
