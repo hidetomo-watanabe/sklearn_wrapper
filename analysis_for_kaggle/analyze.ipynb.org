@@ -445,6 +445,16 @@
    "metadata": {},
    "outputs": [],
    "source": [
+    "logger.info('### change visualizer sample frac')\n",
+    "visualizer_obj.sample_frac = 1.0"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
     "logger.info('### PLOT Y TRAIN TEST PREDS HISTOGRAM')\n",
     "visualizer_obj.plot_histograms(\n",
     "    [Y_train_pred.reshape(-1, 1), pred_data['Y_pred'].reshape(-1, 1)],\n",

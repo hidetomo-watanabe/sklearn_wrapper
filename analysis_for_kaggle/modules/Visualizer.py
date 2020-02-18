@@ -235,6 +235,7 @@ class Visualizer(ConfigReader, CommonMethodWrapper):
         ax.set_title('targets')
         cmap = plt.get_cmap('tab10')
         for i, (target, label) in enumerate(zip(targets, labels)):
+            target = self.sample_like(target, frac=self.sample_frac)
             ax.hist(
                 target, **self.hist_params,
                 color=cmap(i), label=f'{label}')
