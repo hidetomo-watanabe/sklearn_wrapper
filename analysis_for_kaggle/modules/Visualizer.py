@@ -41,7 +41,7 @@ class Visualizer(ConfigReader, CommonMethodWrapper):
                 frac=frac, replace=False, random_state=42).to_numpy()
         return target
 
-    def display_data(self, train_df, test_df, pred_df):
+    def display_dfs(self, train_df, test_df, pred_df):
         train_df = self.sample_like(train_df, frac=self.sample_frac)
         test_df = self.sample_like(test_df, frac=self.sample_frac)
         pred_df = self.sample_like(pred_df, frac=self.sample_frac)
@@ -230,13 +230,13 @@ class Visualizer(ConfigReader, CommonMethodWrapper):
         plt.plot(fpr, tpr, label=f'AUC: {auc}')
         plt.legend(loc="best")
 
-    def plot_y_targets_histogram(self, Y_targets, labels):
+    def plot_histograms(self, targets, labels):
         ax = plt.subplot()
-        ax.set_title('Y_targets')
+        ax.set_title('targets')
         cmap = plt.get_cmap('tab10')
-        for i, (Y_target, label) in enumerate(zip(Y_targets, labels)):
+        for i, (target, label) in enumerate(zip(targets, labels)):
             ax.hist(
-                Y_target, **self.hist_params,
+                target, **self.hist_params,
                 color=cmap(i), label=f'{label}')
         ax.legend()
         plt.show()
