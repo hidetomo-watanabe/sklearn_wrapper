@@ -142,10 +142,10 @@ class Visualizer(ConfigReader, CommonMethodWrapper):
         plt.xlabel('tsne_0')
         plt.ylabel('tsne_1')
         for i, l in enumerate(np.sort(np.unique(label))):
+            _target = target[np.where(self.ravel_like(label) == l)]
             plt.scatter(
-                target[np.where(label == l), 0],
-                target[np.where(label == l), 1], alpha=0.5,
-                color=cmap(i), label=f'label: {l}')
+                _target[:, 0], _target[:, 1],
+                alpha=0.5, color=cmap(i), label=f'label: {l}')
         plt.legend(loc="best")
 
         return pd.DataFrame(
