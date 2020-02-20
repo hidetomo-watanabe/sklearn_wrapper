@@ -172,14 +172,7 @@ class Visualizer(ConfigReader, CommonMethodWrapper):
     def plot_learning_curve(
         self, title, estimator, X_train, Y_train, scorer, cv
     ):
-        ylim = (0.7, 1.01)
         train_sizes = np.linspace(.1, 1.0, 5)
-
-        plt.figure()
-        plt.title(title)
-        plt.ylim(*ylim)
-        plt.xlabel("Training examples")
-        plt.ylabel("Score")
         train_sizes, train_scores, test_scores = learning_curve(
             estimator, X_train, Y_train, scoring=scorer,
             cv=cv, train_sizes=train_sizes, n_jobs=-1)
@@ -187,23 +180,27 @@ class Visualizer(ConfigReader, CommonMethodWrapper):
         train_scores_std = np.std(train_scores, axis=1)
         test_scores_mean = np.mean(test_scores, axis=1)
         test_scores_std = np.std(test_scores, axis=1)
-        plt.grid()
 
-        plt.fill_between(
+        ylim = (0.7, 1.01)
+        ax = plt.subplot()
+        ax.set_title(title)
+        ax.set_ylim(*ylim)
+        ax.set_xlabel("Training examples")
+        ax.set_ylabel("Score")
+        ax.fill_between(
             train_sizes, train_scores_mean - train_scores_std,
             train_scores_mean + train_scores_std, alpha=0.1,
             color="r")
-        plt.fill_between(
+        ax.fill_between(
             train_sizes, test_scores_mean - test_scores_std,
             test_scores_mean + test_scores_std, alpha=0.1, color="g")
-        plt.plot(
+        ax.plot(
             train_sizes, train_scores_mean, 'o-', color="r",
             label="Training score")
-        plt.plot(
+        ax.plot(
             train_sizes, test_scores_mean, 'o-', color="g",
             label="Cross-validation score")
-
-        plt.legend(loc="best")
+        ax.legend(loc="best")
         plt.show()
 
     def plot_roc(self, Y_train, Y_train_pred_proba):
