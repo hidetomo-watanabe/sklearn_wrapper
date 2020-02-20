@@ -442,9 +442,12 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "logger.info('### PLOT ROC')\n",
-    "visualizer_obj.plot_roc(\n",
-    "    train_data['Y_train'], Y_train_pred_proba[:, 1])"
+    "logger.info('### PLOT X TRAIN WITH 2 DIMENSIONS, ONLY ERROR')\n",
+    "logger.info('### Y_train')\n",
+    "error_index = np.where(train_data['Y_train'].reshape(-1,) != Y_train_pred)\n",
+    "df_2d_train_y_train = visualizer_obj.plot_with_2_dimensions(\n",
+    "    train_data['X_train'].toarray()[error_index], train_data['Y_train'][error_index],\n",
+    "    train_data['train_ids'][error_index])"
    ]
   },
   {
@@ -455,6 +458,17 @@
    "source": [
     "logger.info('### change visualizer sample frac')\n",
     "visualizer_obj.sample_frac = 1.0"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "logger.info('### PLOT ROC')\n",
+    "visualizer_obj.plot_roc(\n",
+    "    train_data['Y_train'], Y_train_pred_proba[:, 1])"
    ]
   },
   {
