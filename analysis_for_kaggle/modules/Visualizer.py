@@ -82,7 +82,7 @@ class Visualizer(ConfigReader, CommonMethodWrapper):
                 ax.hist(
                     _target, **self.hist_params,
                     color=cmap(i), label=f'label: {l}')
-            ax.legend()
+            ax.legend(loc="best")
             plt.show()
 
     def plot_scatter_matrix(self, target, feature_columns):
@@ -101,6 +101,8 @@ class Visualizer(ConfigReader, CommonMethodWrapper):
             yticklabels=feature_columns,
             fmt="1.2f", annot=True, lw=0.7, cmap='YlGnBu')
         ax.set_ylim(len(feature_columns), 0)
+        ax.legend(loc="best")
+        plt.show()
 
     def plot_with_2_dimensions(self, target, label, target_ids):
         target = self.sample_like(target, frac=self.sample_frac)
@@ -111,16 +113,17 @@ class Visualizer(ConfigReader, CommonMethodWrapper):
         target = model_obj.fit_transform(target)
 
         cmap = plt.get_cmap('tab10')
-        plt.figure()
-        plt.title('target')
-        plt.xlabel('tsne_0')
-        plt.ylabel('tsne_1')
+        ax = plt.subplot()
+        ax.set_title('target')
+        ax.set_xlabel('tsne_0')
+        ax.set_ylabel('tsne_1')
         for i, l in enumerate(np.sort(np.unique(label))):
             _target = target[np.where(self.ravel_like(label) == l)]
-            plt.scatter(
+            ax.scatter(
                 _target[:, 0], _target[:, 1],
                 alpha=0.5, color=cmap(i), label=f'label: {l}')
-        plt.legend(loc="best")
+        ax.legend(loc="best")
+        plt.show()
 
         return pd.DataFrame(
             np.concatenate((target_ids, target, label), axis=1),
@@ -192,17 +195,20 @@ class Visualizer(ConfigReader, CommonMethodWrapper):
             label="Cross-validation score")
 
         plt.legend(loc="best")
+        plt.show()
 
     def plot_roc(self, Y_train, Y_train_pred_proba):
         fpr, tpr, thresholds = metrics.roc_curve(
             Y_train, Y_train_pred_proba)
         auc = metrics.auc(fpr, tpr)
-        plt.figure()
-        plt.title('ROC curve')
-        plt.xlabel('False Positive Rate')
-        plt.ylabel('True Positive Rate')
-        plt.plot(fpr, tpr, label=f'AUC: {auc}')
-        plt.legend(loc="best")
+
+        ax = plt.subplot()
+        ax.set_title('ROC curve')
+        ax.set_xlabel('False Positive Rate')
+        ax.set_ylabel('True Positive Rate')
+        ax.plot(fpr, tpr, label=f'AUC: {auc}')
+        ax.legend(loc="best")
+        plt.show()
 
     def plot_ndarray_histograms(self, targets, labels):
         ax = plt.subplot()
@@ -213,5 +219,5 @@ class Visualizer(ConfigReader, CommonMethodWrapper):
             ax.hist(
                 target, **self.hist_params,
                 color=cmap(i), label=f'{label}')
-        ax.legend()
+        ax.legend(loc="best")
         plt.show()
