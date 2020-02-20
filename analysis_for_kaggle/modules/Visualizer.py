@@ -66,48 +66,22 @@ class Visualizer(ConfigReader, CommonMethodWrapper):
             display(df.head())
             display(df.describe(include='all'))
 
-    def plot_x_train_histogram(self, train_df, pred_df):
-        train_df = self.sample_like(train_df, frac=self.sample_frac)
-        pred_df = self.sample_like(pred_df, frac=self.sample_frac)
+    def plot_df_histograms(self, df, label):
+        df = self.sample_like(df, frac=self.sample_frac)
+        label = self.sample_like(label, frac=self.sample_frac)
 
-        for key in train_df.keys():
+        cmap = plt.get_cmap('tab10')
+        for key in df.keys():
             if key == self.id_col:
                 continue
             ax = plt.subplot()
             ax.set_title(key)
-            if self.configs['fit']['train_mode'] == 'clf':
-                for pred_col in self.pred_cols:
-                    cmap = plt.get_cmap('tab10')
-                    for i, pred_val in enumerate(
-                        np.unique(pred_df[pred_col].to_numpy())
-                    ):
-                        ax.hist(
-                            train_df[
-                                pred_df[pred_col] == pred_val
-                            ][key].dropna(), **self.hist_params,
-                            color=cmap(i), label=f'{pred_col}: {pred_val}')
-            elif self.configs['fit']['train_mode'] == 'reg':
+            for i, l in enumerate(np.sort(np.unique(label))):
+                _target = \
+                    df[key][self.ravel_like(label) == l].dropna().to_numpy()
                 ax.hist(
-                    train_df[key].dropna(), **self.hist_params)
-            ax.legend()
-            plt.show()
-
-    def plot_x_train_test_histogram(self, train_df, test_df):
-        train_df = self.sample_like(train_df, frac=self.sample_frac)
-        test_df = self.sample_like(test_df, frac=self.sample_frac)
-
-        for key in train_df.keys():
-            if key == self.id_col:
-                continue
-            ax = plt.subplot()
-            ax.set_title(key)
-            cmap = plt.get_cmap('tab10')
-            for i, (label, df) in enumerate(
-                [('train', train_df), ('test', test_df)]
-            ):
-                ax.hist(
-                    df[key].dropna(), **self.hist_params,
-                    color=cmap(i), label=f'{label}')
+                    _target, **self.hist_params,
+                    color=cmap(i), label=f'label: {l}')
             ax.legend()
             plt.show()
 
@@ -230,7 +204,7 @@ class Visualizer(ConfigReader, CommonMethodWrapper):
         plt.plot(fpr, tpr, label=f'AUC: {auc}')
         plt.legend(loc="best")
 
-    def plot_histograms(self, targets, labels):
+    def plot_ndarray_histograms(self, targets, labels):
         ax = plt.subplot()
         ax.set_title('targets')
         cmap = plt.get_cmap('tab10')

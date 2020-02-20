@@ -19,6 +19,7 @@
    "source": [
     "import sys\n",
     "import numpy as np\n",
+    "import pandas as pd\n",
     "from logging import getLogger, StreamHandler, Formatter, INFO\n",
     "import logging.config\n",
     "logging.config.fileConfig(\n",
@@ -142,7 +143,10 @@
    "outputs": [],
    "source": [
     "logger.info('### PLOT X TRAIN HISTOGRAM')\n",
-    "visualizer_obj.plot_x_train_histogram(raw_data['train_df'], raw_data['pred_df'])"
+    "for pred_col in visualizer_obj.pred_cols:\n",
+    "    visualizer_obj.plot_df_histograms(\n",
+    "        raw_data['train_df'],\n",
+    "        raw_data['pred_df'][pred_col].to_numpy())"
    ]
   },
   {
@@ -152,7 +156,11 @@
    "outputs": [],
    "source": [
     "logger.info('### PLOT X TRAIN TEST HISTOGRAM')\n",
-    "visualizer_obj.plot_x_train_test_histogram(raw_data['train_df'], raw_data['test_df'])"
+    "visualizer_obj.plot_df_histograms(\n",
+    "    pd.concat([raw_data['train_df'], raw_data['test_df']]),\n",
+    "    np.concatenate(\n",
+    "        (np.zeros(train_data['X_train'].shape[0]), np.ones(train_data['X_test'].shape[0])),\n",
+    "        axis=0).reshape(-1, 1))"
    ]
   },
   {
@@ -456,7 +464,7 @@
    "outputs": [],
    "source": [
     "logger.info('### PLOT Y TRAIN TEST PREDS HISTOGRAM')\n",
-    "visualizer_obj.plot_histograms(\n",
+    "visualizer_obj.plot_ndarray_histograms(\n",
     "    [Y_train_pred.reshape(-1, 1), pred_data['Y_pred'].reshape(-1, 1)],\n",
     "    ['train', 'test'])"
    ]
@@ -468,7 +476,7 @@
    "outputs": [],
    "source": [
     "logger.info('### PLOT Y TRAIN TEST PRED PROBAS HISTOGRAM')\n",
-    "visualizer_obj.plot_histograms(\n",
+    "visualizer_obj.plot_ndarray_histograms(\n",
     "    [Y_train_pred_proba[:, 1], pred_data['Y_pred_proba'][:, 1]],\n",
     "    ['train', 'test'])"
    ]
@@ -480,7 +488,7 @@
    "outputs": [],
    "source": [
     "logger.info('### PLOT SINGLE Y TRAIN PREDS HISTOGRAM')\n",
-    "visualizer_obj.plot_histograms(\n",
+    "visualizer_obj.plot_ndarray_histograms(\n",
     "    single_y_preds, [_estimator[0] for _estimator in estimator_data['single_estimators']])"
    ]
   },
@@ -491,7 +499,7 @@
    "outputs": [],
    "source": [
     "logger.info('### PLOT SINGLE Y TRAIN PRED PROBAS HISTOGRAM')\n",
-    "visualizer_obj.plot_histograms(\n",
+    "visualizer_obj.plot_ndarray_histograms(\n",
     "    single_y_pred_probas, [_estimator[0] for _estimator in estimator_data['single_estimators']])"
    ]
   },
