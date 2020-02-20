@@ -66,6 +66,19 @@ class Visualizer(ConfigReader, CommonMethodWrapper):
             display(df.head())
             display(df.describe(include='all'))
 
+    def plot_ndarray_histograms(self, targets, labels, title=None):
+        ax = plt.subplot()
+        if title:
+            ax.set_title(title)
+        cmap = plt.get_cmap('tab10')
+        for i, (target, label) in enumerate(zip(targets, labels)):
+            target = self.sample_like(target, frac=self.sample_frac)
+            ax.hist(
+                target, **self.hist_params,
+                color=cmap(i), label=f'{label}')
+        ax.legend(loc="best")
+        plt.show()
+
     def plot_df_histograms(self, df, label):
         df = self.sample_like(df, frac=self.sample_frac)
         label = self.sample_like(label, frac=self.sample_frac)
@@ -74,16 +87,12 @@ class Visualizer(ConfigReader, CommonMethodWrapper):
         for key in df.keys():
             if key == self.id_col:
                 continue
-            ax = plt.subplot()
-            ax.set_title(key)
-            for i, l in enumerate(np.sort(np.unique(label))):
-                _target = \
-                    df[key][self.ravel_like(label) == l].dropna().to_numpy()
-                ax.hist(
-                    _target, **self.hist_params,
-                    color=cmap(i), label=f'label: {l}')
-            ax.legend(loc="best")
-            plt.show()
+            _targets = []
+            _labels = np.sort(np.unique(label))
+            for i, l in enumerate(_labels):
+                _targets.append(
+                    df[key][self.ravel_like(label) == l].dropna().to_numpy())
+            self.plot_ndarray_histograms(_targets, _labels, title=key)
 
     def plot_scatter_matrix(self, target, feature_columns):
         target = self.sample_like(target, frac=self.sample_frac)
@@ -207,17 +216,5 @@ class Visualizer(ConfigReader, CommonMethodWrapper):
         ax.set_xlabel('False Positive Rate')
         ax.set_ylabel('True Positive Rate')
         ax.plot(fpr, tpr, label=f'AUC: {auc}')
-        ax.legend(loc="best")
-        plt.show()
-
-    def plot_ndarray_histograms(self, targets, labels):
-        ax = plt.subplot()
-        ax.set_title('targets')
-        cmap = plt.get_cmap('tab10')
-        for i, (target, label) in enumerate(zip(targets, labels)):
-            target = self.sample_like(target, frac=self.sample_frac)
-            ax.hist(
-                target, **self.hist_params,
-                color=cmap(i), label=f'{label}')
         ax.legend(loc="best")
         plt.show()
