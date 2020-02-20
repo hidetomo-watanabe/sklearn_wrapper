@@ -160,7 +160,7 @@
     "    pd.concat([raw_data['train_df'], raw_data['test_df']]),\n",
     "    np.concatenate(\n",
     "        (np.zeros(train_data['X_train'].shape[0]), np.ones(train_data['X_test'].shape[0])),\n",
-    "        axis=0).reshape(-1, 1))"
+    "        axis=0))"
    ]
   },
   {
@@ -233,7 +233,7 @@
     "    np.concatenate((train_data['X_train'].toarray(), train_data['X_test'].toarray()), axis=0),\n",
     "    np.concatenate(\n",
     "        (np.zeros(train_data['X_train'].shape[0]), np.ones(train_data['X_test'].shape[0])),\n",
-    "        axis=0).reshape(-1, 1),\n",
+    "        axis=0),\n",
     "    np.concatenate((train_data['train_ids'], train_data['test_ids']), axis=0))\n",
     "display(df_2d_train_test)"
    ]
@@ -417,7 +417,7 @@
    "source": [
     "logger.info('### CONFUSION MATRIX')\n",
     "from sklearn.metrics import confusion_matrix\n",
-    "confusion_matrix(train_data['Y_train'], Y_train_pred.reshape(-1, 1))"
+    "confusion_matrix(train_data['Y_train'], Y_train_pred)"
    ]
   },
   {
@@ -432,7 +432,7 @@
     "    train_data['X_train'].toarray(), train_data['Y_train'], train_data['train_ids'])\n",
     "logger.info('### Y_train_pred')\n",
     "df_2d_train_y_train_pred = visualizer_obj.plot_with_2_dimensions(\n",
-    "    train_data['X_train'].toarray(), Y_train_pred.reshape(-1, 1), train_data['train_ids'])\n",
+    "    train_data['X_train'].toarray(), Y_train_pred, train_data['train_ids'])\n",
     "display(df_2d_train_y_train_pred)"
    ]
   },
@@ -445,9 +445,10 @@
     "logger.info('### PLOT X TRAIN WITH 2 DIMENSIONS, ONLY ERROR')\n",
     "logger.info('### Y_train')\n",
     "error_index = np.where(train_data['Y_train'].reshape(-1,) != Y_train_pred)\n",
-    "df_2d_train_y_train = visualizer_obj.plot_with_2_dimensions(\n",
+    "df_2d_train_y_train_error = visualizer_obj.plot_with_2_dimensions(\n",
     "    train_data['X_train'].toarray()[error_index], train_data['Y_train'][error_index],\n",
-    "    train_data['train_ids'][error_index])"
+    "    train_data['train_ids'][error_index])\n",
+    "display(df_2d_train_y_train_error)"
    ]
   },
   {
@@ -479,8 +480,7 @@
    "source": [
     "logger.info('### PLOT Y TRAIN TEST PREDS HISTOGRAM')\n",
     "visualizer_obj.plot_ndarray_histograms(\n",
-    "    [Y_train_pred.reshape(-1, 1), pred_data['Y_pred'].reshape(-1, 1)],\n",
-    "    ['train', 'test'])"
+    "    [Y_train_pred, pred_data['Y_pred']], ['train', 'test'])"
    ]
   },
   {
@@ -491,8 +491,7 @@
    "source": [
     "logger.info('### PLOT Y TRAIN TEST PRED PROBAS HISTOGRAM')\n",
     "visualizer_obj.plot_ndarray_histograms(\n",
-    "    [Y_train_pred_proba[:, 1], pred_data['Y_pred_proba'][:, 1]],\n",
-    "    ['train', 'test'])"
+    "    [Y_train_pred_proba[:, 1], pred_data['Y_pred_proba'][:, 1]], ['train', 'test'])"
    ]
   },
   {
