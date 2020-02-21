@@ -45,16 +45,8 @@ if 'Outputer' not in globals():
     from .Outputer import Outputer
 
 
-class Trainer(ConfigReader, CommonMethodWrapper):
-    def __init__(
-        self,
-        feature_columns, train_ids, test_ids,
-        X_train, Y_train, X_test,
-        kernel=False
-    ):
-        self.feature_columns = feature_columns
-        self.train_ids = train_ids
-        self.test_ids = test_ids
+class SingleTrainer(ConfigReader, CommonMethodWrapper):
+    def __init__(self, X_train, Y_train, X_test, kernel=False):
         self.X_train = X_train
         self.Y_train = Y_train
         self.X_test = X_test
@@ -65,14 +57,8 @@ class Trainer(ConfigReader, CommonMethodWrapper):
         if self.kernel:
             self.create_nn_model = eval('create_nn_model')
 
-    def _get_base_model(self, model, nn_func=None):
-        if model in ['keras_clf', 'keras_reg', 'torch_clf', 'torch_reg']:
-            if self.kernel:
-                create_nn_model = self.create_nn_model
-            else:
-                myfunc = importlib.import_module(
-                    'modules.myfuncs.%s' % nn_func)
-                create_nn_model = myfunc.create_nn_model
+    @classmethod
+    def get_base_model(self, model, create_nn_model=None):
         device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
         if model == 'log_reg':
@@ -148,52 +134,6 @@ class Trainer(ConfigReader, CommonMethodWrapper):
         else:
             logger.error('NOT IMPLEMENTED BASE MODEL: %s' % model)
             raise Exception('NOT IMPLEMENTED')
-
-    @classmethod
-    def get_cv_from_json(self, cv_config, train_mode):
-        if not cv_config:
-            if train_mode == 'reg':
-                model = KFold(
-                    n_splits=3, shuffle=True, random_state=42)
-            elif train_mode == 'clf':
-                model = StratifiedKFold(
-                    n_splits=3, shuffle=True, random_state=42)
-            cv = model
-            return cv
-
-        fold = cv_config['fold']
-        num = cv_config['num']
-        if num == 1:
-            cv = 1
-            return cv
-
-        if fold == 'timeseries':
-            model = TimeSeriesSplit(n_splits=num)
-        elif fold == 'k':
-            model = KFold(
-                n_splits=num, shuffle=True, random_state=42)
-        elif fold == 'stratifiedk':
-            model = StratifiedKFold(
-                n_splits=num, shuffle=True, random_state=42)
-        else:
-            logger.error(f'NOT IMPLEMENTED CV: {fold}')
-            raise Exception('NOT IMPLEMENTED')
-        cv = model
-        return cv
-
-    def _get_scorer_from_string(self, scoring):
-        if scoring == 'my_scorer':
-            if not self.kernel:
-                myfunc = importlib.import_module(
-                    'modules.myfuncs.%s'
-                    % self.configs['fit'].get('myfunc'))
-            method_name = 'get_my_scorer'
-            if not self.kernel:
-                method_name = 'myfunc.%s' % method_name
-            scorer = eval(method_name)()
-        else:
-            scorer = get_scorer(scoring)
-        return scorer
 
     def _calc_cv_scores_models(
         self, model, X_train, Y_train, scorer, cv, fit_params={}
@@ -312,62 +252,6 @@ class Trainer(ConfigReader, CommonMethodWrapper):
         logger.info('best score mean: %s' % best_score_mean)
         return best_params
 
-    def get_estimator_data(self):
-        output = {
-            'cv': self.cv,
-            'scorer': self.scorer,
-            'classes': self.classes,
-            'single_estimators': self.single_estimators,
-            'estimator': self.estimator,
-        }
-        return output
-
-    def calc_estimator_data(self):
-        # configs
-        model_configs = self.configs['fit']['single_model_configs']
-        self.cv = self.get_cv_from_json(
-            self.configs['fit'].get('cv'), self.configs['fit']['train_mode'])
-        logger.info(f'cv: {self.cv}')
-        logger.info('scoring: %s' % self.configs['fit']['scoring'])
-        self.scorer = self._get_scorer_from_string(
-            self.configs['fit']['scoring'])
-        myfunc = self.configs['fit'].get('myfunc')
-        self.classes = None
-
-        # single
-        logger.info('single fit')
-        single_scores = []
-        self.single_estimators = []
-        for i, config in enumerate(model_configs):
-            _scores, _estimators = self.calc_single_estimators(
-                self.scorer, config, self.cv, nn_func=myfunc)
-            single_scores.extend(_scores)
-            modelname = config.get('modelname')
-            if not modelname:
-                modelname = f'tmp_model'
-            for j, _estimator in enumerate(_estimators):
-                self.single_estimators.append(
-                    (f'{i}_{modelname}_{j}', _estimator))
-
-        # ensemble
-        if len(self.single_estimators) == 1:
-            logger.info('no ensemble')
-            self.estimator = self.single_estimators[0][1]
-        else:
-            self.estimator = self.calc_ensemble_estimator(
-                self.single_estimators, single_scores)
-
-        # classes
-        if self.configs['fit']['train_mode'] == 'clf':
-            for _, single_estimator in self.single_estimators:
-                if self.classes is not None:
-                    continue
-                if hasattr(single_estimator, 'classes_'):
-                    self.classes = single_estimator.classes_
-                else:
-                    self.classes = sorted(np.unique(self.Y_train))
-        return self.estimator
-
     def _calc_pseudo_label_data(
         self, X_train, Y_train, estimator, classes, threshold
     ):
@@ -386,7 +270,8 @@ class Trainer(ConfigReader, CommonMethodWrapper):
 
     def calc_single_estimators(
         self,
-        scorer, model_config, cv=KFold(),
+        model_config, scorer=get_scorer('accuracy'),
+        cv=KFold(n_splits=3, shuffle=True, random_state=42),
         nn_func=None, X_train=None, Y_train=None
     ):
         def _fit(X_train, Y_train):
@@ -430,8 +315,6 @@ class Trainer(ConfigReader, CommonMethodWrapper):
                 % (threshold, len(Y_train), len(new_Y_train)))
             return _fit(new_X_train, new_Y_train)
 
-        if isinstance(scorer, str):
-            scorer = self._get_scorer_from_string(scorer)
         if X_train is None:
             X_train = self.X_train
         if Y_train is None:
@@ -443,7 +326,16 @@ class Trainer(ConfigReader, CommonMethodWrapper):
         modelname = model_config.get('modelname')
         if modelname:
             logger.info('modelname: %s' % modelname)
-        base_model = self._get_base_model(model, nn_func)
+        create_nn_model = None
+        if model in ['keras_clf', 'keras_reg', 'torch_clf', 'torch_reg']:
+            if self.kernel:
+                create_nn_model = self.create_nn_model
+            else:
+                myfunc = importlib.import_module(
+                    'modules.myfuncs.%s' % nn_func)
+                create_nn_model = myfunc.create_nn_model
+        base_model = self.get_base_model(
+            model, create_nn_model=create_nn_model)
         multiclass = model_config.get('multiclass')
         if multiclass:
             logger.info('multiclass: %s' % multiclass)
@@ -514,6 +406,14 @@ class Trainer(ConfigReader, CommonMethodWrapper):
 
         return scores, estimators
 
+
+class EnsembleTrainer(ConfigReader, CommonMethodWrapper):
+    def __init__(self, X_train, Y_train, X_test):
+        self.X_train = X_train
+        self.Y_train = Y_train
+        self.X_test = X_test
+        self.configs = {}
+
     def _get_voter(self, mode, estimators, weights=None):
         if self.configs['fit']['train_mode'] == 'clf':
             if mode == 'average':
@@ -564,12 +464,12 @@ class Trainer(ConfigReader, CommonMethodWrapper):
         if self.configs['fit']['train_mode'] == 'clf':
             stacker = Classifier(
                 dataset=stack_dataset,
-                estimator=self._get_base_model(
+                estimator=SingleTrainer.get_base_model(
                     ensemble_config['model']).__class__)
         elif self.configs['fit']['train_mode'] == 'reg':
             stacker = Regressor(
                 dataset=stack_dataset,
-                estimator=self._get_base_model(
+                estimator=SingleTrainer.get_base_model(
                     ensemble_config['model']).__class__)
         stacker.use_cache = False
         # default predict
@@ -577,7 +477,8 @@ class Trainer(ConfigReader, CommonMethodWrapper):
         return stacker
 
     def calc_ensemble_estimator(
-        self, single_estimators, single_scores, X_train=None, Y_train=None
+        self, single_estimators, single_scores,
+        scorer=get_scorer('accuracy'), X_train=None, Y_train=None
     ):
         if X_train is None:
             X_train = self.X_train
@@ -608,13 +509,138 @@ class Trainer(ConfigReader, CommonMethodWrapper):
             pipeline = self._get_pipeline(single_estimators)
             stacker = self._get_stacker(pipeline, ensemble_config)
             stacker.validate(
-                k=ensemble_config['k'], scorer=self.scorer._score_func)
+                k=ensemble_config['k'], scorer=scorer._score_func)
             estimator = stacker
         else:
             logger.error(
                 'NOT IMPLEMENTED ENSEMBLE MODE: %s' % ensemble_config['mode'])
             raise Exception('NOT IMPLEMENTED')
         return estimator
+
+
+class Trainer(ConfigReader, CommonMethodWrapper):
+    def __init__(
+        self,
+        feature_columns, train_ids, test_ids,
+        X_train, Y_train, X_test,
+        kernel=False
+    ):
+        self.feature_columns = feature_columns
+        self.train_ids = train_ids
+        self.test_ids = test_ids
+        self.X_train = X_train
+        self.Y_train = Y_train
+        self.X_test = X_test
+        self.kernel = kernel
+        self.configs = {}
+
+    @classmethod
+    def get_cv_from_json(self, cv_config, train_mode):
+        if not cv_config:
+            if train_mode == 'reg':
+                model = KFold(
+                    n_splits=3, shuffle=True, random_state=42)
+            elif train_mode == 'clf':
+                model = StratifiedKFold(
+                    n_splits=3, shuffle=True, random_state=42)
+            cv = model
+            return cv
+
+        fold = cv_config['fold']
+        num = cv_config['num']
+        if num == 1:
+            cv = 1
+            return cv
+
+        if fold == 'timeseries':
+            model = TimeSeriesSplit(n_splits=num)
+        elif fold == 'k':
+            model = KFold(
+                n_splits=num, shuffle=True, random_state=42)
+        elif fold == 'stratifiedk':
+            model = StratifiedKFold(
+                n_splits=num, shuffle=True, random_state=42)
+        else:
+            logger.error(f'NOT IMPLEMENTED CV: {fold}')
+            raise Exception('NOT IMPLEMENTED')
+        cv = model
+        return cv
+
+    def _get_scorer_from_string(self, scoring):
+        if scoring == 'my_scorer':
+            if not self.kernel:
+                myfunc = importlib.import_module(
+                    'modules.myfuncs.%s'
+                    % self.configs['fit'].get('myfunc'))
+            method_name = 'get_my_scorer'
+            if not self.kernel:
+                method_name = 'myfunc.%s' % method_name
+            scorer = eval(method_name)()
+        else:
+            scorer = get_scorer(scoring)
+        return scorer
+
+    def get_estimator_data(self):
+        output = {
+            'cv': self.cv,
+            'scorer': self.scorer,
+            'classes': self.classes,
+            'single_estimators': self.single_estimators,
+            'estimator': self.estimator,
+        }
+        return output
+
+    def calc_estimator_data(self):
+        # configs
+        model_configs = self.configs['fit']['single_model_configs']
+        self.cv = self.get_cv_from_json(
+            self.configs['fit'].get('cv'), self.configs['fit']['train_mode'])
+        logger.info(f'cv: {self.cv}')
+        logger.info('scoring: %s' % self.configs['fit']['scoring'])
+        self.scorer = self._get_scorer_from_string(
+            self.configs['fit']['scoring'])
+        myfunc = self.configs['fit'].get('myfunc')
+        self.classes = None
+
+        # single
+        logger.info('single fit')
+        single_scores = []
+        self.single_estimators = []
+        single_trainer_obj = SingleTrainer(
+            self.X_train, self.Y_train, self.X_test, self.kernel)
+        single_trainer_obj.configs = self.configs
+        for i, config in enumerate(model_configs):
+            _scores, _estimators = single_trainer_obj.calc_single_estimators(
+                config, self.scorer, self.cv, nn_func=myfunc)
+            single_scores.extend(_scores)
+            modelname = config.get('modelname')
+            if not modelname:
+                modelname = f'tmp_model'
+            for j, _estimator in enumerate(_estimators):
+                self.single_estimators.append(
+                    (f'{i}_{modelname}_{j}', _estimator))
+
+        # ensemble
+        if len(self.single_estimators) == 1:
+            logger.info('no ensemble')
+            self.estimator = self.single_estimators[0][1]
+        else:
+            ensemble_trainer_obj = EnsembleTrainer(
+                self.X_train, self.Y_train, self.X_test)
+            ensemble_trainer_obj.configs = self.configs
+            self.estimator = ensemble_trainer_obj.calc_ensemble_estimator(
+                self.single_estimators, single_scores, self.scorer)
+
+        # classes
+        if self.configs['fit']['train_mode'] == 'clf':
+            for _, single_estimator in self.single_estimators:
+                if self.classes is not None:
+                    continue
+                if hasattr(single_estimator, 'classes_'):
+                    self.classes = single_estimator.classes_
+                else:
+                    self.classes = sorted(np.unique(self.Y_train))
+        return self.estimator
 
     def write_estimator_data(self):
         modelname = \

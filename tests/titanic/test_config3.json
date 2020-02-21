@@ -42,7 +42,6 @@
             },
             "x_scaler": "standard",
             "adversarial_validation": {
-                "scoring": "accuracy",
                 "model_config": {
                     "model": "rf_clf",
                     "cv_select": "train_all",

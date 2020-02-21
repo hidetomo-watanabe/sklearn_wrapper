@@ -24,6 +24,8 @@ if 'CommonMethodWrapper' not in globals():
     from .CommonMethodWrapper import CommonMethodWrapper
 if 'BaseDataTranslater' not in globals():
     from .BaseDataTranslater import BaseDataTranslater
+if 'SingleTrainer' not in globals():
+    from .Trainer import SingleTrainer
 if 'Trainer' not in globals():
     from .Trainer import Trainer
 
@@ -424,11 +426,11 @@ class TableDataTranslater(BaseDataTranslater, CommonMethodWrapper):
                 (np.zeros(X_train.shape[0]), np.ones(X_test.shape[0])),
                 axis=0)
             # fit
-            trainer_obj = Trainer(**self.get_train_data())
-            trainer_obj.configs = self.configs
-            _, estimators = trainer_obj.calc_single_estimators(
-                adversarial['scoring'], adversarial['model_config'],
-                X_train=X_adv, Y_train=Y_adv)
+            single_trainer_obj = SingleTrainer(
+                X_train=self.X_train, Y_train=self.Y_train, X_test=self.X_test)
+            single_trainer_obj.configs = self.configs
+            _, estimators = single_trainer_obj.calc_single_estimators(
+                adversarial['model_config'], X_train=X_adv, Y_train=Y_adv)
             estimator = estimators[0]
             if not hasattr(estimator, 'predict_proba'):
                 logger.error(

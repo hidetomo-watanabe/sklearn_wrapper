@@ -54,7 +54,6 @@
             },
             "feature_selection": true,
             "adversarial_validation": {
-                "scoring": "accuracy",
                 "model_config": {
                     "model": "rf_clf",
                     "modelname": "tmp_adv",
