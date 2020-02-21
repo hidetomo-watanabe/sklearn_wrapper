@@ -252,6 +252,82 @@ class SingleTrainer(ConfigReader, CommonMethodWrapper):
         logger.info('best score mean: %s' % best_score_mean)
         return best_params
 
+    def _get_model_params(self, model_config, nn_func, X_train, Y_train):
+        model = model_config['model']
+        logger.info('model: %s' % model)
+        self.model = model
+        modelname = model_config.get('modelname')
+        if modelname:
+            logger.info('modelname: %s' % modelname)
+        create_nn_model = None
+        if model in ['keras_clf', 'keras_reg', 'torch_clf', 'torch_reg']:
+            if self.kernel:
+                create_nn_model = self.create_nn_model
+            else:
+                myfunc = importlib.import_module(
+                    'modules.myfuncs.%s' % nn_func)
+                create_nn_model = myfunc.create_nn_model
+        self.base_model = self.get_base_model(
+            model, create_nn_model=create_nn_model)
+        multiclass = model_config.get('multiclass')
+        if multiclass:
+            logger.info('multiclass: %s' % multiclass)
+            if multiclass == 'onevsone':
+                multiclass = OneVsOneClassifier
+            elif multiclass == 'onevsrest':
+                multiclass = OneVsRestClassifier
+            else:
+                logger.error(
+                    f'NOT IMPLEMENTED MULTICLASS: {multiclass}')
+                raise Exception('NOT IMPLEMENTED')
+        self.multiclass = multiclass
+        cv_select = model_config.get('cv_select')
+        if not cv_select:
+            cv_select = 'nearest_mean'
+        self.cv_select = cv_select
+        self.n_trials = model_config.get('n_trials')
+        fit_params = model_config.get('fit_params')
+        if not fit_params:
+            fit_params = {}
+        if model in ['lgb_clf', 'lgb_reg']:
+            fit_params['eval_set'] = [(X_train, Y_train)]
+        self.fit_params = fit_params
+        params = model_config.get('params')
+        if not params:
+            params = {}
+        self.params = params
+        return
+
+    def _fit(self, scorer, cv, X_train, Y_train):
+        best_params = self._calc_best_params(
+            self.base_model, X_train, Y_train, self.params,
+            scorer, cv, self.fit_params, self.n_trials, self.multiclass)
+        logger.info('best params: %s' % best_params)
+        estimator = self.base_model
+        estimator.set_params(**best_params)
+        if self.multiclass:
+            estimator = self.multiclass(estimator=estimator)
+        logger.info(f'get estimator with cv_select: {self.cv_select}')
+        if self.cv_select == 'train_all':
+            scores, estimators = self._calc_cv_scores_models(
+                estimator, X_train, Y_train, scorer,
+                cv=1, fit_params=self.fit_params)
+        elif self.cv_select in ['nearest_mean', 'all_folds']:
+            scores, estimators = self._calc_cv_scores_models(
+                estimator, X_train, Y_train, scorer,
+                cv=cv, fit_params=self.fit_params)
+            logger.info(f'cv model scores mean: {np.mean(scores)}')
+            logger.info(f'cv model scores std: {np.std(scores)}')
+            if self.cv_select == 'nearest_mean':
+                nearest_index \
+                    = np.abs(np.array(scores) - np.mean(scores)).argmin()
+                scores = scores[nearest_index: nearest_index + 1]
+                estimators = estimators[nearest_index: nearest_index + 1]
+        else:
+            logger.error(f'NOT IMPLEMENTED CV SELECT: {cv_select}')
+            raise Exception('NOT IMPLEMENTED')
+        return scores, estimators
+
     def _calc_pseudo_label_data(
         self, X_train, Y_train, estimator, classes, threshold
     ):
@@ -268,116 +344,49 @@ class SingleTrainer(ConfigReader, CommonMethodWrapper):
         pseudo_Y_train = np.array(pseudo_Y_train)
         return pseudo_X_train, pseudo_Y_train
 
+    def _fit_with_pseudo_labeling(
+        self, scorer, cv, estimator, X_train, Y_train, classes, threshold
+    ):
+        logger.info('fit with pseudo labeling')
+        pseudo_X_train, pseudo_Y_train = self._calc_pseudo_label_data(
+            X_train, Y_train, estimator, classes, threshold)
+        new_X_train = sp.vstack((X_train, pseudo_X_train), format='csr')
+        new_Y_train = np.concatenate([Y_train, pseudo_Y_train])
+        logger.info(
+            'with threshold %s, train data added %s => %s'
+            % (threshold, len(Y_train), len(new_Y_train)))
+        return self._fit(scorer, cv, new_X_train, new_Y_train)
+
     def calc_single_estimators(
         self,
         model_config, scorer=get_scorer('accuracy'),
         cv=KFold(n_splits=3, shuffle=True, random_state=42),
         nn_func=None, X_train=None, Y_train=None
     ):
-        def _fit(X_train, Y_train):
-            best_params = self._calc_best_params(
-                base_model, X_train, Y_train, params,
-                scorer, cv, fit_params, n_trials, multiclass)
-            logger.info('best params: %s' % best_params)
-            estimator = base_model
-            estimator.set_params(**best_params)
-            if multiclass:
-                estimator = multiclass(estimator=estimator)
-            logger.info(f'get estimator with cv_select: {cv_select}')
-            if cv_select == 'train_all':
-                scores, estimators = self._calc_cv_scores_models(
-                    estimator, X_train, Y_train, scorer,
-                    cv=1, fit_params=fit_params)
-            elif cv_select in ['nearest_mean', 'all_folds']:
-                scores, estimators = self._calc_cv_scores_models(
-                    estimator, X_train, Y_train, scorer,
-                    cv=cv, fit_params=fit_params)
-                logger.info(f'cv model scores mean: {np.mean(scores)}')
-                logger.info(f'cv model scores std: {np.std(scores)}')
-                if cv_select == 'nearest_mean':
-                    nearest_index \
-                        = np.abs(np.array(scores) - np.mean(scores)).argmin()
-                    scores = scores[nearest_index: nearest_index + 1]
-                    estimators = estimators[nearest_index: nearest_index + 1]
-            else:
-                logger.error(f'NOT IMPLEMENTED CV SELECT: {cv_select}')
-                raise Exception('NOT IMPLEMENTED')
-            return scores, estimators
-
-        def _fit_with_pseudo_labeling(estimator, X_train, Y_train):
-            logger.info('fit with pseudo labeling')
-            pseudo_X_train, pseudo_Y_train = self._calc_pseudo_label_data(
-                X_train, Y_train, estimator, classes, threshold)
-            new_X_train = sp.vstack((X_train, pseudo_X_train), format='csr')
-            new_Y_train = np.concatenate([Y_train, pseudo_Y_train])
-            logger.info(
-                'with threshold %s, train data added %s => %s'
-                % (threshold, len(Y_train), len(new_Y_train)))
-            return _fit(new_X_train, new_Y_train)
-
         if X_train is None:
             X_train = self.X_train
         if Y_train is None:
             Y_train = self.Y_train
-
-        # params
-        model = model_config['model']
-        logger.info('model: %s' % model)
-        modelname = model_config.get('modelname')
-        if modelname:
-            logger.info('modelname: %s' % modelname)
-        create_nn_model = None
-        if model in ['keras_clf', 'keras_reg', 'torch_clf', 'torch_reg']:
-            if self.kernel:
-                create_nn_model = self.create_nn_model
-            else:
-                myfunc = importlib.import_module(
-                    'modules.myfuncs.%s' % nn_func)
-                create_nn_model = myfunc.create_nn_model
-        base_model = self.get_base_model(
-            model, create_nn_model=create_nn_model)
-        multiclass = model_config.get('multiclass')
-        if multiclass:
-            logger.info('multiclass: %s' % multiclass)
-            if multiclass == 'onevsone':
-                multiclass = OneVsOneClassifier
-            elif multiclass == 'onevsrest':
-                multiclass = OneVsRestClassifier
-            else:
-                logger.error(
-                    f'NOT IMPLEMENTED MULTICLASS: {multiclass}')
-                raise Exception('NOT IMPLEMENTED')
-        cv_select = model_config.get('cv_select')
-        if not cv_select:
-            cv_select = 'nearest_mean'
-        n_trials = model_config.get('n_trials')
-        fit_params = model_config.get('fit_params')
-        if not fit_params:
-            fit_params = {}
-        if model in ['lgb_clf', 'lgb_reg']:
-            fit_params['eval_set'] = [(X_train, Y_train)]
-        params = model_config.get('params')
-        if not params:
-            params = {}
+        self._get_model_params(model_config, nn_func, X_train, Y_train)
 
         # Y_train
-        if model in ['keras_clf', 'torch_clf']:
+        if self.model in ['keras_clf', 'torch_clf']:
             if Y_train.ndim > 1 and Y_train.shape[1] == 1:
                 Y_train = Y_train.ravel()
             else:
                 logger.error('NOT IMPLEMENTED MULTI TARGET KERAS, TORCH CLF')
                 raise Exception('NOT IMPLEMENTED')
-            if model == 'keras_clf':
+            if self.model == 'keras_clf':
                 Y_train = to_categorical(Y_train)
-            elif model == 'torch_clf':
+            elif self.model == 'torch_clf':
                 Y_train = torch.LongTensor(Y_train)
-        elif model not in ['keras_reg', 'torch_reg']:
+        elif self.model not in ['keras_reg', 'torch_reg']:
             # for warning
             Y_train = self.ravel_like(Y_train)
 
         # fit
         logger.info('fit')
-        scores, estimators = _fit(X_train, Y_train)
+        scores, estimators = self._fit(scorer, cv, X_train, Y_train)
         logger.info(f'scores: {scores}')
         logger.info(f'estimators: {estimators}')
         # pseudo
@@ -386,7 +395,7 @@ class SingleTrainer(ConfigReader, CommonMethodWrapper):
             if self.configs['fit']['train_mode'] == 'reg':
                 logger.error('NOT IMPLEMENTED PSEUDO LABELING WITH REGRESSION')
                 raise Exception('NOT IMPLEMENTED')
-            if cv_select == 'all_folds':
+            if self.cv_select == 'all_folds':
                 logger.error('NOT IMPLEMENTED PSEUDO LABELING WITH ALL FOLDS')
                 raise Exception('NOT IMPLEMENTED')
 
@@ -399,8 +408,8 @@ class SingleTrainer(ConfigReader, CommonMethodWrapper):
             else:
                 classes = sorted(np.unique(self.Y_train))
 
-            scores, estimators = _fit_with_pseudo_labeling(
-                estimator, X_train, Y_train)
+            scores, estimators = self._fit_with_pseudo_labeling(
+                scorer, cv, estimator, X_train, Y_train, classes, threshold)
             logger.info(f'scores: {scores}')
             logger.info(f'estimators: {estimators}')
 
