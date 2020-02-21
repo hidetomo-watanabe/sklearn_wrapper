@@ -421,6 +421,17 @@ class Trainer(ConfigReader, CommonMethodWrapper):
                 raise Exception('NOT IMPLEMENTED')
             return scores, estimators
 
+        def _fit_with_pseudo_labeling(estimator, X_train, Y_train):
+            logger.info('fit with pseudo labeling')
+            pseudo_X_train, pseudo_Y_train = self._calc_pseudo_label_data(
+                X_train, Y_train, estimator, classes, threshold)
+            new_X_train = sp.vstack((X_train, pseudo_X_train), format='csr')
+            new_Y_train = np.concatenate([Y_train, pseudo_Y_train])
+            logger.info(
+                'with threshold %s, train data added %s => %s'
+                % (threshold, len(Y_train), len(new_Y_train)))
+            return _fit(new_X_train, new_Y_train)
+
         if isinstance(scorer, str):
             scorer = self._get_scorer_from_string(scorer)
         if X_train is None:
@@ -482,7 +493,6 @@ class Trainer(ConfigReader, CommonMethodWrapper):
         # pseudo
         pseudo_config = model_config.get('pseudo')
         if pseudo_config:
-            logger.info('refit with pseudo labeling')
             if self.configs['fit']['train_mode'] == 'reg':
                 logger.error('NOT IMPLEMENTED PSEUDO LABELING WITH REGRESSION')
                 raise Exception('NOT IMPLEMENTED')
@@ -490,22 +500,17 @@ class Trainer(ConfigReader, CommonMethodWrapper):
                 logger.error('NOT IMPLEMENTED PSEUDO LABELING WITH ALL FOLDS')
                 raise Exception('NOT IMPLEMENTED')
 
-            estimator = estimators[0]
             threshold = pseudo_config.get('threshold')
             if not threshold and int(threshold) != 0:
                 threshold = 0.8
+            estimator = estimators[0]
             if hasattr(estimator, 'classes_'):
                 classes = estimator.classes_
             else:
                 classes = sorted(np.unique(self.Y_train))
-            pseudo_X_train, pseudo_Y_train = self._calc_pseudo_label_data(
-                X_train, Y_train, estimator, classes, threshold)
-            new_X_train = sp.vstack((X_train, pseudo_X_train), format='csr')
-            new_Y_train = np.concatenate([Y_train, pseudo_Y_train])
-            logger.info(
-                'with threshold %s, train data added %s => %s'
-                % (threshold, len(Y_train), len(new_Y_train)))
-            scores, estimators = _fit(new_X_train, new_Y_train)
+
+            scores, estimators = _fit_with_pseudo_labeling(
+                estimator, X_train, Y_train)
             logger.info(f'scores: {scores}')
             logger.info(f'estimators: {estimators}')
 
