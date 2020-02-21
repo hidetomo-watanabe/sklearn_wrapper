@@ -45,22 +45,20 @@ class Outputer(ConfigReader, CommonMethodWrapper):
         }
         return output
 
-    def predict_like(self, estimator=None, X_target=None):
-        if estimator is None:
-            estimator = self.estimator
-        if X_target is None:
-            X_target = self.X_test
-
+    @classmethod
+    def predict_like(
+        self, train_mode, estimator, X_train, Y_train, X_target
+    ):
         # for ensemble
         # for warning
-        Y_train = self.ravel_like(self.Y_train)
+        Y_train = self.ravel_like(Y_train)
         dataset = Dataset(
-            self.toarray_like(self.X_train), Y_train,
+            self.toarray_like(X_train), Y_train,
             self.toarray_like(X_target))
 
         Y_pred_proba = None
         # clf
-        if self.configs['fit']['train_mode'] == 'clf':
+        if train_mode == 'clf':
             # keras
             if estimator.__class__ in [Sequential]:
                 Y_pred = estimator.predict_classes(X_target)
@@ -89,7 +87,7 @@ class Outputer(ConfigReader, CommonMethodWrapper):
                     Y_pred_proba = estimator.predict_proba(
                         X_target)
         # reg
-        elif self.configs['fit']['train_mode'] == 'reg':
+        elif train_mode == 'reg':
             # ensemble
             if estimator.__class__ in [Regressor]:
                 estimator.dataset = dataset
@@ -171,7 +169,10 @@ class Outputer(ConfigReader, CommonMethodWrapper):
         return
 
     def calc_predict_data(self):
-        self.Y_pred, self.Y_pred_proba = self.predict_like()
+        self.Y_pred, self.Y_pred_proba = self.predict_like(
+            train_mode=self.configs['fit']['train_mode'],
+            estimator=self.estimator, X_train=self.X_train,
+            Y_train=self.Y_train, X_target=self.X_test)
         self._fix_y_scaler()
         self._fix_y_pre()
         self._calc_base_predict_df()

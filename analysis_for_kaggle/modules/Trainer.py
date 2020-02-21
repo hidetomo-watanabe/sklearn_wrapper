@@ -371,12 +371,10 @@ class Trainer(ConfigReader, CommonMethodWrapper):
     def _calc_pseudo_label_data(
         self, X_train, Y_train, estimator, classes, threshold
     ):
-        _ = None
-        outputer_obj = Outputer(
-            _, _, _, X_train, Y_train, self.X_test,
-            _, _, _, _, estimator)
-        outputer_obj.configs = self.configs
-        _, Y_pred_proba = outputer_obj.predict_like()
+        _, Y_pred_proba = Outputer.predict_like(
+            train_mode=self.configs['fit']['train_mode'],
+            estimator=estimator, X_train=self.X_train, Y_train=self.Y_train,
+            X_target=self.X_test)
 
         data_indexes, label_indexes = np.where(Y_pred_proba > threshold)
         pseudo_X_train = self.X_test[data_indexes]
