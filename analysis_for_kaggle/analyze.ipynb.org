@@ -400,11 +400,17 @@
    "source": [
     "logger.info('### GET PREDICT DATA')\n",
     "pred_data = outputer_obj.get_predict_data()\n",
-    "Y_train_pred, Y_train_pred_proba = outputer_obj.predict_like(X_target=train_data['X_train'])\n",
+    "Y_train_pred, Y_train_pred_proba = outputer_obj.predict_like(\n",
+    "    train_mode=outputer_obj.configs['fit']['train_mode'], estimator=estimator_data['estimator'],\n",
+    "    X_train=train_data['X_train'], Y_train=train_data['Y_train'],\n",
+    "    X_target=train_data['X_train'])\n",
     "single_y_preds = []\n",
     "single_y_pred_probas = []\n",
     "for _estimator in estimator_data['single_estimators']:\n",
-    "    _y_pred, _y_pred_proba = outputer_obj.predict_like(estimator=_estimator[1])\n",
+    "    _y_pred, _y_pred_proba = outputer_obj.predict_like(\n",
+    "        train_mode=outputer_obj.configs['fit']['train_mode'], estimator=_estimator[1],\n",
+    "        X_train=train_data['X_train'], Y_train=train_data['Y_train'],\n",
+    "        X_target=train_data['X_test'])\n",
     "    single_y_preds.append(_y_pred)\n",
     "    single_y_pred_probas.append(_y_pred_proba[:, 1])"
    ]
