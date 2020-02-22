@@ -333,15 +333,12 @@ class SingleTrainer(ConfigReader, CommonMethodWrapper):
     ):
         _, Y_pred_proba = Outputer.predict_like(
             train_mode=self.configs['fit']['train_mode'],
-            estimator=estimator, X_train=self.X_train, Y_train=self.Y_train,
+            estimator=estimator, X_train=X_train, Y_train=Y_train,
             X_target=self.X_test)
 
-        data_indexes, label_indexes = np.where(Y_pred_proba > threshold)
-        pseudo_X_train = self.X_test[data_indexes]
-        pseudo_Y_train = []
-        for label_index in label_indexes:
-            pseudo_Y_train.append(classes[label_index])
-        pseudo_Y_train = np.array(pseudo_Y_train)
+        data_index, label_index = np.where(Y_pred_proba > threshold)
+        pseudo_X_train = self.X_test[data_index]
+        pseudo_Y_train = classes[label_index]
         return pseudo_X_train, pseudo_Y_train
 
     def _fit_with_pseudo_labeling(
