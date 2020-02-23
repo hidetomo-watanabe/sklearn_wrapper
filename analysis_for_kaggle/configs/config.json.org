@@ -136,7 +136,7 @@
                     "n_estimators": [1000],
                     "random_state": [42]
                 },
-                "pseudo": {
+                "pseudo_labeling": {
                     "threshold": 0.8
                 },
                 "error_sampling": true

@@ -409,8 +409,8 @@ class SingleTrainer(ConfigReader, CommonMethodWrapper):
         logger.info(f'scores: {scores}')
         logger.info(f'estimators: {estimators}')
 
-        # pseudo
-        pseudo_config = model_config.get('pseudo')
+        # pseudo labeling
+        pseudo_config = model_config.get('pseudo_labeling')
         if pseudo_config:
             if self.configs['fit']['train_mode'] == 'reg':
                 logger.error('NOT IMPLEMENTED PSEUDO LABELING WITH REGRESSION')
