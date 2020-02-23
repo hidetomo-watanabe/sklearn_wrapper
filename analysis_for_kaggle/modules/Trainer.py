@@ -323,6 +323,20 @@ class SingleTrainer(ConfigReader, CommonMethodWrapper):
                     = np.abs(np.array(scores) - np.mean(scores)).argmin()
                 scores = scores[nearest_index: nearest_index + 1]
                 estimators = estimators[nearest_index: nearest_index + 1]
+            elif self.cv_select == 'all_folds':
+                single_estimators = []
+                for i, _estimator in enumerate(estimators):
+                    single_estimators.append(
+                        (f'{i}_fold', _estimator))
+
+                ensemble_trainer_obj = EnsembleTrainer(
+                    X_train, Y_train, self.X_test)
+                ensemble_trainer_obj.configs = self.configs
+                estimator = ensemble_trainer_obj.calc_ensemble_estimator(
+                    single_estimators, scores,
+                    ensemble_config={'mode': 'average'}, scorer=scorer)
+                scores = [np.mean(scores)]
+                estimators = [estimator]
         else:
             logger.error(f'NOT IMPLEMENTED CV SELECT: {cv_select}')
             raise Exception('NOT IMPLEMENTED')
@@ -526,15 +540,16 @@ class EnsembleTrainer(ConfigReader, CommonMethodWrapper):
         return stacker
 
     def calc_ensemble_estimator(
-        self, single_estimators, single_scores,
+        self, single_estimators, single_scores, ensemble_config=None,
         scorer=get_scorer('accuracy'), X_train=None, Y_train=None
     ):
+        if ensemble_config is None:
+            ensemble_config = self.configs['fit']['ensemble_model_config']
         if X_train is None:
             X_train = self.X_train
         if Y_train is None:
             Y_train = self.Y_train
 
-        ensemble_config = self.configs['fit']['ensemble_model_config']
         logger.info('ensemble fit: %s' % ensemble_config['mode'])
         if ensemble_config['mode'] in ['average', 'vote']:
             if ensemble_config['mode'] == 'vote' \
@@ -678,7 +693,7 @@ class Trainer(ConfigReader, CommonMethodWrapper):
                 self.X_train, self.Y_train, self.X_test)
             ensemble_trainer_obj.configs = self.configs
             self.estimator = ensemble_trainer_obj.calc_ensemble_estimator(
-                self.single_estimators, single_scores, self.scorer)
+                self.single_estimators, single_scores, scorer=self.scorer)
 
         # classes
         if self.configs['fit']['train_mode'] == 'clf':
