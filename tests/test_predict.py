@@ -62,6 +62,11 @@ class TestPredict(unittest.TestCase):
         assert_frame_equal(
             result['Y_pred_df'],
             pd.read_csv(f'{TEST_PATH}/titanic/output9.csv'))
+        # error sampling
+        result = predict.main(f'{TEST_PATH}/titanic/test_config10.json')
+        assert_frame_equal(
+            result['Y_pred_df'],
+            pd.read_csv(f'{TEST_PATH}/titanic/output10.csv'))
 
     # house table regression
     def test_house(self):

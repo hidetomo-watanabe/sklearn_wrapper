@@ -1,0 +1,74 @@
+{
+    "data": {
+        "train_path": "./tests/titanic/train.csv",
+        "test_path": "./tests/titanic/test.csv",
+        "output_dir": "./outputs",
+        "type": "table",
+        "pred_cols": ["Survived"],
+        "id_col": "PassengerId"
+    },
+    "pre": {
+        "train_mode": "clf",
+        "table": {
+            "adhoc_df": {
+                "myfunc": "titanic",
+                "methods": [
+                    "translate_honorific_title",
+                    "translate_age",
+                    "translate_familystatus"
+                ]
+            },
+            "deletion": [
+                "HonorificTitle",
+                "Name",
+                "Ticket",
+                "Fare",
+                "Cabin",
+                "Embarked"
+            ],
+            "missing_imputation": true,
+            "category_encoding": {
+                "default": {
+                    "model": "onehot"
+                },
+                "options": [
+                    {
+                        "columns": [
+                            "Pclass",
+                            "FamilyStatus"
+                        ],
+                        "model": "onehot"
+                    }
+                ]
+            },
+            "x_scaler": "standard"
+        }
+    },
+    "fit": {
+        "train_mode": "clf",
+        "scoring": "accuracy",
+        "ensemble_model_config": {
+            "mode": "average",
+            "model": "log_reg",
+            "modelname": "tmp_titanic10",
+            "k": 10
+        },
+        "single_model_configs": [
+            {
+                "model": "gbdt_clf",
+                "modelname": "tmp",
+                "fit_params": {
+                },
+                "params": {
+                    "n_estimators": [5],
+                    "max_depth": [3]
+                },
+                "error_sampling": true
+            }
+        ]
+    },
+    "post": false,
+    "notify": {
+        "slack": "https://hooks.slack.com/services/hogehoge"
+    }
+}

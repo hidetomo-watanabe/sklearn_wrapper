@@ -354,6 +354,28 @@ class SingleTrainer(ConfigReader, CommonMethodWrapper):
             % (threshold, len(Y_train), len(new_Y_train)))
         return self._fit(scorer, cv, new_X_train, new_Y_train)
 
+    def _sample_with_error(self, X_train, Y_train, estimator):
+        Y_pred, _ = Outputer.predict_like(
+            train_mode=self.configs['fit']['train_mode'],
+            estimator=estimator, X_train=X_train, Y_train=Y_train,
+            X_target=X_train)
+
+        data_index = np.where(Y_pred != Y_train)
+        error_X_train = X_train[data_index]
+        error_Y_train = Y_train[data_index]
+        return error_X_train, error_Y_train
+
+    def _fit_with_error_sampling(
+        self, scorer, cv, estimator, X_train, Y_train
+    ):
+        logger.info('fit with error_sampling')
+        new_X_train, new_Y_train = self._sample_with_error(
+            X_train, Y_train, estimator)
+        logger.info(
+            'with error_sampling, error train data is %s'
+            % len(new_Y_train))
+        return self._fit(scorer, cv, new_X_train, new_Y_train)
+
     def calc_single_estimators(
         self,
         model_config, scorer=get_scorer('accuracy'),
@@ -386,6 +408,7 @@ class SingleTrainer(ConfigReader, CommonMethodWrapper):
         scores, estimators = self._fit(scorer, cv, X_train, Y_train)
         logger.info(f'scores: {scores}')
         logger.info(f'estimators: {estimators}')
+
         # pseudo
         pseudo_config = model_config.get('pseudo')
         if pseudo_config:
@@ -405,10 +428,30 @@ class SingleTrainer(ConfigReader, CommonMethodWrapper):
             else:
                 classes = sorted(np.unique(self.Y_train))
 
-            scores, estimators = self._fit_with_pseudo_labeling(
+            _scores, _estimators = self._fit_with_pseudo_labeling(
                 scorer, cv, estimator, X_train, Y_train, classes, threshold)
-            logger.info(f'scores: {scores}')
-            logger.info(f'estimators: {estimators}')
+            logger.info(f'scores: {_scores}')
+            logger.info(f'estimators: {_estimators}')
+            logger.info('replace with pseudo labeling estimator')
+            scores, estimators = _scores, _estimators
+
+        # error sampling
+        if model_config.get('error_sampling'):
+            if self.configs['fit']['train_mode'] == 'reg':
+                logger.error('NOT IMPLEMENTED ERROR SAMPLING WITH REGRESSION')
+                raise Exception('NOT IMPLEMENTED')
+            if self.cv_select == 'all_folds':
+                logger.error('NOT IMPLEMENTED ERROR SAMPLING WITH ALL FOLDS')
+                raise Exception('NOT IMPLEMENTED')
+
+            estimator = estimators[0]
+            _scores, _estimators = self._fit_with_error_sampling(
+                scorer, cv, estimator, X_train, Y_train)
+            logger.info(f'scores: {_scores}')
+            logger.info(f'estimators: {_estimators}')
+            logger.info('add error sampling estimator')
+            scores.extend(_scores)
+            estimators.extend(_estimators)
 
         return scores, estimators
 
