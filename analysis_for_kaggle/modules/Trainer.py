@@ -324,17 +324,17 @@ class SingleTrainer(ConfigReader, CommonMethodWrapper):
                 scores = scores[nearest_index: nearest_index + 1]
                 estimators = estimators[nearest_index: nearest_index + 1]
             elif self.cv_select == 'all_folds':
-                single_estimators = []
+                _single_estimators = []
                 for i, _estimator in enumerate(estimators):
-                    single_estimators.append(
+                    _single_estimators.append(
                         (f'{i}_fold', _estimator))
 
                 ensemble_trainer_obj = EnsembleTrainer(
                     X_train, Y_train, self.X_test)
                 ensemble_trainer_obj.configs = self.configs
                 estimator = ensemble_trainer_obj.calc_ensemble_estimator(
-                    single_estimators, scores,
-                    ensemble_config={'mode': 'average'}, scorer=scorer)
+                    _single_estimators, ensemble_config={'mode': 'average'},
+                    weights=EnsembleTrainer.get_weights(scores), scorer=scorer)
                 scores = [np.mean(scores)]
                 estimators = [estimator]
         else:
@@ -539,8 +539,13 @@ class EnsembleTrainer(ConfigReader, CommonMethodWrapper):
         stacker.probability = False
         return stacker
 
+    @classmethod
+    def get_weights(self, scores):
+        scores = np.array(scores)
+        return scores / np.sum(scores)
+
     def calc_ensemble_estimator(
-        self, single_estimators, single_scores, ensemble_config=None,
+        self, single_estimators, ensemble_config=None, weights=None,
         scorer=get_scorer('accuracy'), X_train=None, Y_train=None
     ):
         if ensemble_config is None:
@@ -558,8 +563,6 @@ class EnsembleTrainer(ConfigReader, CommonMethodWrapper):
                     'NOT IMPLEMENTED REGRESSION AND VOTE')
                 raise Exception('NOT IMPLEMENTED')
 
-            single_scores = np.array(single_scores)
-            weights = single_scores / np.sum(single_scores)
             logger.info('weights:')
             display(pd.DataFrame(
                     weights.reshape(-1, weights.shape[0]),
@@ -693,7 +696,9 @@ class Trainer(ConfigReader, CommonMethodWrapper):
                 self.X_train, self.Y_train, self.X_test)
             ensemble_trainer_obj.configs = self.configs
             self.estimator = ensemble_trainer_obj.calc_ensemble_estimator(
-                self.single_estimators, single_scores, scorer=self.scorer)
+                self.single_estimators,
+                weights=EnsembleTrainer.get_weights(single_scores),
+                scorer=self.scorer)
 
         # classes
         if self.configs['fit']['train_mode'] == 'clf':
