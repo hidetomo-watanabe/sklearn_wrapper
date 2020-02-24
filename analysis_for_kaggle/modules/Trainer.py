@@ -328,14 +328,15 @@ class SingleTrainer(ConfigReader, CommonMethodWrapper):
                 for i, _estimator in enumerate(estimators):
                     _single_estimators.append(
                         (f'{i}_fold', _estimator))
+                weights = EnsembleTrainer.get_weights(scores)
 
                 ensemble_trainer_obj = EnsembleTrainer(
                     X_train, Y_train, self.X_test)
                 ensemble_trainer_obj.configs = self.configs
                 estimator = ensemble_trainer_obj.calc_ensemble_estimator(
                     _single_estimators, ensemble_config={'mode': 'average'},
-                    weights=EnsembleTrainer.get_weights(scores), scorer=scorer)
-                scores = [np.mean(scores)]
+                    weights=weights, scorer=scorer)
+                scores = [np.average(scores, weights=weights)]
                 estimators = [estimator]
         else:
             logger.error(f'NOT IMPLEMENTED CV SELECT: {cv_select}')
@@ -380,7 +381,7 @@ class SingleTrainer(ConfigReader, CommonMethodWrapper):
         return error_X_train, error_Y_train
 
     def _fit_with_error_sampling(
-        self, scorer, cv, estimator, X_train, Y_train
+        self, scorer, cv, estimator, X_train, Y_train, scores
     ):
         logger.info('fit with error_sampling')
         new_X_train, new_Y_train = self._sample_with_error(
@@ -388,7 +389,25 @@ class SingleTrainer(ConfigReader, CommonMethodWrapper):
         logger.info(
             'with error_sampling, error train data is %s'
             % len(new_Y_train))
-        return self._fit(scorer, cv, new_X_train, new_Y_train)
+        _scores, _estimators = self._fit(scorer, cv, new_X_train, new_Y_train)
+
+        _single_estimators = [
+            ('base', estimator),
+            ('error', _estimators[0]),
+        ]
+        weights = EnsembleTrainer.get_weights(
+            np.array([len(Y_train), len(new_Y_train)]))
+
+        ensemble_trainer_obj = EnsembleTrainer(
+            X_train, Y_train, self.X_test)
+        ensemble_trainer_obj.configs = self.configs
+        estimator = ensemble_trainer_obj.calc_ensemble_estimator(
+            _single_estimators, ensemble_config={'mode': 'average'},
+            weights=weights, scorer=scorer)
+        scores = [np.average(
+            np.array([scores[0], _scores[0]]), weights=weights)]
+        estimators = [estimator]
+        return scores, estimators
 
     def calc_single_estimators(
         self,
@@ -460,12 +479,11 @@ class SingleTrainer(ConfigReader, CommonMethodWrapper):
 
             estimator = estimators[0]
             _scores, _estimators = self._fit_with_error_sampling(
-                scorer, cv, estimator, X_train, Y_train)
+                scorer, cv, estimator, X_train, Y_train, scores)
             logger.info(f'scores: {_scores}')
             logger.info(f'estimators: {_estimators}')
-            logger.info('add error sampling estimator')
-            scores.extend(_scores)
-            estimators.extend(_estimators)
+            logger.info('replace with error sampling estimator')
+            scores, estimators = _scores, _estimators
 
         return scores, estimators
 
