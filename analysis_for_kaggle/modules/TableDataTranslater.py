@@ -429,9 +429,8 @@ class TableDataTranslater(BaseDataTranslater, CommonMethodWrapper):
             single_trainer_obj = SingleTrainer(
                 X_train=self.X_train, Y_train=self.Y_train, X_test=self.X_test)
             single_trainer_obj.configs = self.configs
-            _, estimators = single_trainer_obj.calc_single_estimators(
+            _, estimator = single_trainer_obj.calc_single_estimator(
                 adversarial['model_config'], X_train=X_adv, Y_train=Y_adv)
-            estimator = estimators[0]
             if not hasattr(estimator, 'predict_proba'):
                 logger.error(
                     'NOT PREDICT_PROBA METHOD IN ADVERSARIAL ESTIMATOR')

@@ -341,7 +341,7 @@ class SingleTrainer(ConfigReader, CommonMethodWrapper):
         else:
             logger.error(f'NOT IMPLEMENTED CV SELECT: {cv_select}')
             raise Exception('NOT IMPLEMENTED')
-        return scores, estimators
+        return scores[0], estimators[0]
 
     def _calc_pseudo_label_data(
         self, X_train, Y_train, estimator, classes, threshold
@@ -381,7 +381,7 @@ class SingleTrainer(ConfigReader, CommonMethodWrapper):
         return error_X_train, error_Y_train
 
     def _fit_with_error_sampling(
-        self, scorer, cv, estimator, X_train, Y_train, scores
+        self, scorer, cv, estimator, X_train, Y_train, score
     ):
         logger.info('fit with error_sampling')
         new_X_train, new_Y_train = self._sample_with_error(
@@ -389,27 +389,25 @@ class SingleTrainer(ConfigReader, CommonMethodWrapper):
         logger.info(
             'with error_sampling, error train data is %s'
             % len(new_Y_train))
-        _scores, _estimators = self._fit(scorer, cv, new_X_train, new_Y_train)
+        _score, _estimator = self._fit(scorer, cv, new_X_train, new_Y_train)
 
         _single_estimators = [
             ('base', estimator),
-            ('error', _estimators[0]),
+            ('error', _estimator),
         ]
         weights = EnsembleTrainer.get_weights(
             np.array([len(Y_train), len(new_Y_train)]))
 
+        score = np.average(np.array([score, _score]), weights=weights)
         ensemble_trainer_obj = EnsembleTrainer(
             X_train, Y_train, self.X_test)
         ensemble_trainer_obj.configs = self.configs
         estimator = ensemble_trainer_obj.calc_ensemble_estimator(
             _single_estimators, ensemble_config={'mode': 'average'},
             weights=weights, scorer=scorer)
-        scores = [np.average(
-            np.array([scores[0], _scores[0]]), weights=weights)]
-        estimators = [estimator]
-        return scores, estimators
+        return score, estimator
 
-    def calc_single_estimators(
+    def calc_single_estimator(
         self,
         model_config, scorer=get_scorer('accuracy'),
         cv=KFold(n_splits=3, shuffle=True, random_state=42),
@@ -438,9 +436,9 @@ class SingleTrainer(ConfigReader, CommonMethodWrapper):
 
         # fit
         logger.info('fit')
-        scores, estimators = self._fit(scorer, cv, X_train, Y_train)
-        logger.info(f'scores: {scores}')
-        logger.info(f'estimators: {estimators}')
+        score, estimator = self._fit(scorer, cv, X_train, Y_train)
+        logger.info(f'score: {score}')
+        logger.info(f'estimator: {estimator}')
 
         # pseudo labeling
         pseudo_config = model_config.get('pseudo_labeling')
@@ -448,44 +446,32 @@ class SingleTrainer(ConfigReader, CommonMethodWrapper):
             if self.configs['fit']['train_mode'] == 'reg':
                 logger.error('NOT IMPLEMENTED PSEUDO LABELING WITH REGRESSION')
                 raise Exception('NOT IMPLEMENTED')
-            if self.cv_select == 'all_folds':
-                logger.error('NOT IMPLEMENTED PSEUDO LABELING WITH ALL FOLDS')
-                raise Exception('NOT IMPLEMENTED')
 
             threshold = pseudo_config.get('threshold')
             if not threshold and int(threshold) != 0:
                 threshold = 0.8
-            estimator = estimators[0]
             if hasattr(estimator, 'classes_'):
                 classes = estimator.classes_
             else:
                 classes = sorted(np.unique(self.Y_train))
 
-            _scores, _estimators = self._fit_with_pseudo_labeling(
+            score, estimator = self._fit_with_pseudo_labeling(
                 scorer, cv, estimator, X_train, Y_train, classes, threshold)
-            logger.info(f'scores: {_scores}')
-            logger.info(f'estimators: {_estimators}')
-            logger.info('replace with pseudo labeling estimator')
-            scores, estimators = _scores, _estimators
+            logger.info(f'score: {score}')
+            logger.info(f'estimator: {estimator}')
 
         # error sampling
         if model_config.get('error_sampling'):
             if self.configs['fit']['train_mode'] == 'reg':
                 logger.error('NOT IMPLEMENTED ERROR SAMPLING WITH REGRESSION')
                 raise Exception('NOT IMPLEMENTED')
-            if self.cv_select == 'all_folds':
-                logger.error('NOT IMPLEMENTED ERROR SAMPLING WITH ALL FOLDS')
-                raise Exception('NOT IMPLEMENTED')
 
-            estimator = estimators[0]
-            _scores, _estimators = self._fit_with_error_sampling(
-                scorer, cv, estimator, X_train, Y_train, scores)
-            logger.info(f'scores: {_scores}')
-            logger.info(f'estimators: {_estimators}')
-            logger.info('replace with error sampling estimator')
-            scores, estimators = _scores, _estimators
+            score, estimator = self._fit_with_error_sampling(
+                scorer, cv, estimator, X_train, Y_train, score)
+            logger.info(f'score: {score}')
+            logger.info(f'estimator: {estimator}')
 
-        return scores, estimators
+        return score, estimator
 
 
 class EnsembleTrainer(ConfigReader, CommonMethodWrapper):
@@ -695,15 +681,14 @@ class Trainer(ConfigReader, CommonMethodWrapper):
             self.X_train, self.Y_train, self.X_test, self.kernel)
         single_trainer_obj.configs = self.configs
         for i, config in enumerate(model_configs):
-            _scores, _estimators = single_trainer_obj.calc_single_estimators(
+            _score, _estimator = single_trainer_obj.calc_single_estimator(
                 config, self.scorer, self.cv, nn_func=myfunc)
-            single_scores.extend(_scores)
+            single_scores.append(_score)
             modelname = config.get('modelname')
             if not modelname:
                 modelname = f'tmp_model'
-            for j, _estimator in enumerate(_estimators):
-                self.single_estimators.append(
-                    (f'{i}_{modelname}_{j}', _estimator))
+            self.single_estimators.append(
+                (f'{i}_{modelname}', _estimator))
 
         # ensemble
         if len(self.single_estimators) == 1:
