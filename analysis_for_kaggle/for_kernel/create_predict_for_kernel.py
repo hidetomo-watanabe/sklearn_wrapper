@@ -33,6 +33,12 @@ if __name__ == '__main__':
     _append_file_text(
         '%s/modules/Outputer.py' % BASE_PATH, FILENAME)
     _append_file_text(
+        '%s/modules/BaseTrainer.py' % BASE_PATH, FILENAME)
+    _append_file_text(
+        '%s/modules/EnsembleTrainer.py' % BASE_PATH, FILENAME)
+    _append_file_text(
+        '%s/modules/SingleTrainer.py' % BASE_PATH, FILENAME)
+    _append_file_text(
         '%s/modules/Trainer.py' % BASE_PATH, FILENAME)
     _append_file_text(
         '%s/modules/BaseDataTranslater.py' % BASE_PATH, FILENAME)

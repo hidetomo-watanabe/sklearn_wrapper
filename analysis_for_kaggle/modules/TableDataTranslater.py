@@ -20,17 +20,15 @@ from IPython.display import display
 from logging import getLogger
 
 logger = getLogger('predict').getChild('TableDataTranslater')
-if 'CommonMethodWrapper' not in globals():
-    from .CommonMethodWrapper import CommonMethodWrapper
 if 'BaseDataTranslater' not in globals():
     from .BaseDataTranslater import BaseDataTranslater
 if 'SingleTrainer' not in globals():
-    from .Trainer import SingleTrainer
+    from .SingleTrainer import SingleTrainer
 if 'Trainer' not in globals():
     from .Trainer import Trainer
 
 
-class TableDataTranslater(BaseDataTranslater, CommonMethodWrapper):
+class TableDataTranslater(BaseDataTranslater):
     def __init__(self, kernel=False):
         self.kernel = kernel
         self.configs = {}
