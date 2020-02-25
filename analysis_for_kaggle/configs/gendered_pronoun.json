@@ -41,20 +41,19 @@
         }
     },
     "fit": {
-        "myfunc": "gendred_pronoun",
+        "myfunc": "gendered_pronoun",
         "train_mode": "clf",
         "scoring": "neg_log_loss",
+        "modelname": "gendered_pronoun",
         "ensemble_model_config": {
             "mode": "stacking",
             "model": "log_reg",
-            "modelname": "tmp_gp",
             "k": 10
         },
         "single_model_configs": [
             {
                 "model": "lgb_clf",
                 "multiclass": "onevsrest",
-                "modelname": "tmp",
                 "n_trials": 50,
                 "fit_params" : {
                 },

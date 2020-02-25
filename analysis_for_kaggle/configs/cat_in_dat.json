@@ -57,17 +57,16 @@
             "fold": "stratifiedk",
             "num": 5
         },
+        "modelname": "cat_in_dat",
         "ensemble_model_config": {
             "mode": "average",
             "model": "log_reg",
-            "modelname": "cat_in_dat",
             "k": 10,
             "proportion": 0.2
         },
         "single_model_configs": [
             {
                 "model": "log_reg",
-                "modelname": "log_reg_1",
                 "cv_select": "train_all",
                 "n_trials": 1,
                 "fit_params": {

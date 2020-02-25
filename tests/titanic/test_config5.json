@@ -47,14 +47,13 @@
     "fit": {
         "train_mode": "clf",
         "scoring": "accuracy",
+        "modelname": "tmp_titanic5",
         "ensemble_model_config": {
-            "mode": "vote",
-            "modelname": "tmp_titanic5"
+            "mode": "vote"
         },
         "single_model_configs": [
             {
                 "model": "gbdt_clf",
-                "modelname": "tmp1",
                 "fit_params": {
                 },
                 "params": {
@@ -64,7 +63,6 @@
             },
             {
                 "model": "gbdt_clf",
-                "modelname": "tmp2",
                 "fit_params": {
                 },
                 "params": {

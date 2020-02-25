@@ -111,11 +111,9 @@ class Trainer(BaseTrainer):
             _score, _estimator = single_trainer_obj.calc_single_estimator(
                 config, self.scorer, self.cv, nn_func=myfunc)
             single_scores.append(_score)
-            modelname = config.get('modelname')
-            if not modelname:
-                modelname = f'tmp_model'
+            modelname = f'{i}_config["model"]'
             self.single_estimators.append(
-                (f'{i}_{modelname}', _estimator))
+                (modelname, _estimator))
 
         # ensemble
         if len(self.single_estimators) == 1:
@@ -142,8 +140,7 @@ class Trainer(BaseTrainer):
         return self.estimator
 
     def write_estimator_data(self):
-        modelname = \
-            self.configs['fit']['ensemble_model_config'].get('modelname')
+        modelname = self.configs['fit'].get('modelname')
         if not modelname:
             modelname = 'tmp_model'
         if len(self.single_estimators) == 1:

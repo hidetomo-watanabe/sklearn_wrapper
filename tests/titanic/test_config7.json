@@ -47,16 +47,15 @@
     "fit": {
         "train_mode": "clf",
         "scoring": "accuracy",
+        "modelname": "tmp_titanic7",
         "ensemble_model_config": {
             "mode": "average",
             "model": "log_reg",
-            "modelname": "tmp_titanic7",
             "k": 10
         },
         "single_model_configs": [
             {
                 "model": "gbdt_clf",
-                "modelname": "tmp",
                 "cv_select": "all_folds",
                 "fit_params": {
                 },

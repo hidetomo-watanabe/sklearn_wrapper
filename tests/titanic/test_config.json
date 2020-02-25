@@ -47,16 +47,15 @@
     "fit": {
         "train_mode": "clf",
         "scoring": "accuracy",
+        "modelname": "tmp_titanic",
         "ensemble_model_config": {
             "mode": "stacking",
             "model": "log_reg",
-            "modelname": "tmp_titanic",
             "k": 10
         },
         "single_model_configs": [
             {
                 "model": "gbdt_clf",
-                "modelname": "tmp",
                 "fit_params": {
                 },
                 "params": {

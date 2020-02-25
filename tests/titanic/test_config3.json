@@ -63,16 +63,15 @@
             "fold": "stratifiedk",
             "num": 3
         },
+        "modelname": "tmp_titanic3",
         "ensemble_model_config": {
             "mode": "stacking",
             "model": "log_reg",
-            "modelname": "tmp_titanic3",
             "k": 10
         },
         "single_model_configs": [
             {
                 "model": "torch_clf",
-                "modelname": "tmp",
                 "fit_params": {
                 },
                 "params": {

@@ -30,16 +30,15 @@
     "fit": {
         "train_mode": "reg",
         "scoring": "neg_mean_squared_error",
+        "modelname": "tmp_house3",
         "ensemble_model_config": {
             "mode": "average",
             "model": "linear_reg",
-            "modelname": "tmp_house3",
             "k": 10
         },
         "single_model_configs": [
             {
                 "model": "svr",
-                "modelname": "tmp",
                 "fit_params": {
                 },
                 "params": {
@@ -51,7 +50,6 @@
             },
             {
                 "model": "svr",
-                "modelname": "tmp",
                 "fit_params": {
                 },
                 "params": {

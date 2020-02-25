@@ -27,16 +27,15 @@
         "myfunc": "cactus",
         "train_mode": "clf",
         "scoring": "roc_auc",
+        "modelname": "tmp_cactus",
         "ensemble_model_config": {
             "mode": "stacking",
             "model": "log_reg",
-            "modelname": "tmp_cactus",
             "k": 10
         },
         "single_model_configs": [
             {
                 "model": "keras_clf",
-                "modelname": "tmp_cactus",
                 "fit_params": {
                     "epochs": 3,
                     "batch_size": 50

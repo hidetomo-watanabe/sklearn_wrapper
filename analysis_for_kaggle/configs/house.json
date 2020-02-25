@@ -30,16 +30,15 @@
     "fit": {
         "train_mode": "reg",
         "scoring": "neg_mean_squared_error",
+        "modelname": "house",
         "ensemble_model_config": {
             "mode": "stacking",
             "model": "linear_reg",
-            "modelname": "house",
             "k": 10
         },
         "single_model_configs": [
             {
                 "model": "svr",
-                "modelname": "house_svr",
                 "fit_params": {
                 },
                 "params": {

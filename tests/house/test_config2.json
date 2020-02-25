@@ -31,16 +31,15 @@
         "myfunc": "house",
         "train_mode": "reg",
         "scoring": "neg_mean_squared_error",
+        "modelname": "tmp_house2",
         "ensemble_model_config": {
             "mode": "stacking",
             "model": "linear_reg",
-            "modelname": "tmp_house2",
             "k": 10
         },
         "single_model_configs": [
             {
                 "model": "keras_reg",
-                "modelname": "tmp",
                 "fit_params": {
                     "epochs": 3,
                     "batch_size": 50
