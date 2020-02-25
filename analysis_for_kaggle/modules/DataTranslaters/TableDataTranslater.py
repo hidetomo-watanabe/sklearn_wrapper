@@ -363,7 +363,7 @@ class TableDataTranslater(BaseDataTranslater):
                 model_obj.explained_variance_ratio_))
             logger.info('svd_ratio: %s' % model_obj.explained_variance_ratio_)
         elif model == 'kmeans':
-            model_obj = KMeans(n_clusters=n, random_state=42)
+            model_obj = KMeans(n_clusters=n, random_state=42, n_jobs=-1)
             model_obj.fit(X_train)
             logger.info(
                 'kmeans inertia_: %s' % model_obj.inertia_)
@@ -397,7 +397,7 @@ class TableDataTranslater(BaseDataTranslater):
             return
 
         rf = RandomForestClassifier(
-            n_jobs=-1, class_weight='balanced', max_depth=5)
+            class_weight='balanced', max_depth=5, n_jobs=-1)
         selector = BorutaPy(
             rf, n_estimators='auto', verbose=2, random_state=42)
         Y_train = self.ravel_like(self.Y_train)

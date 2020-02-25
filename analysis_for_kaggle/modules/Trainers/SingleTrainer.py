@@ -3,6 +3,7 @@ import numpy as np
 import importlib
 from sklearn.model_selection import KFold
 from sklearn.multiclass import OneVsOneClassifier, OneVsRestClassifier
+from imblearn.ensemble import BalancedBaggingClassifier, RUSBoostClassifier
 from sklearn.metrics import get_scorer
 from keras.utils.np_utils import to_categorical
 from torch import LongTensor
@@ -59,6 +60,14 @@ class SingleTrainer(BaseTrainer):
                     f'NOT IMPLEMENTED MULTICLASS: {multiclass}')
                 raise Exception('NOT IMPLEMENTED')
         self.multiclass = multiclass
+        undersampling = model_config.get('undersampling')
+        if undersampling:
+            logger.info(f'undersampling: {undersampling}')
+            if undersampling == 'bagging':
+                undersampling = BalancedBaggingClassifier
+            elif undersampling == 'adaboost':
+                undersampling = RUSBoostClassifier
+        self.undersampling = undersampling
         cv_select = model_config.get('cv_select')
         if not cv_select:
             cv_select = 'nearest_mean'
@@ -84,7 +93,11 @@ class SingleTrainer(BaseTrainer):
         estimator = self.base_model
         estimator.set_params(**best_params)
         if self.multiclass:
-            estimator = self.multiclass(estimator=estimator)
+            estimator = self.multiclass(estimator=estimator, n_jobs=-1)
+        if self.undersampling:
+            estimator = self.undersampling(
+                base_estimator=estimator, random_state=42, n_jobs=-1)
+            estimator.fit(X_train, Y_train)
         logger.info(f'get estimator with cv_select: {self.cv_select}')
         if self.cv_select == 'train_all':
             scores, estimators = self.calc_cv_scores_models(

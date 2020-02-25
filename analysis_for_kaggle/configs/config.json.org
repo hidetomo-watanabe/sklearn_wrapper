@@ -126,6 +126,7 @@
             {
                 "model": "gbdt_clf",
                 "multiclass": "onevsrest",
+                "undersampling": "bagging",
                 "modelname": "tmp_model2",
                 "n_trials": 1,
                 "fit_params": {
