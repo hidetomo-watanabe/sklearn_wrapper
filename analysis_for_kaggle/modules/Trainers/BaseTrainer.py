@@ -25,9 +25,9 @@ from logging import getLogger
 
 logger = getLogger('predict').getChild('BaseTrainer')
 if 'ConfigReader' not in globals():
-    from .ConfigReader import ConfigReader
+    from ..ConfigReader import ConfigReader
 if 'CommonMethodWrapper' not in globals():
-    from .CommonMethodWrapper import CommonMethodWrapper
+    from ..CommonMethodWrapper import CommonMethodWrapper
 
 
 class BaseTrainer(ConfigReader, CommonMethodWrapper):

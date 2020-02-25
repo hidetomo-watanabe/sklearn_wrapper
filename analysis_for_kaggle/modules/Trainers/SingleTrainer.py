@@ -15,7 +15,7 @@ if 'BaseTrainer' not in globals():
 if 'EnsembleTrainer' not in globals():
     from .EnsembleTrainer import EnsembleTrainer
 if 'Outputer' not in globals():
-    from .Outputer import Outputer
+    from ..Outputer import Outputer
 
 
 class SingleTrainer(BaseTrainer):

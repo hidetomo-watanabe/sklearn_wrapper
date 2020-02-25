@@ -4,8 +4,8 @@ import traceback
 from memory_profiler import profile
 import logging.config
 from logging import getLogger
-from modules.DataTranslater import DataTranslater
-from modules.Trainer import Trainer
+from modules.DataTranslaters.DataTranslater import DataTranslater
+from modules.Trainers.Trainer import Trainer
 from modules.Outputer import Outputer
 from modules.Notifier import Notifier
 

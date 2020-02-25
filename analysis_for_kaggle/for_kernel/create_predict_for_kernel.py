@@ -15,9 +15,9 @@ if __name__ == '__main__':
     if len(sys.argv) > 1:
         config_path = sys.argv[1]
     else:
-        config_path = '%s/configs/config.json' % BASE_PATH
+        config_path = f'{BASE_PATH}/configs/config.json'
 
-    FILENAME = '%s/for_kernel/predict_for_kernel.py' % BASE_PATH
+    FILENAME = f'{BASE_PATH}/for_kernel/predict_for_kernel.py'
     # config
     with open(FILENAME, 'w') as f:
         f.write('config_text = """\\\n')
@@ -27,27 +27,18 @@ if __name__ == '__main__':
     # modules
     # keep append order
     _append_file_text(
-        '%s/modules/ConfigReader.py' % BASE_PATH, FILENAME)
+        f'{BASE_PATH}/modules/ConfigReader.py', FILENAME)
     _append_file_text(
-        '%s/modules/CommonMethodWrapper.py' % BASE_PATH, FILENAME)
+        f'{BASE_PATH}/modules/CommonMethodWrapper.py', FILENAME)
     _append_file_text(
-        '%s/modules/Outputer.py' % BASE_PATH, FILENAME)
-    _append_file_text(
-        '%s/modules/BaseTrainer.py' % BASE_PATH, FILENAME)
-    _append_file_text(
-        '%s/modules/EnsembleTrainer.py' % BASE_PATH, FILENAME)
-    _append_file_text(
-        '%s/modules/SingleTrainer.py' % BASE_PATH, FILENAME)
-    _append_file_text(
-        '%s/modules/Trainer.py' % BASE_PATH, FILENAME)
-    _append_file_text(
-        '%s/modules/BaseDataTranslater.py' % BASE_PATH, FILENAME)
-    _append_file_text(
-        '%s/modules/TableDataTranslater.py' % BASE_PATH, FILENAME)
-    _append_file_text(
-        '%s/modules/ImageDataTranslater.py' % BASE_PATH, FILENAME)
-    _append_file_text(
-        '%s/modules/DataTranslater.py' % BASE_PATH, FILENAME)
+        f'{BASE_PATH}/modules/Outputer.py', FILENAME)
+    for prefix in ['Base', 'Ensemble', 'Single', '']:
+        _append_file_text(
+            f'{BASE_PATH}/modules/Trainers/{prefix}Trainer.py', FILENAME)
+    for prefix in ['Base', 'Table', 'Image', '']:
+        _append_file_text(
+            f'{BASE_PATH}/modules/DataTranslaters/{prefix}DataTranslater.py',
+            FILENAME)
     # adhoc
     with open(config_path, 'r') as f:
         config_json = json.loads(f.read())
@@ -62,7 +53,7 @@ if __name__ == '__main__':
     adhocs = list(set(adhocs))
     for adhoc in adhocs:
         _append_file_text(
-            '%s/modules/myfuncs/%s.py' % (BASE_PATH, adhoc), FILENAME)
+            f'{BASE_PATH}/modules/myfuncs/{adhoc}.py', FILENAME)
     # base
     _append_file_text(
-        '%s/for_kernel/predict_for_kernel_base.py' % BASE_PATH, FILENAME)
+        f'{BASE_PATH}/for_kernel/predict_for_kernel_base.py', FILENAME)

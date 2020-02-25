@@ -2,7 +2,7 @@ from logging import getLogger
 
 logger = getLogger('predict').getChild('DataTranslater')
 if 'ConfigReader' not in globals():
-    from .ConfigReader import ConfigReader
+    from ..ConfigReader import ConfigReader
 if 'TableDataTranslater' not in globals():
     from .TableDataTranslater import TableDataTranslater
 if 'ImageDataTranslater' not in globals():
