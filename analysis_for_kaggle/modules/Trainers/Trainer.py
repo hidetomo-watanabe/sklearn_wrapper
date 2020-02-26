@@ -111,7 +111,7 @@ class Trainer(BaseTrainer):
             _score, _estimator = single_trainer_obj.calc_single_estimator(
                 config, self.scorer, self.cv, nn_func=myfunc)
             single_scores.append(_score)
-            modelname = f'{i}_config["model"]'
+            modelname = f'{i}_{config["model"]}'
             self.single_estimators.append(
                 (modelname, _estimator))
 
