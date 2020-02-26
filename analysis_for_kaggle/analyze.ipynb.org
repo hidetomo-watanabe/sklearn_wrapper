@@ -44,7 +44,7 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "from modules.DataTranslater import DataTranslater\n",
+    "from modules.DataTranslaters.DataTranslater import DataTranslater\n",
     "translater_obj = DataTranslater()\n",
     "translater_obj.read_config_file(config_path)\n",
     "# translater_obj.read_config_text(config_text)\n",
@@ -255,7 +255,7 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "from modules.Trainer import Trainer\n",
+    "from modules.Trainers.Trainer import Trainer\n",
     "trainer_obj = Trainer(**train_data)\n",
     "trainer_obj.read_config_file(config_path)\n",
     "# trainer_obj.read_config_text(config_text)"
