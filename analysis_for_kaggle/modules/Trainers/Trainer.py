@@ -140,9 +140,7 @@ class Trainer(BaseTrainer):
         return self.estimator
 
     def write_estimator_data(self):
-        modelname = self.configs['fit'].get('modelname')
-        if not modelname:
-            modelname = 'tmp_model'
+        modelname = self.configs['fit'].get('modelname', 'tmp_model')
         if len(self.single_estimators) == 1:
             targets = self.single_estimators
         else:

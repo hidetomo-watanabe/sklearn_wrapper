@@ -180,9 +180,7 @@ class Outputer(ConfigReader, CommonMethodWrapper):
         return self.Y_pred_df, self.Y_pred_proba_df
 
     def write_predict_data(self):
-        modelname = self.configs['fit'].get('modelname')
-        if not modelname:
-            modelname = 'tmp_model'
+        modelname = self.configs['fit'].get('modelname', 'tmp_model')
         filename = '%s.csv' % modelname
         output_path = self.configs['data']['output_dir']
         if isinstance(self.Y_pred_df, pd.DataFrame):

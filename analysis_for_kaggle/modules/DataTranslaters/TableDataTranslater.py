@@ -468,9 +468,7 @@ class TableDataTranslater(BaseDataTranslater):
                  sp.csr_matrix(adv_test_preds.reshape(-1, 1))),
                 format='csr')
 
-        threshold = adversarial.get('threshold')
-        if not threshold and int(threshold) != 0:
-            threshold = 0.5
+        threshold = adversarial.get('threshold', 0.5)
         org_len = self.X_train.shape[0]
         self.X_train = self.X_train[adv_train_preds > threshold]
         self.Y_train = self.Y_train[adv_train_preds > threshold]

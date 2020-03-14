@@ -68,21 +68,13 @@ class SingleTrainer(BaseTrainer):
             elif undersampling == 'adaboost':
                 undersampling = RUSBoostClassifier
         self.undersampling = undersampling
-        cv_select = model_config.get('cv_select')
-        if not cv_select:
-            cv_select = 'nearest_mean'
-        self.cv_select = cv_select
+        self.cv_select = model_config.get('cv_select', 'nearest_mean')
         self.n_trials = model_config.get('n_trials')
-        fit_params = model_config.get('fit_params')
-        if not fit_params:
-            fit_params = {}
+        fit_params = model_config.get('fit_params', {})
         if model in ['lgb_clf', 'lgb_reg']:
             fit_params['eval_set'] = [(X_train, Y_train)]
         self.fit_params = fit_params
-        params = model_config.get('params')
-        if not params:
-            params = {}
-        self.params = params
+        self.params = model_config.get('params', {})
         return
 
     def _fit(self, scorer, cv, X_train, Y_train):
