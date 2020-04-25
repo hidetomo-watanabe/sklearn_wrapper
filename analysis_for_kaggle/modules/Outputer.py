@@ -2,7 +2,7 @@ import math
 import numpy as np
 import pandas as pd
 import importlib
-from keras.engine.sequential import Sequential
+from keras.wrappers.scikit_learn import KerasClassifier
 from sklearn.ensemble import VotingClassifier
 from heamy.dataset import Dataset
 from heamy.estimator import Classifier, Regressor
@@ -60,9 +60,9 @@ class Outputer(ConfigReader, CommonMethodWrapper):
         # clf
         if train_mode == 'clf':
             # keras
-            if estimator.__class__ in [Sequential]:
-                Y_pred = estimator.predict_classes(X_target)
-                Y_pred_proba = estimator.predict(X_target)
+            if estimator.__class__ in [KerasClassifier] and \
+                    Y_train.ndim == 2 and Y_train.shape[1] > 1:
+                Y_pred = estimator.predict_proba(X_target)
             # ensemble
             elif estimator.__class__ in [Classifier]:
                 estimator.dataset = dataset

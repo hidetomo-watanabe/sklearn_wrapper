@@ -126,8 +126,7 @@ class BaseTrainer(ConfigReader, CommonMethodWrapper):
 
     @classmethod
     def _reshape_y_train_for_keras(self, estimator, Y_train):
-        model = type(estimator)
-        if model != KerasClassifier:
+        if estimator.__class__ not in [KerasClassifier]:
             return Y_train
         if Y_train.ndim > 2:
             return Y_train
