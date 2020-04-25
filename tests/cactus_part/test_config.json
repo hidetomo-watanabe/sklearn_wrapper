@@ -10,7 +10,9 @@
     "pre": {
         "train_mode": "clf",
         "image": {
-            "img_path": "img_path",
+            "train_img_dir": "./tests/cactus_part/train",
+            "test_img_dir": "./tests/cactus_part/test",
+            "img_path_col": "id",
             "resize": {
                 "x": 32,
                 "y": 32

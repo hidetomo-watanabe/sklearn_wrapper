@@ -77,7 +77,10 @@
             "reshape_for_keras": "lstm"
         },
         "image": {
-            "img_path": "img_path",
+            "train_img_dir": "/path",
+            "test_img_dir": "/path",
+            "img_path_col": "img_path_col",
+            "img_extension": ".jpg",
             "resize": {
                 "x": 32,
                 "y": 32
