@@ -127,9 +127,14 @@ class BaseTrainer(ConfigReader, CommonMethodWrapper):
     @classmethod
     def _reshape_y_train_for_keras(self, estimator, Y_train):
         model = type(estimator)
-        if model == KerasClassifier:
-            logger.info('to_categorical y_train')
-            Y_train = to_categorical(Y_train)
+        if model != KerasClassifier:
+            return Y_train
+        if Y_train.ndim > 2:
+            return Y_train
+        if Y_train.ndim == 2 and Y_train.shape[1] > 1:
+            return Y_train
+        logger.info('to_categorical y_train')
+        Y_train = to_categorical(Y_train)
         return Y_train
 
     @classmethod
