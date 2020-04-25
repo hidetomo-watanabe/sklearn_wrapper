@@ -168,6 +168,13 @@ class Outputer(ConfigReader, CommonMethodWrapper):
                 method_name)(self.Y_pred_df, self.Y_pred_proba_df)
         return
 
+    def _round_predict_df(self):
+        if isinstance(self.Y_pred_df, pd.DataFrame):
+            self.Y_pred_df = self.Y_pred_df.round(5)
+        if isinstance(self.Y_pred_proba_df, pd.DataFrame):
+            self.Y_pred_proba_df = self.Y_pred_proba_df.round(5)
+        return
+
     def calc_predict_data(self):
         self.Y_pred, self.Y_pred_proba = self.predict_like(
             train_mode=self.configs['fit']['train_mode'],
@@ -177,6 +184,7 @@ class Outputer(ConfigReader, CommonMethodWrapper):
         self._fix_y_pre()
         self._calc_base_predict_df()
         self._calc_post_predict_df()
+        self._round_predict_df()
         return self.Y_pred_df, self.Y_pred_proba_df
 
     def write_predict_data(self):
@@ -184,9 +192,9 @@ class Outputer(ConfigReader, CommonMethodWrapper):
         filename = '%s.csv' % modelname
         output_path = self.configs['data']['output_dir']
         if isinstance(self.Y_pred_df, pd.DataFrame):
-            self.Y_pred_df.round(5).to_csv(
+            self.Y_pred_df.to_csv(
                 '%s/%s' % (output_path, filename), index=False)
         if isinstance(self.Y_pred_proba_df, pd.DataFrame):
-            self.Y_pred_proba_df.round(5).to_csv(
+            self.Y_pred_proba_df.to_csv(
                 '%s/proba_%s' % (output_path, filename), index=False)
         return filename

@@ -20,7 +20,7 @@ class TestPredict(unittest.TestCase):
             result['Y_pred_df'],
             pd.read_csv(f'{TEST_PATH}/titanic/output.csv'))
         assert_frame_equal(
-            result['Y_pred_proba_df'].round(5),
+            result['Y_pred_proba_df'],
             pd.read_csv(f'{TEST_PATH}/titanic/proba_output.csv'))
         # lgb
         result = predict.main(f'{TEST_PATH}/titanic/test_config2.json')
@@ -28,7 +28,7 @@ class TestPredict(unittest.TestCase):
             result['Y_pred_df'],
             pd.read_csv(f'{TEST_PATH}/titanic/output2.csv'))
         assert_frame_equal(
-            result['Y_pred_proba_df'].round(5),
+            result['Y_pred_proba_df'],
             pd.read_csv(f'{TEST_PATH}/titanic/proba_output2.csv'))
         # torch
         result = predict.main(f'{TEST_PATH}/titanic/test_config3.json')
@@ -78,8 +78,8 @@ class TestPredict(unittest.TestCase):
         # svr
         result = predict.main(f'{TEST_PATH}/house/test_config.json')
         assert_frame_equal(
-            result['Y_pred_df'].round(5),
-            pd.read_csv(f'{TEST_PATH}/house/output.csv'))
+            result['Y_pred_df'].round(0),
+            pd.read_csv(f'{TEST_PATH}/house/output.csv').round(0))
         # keras
         result = predict.main(f'{TEST_PATH}/house/test_config2.json')
         # ensemble(vote)
