@@ -20,6 +20,7 @@ from rgf.sklearn import RGFClassifier, RGFRegressor
 from keras.wrappers.scikit_learn import KerasClassifier, KerasRegressor
 from skorch import NeuralNetClassifier, NeuralNetRegressor
 from torch import cuda
+from keras.utils.np_utils import to_categorical
 from logging import getLogger
 
 
@@ -124,28 +125,33 @@ class BaseTrainer(ConfigReader, CommonMethodWrapper):
         return estimator
 
     @classmethod
+    def _reshape_y_train_for_keras(self, estimator, Y_train):
+        model = type(estimator)
+        if model == KerasClassifier:
+            logger.info('to_categorical y_train')
+            Y_train = to_categorical(Y_train)
+        return Y_train
+
+    @classmethod
     def calc_cv_scores_estimators(
         self, estimator, X_train, Y_train, scorer, cv, fit_params={}
     ):
-        if Y_train.ndim > 1 and Y_train.shape[1] > 1:
-            tmp_Y_train = np.argmax(Y_train, axis=1)
-        else:
-            tmp_Y_train = Y_train
-
         scores = []
         estimators = []
         if cv == 1:
-            indexes = [[range(X_train.shape[0]), range(tmp_Y_train.shape[0])]]
+            indexes = [[range(X_train.shape[0]), range(Y_train.shape[0])]]
         else:
-            indexes = cv.split(X_train, tmp_Y_train)
+            indexes = cv.split(X_train, Y_train)
+
+        Y_train_for_fit = self._reshape_y_train_for_keras(estimator, Y_train)
         for train_index, test_index in indexes:
             tmp_estimator = estimator
             tmp_estimator.fit(
-                X_train[train_index], Y_train[train_index],
+                X_train[train_index], Y_train_for_fit[train_index],
                 **fit_params)
             estimators.append(tmp_estimator)
             scores.append(scorer(
-                tmp_estimator, X_train[test_index], tmp_Y_train[test_index]))
+                tmp_estimator, X_train[test_index], Y_train[test_index]))
         return scores, estimators
 
     @classmethod

@@ -5,8 +5,6 @@ from sklearn.model_selection import KFold
 from sklearn.multiclass import OneVsOneClassifier, OneVsRestClassifier
 from imblearn.ensemble import BalancedBaggingClassifier, RUSBoostClassifier
 from sklearn.metrics import get_scorer
-from keras.utils.np_utils import to_categorical
-from torch import LongTensor
 from logging import getLogger
 
 
@@ -198,20 +196,8 @@ class SingleTrainer(BaseTrainer):
         if Y_train is None:
             Y_train = self.Y_train
         self._get_model_params(model_config, nn_func, X_train, Y_train)
-
-        # Y_train
-        if self.model in ['keras_clf', 'torch_clf']:
-            if Y_train.ndim > 1 and Y_train.shape[1] == 1:
-                Y_train = Y_train.ravel()
-            else:
-                logger.error('NOT IMPLEMENTED MULTI TARGET KERAS, TORCH CLF')
-                raise Exception('NOT IMPLEMENTED')
-            if self.model == 'keras_clf':
-                Y_train = to_categorical(Y_train)
-            elif self.model == 'torch_clf':
-                Y_train = LongTensor(Y_train)
-        elif self.model not in ['keras_reg', 'torch_reg']:
-            # for warning
+        # for warning
+        if self.model not in ['keras_reg', 'torch_reg']:
             Y_train = self.ravel_like(Y_train)
 
         # fit
@@ -233,7 +219,7 @@ class SingleTrainer(BaseTrainer):
             if hasattr(estimator, 'classes_'):
                 classes = estimator.classes_
             else:
-                classes = sorted(np.unique(self.Y_train))
+                classes = sorted(np.unique(Y_train))
 
             score, estimator = self._fit_with_pseudo_labeling(
                 scorer, cv, estimator, X_train, Y_train, classes, threshold)
