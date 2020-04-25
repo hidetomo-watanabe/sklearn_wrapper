@@ -88,9 +88,7 @@ class TableDataTranslater(BaseDataTranslater):
 
     def _encode_category_with_target(self, columns):
         model_obj = TargetEncoder(cols=columns)
-        cv = Trainer.get_cv_from_json(
-            self.configs['fit'].get('cv'),
-            self.configs['fit']['train_mode'])
+        cv = Trainer.get_cv_from_json(self.configs['fit'].get('cv'))
         logger.info(f'cv: {cv}')
         indexes = cv.split(self.train_df, self.pred_df)
         train_encoded = []

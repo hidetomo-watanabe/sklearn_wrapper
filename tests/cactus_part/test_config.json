@@ -29,6 +29,10 @@
         "myfunc": "cactus",
         "train_mode": "clf",
         "scoring": "roc_auc",
+        "cv": {
+            "fold": "stratifiedk",
+            "num": 3
+        },
         "modelname": "tmp_cactus",
         "ensemble_model_config": {
             "mode": "stacking",

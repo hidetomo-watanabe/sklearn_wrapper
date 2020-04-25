@@ -24,14 +24,18 @@
     },
     "fit": {
         "train_mode": "clf",
+        "scoring": "f1",
+        "cv": {
+            "fold": "stratifiedk",
+            "num": 3
+        },
+        "modelname": "tmp_disaster",
         "ensemble_model_config": {
             "mode": "stacking",
             "model": "log_reg",
-            "modelname": "disaster",
             "k": 10,
             "proportion": 0.2
         },
-        "scoring": "f1",
         "single_model_configs": [
             {
                 "model": "log_reg",

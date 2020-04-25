@@ -33,14 +33,10 @@ class Trainer(BaseTrainer):
         self.configs = {}
 
     @classmethod
-    def get_cv_from_json(self, cv_config, train_mode):
+    def get_cv_from_json(self, cv_config):
         if not cv_config:
-            if train_mode == 'reg':
-                model = KFold(
-                    n_splits=3, shuffle=True, random_state=42)
-            elif train_mode == 'clf':
-                model = StratifiedKFold(
-                    n_splits=3, shuffle=True, random_state=42)
+            model = KFold(
+                n_splits=3, shuffle=True, random_state=42)
             cv = model
             return cv
 
@@ -91,8 +87,7 @@ class Trainer(BaseTrainer):
     def calc_estimator_data(self):
         # configs
         model_configs = self.configs['fit']['single_model_configs']
-        self.cv = self.get_cv_from_json(
-            self.configs['fit'].get('cv'), self.configs['fit']['train_mode'])
+        self.cv = self.get_cv_from_json(self.configs['fit'].get('cv'))
         logger.info(f'cv: {self.cv}')
         logger.info('scoring: %s' % self.configs['fit']['scoring'])
         self.scorer = self._get_scorer_from_string(

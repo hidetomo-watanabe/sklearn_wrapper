@@ -47,6 +47,10 @@
     "fit": {
         "train_mode": "clf",
         "scoring": "accuracy",
+        "cv": {
+            "fold": "stratifiedk",
+            "num": 3
+        },
         "modelname": "tmp_titanic4",
         "ensemble_model_config": {
             "mode": "stacking",
