@@ -59,8 +59,8 @@
                 "fit_params": {
                 },
                 "params": {
-                    "n_estimators": [5],
-                    "max_depth": [3]
+                    "n_estimators": [5, 5],
+                    "max_depth": [3, 3]
                 }
             }
         ]

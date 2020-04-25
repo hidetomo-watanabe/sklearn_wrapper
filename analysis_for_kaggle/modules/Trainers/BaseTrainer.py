@@ -35,7 +35,7 @@ class BaseTrainer(ConfigReader, CommonMethodWrapper):
         pass
 
     @classmethod
-    def get_base_model(self, model, create_nn_model=None):
+    def get_base_estimator(self, model, create_nn_model=None):
         device = 'cuda' if cuda.is_available() else 'cpu'
 
         if model == 'log_reg':
@@ -113,34 +113,46 @@ class BaseTrainer(ConfigReader, CommonMethodWrapper):
             raise Exception('NOT IMPLEMENTED')
 
     @classmethod
-    def calc_cv_scores_models(
-        self, model, X_train, Y_train, scorer, cv, fit_params={}
+    def to_second_estimator(
+        self, estimator, multiclass=None, undersampling=None
+    ):
+        if multiclass:
+            estimator = multiclass(estimator=estimator, n_jobs=-1)
+        if undersampling:
+            estimator = undersampling(
+                base_estimator=estimator, random_state=42, n_jobs=-1)
+        return estimator
+
+    @classmethod
+    def calc_cv_scores_estimators(
+        self, estimator, X_train, Y_train, scorer, cv, fit_params={}
     ):
         if Y_train.ndim > 1 and Y_train.shape[1] > 1:
             tmp_Y_train = np.argmax(Y_train, axis=1)
         else:
             tmp_Y_train = Y_train
+
         scores = []
-        models = []
+        estimators = []
         if cv == 1:
             indexes = [[range(X_train.shape[0]), range(tmp_Y_train.shape[0])]]
         else:
             indexes = cv.split(X_train, tmp_Y_train)
         for train_index, test_index in indexes:
-            tmp_model = model
-            tmp_model.fit(
+            tmp_estimator = estimator
+            tmp_estimator.fit(
                 X_train[train_index], Y_train[train_index],
                 **fit_params)
-            models.append(tmp_model)
+            estimators.append(tmp_estimator)
             scores.append(scorer(
-                tmp_model, X_train[test_index], tmp_Y_train[test_index]))
-        return scores, models
+                tmp_estimator, X_train[test_index], tmp_Y_train[test_index]))
+        return scores, estimators
 
     @classmethod
     def calc_best_params(
         self,
-        base_model, X_train, Y_train, params, scorer, cv,
-        fit_params={}, n_trials=None, multiclass=None
+        base_estimator, X_train, Y_train, params, scorer, cv,
+        fit_params={}, n_trials=None, multiclass=None, undersampling=None
     ):
         def _get_args(trial, params):
             args = {}
@@ -168,14 +180,14 @@ class BaseTrainer(ConfigReader, CommonMethodWrapper):
             return args
 
         def _objective(trial):
-            model = base_model
             args = _get_args(trial, params)
-            model.set_params(**args)
-            if multiclass:
-                model = multiclass(estimator=model)
+            estimator = base_estimator
+            estimator.set_params(**args)
+            estimator = self.to_second_estimator(
+                estimator, multiclass, undersampling)
             try:
-                scores, _ = self._calc_cv_scores_models(
-                    model, X_train, Y_train, scorer, cv, fit_params)
+                scores, _ = self.calc_cv_scores_estimators(
+                    estimator, X_train, Y_train, scorer, cv, fit_params)
             except Exception as e:
                 logger.warning(e)
                 logger.warning('SET SCORE 0')

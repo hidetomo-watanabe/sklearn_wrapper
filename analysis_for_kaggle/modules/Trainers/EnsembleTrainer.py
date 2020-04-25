@@ -71,12 +71,12 @@ class EnsembleTrainer(BaseTrainer):
         if self.configs['fit']['train_mode'] == 'clf':
             stacker = Classifier(
                 dataset=stack_dataset,
-                estimator=self.get_base_model(
+                estimator=self.get_base_estimator(
                     ensemble_config['model']).__class__)
         elif self.configs['fit']['train_mode'] == 'reg':
             stacker = Regressor(
                 dataset=stack_dataset,
-                estimator=self.get_base_model(
+                estimator=self.get_base_estimator(
                     ensemble_config['model']).__class__)
         stacker.use_cache = False
         # default predict

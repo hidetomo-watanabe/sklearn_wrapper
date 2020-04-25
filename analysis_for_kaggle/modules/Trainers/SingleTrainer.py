@@ -46,7 +46,7 @@ class SingleTrainer(BaseTrainer):
                 myfunc = importlib.import_module(
                     'modules.myfuncs.%s' % nn_func)
                 create_nn_model = myfunc.create_nn_model
-        self.base_model = self.get_base_model(
+        self.base_estimator = self.get_base_estimator(
             model, create_nn_model=create_nn_model)
         multiclass = model_config.get('multiclass')
         if multiclass:
@@ -79,24 +79,21 @@ class SingleTrainer(BaseTrainer):
 
     def _fit(self, scorer, cv, X_train, Y_train):
         best_params = self.calc_best_params(
-            self.base_model, X_train, Y_train, self.params,
-            scorer, cv, self.fit_params, self.n_trials, self.multiclass)
+            self.base_estimator, X_train, Y_train, self.params,
+            scorer, cv, self.fit_params, self.n_trials,
+            self.multiclass, self.undersampling)
         logger.info('best params: %s' % best_params)
-        estimator = self.base_model
+        estimator = self.base_estimator
         estimator.set_params(**best_params)
-        if self.multiclass:
-            estimator = self.multiclass(estimator=estimator, n_jobs=-1)
-        if self.undersampling:
-            estimator = self.undersampling(
-                base_estimator=estimator, random_state=42, n_jobs=-1)
-            estimator.fit(X_train, Y_train)
+        estimator = self.to_second_estimator(
+            estimator, self.multiclass, self.undersampling)
         logger.info(f'get estimator with cv_select: {self.cv_select}')
         if self.cv_select == 'train_all':
-            scores, estimators = self.calc_cv_scores_models(
+            scores, estimators = self.calc_cv_scores_estimators(
                 estimator, X_train, Y_train, scorer,
                 cv=1, fit_params=self.fit_params)
         elif self.cv_select in ['nearest_mean', 'all_folds']:
-            scores, estimators = self.calc_cv_scores_models(
+            scores, estimators = self.calc_cv_scores_estimators(
                 estimator, X_train, Y_train, scorer,
                 cv=cv, fit_params=self.fit_params)
             logger.info(f'cv model scores mean: {np.mean(scores)}')
