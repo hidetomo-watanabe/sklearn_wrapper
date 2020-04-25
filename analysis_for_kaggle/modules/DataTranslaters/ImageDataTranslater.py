@@ -42,6 +42,8 @@ class ImageDataTranslater(BaseDataTranslater):
         img_extension = img_config.get('img_extension', '')
         # Y_train
         self.Y_train = pred_df.to_numpy()
+        if self.configs['pre']['train_mode'] == 'reg':
+            self.Y_train = self.Y_train.astype('float32')
         # X_train
         self.train_ids = train_df[self.id_col].to_numpy()
         self.X_train = []

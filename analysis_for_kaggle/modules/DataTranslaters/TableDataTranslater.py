@@ -267,6 +267,8 @@ class TableDataTranslater(BaseDataTranslater):
     def _to_sparse(self):
         self.X_train = sp.csr_matrix(self.X_train.astype('float32'))
         self.X_test = sp.csr_matrix(self.X_test.astype('float32'))
+        if self.configs['pre']['train_mode'] == 'reg':
+            self.Y_train = self.Y_train.astype('float32')
         return
 
     def _normalize_x(self):
@@ -550,12 +552,12 @@ class TableDataTranslater(BaseDataTranslater):
                     % (org_len, self.X_train.shape[0]))
         return
 
-    def _reshape_for_keras(self):
+    def _reshape_x_for_keras(self):
         mode = self.configs['pre']['table'].get('reshape_for_keras')
         if not mode:
             return
 
-        logger.info('reshape for keras: %s' % mode)
+        logger.info('reshape x for keras: %s' % mode)
         if mode == 'lstm':
             self.X_train = self.X_train.reshape(*self.X_train.shape, 1)
             self.X_test = self.X_test.reshape(*self.X_test.shape, 1)
@@ -586,5 +588,5 @@ class TableDataTranslater(BaseDataTranslater):
         self._extract_with_no_anomaly_validation()
         self._sample_with_under()
         self._sample_with_over()
-        self._reshape_for_keras()
+        self._reshape_x_for_keras()
         return
