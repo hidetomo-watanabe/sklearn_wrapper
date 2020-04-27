@@ -13,6 +13,7 @@ from sklearn.feature_selection import RFE
 from xgboost import XGBClassifier
 from boruta import BorutaPy
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import roc_auc_score
 from sklearn.ensemble import IsolationForest
 from imblearn.under_sampling import RandomUnderSampler
 from imblearn.over_sampling import RandomOverSampler, SMOTE
@@ -438,6 +439,10 @@ class TableDataTranslater(BaseDataTranslater):
             else:
                 logger.warning('CLASSES_ NOT IN ESTIMATOR')
                 test_index = 1
+            # predict
+            auc = roc_auc_score(
+                Y_adv, estimator.predict_proba(X_adv)[:, test_index])
+            logger.info(f'auc: {auc}')
             adv_train_preds = estimator.predict_proba(X_train)[:, test_index]
             adv_test_preds = estimator.predict_proba(X_test)[:, test_index]
             return adv_train_preds, adv_test_preds
