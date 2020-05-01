@@ -97,13 +97,17 @@ class ImageDataTranslater(BaseDataTranslater):
             return
 
         datagen = image.ImageDataGenerator(aug['conf'])
-        batches = datagen.flow(
-            self.X_train,
-            y=self.Y_train,
-            batch_size=len(self.X_train) * aug['batch_size_ratio'],
-            seed=42)
-        self.X_train = np.append(self.X_train, batches[0][0], axis=0)
-        self.Y_train = np.append(self.Y_train, batches[0][1], axis=0)
+        batch_itr = datagen.flow(
+            self.X_train, y=self.Y_train,
+            batch_size=len(self.X_train), seed=42)
+        new_X_train = []
+        new_Y_train = []
+        for _ in range(aug['ratio']):
+            batch = next(batch_itr)
+            new_X_train.extend(batch[0])
+            new_Y_train.extend(batch_itr[0][1])
+        self.X_train = np.array(new_X_train)
+        self.Y_train = np.array(new_Y_train)
         return
 
     def calc_train_data(self):
