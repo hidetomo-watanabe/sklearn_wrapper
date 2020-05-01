@@ -18,10 +18,13 @@
                 "y": 32
             },
             "augmentation": {
-                "flip": true,
-                "rotate": true,
-                "noize": true,
-                "invert": true
+                "conf": {
+                    "rotation_range": 20,
+                    "channel_shift_range": true,
+                    "horizontal_flip": true,
+                    "vertical_flip": true
+                },
+                "batch_size_ratio": 1
             }
         }
     },
