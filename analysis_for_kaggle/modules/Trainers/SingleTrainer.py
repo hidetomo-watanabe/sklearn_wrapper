@@ -4,7 +4,7 @@ import importlib
 from sklearn.model_selection import KFold
 from sklearn.multiclass import OneVsOneClassifier, OneVsRestClassifier
 from imblearn.ensemble import BalancedBaggingClassifier, RUSBoostClassifier
-from keras.callbacks import EarlyStopping
+from keras.callbacks import ReduceLROnPlateau, EarlyStopping
 from sklearn.metrics import get_scorer
 from logging import getLogger
 
@@ -74,6 +74,10 @@ class SingleTrainer(BaseTrainer):
             fit_params['eval_set'] = [(X_train, Y_train)]
         if model in ['keras_clf', 'keras_reg']:
             fit_params['callbacks'] = []
+            if fit_params.get('reduce_lr'):
+                fit_params['callbacks'].append(
+                    ReduceLROnPlateau(**fit_params['reduce_lr']))
+                del fit_params['reduce_lr']
             if fit_params.get('early_stopping'):
                 fit_params['callbacks'].append(
                     EarlyStopping(**fit_params['early_stopping']))
