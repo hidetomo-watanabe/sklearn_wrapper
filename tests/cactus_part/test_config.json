@@ -50,7 +50,8 @@
                     "batch_size": 50,
                     "early_stopping": {
                         "monitor": "loss",
-                        "patience": 1
+                        "patience": 1,
+                        "verbose": 1
                     }
                 },
                 "params": {
