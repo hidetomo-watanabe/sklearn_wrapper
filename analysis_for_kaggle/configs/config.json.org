@@ -217,9 +217,23 @@
                 "n_trials": 1,
                 "fit_params": {
                     "epochs": 3,
-                    "batch_size": 50
+                    "batch_size": 50,
+                    "early_stopping": {
+                        "monitor": "loss",
+                        "patience": 1
+                    }
                 },
                 "params": {
+                }
+            },
+            {
+                "model": "torch_clf",
+                "n_trials": 1,
+                "fit_params": {
+                },
+                "params": {
+                    "max_epochs": [3],
+                    "batch_size": [50]
                 }
             }
         ],
