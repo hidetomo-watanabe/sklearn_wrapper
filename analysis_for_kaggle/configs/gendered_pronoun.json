@@ -11,6 +11,7 @@
     "pre": {
         "train_mode": "clf",
         "y_scaler": "standard",
+        "undersampling": "random",
         "table": {
             "adhoc_df": {
                 "myfunc": "gendered_pronoun",
@@ -36,8 +37,7 @@
                 "options": [
                 ]
             },
-            "x_scaler": "standard",
-            "undersampling": "random"
+            "x_scaler": "standard"
         }
     },
     "fit": {

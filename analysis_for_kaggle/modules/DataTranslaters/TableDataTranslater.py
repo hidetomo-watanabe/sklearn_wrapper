@@ -15,8 +15,6 @@ from boruta import BorutaPy
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import roc_auc_score
 from sklearn.ensemble import IsolationForest
-from imblearn.under_sampling import RandomUnderSampler
-from imblearn.over_sampling import RandomOverSampler, SMOTE
 from IPython.display import display
 from logging import getLogger
 
@@ -513,45 +511,6 @@ class TableDataTranslater(BaseDataTranslater):
         self.X_train = self.X_train[preds == 1]
         self.Y_train = self.Y_train[preds == 1]
         logger.info('train data reduced %s => %s'
-                    % (org_len, self.X_train.shape[0]))
-        return
-
-    def _sample_with_under(self):
-        method = self.configs['pre']['table'].get('undersampling')
-        if not method:
-            return
-
-        logger.info('extract train data with undersampling: %s' % method)
-        if method == 'random':
-            sampler_obj = RandomUnderSampler(random_state=42)
-        else:
-            logger.error('NOT IMPLEMENTED UNDERSAMPLING METHOD: %s' % method)
-            raise Exception('NOT IMPLEMENTED')
-        org_len = self.X_train.shape[0]
-        self.X_train, self.Y_train = sampler_obj.fit_resample(
-            self.X_train, self.Y_train)
-        logger.info('train data reduced %s => %s'
-                    % (org_len, self.X_train.shape[0]))
-        return
-
-    def _sample_with_over(self):
-        method = self.configs['pre']['table'].get('oversampling')
-        if not method:
-            return
-
-        logger.info('add train data with oversampling: %s' % method)
-        if method == 'random':
-            sampler_obj = RandomOverSampler(random_state=42)
-        elif method == 'smote':
-            sampler_obj = SMOTE(random_state=42)
-        else:
-            logger.error('NOT IMPLEMENTED OVERSAMPLING METHOD: %s' % method)
-            raise Exception('NOT IMPLEMENTED')
-        org_len = self.X_train.shape[0]
-        Y_train = self.ravel_like(self.Y_train)
-        self.X_train, self.Y_train = sampler_obj.fit_resample(
-            self.X_train, Y_train)
-        logger.info('train data added %s => %s'
                     % (org_len, self.X_train.shape[0]))
         return
 

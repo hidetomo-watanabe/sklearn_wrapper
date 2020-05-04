@@ -44,3 +44,9 @@ class DataTranslater(ConfigReader):
 
     def get_post_processers(self):
         return self.translater.get_post_processers()
+
+    def _sample_with_under(self):
+        return self.translater._sample_with_under()
+
+    def _sample_with_over(self):
+        return self.translater._sample_with_over()

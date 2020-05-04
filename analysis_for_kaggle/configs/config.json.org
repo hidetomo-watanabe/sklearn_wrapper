@@ -13,6 +13,8 @@
         "y_pre": false,
         "y_scaler": "standard",
         "savename": "tmp_file",
+        "undersampling": "random",
+        "oversampling": "smote",
         "table": {
             "adhoc_df": {
                 "myfunc": "hoge",
@@ -72,8 +74,6 @@
                 "contamination": "auto",
                 "add_column": false
             },
-            "undersampling": "random",
-            "oversampling": "smote",
             "reshape_for_keras": "lstm"
         },
         "image": {

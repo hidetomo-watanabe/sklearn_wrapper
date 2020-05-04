@@ -115,4 +115,6 @@ class ImageDataTranslater(BaseDataTranslater):
         self._calc_base_train_data()
         self._normalize_data_for_model()
         self._augment()
+        self._sample_with_under()
+        self._sample_with_over()
         return
