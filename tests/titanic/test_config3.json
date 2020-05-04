@@ -9,6 +9,7 @@
     },
     "pre": {
         "train_mode": "clf",
+        "oversampling": "smote",
         "table": {
             "adhoc_df": {
                 "myfunc": "titanic",

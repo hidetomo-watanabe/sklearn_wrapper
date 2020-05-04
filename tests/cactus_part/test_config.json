@@ -9,6 +9,7 @@
     },
     "pre": {
         "train_mode": "clf",
+        "oversampling": "smote",
         "image": {
             "train_img_dir": "./tests/cactus_part/train",
             "test_img_dir": "./tests/cactus_part/test",

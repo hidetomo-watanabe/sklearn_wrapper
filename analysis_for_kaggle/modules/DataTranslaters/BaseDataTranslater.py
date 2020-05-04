@@ -1,3 +1,5 @@
+from functools import reduce
+from operator import mul
 import numpy as np
 import pandas as pd
 from imblearn.under_sampling import RandomUnderSampler
@@ -101,9 +103,13 @@ class BaseDataTranslater(ConfigReader, CommonMethodWrapper):
         else:
             logger.error('NOT IMPLEMENTED UNDERSAMPLING METHOD: %s' % method)
             raise Exception('NOT IMPLEMENTED')
+
         org_len = self.X_train.shape[0]
-        self.X_train, self.Y_train = sampler_obj.fit_resample(
-            self.X_train, self.Y_train)
+        tmp_X_train = self.X_train.reshape(
+            (-1, reduce(mul, self.X_train.shape[1:])))
+        tmp_X_train, self.Y_train = sampler_obj.fit_resample(
+            tmp_X_train, self.Y_train)
+        self.X_train = tmp_X_train.reshape(-1, *self.X_train.shape[1:])
         logger.info('train data reduced %s => %s'
                     % (org_len, self.X_train.shape[0]))
         return
@@ -121,10 +127,14 @@ class BaseDataTranslater(ConfigReader, CommonMethodWrapper):
         else:
             logger.error('NOT IMPLEMENTED OVERSAMPLING METHOD: %s' % method)
             raise Exception('NOT IMPLEMENTED')
+
         org_len = self.X_train.shape[0]
+        tmp_X_train = self.X_train.reshape(
+            (-1, reduce(mul, self.X_train.shape[1:])))
         Y_train = self.ravel_like(self.Y_train)
-        self.X_train, self.Y_train = sampler_obj.fit_resample(
-            self.X_train, Y_train)
+        tmp_X_train, self.Y_train = sampler_obj.fit_resample(
+            tmp_X_train, Y_train)
+        self.X_train = tmp_X_train.reshape(-1, *self.X_train.shape[1:])
         logger.info('train data added %s => %s'
                     % (org_len, self.X_train.shape[0]))
         return
