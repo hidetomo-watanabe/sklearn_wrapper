@@ -49,6 +49,7 @@
         "single_model_configs": [
             {
                 "model": "keras_clf",
+                "cv_select": "train_all",
                 "fit_params": {
                     "epochs": 3,
                     "batch_size": 50

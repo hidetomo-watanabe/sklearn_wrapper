@@ -73,6 +73,7 @@
         "single_model_configs": [
             {
                 "model": "torch_clf",
+                "cv_select": "train_all",
                 "fit_params": {
                 },
                 "params": {
