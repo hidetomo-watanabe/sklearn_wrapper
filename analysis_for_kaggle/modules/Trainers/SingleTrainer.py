@@ -86,7 +86,7 @@ class SingleTrainer(BaseTrainer):
                 fit_params['callbacks'].append(
                     EarlyStopping(**fit_params['early_stopping']))
                 del fit_params['early_stopping']
-        self.fit_params = fit_params
+        self.fit_params = self._to_pipeline_params(self.model, fit_params)
         params = model_config.get('params', {})
         self.params = self._to_pipeline_params(self.model, params)
         return
@@ -99,18 +99,19 @@ class SingleTrainer(BaseTrainer):
         logger.info('best params: %s' % best_params)
         pipeline = self.base_pipeline
         pipeline.set_params(**best_params)
-        estimator = pipeline.steps[-1][1]
-        estimator = self.to_second_estimator(
-            estimator, self.multiclass, self.undersampling)
+        pipeline.steps[-1] = (pipeline.steps[-1][0], self.to_second_estimator(
+            pipeline.steps[-1][1], self.multiclass, self.undersampling))
         logger.info(f'get estimator with cv_select: {self.cv_select}')
         if self.cv_select == 'train_all':
-            scores, estimators = self.calc_cv_scores_estimators(
-                estimator, X_train, Y_train, scorer,
+            scores, pipelines = self.calc_cv_scores_estimators(
+                pipeline, X_train, Y_train, scorer,
                 cv=1, fit_params=self.fit_params)
+            estimators = [x.steps[-1][1] for x in pipelines]
         elif self.cv_select in ['nearest_mean', 'all_folds']:
-            scores, estimators = self.calc_cv_scores_estimators(
-                estimator, X_train, Y_train, scorer,
+            scores, pipelines = self.calc_cv_scores_estimators(
+                pipeline, X_train, Y_train, scorer,
                 cv=cv, fit_params=self.fit_params)
+            estimators = [x.steps[-1][1] for x in pipelines]
             logger.info(f'cv model scores mean: {np.mean(scores)}')
             logger.info(f'cv model scores std: {np.std(scores)}')
             if self.cv_select == 'nearest_mean':
