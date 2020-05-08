@@ -1,6 +1,7 @@
 import scipy.sparse as sp
 import numpy as np
 import importlib
+from sklearn.pipeline import Pipeline
 from sklearn.model_selection import KFold
 from sklearn.multiclass import OneVsOneClassifier, OneVsRestClassifier
 from imblearn.ensemble import BalancedBaggingClassifier, RUSBoostClassifier
@@ -30,6 +31,9 @@ class SingleTrainer(BaseTrainer):
         if self.kernel:
             self.create_nn_model = eval('create_nn_model')
 
+    def _to_pipeline_params(self, pre, params):
+        return {f'{pre}__{k}': v for k, v in params.items()}
+
     def _get_model_params(self, model_config, nn_func, X_train, Y_train):
         model = model_config['model']
         logger.info('model: %s' % model)
@@ -45,8 +49,8 @@ class SingleTrainer(BaseTrainer):
                 myfunc = importlib.import_module(
                     'modules.myfuncs.%s' % nn_func)
                 create_nn_model = myfunc.create_nn_model
-        self.base_estimator = self.get_base_estimator(
-            model, create_nn_model=create_nn_model)
+        self.base_pipeline = Pipeline([(self.model, self.get_base_estimator(
+            model, create_nn_model=create_nn_model))])
         multiclass = model_config.get('multiclass')
         if multiclass:
             logger.info('multiclass: %s' % multiclass)
@@ -83,17 +87,19 @@ class SingleTrainer(BaseTrainer):
                     EarlyStopping(**fit_params['early_stopping']))
                 del fit_params['early_stopping']
         self.fit_params = fit_params
-        self.params = model_config.get('params', {})
+        params = model_config.get('params', {})
+        self.params = self._to_pipeline_params(self.model, params)
         return
 
     def _fit(self, scorer, cv, X_train, Y_train):
         best_params = self.calc_best_params(
-            self.base_estimator, X_train, Y_train, self.params,
+            self.base_pipeline, X_train, Y_train, self.params,
             scorer, cv, self.fit_params, self.n_trials,
             self.multiclass, self.undersampling)
         logger.info('best params: %s' % best_params)
-        estimator = self.base_estimator
-        estimator.set_params(**best_params)
+        pipeline = self.base_pipeline
+        pipeline.set_params(**best_params)
+        estimator = pipeline.steps[-1][1]
         estimator = self.to_second_estimator(
             estimator, self.multiclass, self.undersampling)
         logger.info(f'get estimator with cv_select: {self.cv_select}')
