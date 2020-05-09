@@ -96,23 +96,15 @@ class ImageDataTranslater(BaseDataTranslater):
         if not aug:
             return
 
-        logger.info('augment image: %s' % aug['conf'])
-        org_len = self.X_train.shape[0]
-        datagen = image.ImageDataGenerator(aug['conf'])
+        logger.info('augment image: %s' % aug)
+        datagen = image.ImageDataGenerator(aug)
         datagen.fit(self.X_train)
         batch_itr = datagen.flow(
             self.X_train, y=self.Y_train,
             batch_size=len(self.X_train), seed=42)
-        new_X_train = []
-        new_Y_train = []
-        for _ in range(aug['ratio']):
-            batch = next(batch_itr)
-            new_X_train.extend(batch[0])
-            new_Y_train.extend(batch[1])
-        self.X_train = np.array(new_X_train)
-        self.Y_train = np.array(new_Y_train)
-        logger.info('train data added %s => %s'
-                    % (org_len, self.X_train.shape[0]))
+        batch = next(batch_itr)
+        self.X_train = batch[0]
+        self.Y_train = batch[1]
         return
 
     def calc_train_data(self):

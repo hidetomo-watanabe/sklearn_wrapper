@@ -18,13 +18,10 @@
                 "y": 32
             },
             "augmentation": {
-                "conf": {
-                    "rotation_range": 20,
-                    "channel_shift_range": true,
-                    "horizontal_flip": true,
-                    "vertical_flip": true
-                },
-                "ratio": 3
+                "rotation_range": 20,
+                "channel_shift_range": true,
+                "horizontal_flip": true,
+                "vertical_flip": true
             }
         }
     },
