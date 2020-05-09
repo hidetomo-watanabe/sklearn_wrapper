@@ -548,7 +548,5 @@ class TableDataTranslater(BaseDataTranslater):
         self._select_feature()
         self._extract_with_adversarial_validation()
         self._extract_with_no_anomaly_validation()
-        self._sample_with_under()
-        self._sample_with_over()
         self._reshape_x_for_keras()
         return

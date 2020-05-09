@@ -1,10 +1,12 @@
 import scipy.sparse as sp
 import numpy as np
 import importlib
-from sklearn.pipeline import Pipeline
+from imblearn.pipeline import Pipeline
 from sklearn.model_selection import KFold
-from sklearn.multiclass import OneVsOneClassifier, OneVsRestClassifier
+from imblearn.under_sampling import RandomUnderSampler
+from imblearn.over_sampling import RandomOverSampler, SMOTE
 from imblearn.ensemble import BalancedBaggingClassifier, RUSBoostClassifier
+from sklearn.multiclass import OneVsOneClassifier, OneVsRestClassifier
 from keras.callbacks import ReduceLROnPlateau, EarlyStopping
 from sklearn.metrics import get_scorer
 from logging import getLogger
@@ -51,6 +53,44 @@ class SingleTrainer(BaseTrainer):
                 create_nn_model = myfunc.create_nn_model
         self.base_pipeline = Pipeline([(self.model, self.get_base_estimator(
             model, create_nn_model=create_nn_model))])
+
+        undersampling = model_config.get('undersampling')
+        if undersampling:
+            logger.info(f'undersampling: {undersampling}')
+            if undersampling == 'random':
+                self.base_pipeline.steps.insert(
+                    0,
+                    ('undersampling', RandomUnderSampler(random_state=42)))
+                undersampling = None
+            elif undersampling == 'bagging':
+                undersampling = BalancedBaggingClassifier
+            elif undersampling == 'adaboost':
+                undersampling = RUSBoostClassifier
+            else:
+                logger.error(
+                    f'NOT IMPLEMENTED UNDERSAMPLING: {undersampling}')
+                raise Exception('NOT IMPLEMENTED')
+        self.undersampling = undersampling
+
+        oversampling = model_config.get('oversampling')
+        if oversampling:
+            logger.info(f'oversampling: {oversampling}')
+            if oversampling == 'random':
+                self.base_pipeline.steps.insert(
+                    0,
+                    ('oversampling', RandomOverSampler(random_state=42)))
+                oversampling = None
+            elif oversampling == 'smote':
+                self.base_pipeline.steps.insert(
+                    0,
+                    ('oversampling', SMOTE(random_state=42)))
+                oversampling = None
+            else:
+                logger.error(
+                    f'NOT IMPLEMENTED OVERSAMPLING: {oversampling}')
+                raise Exception('NOT IMPLEMENTED')
+        self.oversampling = oversampling
+
         multiclass = model_config.get('multiclass')
         if multiclass:
             logger.info('multiclass: %s' % multiclass)
@@ -63,14 +103,7 @@ class SingleTrainer(BaseTrainer):
                     f'NOT IMPLEMENTED MULTICLASS: {multiclass}')
                 raise Exception('NOT IMPLEMENTED')
         self.multiclass = multiclass
-        undersampling = model_config.get('undersampling')
-        if undersampling:
-            logger.info(f'undersampling: {undersampling}')
-            if undersampling == 'bagging':
-                undersampling = BalancedBaggingClassifier
-            elif undersampling == 'adaboost':
-                undersampling = RUSBoostClassifier
-        self.undersampling = undersampling
+
         self.cv_select = model_config.get('cv_select', 'nearest_mean')
         self.n_trials = model_config.get('n_trials')
         fit_params = model_config.get('fit_params', {})

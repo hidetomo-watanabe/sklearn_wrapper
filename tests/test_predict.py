@@ -72,6 +72,11 @@ class TestPredict(unittest.TestCase):
         assert_frame_equal(
             result['Y_pred_df'],
             pd.read_csv(f'{TEST_PATH}/titanic/output11.csv'))
+        # undersampling random
+        result = predict.main(f'{TEST_PATH}/titanic/test_config12.json')
+        assert_frame_equal(
+            result['Y_pred_df'],
+            pd.read_csv(f'{TEST_PATH}/titanic/output12.csv'))
 
     # house table regression
     def test_house(self):

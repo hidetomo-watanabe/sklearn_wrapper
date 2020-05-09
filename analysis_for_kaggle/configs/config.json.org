@@ -13,8 +13,6 @@
         "y_pre": false,
         "y_scaler": "standard",
         "savename": "tmp_file",
-        "undersampling": "random",
-        "oversampling": "smote",
         "table": {
             "adhoc_df": {
                 "myfunc": "hoge",
@@ -129,8 +127,8 @@
             },
             {
                 "model": "gbdt_clf",
-                "multiclass": "onevsrest",
                 "undersampling": "bagging",
+                "multiclass": "onevsrest",
                 "n_trials": 1,
                 "fit_params": {
                 },
@@ -234,6 +232,7 @@
             },
             {
                 "model": "torch_clf",
+                "oversampling": "smote",
                 "n_trials": 1,
                 "fit_params": {
                 },

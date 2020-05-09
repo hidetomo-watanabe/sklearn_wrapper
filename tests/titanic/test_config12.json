@@ -34,36 +34,24 @@
                 "options": [
                     {
                         "columns": [
+                            "Pclass",
                             "FamilyStatus"
                         ],
                         "model": "onehot"
                     }
                 ]
             },
-            "x_scaler": "standard",
-            "adversarial_validation": {
-                "model_config": {
-                    "model": "rf_clf",
-                    "cv_select": "train_all",
-                    "params": {
-                        "n_estimators": [3, 5, 10],
-                        "max_depth": [3, 5, 10]
-                    }
-                },
-                "threshold": 0.0,
-                "add_column": false
-            }
+            "x_scaler": "standard"
         }
     },
     "fit": {
-        "myfunc": "titanic",
         "train_mode": "clf",
         "scoring": "accuracy",
         "cv": {
             "fold": "stratifiedk",
             "num": 3
         },
-        "modelname": "tmp_titanic3",
+        "modelname": "tmp_titanic12",
         "ensemble_model_config": {
             "mode": "stacking",
             "model": "log_reg",
@@ -71,14 +59,13 @@
         },
         "single_model_configs": [
             {
-                "model": "torch_clf",
-                "oversampling": "smote",
-                "cv_select": "train_all",
+                "model": "gbdt_clf",
+                "undersampling": "random",
                 "fit_params": {
                 },
                 "params": {
-                    "max_epochs": [3],
-                    "batch_size": [50]
+                    "n_estimators": [5],
+                    "max_depth": [3]
                 }
             }
         ]

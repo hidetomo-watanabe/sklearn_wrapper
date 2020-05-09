@@ -1,9 +1,5 @@
-from functools import reduce
-from operator import mul
 import numpy as np
 import pandas as pd
-from imblearn.under_sampling import RandomUnderSampler
-from imblearn.over_sampling import RandomOverSampler, SMOTE
 from logging import getLogger
 
 logger = getLogger('predict').getChild('BaseDataTranslater')
@@ -91,50 +87,3 @@ class BaseDataTranslater(ConfigReader, CommonMethodWrapper):
         if hasattr(self, 'y_scaler'):
             output['y_scaler'] = self.y_scaler
         return output
-
-    def _sample_with_under(self):
-        method = self.configs['pre'].get('undersampling')
-        if not method:
-            return
-
-        logger.info('extract train data with undersampling: %s' % method)
-        if method == 'random':
-            sampler_obj = RandomUnderSampler(random_state=42)
-        else:
-            logger.error('NOT IMPLEMENTED UNDERSAMPLING METHOD: %s' % method)
-            raise Exception('NOT IMPLEMENTED')
-
-        org_len = self.X_train.shape[0]
-        tmp_X_train = self.X_train.reshape(
-            (-1, reduce(mul, self.X_train.shape[1:])))
-        tmp_X_train, self.Y_train = sampler_obj.fit_resample(
-            tmp_X_train, self.Y_train)
-        self.X_train = tmp_X_train.reshape(-1, *self.X_train.shape[1:])
-        logger.info('train data reduced %s => %s'
-                    % (org_len, self.X_train.shape[0]))
-        return
-
-    def _sample_with_over(self):
-        method = self.configs['pre'].get('oversampling')
-        if not method:
-            return
-
-        logger.info('add train data with oversampling: %s' % method)
-        if method == 'random':
-            sampler_obj = RandomOverSampler(random_state=42)
-        elif method == 'smote':
-            sampler_obj = SMOTE(random_state=42)
-        else:
-            logger.error('NOT IMPLEMENTED OVERSAMPLING METHOD: %s' % method)
-            raise Exception('NOT IMPLEMENTED')
-
-        org_len = self.X_train.shape[0]
-        tmp_X_train = self.X_train.reshape(
-            (-1, reduce(mul, self.X_train.shape[1:])))
-        Y_train = self.ravel_like(self.Y_train)
-        tmp_X_train, self.Y_train = sampler_obj.fit_resample(
-            tmp_X_train, Y_train)
-        self.X_train = tmp_X_train.reshape(-1, *self.X_train.shape[1:])
-        logger.info('train data added %s => %s'
-                    % (org_len, self.X_train.shape[0]))
-        return

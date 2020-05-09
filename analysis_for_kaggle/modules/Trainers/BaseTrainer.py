@@ -122,6 +122,7 @@ class BaseTrainer(ConfigReader, CommonMethodWrapper):
         if undersampling:
             estimator = undersampling(
                 base_estimator=estimator, random_state=42, n_jobs=-1)
+        # no oversampling
         return estimator
 
     @classmethod

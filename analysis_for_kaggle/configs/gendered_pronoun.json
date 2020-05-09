@@ -11,7 +11,6 @@
     "pre": {
         "train_mode": "clf",
         "y_scaler": "standard",
-        "undersampling": "random",
         "table": {
             "adhoc_df": {
                 "myfunc": "gendered_pronoun",
@@ -53,6 +52,7 @@
         "single_model_configs": [
             {
                 "model": "lgb_clf",
+                "undersampling": "random",
                 "multiclass": "onevsrest",
                 "n_trials": 50,
                 "fit_params" : {
