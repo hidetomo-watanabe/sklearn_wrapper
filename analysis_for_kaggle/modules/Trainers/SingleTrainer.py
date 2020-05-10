@@ -139,7 +139,8 @@ class SingleTrainer(BaseTrainer):
             scores, pipelines = self.calc_cv_scores_estimators(
                 pipeline, X_train, Y_train, scorer,
                 cv=1, fit_params=self.fit_params)
-            estimators = [x.steps[-1][1] for x in pipelines]
+            score = scores[0]
+            estimator = pipelines[0].steps[-1][1]
         elif self.cv_select in ['nearest_mean', 'all_folds']:
             scores, pipelines = self.calc_cv_scores_estimators(
                 pipeline, X_train, Y_train, scorer,
@@ -150,8 +151,8 @@ class SingleTrainer(BaseTrainer):
             if self.cv_select == 'nearest_mean':
                 nearest_index \
                     = np.abs(np.array(scores) - np.mean(scores)).argmin()
-                scores = scores[nearest_index: nearest_index + 1]
-                estimators = estimators[nearest_index: nearest_index + 1]
+                score = scores[nearest_index]
+                estimator = estimators[nearest_index]
             elif self.cv_select == 'all_folds':
                 _single_estimators = []
                 for i, _estimator in enumerate(estimators):
@@ -159,18 +160,17 @@ class SingleTrainer(BaseTrainer):
                         (f'{i}_fold', _estimator))
                 weights = EnsembleTrainer.get_weights(scores)
 
+                score = np.average(scores, weights=weights)
                 ensemble_trainer_obj = EnsembleTrainer(
                     X_train, Y_train, self.X_test)
                 ensemble_trainer_obj.configs = self.configs
                 estimator = ensemble_trainer_obj.calc_ensemble_estimator(
                     _single_estimators, ensemble_config={'mode': 'average'},
                     weights=weights, scorer=scorer)
-                scores = [np.average(scores, weights=weights)]
-                estimators = [estimator]
         else:
             logger.error(f'NOT IMPLEMENTED CV SELECT: {cv_select}')
             raise Exception('NOT IMPLEMENTED')
-        return scores[0], estimators[0]
+        return score, estimator
 
     def _calc_pseudo_label_data(
         self, X_train, Y_train, estimator, classes, threshold
