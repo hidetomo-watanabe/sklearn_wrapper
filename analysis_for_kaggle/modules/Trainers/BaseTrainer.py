@@ -17,9 +17,10 @@ from xgboost import XGBClassifier, XGBRegressor
 from lightgbm import LGBMClassifier, LGBMRegressor
 from catboost import CatBoostClassifier, CatBoostRegressor
 from rgf.sklearn import RGFClassifier, RGFRegressor
+import tensorflow as tf
 from keras.wrappers.scikit_learn import KerasClassifier, KerasRegressor
 from skorch import NeuralNetClassifier, NeuralNetRegressor
-from torch import cuda
+import torch
 from keras.utils.np_utils import to_categorical
 from logging import getLogger
 
@@ -37,7 +38,16 @@ class BaseTrainer(ConfigReader, CommonMethodWrapper):
 
     @classmethod
     def get_base_estimator(self, model, create_nn_model=None):
-        device = 'cuda' if cuda.is_available() else 'cpu'
+        # keras config
+        tf.random.set_seed(42)
+
+        # torch config
+        # for reproducibility
+        torch.manual_seed(42)
+        torch.backends.cudnn.deterministic = True
+        torch.backends.cudnn.benchmark = False
+        # gpu or cpu
+        device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
         if model == 'log_reg':
             return LogisticRegression(solver='lbfgs')

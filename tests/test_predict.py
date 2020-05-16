@@ -32,6 +32,9 @@ class TestPredict(unittest.TestCase):
             pd.read_csv(f'{TEST_PATH}/titanic/proba_output2.csv'))
         # torch
         result = predict.main(f'{TEST_PATH}/titanic/test_config3.json')
+        assert_frame_equal(
+            result['Y_pred_df'],
+            pd.read_csv(f'{TEST_PATH}/titanic/output3.csv'))
         # ensemble(stacking)
         result = predict.main(f'{TEST_PATH}/titanic/test_config4.json')
         assert_frame_equal(
@@ -101,6 +104,9 @@ class TestPredict(unittest.TestCase):
     def test_cactus_part(self):
         # keras(vgg16)
         result = predict.main(f'{TEST_PATH}/cactus_part/test_config.json')
+        assert_frame_equal(
+            result['Y_pred_df'],
+            pd.read_csv(f'{TEST_PATH}/cactus_part/output.csv'))
 
     # disaster text binary classification
     def test_disaster(self):
