@@ -1,6 +1,7 @@
 import json
-import requests
 from logging import getLogger
+
+import requests
 
 logger = getLogger('predict').getChild('Notifier')
 

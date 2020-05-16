@@ -1,16 +1,24 @@
-import numpy as np
-import pandas as pd
-from sklearn.manifold import TSNE
-from sklearn.tree import DecisionTreeClassifier
+from logging import getLogger
+
+from IPython.display import display
+
 from dtreeviz.trees import dtreeviz
+
 import eli5
 from eli5.sklearn import PermutationImportance
-from sklearn.model_selection import learning_curve
-from sklearn import metrics
+
 import matplotlib.pyplot as plt
+
+import numpy as np
+
+import pandas as pd
+
 import seaborn as sns
-from IPython.display import display
-from logging import getLogger
+
+from sklearn import metrics
+from sklearn.manifold import TSNE
+from sklearn.model_selection import learning_curve
+from sklearn.tree import DecisionTreeClassifier
 
 
 logger = getLogger('predict').getChild('Visualizer')
@@ -83,7 +91,6 @@ class Visualizer(ConfigReader, CommonMethodWrapper):
         df = self.sample_like(df, frac=self.sample_frac)
         label = self.sample_like(label, frac=self.sample_frac)
 
-        cmap = plt.get_cmap('tab10')
         for key in df.keys():
             if key == self.id_col:
                 continue

@@ -1,22 +1,31 @@
-import math
-from tqdm import tqdm
-import scipy.sparse as sp
-import numpy as np
-import pandas as pd
 import importlib
-from category_encoders import OneHotEncoder, OrdinalEncoder, TargetEncoder
-from sklearn.preprocessing import StandardScaler, MaxAbsScaler
-from sklearn.decomposition import PCA, TruncatedSVD, NMF
-from scipy.stats import ks_2samp
-from sklearn.cluster import KMeans
-from sklearn.feature_selection import RFE
-from xgboost import XGBClassifier
-from boruta import BorutaPy
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import roc_auc_score
-from sklearn.ensemble import IsolationForest
-from IPython.display import display
+import math
 from logging import getLogger
+
+from IPython.display import display
+
+from boruta import BorutaPy
+
+from category_encoders import OneHotEncoder, OrdinalEncoder, TargetEncoder
+
+import numpy as np
+
+import pandas as pd
+
+import scipy.sparse as sp
+from scipy.stats import ks_2samp
+
+from sklearn.cluster import KMeans
+from sklearn.decomposition import NMF, PCA, TruncatedSVD
+from sklearn.ensemble import IsolationForest
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.feature_selection import RFE
+from sklearn.metrics import roc_auc_score
+from sklearn.preprocessing import MaxAbsScaler, StandardScaler
+
+from tqdm import tqdm
+
+from xgboost import XGBClassifier
 
 logger = getLogger('predict').getChild('TableDataTranslater')
 if 'BaseDataTranslater' not in globals():

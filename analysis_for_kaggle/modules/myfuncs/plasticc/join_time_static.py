@@ -1,7 +1,9 @@
-import sys
 import logging.config
+import sys
 from logging import getLogger
+
 import pandas as pd
+
 from tqdm import tqdm
 
 if __name__ == '__main__':

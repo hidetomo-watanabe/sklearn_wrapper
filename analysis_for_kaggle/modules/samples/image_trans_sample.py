@@ -1,7 +1,8 @@
-import numpy as np
 from keras.applications.vgg16 import VGG16
-from keras.preprocessing import image
 from keras.applications.vgg16 import preprocess_input
+from keras.preprocessing import image
+
+import numpy as np
 
 
 def translate_image2feature_with_vgg16(img_path):

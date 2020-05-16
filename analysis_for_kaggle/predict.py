@@ -1,13 +1,15 @@
+import logging.config
 import os
 import sys
 import traceback
-from memory_profiler import profile
-import logging.config
 from logging import getLogger
+
+from memory_profiler import profile
+
 from modules.DataTranslaters.DataTranslater import DataTranslater
-from modules.Trainers.Trainer import Trainer
-from modules.Outputer import Outputer
 from modules.Notifier import Notifier
+from modules.Outputer import Outputer
+from modules.Trainers.Trainer import Trainer
 
 
 BASE_PATH = os.path.dirname(os.path.abspath(__file__))

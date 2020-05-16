@@ -1,15 +1,20 @@
-import scipy.sparse as sp
-import numpy as np
 import importlib
-from imblearn.pipeline import Pipeline
-from sklearn.model_selection import KFold
-from imblearn.under_sampling import RandomUnderSampler
-from imblearn.over_sampling import RandomOverSampler, SMOTE
-from imblearn.ensemble import BalancedBaggingClassifier, RUSBoostClassifier
-from sklearn.multiclass import OneVsOneClassifier, OneVsRestClassifier
-from keras.callbacks import ReduceLROnPlateau, EarlyStopping
-from sklearn.metrics import get_scorer
 from logging import getLogger
+
+from imblearn.ensemble import BalancedBaggingClassifier, RUSBoostClassifier
+from imblearn.over_sampling import RandomOverSampler, SMOTE
+from imblearn.pipeline import Pipeline
+from imblearn.under_sampling import RandomUnderSampler
+
+from keras.callbacks import EarlyStopping, ReduceLROnPlateau
+
+import numpy as np
+
+import scipy.sparse as sp
+
+from sklearn.metrics import get_scorer
+from sklearn.model_selection import KFold
+from sklearn.multiclass import OneVsOneClassifier, OneVsRestClassifier
 
 
 logger = getLogger('predict').getChild('SingleTrainer')
@@ -168,7 +173,7 @@ class SingleTrainer(BaseTrainer):
                     _single_estimators, ensemble_config={'mode': 'average'},
                     weights=weights, scorer=scorer)
         else:
-            logger.error(f'NOT IMPLEMENTED CV SELECT: {cv_select}')
+            logger.error(f'NOT IMPLEMENTED CV SELECT: {self.cv_select}')
             raise Exception('NOT IMPLEMENTED')
         return score, estimator
 

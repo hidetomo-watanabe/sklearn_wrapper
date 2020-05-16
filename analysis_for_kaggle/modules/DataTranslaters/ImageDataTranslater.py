@@ -1,9 +1,13 @@
 import math
-import numpy as np
-from sklearn.preprocessing import StandardScaler, MinMaxScaler
-import cv2
-from keras.preprocessing import image
 from logging import getLogger
+
+import cv2
+
+from keras.preprocessing import image
+
+import numpy as np
+
+from sklearn.preprocessing import MinMaxScaler, StandardScaler
 
 logger = getLogger('predict').getChild('ImageDataTranslater')
 if 'BaseDataTranslater' not in globals():

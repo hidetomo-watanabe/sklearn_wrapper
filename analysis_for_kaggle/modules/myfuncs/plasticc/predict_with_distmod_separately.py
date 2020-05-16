@@ -1,15 +1,17 @@
-import sys
-import os
-import traceback
 import logging.config
+import os
+import sys
+import traceback
 from logging import getLogger
-import pandas as pd
+
 BASE_PATH = '%s/../..' % os.path.dirname(os.path.abspath(__file__))
 sys.path.append(BASE_PATH)
 from modules.DataTranslater import DataTranslater
-from modules.Trainer import Trainer
-from modules.Outputer import Outputer
 from modules.Notifier import Notifier
+from modules.Outputer import Outputer
+from modules.Trainer import Trainer
+
+import pandas as pd
 
 if __name__ == '__main__':
     logging.config.fileConfig(

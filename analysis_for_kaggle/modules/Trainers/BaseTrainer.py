@@ -1,28 +1,39 @@
+from logging import getLogger
+
+from catboost import CatBoostClassifier, CatBoostRegressor
+
+from keras.utils.np_utils import to_categorical
+from keras.wrappers.scikit_learn import KerasClassifier, KerasRegressor
+
+from lightgbm import LGBMClassifier, LGBMRegressor
+
 import numpy as np
+
 import optuna
-from sklearn.linear_model import LogisticRegression, LinearRegression
-from sklearn.linear_model import LogisticRegressionCV
-from sklearn.linear_model import Lasso, Ridge
-from sklearn.svm import SVC, SVR, LinearSVC, LinearSVR
-from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
+
+from rgf.sklearn import RGFClassifier, RGFRegressor
+
 from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.ensemble import GradientBoostingRegressor
-from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
-from sklearn.mixture import GaussianMixture
-from sklearn.naive_bayes import GaussianNB
+from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
+from sklearn.linear_model import Lasso, Ridge
+from sklearn.linear_model import LinearRegression, LogisticRegression
+from sklearn.linear_model import LogisticRegressionCV
 from sklearn.linear_model import Perceptron
 from sklearn.linear_model import SGDClassifier, SGDRegressor
+from sklearn.mixture import GaussianMixture
+from sklearn.naive_bayes import GaussianNB
+from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
+from sklearn.svm import LinearSVC, LinearSVR, SVC, SVR
 from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
-from xgboost import XGBClassifier, XGBRegressor
-from lightgbm import LGBMClassifier, LGBMRegressor
-from catboost import CatBoostClassifier, CatBoostRegressor
-from rgf.sklearn import RGFClassifier, RGFRegressor
-import tensorflow as tf
-from keras.wrappers.scikit_learn import KerasClassifier, KerasRegressor
+
 from skorch import NeuralNetClassifier, NeuralNetRegressor
+
+import tensorflow as tf
+
 import torch
-from keras.utils.np_utils import to_categorical
-from logging import getLogger
+
+from xgboost import XGBClassifier, XGBRegressor
 
 
 logger = getLogger('predict').getChild('BaseTrainer')

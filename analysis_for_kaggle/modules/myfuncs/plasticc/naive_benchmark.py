@@ -1,7 +1,10 @@
 import sys
-import tqdm
+
 import numpy as np
+
 import pandas as pd
+
+import tqdm
 
 if __name__ == '__main__':
     train_meta_filename = sys.argv[1]

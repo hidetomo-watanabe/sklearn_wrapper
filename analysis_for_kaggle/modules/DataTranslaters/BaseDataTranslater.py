@@ -1,6 +1,8 @@
-import numpy as np
-import pandas as pd
 from logging import getLogger
+
+import numpy as np
+
+import pandas as pd
 
 logger = getLogger('predict').getChild('BaseDataTranslater')
 if 'ConfigReader' not in globals():

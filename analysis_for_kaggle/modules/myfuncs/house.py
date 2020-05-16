@@ -1,5 +1,5 @@
-from keras.models import Sequential
 from keras.layers.core import Dense
+from keras.models import Sequential
 
 
 def create_nn_model():

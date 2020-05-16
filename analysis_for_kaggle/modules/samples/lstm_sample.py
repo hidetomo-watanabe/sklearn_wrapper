@@ -1,6 +1,6 @@
-from keras.models import Sequential
-from keras.layers.core import Dense, Activation
+from keras.layers.core import Activation, Dense
 from keras.layers.recurrent import LSTM
+from keras.models import Sequential
 from keras.optimizers import Adam
 
 

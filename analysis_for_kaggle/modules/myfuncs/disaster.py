@@ -1,13 +1,15 @@
-import numpy as np
-from sklearn.feature_extraction.text import TfidfVectorizer
-from keras.preprocessing.text import Tokenizer
-from keras.preprocessing.sequence import pad_sequences
-from keras.models import Sequential
-from keras.layers.embeddings import Embedding
-from keras.layers.wrappers import Bidirectional
 from keras.layers import GlobalAveragePooling1D
 from keras.layers.core import Dense, Dropout
+from keras.layers.embeddings import Embedding
 from keras.layers.recurrent import LSTM
+from keras.layers.wrappers import Bidirectional
+from keras.models import Sequential
+from keras.preprocessing.sequence import pad_sequences
+from keras.preprocessing.text import Tokenizer
+
+import numpy as np
+
+from sklearn.feature_extraction.text import TfidfVectorizer
 
 
 def translate_by_tfidf(X_train, X_test, feature_columns):

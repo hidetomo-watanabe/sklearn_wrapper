@@ -1,8 +1,10 @@
 import math
-from keras.models import Sequential
+
 from keras.layers.core import Dense
-from torch import nn
+from keras.models import Sequential
+
 import torch.nn.functional as F
+from torch import nn
 
 
 def translate_honorific_title(train_df, test_df):

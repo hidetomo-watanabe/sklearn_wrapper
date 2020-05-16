@@ -1,4 +1,4 @@
-from logging import getLogger, StreamHandler, Formatter, INFO
+from logging import Formatter, INFO, StreamHandler, getLogger
 
 if __name__ == '__main__':
     logger = getLogger('predict')

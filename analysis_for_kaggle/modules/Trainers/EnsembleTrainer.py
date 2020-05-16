@@ -1,12 +1,17 @@
-import numpy as np
-import pandas as pd
-from sklearn.ensemble import VotingClassifier, VotingRegressor
+from logging import getLogger
+
+from IPython.display import display
+
 from heamy.dataset import Dataset
 from heamy.estimator import Classifier, Regressor
 from heamy.pipeline import ModelsPipeline
+
+import numpy as np
+
+import pandas as pd
+
+from sklearn.ensemble import VotingClassifier, VotingRegressor
 from sklearn.metrics import get_scorer
-from IPython.display import display
-from logging import getLogger
 
 
 logger = getLogger('predict').getChild('EnsembleTrainer')

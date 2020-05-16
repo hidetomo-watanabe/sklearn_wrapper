@@ -1,10 +1,14 @@
-import dill
-import numpy as np
 import importlib
-from sklearn.model_selection import KFold, StratifiedKFold, TimeSeriesSplit
-from skorch import NeuralNetClassifier, NeuralNetRegressor
-from sklearn.metrics import get_scorer
 from logging import getLogger
+
+import dill
+
+import numpy as np
+
+from sklearn.metrics import get_scorer
+from sklearn.model_selection import KFold, StratifiedKFold, TimeSeriesSplit
+
+from skorch import NeuralNetClassifier, NeuralNetRegressor
 
 
 logger = getLogger('predict').getChild('Trainer')

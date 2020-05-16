@@ -1,6 +1,6 @@
-from keras.models import Sequential
-from keras.layers import Activation, Dropout, Flatten, Dense
 from keras.applications import VGG16
+from keras.layers import Activation, Dense, Dropout, Flatten
+from keras.models import Sequential
 from keras.optimizers import Adam
 
 

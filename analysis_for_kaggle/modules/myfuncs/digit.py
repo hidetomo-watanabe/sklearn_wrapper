@@ -1,8 +1,9 @@
-import numpy as np
-from keras.models import Sequential
-from keras.layers.core import Dense, Activation
+from keras.layers.core import Activation, Dense
 from keras.layers.recurrent import LSTM
+from keras.models import Sequential
 from keras.optimizers import Adam
+
+import numpy as np
 
 
 def add_image_id(train_df, test_df):

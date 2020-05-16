@@ -1,12 +1,17 @@
-import math
-import numpy as np
-import pandas as pd
 import importlib
-from keras.wrappers.scikit_learn import KerasClassifier
-from sklearn.ensemble import VotingClassifier
+import math
+from logging import getLogger
+
 from heamy.dataset import Dataset
 from heamy.estimator import Classifier, Regressor
-from logging import getLogger
+
+from keras.wrappers.scikit_learn import KerasClassifier
+
+import numpy as np
+
+import pandas as pd
+
+from sklearn.ensemble import VotingClassifier
 
 
 logger = getLogger('predict').getChild('Outputer')

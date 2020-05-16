@@ -1,8 +1,9 @@
-import pandas as pd
-from keras.preprocessing import text, sequence
-from keras.models import Model
-from keras.layers import Input, Dense, Embedding, concatenate
 from keras.layers import CuDNNGRU, GlobalAveragePooling1D, GlobalMaxPooling1D
+from keras.layers import Dense, Embedding, Input, concatenate
+from keras.models import Model
+from keras.preprocessing import sequence, text
+
+import pandas as pd
 
 
 def translate_text2seq(train_df, test_df):
