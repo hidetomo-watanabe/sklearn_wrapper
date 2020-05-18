@@ -1,4 +1,6 @@
+from functools import reduce
 from logging import getLogger
+from operator import mul
 
 from IPython.display import display
 
@@ -44,9 +46,12 @@ class Visualizer(ConfigReader, CommonMethodWrapper):
             return target.sample(
                 frac=frac, replace=False, random_state=42)
         elif isinstance(target, np.ndarray):
-            df = pd.DataFrame(target)
-            return df.sample(
+            _target = target.reshape(
+                (-1, reduce(mul, target.shape[1:])))
+            df = pd.DataFrame(_target)
+            _target = df.sample(
                 frac=frac, replace=False, random_state=42).to_numpy()
+            return _target.reshape(-1, *target.shape[1:])
         return target
 
     def display_dfs(self, train_df, test_df, pred_df):
