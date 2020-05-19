@@ -166,6 +166,20 @@ class Visualizer(ConfigReader, CommonMethodWrapper):
                 class_names=list(set([str(i) for i in Y_train])))
             display(viz)
 
+    def draw_images(self, target, label):
+        target = self.sample_like(target, frac=self.sample_frac)
+        label = self.sample_like(label, frac=self.sample_frac)
+
+        for l in np.sort(np.unique(label)):
+            logger.info(f'label: {l}')
+            _target = target[np.where(self.ravel_like(label) == l)]
+            fig = plt.figure(figsize=(len(target), 1), dpi=100)
+            for i, _d in enumerate(_target):
+                ax = fig.add_subplot(1, len(target), i + 1)
+                ax.set_title(i + 1)
+                ax.imshow(_d)
+            plt.show()
+
     def display_feature_importances(self, estimator, feature_columns):
         feature_importances = pd.DataFrame(
             data=[estimator.feature_importances_], columns=feature_columns)

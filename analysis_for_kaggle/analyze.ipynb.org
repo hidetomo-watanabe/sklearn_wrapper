@@ -255,6 +255,16 @@
    "metadata": {},
    "outputs": [],
    "source": [
+    "logger.info('DRAW IMAGES')\n",
+    "visualizer_obj.draw_images(train_data['X_train'], train_data['Y_train'])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
     "from modules.Trainers.Trainer import Trainer\n",
     "trainer_obj = Trainer(**train_data)\n",
     "trainer_obj.read_config_file(config_path)\n",
