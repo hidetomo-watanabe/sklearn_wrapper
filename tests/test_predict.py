@@ -119,6 +119,8 @@ class TestPredict(unittest.TestCase):
         assert_frame_equal(
             result['Y_pred_df'],
             pd.read_csv(f'{TEST_PATH}/disaster/output.csv'))
+        # bert
+        # result = predict.main(f'{TEST_PATH}/disaster/test_config2.json')
 
 
 if __name__ == '__main__':

@@ -1,5 +1,7 @@
 from logging import getLogger
 
+from bert_sklearn import BertClassifier, BertRegressor
+
 from catboost import CatBoostClassifier, CatBoostRegressor
 
 from keras.utils.np_utils import to_categorical
@@ -130,6 +132,10 @@ class BaseTrainer(ConfigReader, CommonMethodWrapper):
         elif model == 'torch_reg':
             return NeuralNetRegressor(
                 module=create_nn_model(), device=device, train_split=None)
+        elif model == 'bert_clf':
+            return BertClassifier()
+        elif model == 'bert_reg':
+            return BertRegressor()
         else:
             logger.error('NOT IMPLEMENTED BASE MODEL: %s' % model)
             raise Exception('NOT IMPLEMENTED')

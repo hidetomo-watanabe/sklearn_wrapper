@@ -41,6 +41,8 @@
   - KerasClassifier
 - torch_clf
   - NeuralNetClassifier
+- bert_clf
+  - BertClassifier
 
 ##### regression
 - linear_reg
@@ -75,6 +77,8 @@
   - KerasRegressor
 - torch_reg
   - NeuralNetRegressor
+- bert_reg
+  - BertRegressor
 
 ### CUI flow
 - cp analysis_for_kaggle/configs/config.json.org configs/config.json

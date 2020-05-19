@@ -271,8 +271,10 @@ class TableDataTranslater(BaseDataTranslater):
         return
 
     def _to_sparse(self):
-        self.X_train = sp.csr_matrix(self.X_train.astype('float32'))
-        self.X_test = sp.csr_matrix(self.X_test.astype('float32'))
+        if self.X_train.dtype != 'object':
+            logger.info('set x to sparse')
+            self.X_train = sp.csr_matrix(self.X_train.astype('float32'))
+            self.X_test = sp.csr_matrix(self.X_test.astype('float32'))
         if self.configs['pre']['train_mode'] == 'reg':
             self.Y_train = self.Y_train.astype('float32')
         return

@@ -252,6 +252,9 @@ class SingleTrainer(BaseTrainer):
         if Y_train is None:
             Y_train = self.Y_train
         self._get_model_params(model_config, nn_func, X_train, Y_train)
+        # for bert
+        if self.model in ['bert_clf', 'bert_reg']:
+            X_train = self.ravel_like(X_train)
         # for warning
         if self.model not in ['keras_reg', 'torch_reg']:
             Y_train = self.ravel_like(Y_train)

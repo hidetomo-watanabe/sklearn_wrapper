@@ -13,13 +13,7 @@
             "deletion": [
                 "keyword",
                 "location"
-            ],
-            "adhoc_ndarray": {
-                "myfunc": "disaster",
-                "methods": [
-                    "translate_by_tfidf"
-                ]
-            }
+            ]
         }
     },
     "fit": {
@@ -29,7 +23,7 @@
             "fold": "stratifiedk",
             "num": 3
         },
-        "modelname": "tmp_disaster",
+        "modelname": "tmp_disaster2",
         "ensemble_model_config": {
             "mode": "stacking",
             "model": "log_reg",
@@ -38,12 +32,13 @@
         },
         "single_model_configs": [
             {
-                "model": "log_reg",
+                "model": "bert_clf",
                 "train_all": true,
                 "fit_params": {
                 },
                 "params": {
-                    "n_jobs": [-1]
+                    "epochs": [50],
+                    "learning_rate": [1e-5]
                 }
             }
         ]
