@@ -2,6 +2,8 @@ import importlib
 import math
 from logging import getLogger
 
+from bert_sklearn import BertClassifier, BertRegressor
+
 from heamy.dataset import Dataset
 from heamy.estimator import Classifier, Regressor
 
@@ -54,12 +56,16 @@ class Outputer(ConfigReader, CommonMethodWrapper):
     def predict_like(
         self, train_mode, estimator, X_train, Y_train, X_target
     ):
-        # for ensemble
+        # for bert
+        if estimator.__class__ in [BertClassifier, BertRegressor]:
+            X_target = self.ravel_like(X_target)
         # for warning
         Y_train = self.ravel_like(Y_train)
-        dataset = Dataset(
-            self.toarray_like(X_train), Y_train,
-            self.toarray_like(X_target))
+        # for ensemble
+        if estimator.__class__ in [Classifier, Regressor]:
+            dataset = Dataset(
+                self.toarray_like(X_train), Y_train,
+                self.toarray_like(X_target))
 
         Y_pred_proba = None
         # clf

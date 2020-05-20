@@ -135,7 +135,7 @@ class Trainer(BaseTrainer):
                 if hasattr(single_estimator, 'classes_'):
                     self.classes = single_estimator.classes_
                 else:
-                    self.classes = sorted(np.unique(self.Y_train))
+                    self.classes = np.sort(np.unique(self.Y_train))
         return self.estimator
 
     def write_estimator_data(self):
