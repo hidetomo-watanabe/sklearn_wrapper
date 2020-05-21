@@ -166,7 +166,7 @@ class BaseTrainer(ConfigReader, CommonMethodWrapper):
 
     @classmethod
     def calc_cv_scores_estimators(
-        self, estimator, X_train, Y_train, scorer, cv, fit_params={}
+        self, estimator, X_train, Y_train, scorer, cv, fit_params
     ):
         scores = []
         estimators = []
@@ -189,8 +189,8 @@ class BaseTrainer(ConfigReader, CommonMethodWrapper):
     @classmethod
     def calc_best_params(
         self,
-        base_estimator, X_train, Y_train, params, scorer, cv,
-        fit_params={}, n_trials=None, multiclass=None, undersampling=None
+        base_estimator, X_train, Y_train, params, scorer, cv, fit_params,
+        n_trials=None, multiclass=None, undersampling=None
     ):
         def _get_args(trial, params):
             args = {}
