@@ -8,7 +8,7 @@ def create_nn_model():
     input_dim1 = 32
     input_dim2 = 32
     input_dim3 = 3
-    output_dim = 1
+    output_dim = 2
 
     vgg16_net = VGG16(
         weights='imagenet',

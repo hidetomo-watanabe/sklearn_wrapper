@@ -153,16 +153,14 @@ class BaseTrainer(ConfigReader, CommonMethodWrapper):
         return estimator
 
     @classmethod
-    def _reshape_y_train_for_keras(self, estimator, Y_train):
-        if estimator.__class__ not in [KerasClassifier]:
-            return Y_train
-        if Y_train.ndim > 2:
-            return Y_train
-        if Y_train.ndim == 2 and Y_train.shape[1] > 1:
-            return Y_train
-        logger.info('to_categorical y_train')
-        Y_train = to_categorical(Y_train)
-        return Y_train
+    def _trans_for_fit(self, estimator, X_train, Y_train):
+        for step in estimator.steps:
+            if step[1].__class__ in [BertClassifier, BertRegressor]:
+                X_train = self.ravel_like(X_train)
+            elif step[1].__class__ in [KerasClassifier]:
+                Y_train = to_categorical(Y_train)
+        Y_train = self.ravel_like(Y_train)
+        return X_train, Y_train
 
     @classmethod
     def calc_cv_scores_estimators(
@@ -175,15 +173,17 @@ class BaseTrainer(ConfigReader, CommonMethodWrapper):
         else:
             indexes = cv.split(X_train, Y_train)
 
-        Y_train_for_fit = self._reshape_y_train_for_keras(estimator, Y_train)
+        X_train_for_fit, Y_train_for_fit = \
+            self._trans_for_fit(estimator, X_train, Y_train)
         for train_index, test_index in indexes:
             tmp_estimator = estimator
             tmp_estimator.fit(
-                X_train[train_index], Y_train_for_fit[train_index],
+                X_train_for_fit[train_index], Y_train_for_fit[train_index],
                 **fit_params)
             estimators.append(tmp_estimator)
             scores.append(scorer(
-                tmp_estimator, X_train[test_index], Y_train[test_index]))
+                tmp_estimator,
+                X_train_for_fit[test_index], Y_train[test_index]))
         return scores, estimators
 
     @classmethod

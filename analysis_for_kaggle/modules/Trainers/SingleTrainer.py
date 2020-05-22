@@ -187,7 +187,7 @@ class SingleTrainer(BaseTrainer):
 
         data_index, label_index = np.where(Y_pred_proba > threshold)
         pseudo_X_train = self.X_test[data_index]
-        pseudo_Y_train = classes[label_index]
+        pseudo_Y_train = classes[label_index].reshape(-1, 1)
         return pseudo_X_train, pseudo_Y_train
 
     def _fit_with_pseudo_labeling(
@@ -209,7 +209,7 @@ class SingleTrainer(BaseTrainer):
             estimator=estimator, X_train=X_train, Y_train=Y_train,
             X_target=X_train)
 
-        data_index = np.where(Y_pred != Y_train)
+        data_index = np.where(Y_pred != self.ravel_like(Y_train))
         error_X_train = X_train[data_index]
         error_Y_train = Y_train[data_index]
         return error_X_train, error_Y_train
@@ -252,12 +252,6 @@ class SingleTrainer(BaseTrainer):
         if Y_train is None:
             Y_train = self.Y_train
         self._get_model_params(model_config, nn_func, X_train, Y_train)
-        # for bert
-        if self.model in ['bert_clf', 'bert_reg']:
-            X_train = self.ravel_like(X_train)
-        # for warning
-        if self.model not in ['keras_reg', 'torch_reg']:
-            Y_train = self.ravel_like(Y_train)
 
         # fit
         logger.info('fit')
@@ -278,7 +272,7 @@ class SingleTrainer(BaseTrainer):
             if hasattr(estimator, 'classes_'):
                 classes = estimator.classes_
             else:
-                classes = sorted(np.unique(Y_train))
+                classes = np.sort(np.unique(Y_train))
 
             score, estimator = self._fit_with_pseudo_labeling(
                 scorer, cv, estimator, X_train, Y_train, classes, threshold)

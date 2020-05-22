@@ -43,9 +43,9 @@ class EnsembleTrainer(BaseTrainer):
 
     def _get_pipeline(self, single_estimators):
         # for warning
-        Y_train = self.ravel_like(self.Y_train)
         dataset = Dataset(
-            self.toarray_like(self.X_train), Y_train,
+            self.toarray_like(self.X_train),
+            self.ravel_like(self.Y_train),
             self.toarray_like(self.X_test))
         models = []
         for modelname, single_estimator in single_estimators:

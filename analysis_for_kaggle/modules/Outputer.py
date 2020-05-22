@@ -53,14 +53,19 @@ class Outputer(ConfigReader, CommonMethodWrapper):
         return output
 
     @classmethod
+    def _trans_for_predict(self, estimator, X_train, Y_train, X_target):
+        if estimator.__class__ in [BertClassifier, BertRegressor]:
+            X_train = self.ravel_like(X_train)
+            X_target = self.ravel_like(X_target)
+        Y_train = self.ravel_like(Y_train)
+        return X_train, Y_train, X_target
+
+    @classmethod
     def predict_like(
         self, train_mode, estimator, X_train, Y_train, X_target
     ):
-        # for bert
-        if estimator.__class__ in [BertClassifier, BertRegressor]:
-            X_target = self.ravel_like(X_target)
-        # for warning
-        Y_train = self.ravel_like(Y_train)
+        X_train, Y_train, X_target = \
+            self._trans_for_predict(estimator, X_train, Y_train, X_target)
         # for ensemble
         if estimator.__class__ in [Classifier, Regressor]:
             dataset = Dataset(
