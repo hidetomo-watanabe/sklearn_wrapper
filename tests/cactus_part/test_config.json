@@ -16,12 +16,6 @@
             "resize": {
                 "x": 32,
                 "y": 32
-            },
-            "augmentation": {
-                "rotation_range": 20,
-                "channel_shift_range": true,
-                "horizontal_flip": true,
-                "vertical_flip": true
             }
         }
     },
@@ -42,6 +36,12 @@
         "single_model_configs": [
             {
                 "model": "keras_clf",
+                "augmentation": {
+                    "rotation_range": 20,
+                    "channel_shift_range": true,
+                    "horizontal_flip": true,
+                    "vertical_flip": true
+                },
                 "cv_select": "train_all",
                 "fit_params": {
                     "epochs": 3,

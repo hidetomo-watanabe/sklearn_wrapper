@@ -63,9 +63,6 @@ class ImageDataTranslater(BaseDataTranslater):
         self.X_test = np.array(self.X_test)
         # feature_columns
         self.feature_columns = [img_path_col]
-        # for data augmentation
-        self.org_X_train = self.X_train
-        self.org_Y_train = self.Y_train
         return
 
     def _normalize_data_for_model(self):
@@ -95,25 +92,8 @@ class ImageDataTranslater(BaseDataTranslater):
                 self.y_scaler = None
         return
 
-    def _augment(self):
-        aug = self.configs['pre']['image'].get('augmentation')
-        if not aug:
-            return
-
-        logger.info('augment image: %s' % aug)
-        datagen = image.ImageDataGenerator(aug)
-        datagen.fit(self.X_train)
-        batch_itr = datagen.flow(
-            self.X_train, y=self.Y_train,
-            batch_size=len(self.X_train), seed=42)
-        batch = next(batch_itr)
-        self.X_train = batch[0]
-        self.Y_train = batch[1]
-        return
-
     def calc_train_data(self):
         self._calc_raw_data()
         self._calc_base_train_data()
         self._normalize_data_for_model()
-        self._augment()
         return

@@ -22,6 +22,8 @@ if 'BaseTrainer' not in globals():
     from .BaseTrainer import BaseTrainer
 if 'EnsembleTrainer' not in globals():
     from .EnsembleTrainer import EnsembleTrainer
+if 'Augmentor' not in globals():
+    from .Augmentor import Augmentor
 if 'Outputer' not in globals():
     from ..Outputer import Outputer
 
@@ -84,17 +86,21 @@ class SingleTrainer(BaseTrainer):
                 self.base_pipeline.steps.insert(
                     0,
                     ('oversampling', RandomOverSampler(random_state=42)))
-                oversampling = None
             elif oversampling == 'smote':
                 self.base_pipeline.steps.insert(
                     0,
                     ('oversampling', SMOTE(random_state=42)))
-                oversampling = None
             else:
                 logger.error(
                     f'NOT IMPLEMENTED OVERSAMPLING: {oversampling}')
                 raise Exception('NOT IMPLEMENTED')
-        self.oversampling = oversampling
+
+        augmentation = model_config.get('augmentation')
+        if augmentation:
+            logger.info(f'augmentation: {augmentation}')
+            self.base_pipeline.steps.insert(
+                0,
+                ('augmentation', Augmentor(augmentation)))
 
         multiclass = model_config.get('multiclass')
         if multiclass:
