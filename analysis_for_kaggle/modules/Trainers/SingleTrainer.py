@@ -112,8 +112,6 @@ class SingleTrainer(BaseTrainer):
         self.cv_select = model_config.get('cv_select', 'nearest_mean')
         self.n_trials = model_config.get('n_trials')
         fit_params = model_config.get('fit_params', {})
-        if model in ['lgb_clf', 'lgb_reg']:
-            fit_params['eval_set'] = [(X_train, Y_train)]
         if model in ['keras_clf', 'keras_reg']:
             fit_params['callbacks'] = []
             if fit_params.get('reduce_lr'):

@@ -153,7 +153,7 @@ class BaseTrainer(ConfigReader, CommonMethodWrapper):
         return estimator
 
     @classmethod
-    def _trans_for_fit(self, estimator, X_train, Y_train):
+    def _trans_xy_for_fit(self, estimator, X_train, Y_train):
         for step in estimator.steps:
             if step[1].__class__ in [BertClassifier, BertRegressor]:
                 X_train = self.ravel_like(X_train)
@@ -163,19 +163,31 @@ class BaseTrainer(ConfigReader, CommonMethodWrapper):
         return X_train, Y_train
 
     @classmethod
+    def _add_val_to_fit_params(self, fit_params, estimator, X_train, Y_train):
+        for step in estimator.steps:
+            if step[1].__class__ in [KerasClassifier, KerasRegressor]:
+                fit_params[f'{step[0]}__validation_data'] = (X_train, Y_train)
+            elif step[1].__class__ in [LGBMClassifier, LGBMRegressor]:
+                fit_params[f'{step[0]}__eval_set'] = [(X_train, Y_train)]
+        return fit_params
+
+    @classmethod
     def calc_cv_scores_estimators(
         self, estimator, X_train, Y_train, scorer, cv, fit_params
     ):
         scores = []
         estimators = []
         if cv == 1:
-            indexes = [[range(X_train.shape[0]), range(Y_train.shape[0])]]
+            indexes = [[range(X_train.shape[0]), range(X_train.shape[0])]]
         else:
             indexes = cv.split(X_train, Y_train)
 
         X_train_for_fit, Y_train_for_fit = \
-            self._trans_for_fit(estimator, X_train, Y_train)
+            self._trans_xy_for_fit(estimator, X_train, Y_train)
         for train_index, test_index in indexes:
+            fit_params = self._add_val_to_fit_params(
+                fit_params, estimator,
+                X_train_for_fit[test_index], Y_train_for_fit[test_index])
             tmp_estimator = estimator
             tmp_estimator.fit(
                 X_train_for_fit[train_index], Y_train_for_fit[train_index],
