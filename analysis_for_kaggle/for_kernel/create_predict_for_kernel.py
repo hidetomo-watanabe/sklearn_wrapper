@@ -34,10 +34,10 @@ if __name__ == '__main__':
         f'{BASE_PATH}/modules/Outputer.py', FILENAME)
     for prefix in ['Base', 'Ensemble', 'Single', '']:
         _append_file_text(
-            f'{BASE_PATH}/modules/Trainers/{prefix}Trainer.py', FILENAME)
+            f'{BASE_PATH}/modules/trainers/{prefix}Trainer.py', FILENAME)
     for prefix in ['Base', 'Table', 'Image', '']:
         _append_file_text(
-            f'{BASE_PATH}/modules/DataTranslaters/{prefix}DataTranslater.py',
+            f'{BASE_PATH}/modules/data_translaters/{prefix}DataTranslater.py',
             FILENAME)
     # adhoc
     with open(config_path, 'r') as f:

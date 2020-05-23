@@ -31,9 +31,9 @@ logger = getLogger('predict').getChild('TableDataTranslater')
 if 'BaseDataTranslater' not in globals():
     from .BaseDataTranslater import BaseDataTranslater
 if 'SingleTrainer' not in globals():
-    from ..Trainers.SingleTrainer import SingleTrainer
+    from ..trainers.SingleTrainer import SingleTrainer
 if 'Trainer' not in globals():
-    from ..Trainers.Trainer import Trainer
+    from ..trainers.Trainer import Trainer
 
 
 class TableDataTranslater(BaseDataTranslater):
