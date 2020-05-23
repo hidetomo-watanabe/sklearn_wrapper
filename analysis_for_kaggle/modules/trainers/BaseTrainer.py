@@ -165,7 +165,8 @@ class BaseTrainer(ConfigReader, LikeWrapper):
             if step[1].__class__ in [BertClassifier, BertRegressor]:
                 X_train = self.ravel_like(X_train)
             elif step[1].__class__ in [KerasClassifier]:
-                Y_train = to_categorical(Y_train)
+                if self.ravel_like(Y_train).ndim == 1:
+                    Y_train = to_categorical(Y_train)
         Y_train = self.ravel_like(Y_train)
         return X_train, Y_train
 
@@ -175,7 +176,8 @@ class BaseTrainer(ConfigReader, LikeWrapper):
         indexes = []
         for i, step in enumerate(estimator.steps):
             if step[1].__class__ in [KerasClassifier]:
-                is_categorical = True
+                if self.ravel_like(Y_train).ndim == 1:
+                    is_categorical = True
             elif step[1].__class__ in [
                 RandomUnderSampler, RandomOverSampler, SMOTE
             ]:
