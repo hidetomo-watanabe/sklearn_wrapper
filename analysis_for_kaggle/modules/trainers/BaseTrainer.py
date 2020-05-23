@@ -50,6 +50,8 @@ if 'Reshaper' not in globals():
     from ..commons.Reshaper import Reshaper
 if 'LikeWrapper' not in globals():
     from ..commons.LikeWrapper import LikeWrapper
+if 'Augmentor' not in globals():
+    from .Augmentor import Augmentor
 
 
 class BaseTrainer(ConfigReader, LikeWrapper):
@@ -162,11 +164,11 @@ class BaseTrainer(ConfigReader, LikeWrapper):
     @classmethod
     def _trans_xy_for_fit(self, estimator, X_train, Y_train):
         for step in estimator.steps:
-            if step[1].__class__ in [BertClassifier, BertRegressor]:
-                X_train = self.ravel_like(X_train)
-            elif step[1].__class__ in [KerasClassifier]:
+            if step[1].__class__ in [KerasClassifier]:
                 if self.ravel_like(Y_train).ndim == 1:
                     Y_train = to_categorical(Y_train)
+            elif step[1].__class__ in [BertClassifier, BertRegressor]:
+                X_train = self.ravel_like(X_train)
         Y_train = self.ravel_like(Y_train)
         return X_train, Y_train
 
@@ -175,13 +177,13 @@ class BaseTrainer(ConfigReader, LikeWrapper):
         is_categorical = False
         indexes = []
         for i, step in enumerate(estimator.steps):
-            if step[1].__class__ in [KerasClassifier]:
-                if self.ravel_like(Y_train).ndim == 1:
-                    is_categorical = True
-            elif step[1].__class__ in [
+            if step[1].__class__ in [
                 RandomUnderSampler, RandomOverSampler, SMOTE
             ]:
                 indexes.append(i)
+            elif step[1].__class__ in [KerasClassifier]:
+                if self.ravel_like(Y_train).ndim == 1:
+                    is_categorical = True
 
         base = 0
         for i in indexes:
@@ -195,12 +197,14 @@ class BaseTrainer(ConfigReader, LikeWrapper):
         return estimator
 
     @classmethod
-    def _add_val_to_fit_params(self, fit_params, estimator, X_train, Y_train):
+    def _add_val_to_fit_params(self, fit_params, estimator, X_test, Y_test):
         for step in estimator.steps:
-            if step[1].__class__ in [KerasClassifier, KerasRegressor]:
-                fit_params[f'{step[0]}__validation_data'] = (X_train, Y_train)
+            if step[1].__class__ in [Augmentor]:
+                X_test, Y_test = step[1].fit_resample(X_test, Y_test)
+            elif step[1].__class__ in [KerasClassifier, KerasRegressor]:
+                fit_params[f'{step[0]}__validation_data'] = (X_test, Y_test)
             elif step[1].__class__ in [LGBMClassifier, LGBMRegressor]:
-                fit_params[f'{step[0]}__eval_set'] = [(X_train, Y_train)]
+                fit_params[f'{step[0]}__eval_set'] = [(X_test, Y_test)]
         return fit_params
 
     @classmethod
