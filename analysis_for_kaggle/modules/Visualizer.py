@@ -1,6 +1,4 @@
-from functools import reduce
 from logging import getLogger
-from operator import mul
 
 from IPython.display import display
 
@@ -39,26 +37,6 @@ class Visualizer(ConfigReader, LikeWrapper):
             'density': True,
             'stacked': True,
         }
-
-    @classmethod
-    def sample_like(self, target, frac):
-        if isinstance(target, pd.DataFrame):
-            return target.sample(
-                frac=frac, replace=False, random_state=42)
-        elif isinstance(target, np.ndarray):
-            if target.ndim == 1:
-                _target = target
-            else:
-                _target = target.reshape(
-                    (-1, reduce(mul, target.shape[1:])))
-            df = pd.DataFrame(_target)
-            _target = df.sample(
-                frac=frac, replace=False, random_state=42).to_numpy()
-            if target.ndim == 1:
-                return _target
-            else:
-                return _target.reshape(-1, *target.shape[1:])
-        return target
 
     def display_dfs(self, train_df, test_df, pred_df):
         train_df = self.sample_like(train_df, frac=self.sample_frac)
