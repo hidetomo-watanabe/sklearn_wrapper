@@ -19,11 +19,11 @@ from sklearn.ensemble import VotingClassifier
 logger = getLogger('predict').getChild('Outputer')
 if 'ConfigReader' not in globals():
     from .ConfigReader import ConfigReader
-if 'CommonMethodWrapper' not in globals():
-    from .CommonMethodWrapper import CommonMethodWrapper
+if 'LikeWrapper' not in globals():
+    from .commons.LikeWrapper import LikeWrapper
 
 
-class Outputer(ConfigReader, CommonMethodWrapper):
+class Outputer(ConfigReader, LikeWrapper):
     def __init__(
         self,
         feature_columns, train_ids, test_ids,

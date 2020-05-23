@@ -41,11 +41,11 @@ from xgboost import XGBClassifier, XGBRegressor
 logger = getLogger('predict').getChild('BaseTrainer')
 if 'ConfigReader' not in globals():
     from ..ConfigReader import ConfigReader
-if 'CommonMethodWrapper' not in globals():
-    from ..CommonMethodWrapper import CommonMethodWrapper
+if 'LikeWrapper' not in globals():
+    from ..commons.LikeWrapper import LikeWrapper
 
 
-class BaseTrainer(ConfigReader, CommonMethodWrapper):
+class BaseTrainer(ConfigReader, LikeWrapper):
     def __init__(self):
         pass
 

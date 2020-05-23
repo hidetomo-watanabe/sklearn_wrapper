@@ -1,7 +1,7 @@
 import scipy.sparse as sp
 
 
-class CommonMethodWrapper(object):
+class LikeWrapper(object):
     def __init__(self):
         pass
 

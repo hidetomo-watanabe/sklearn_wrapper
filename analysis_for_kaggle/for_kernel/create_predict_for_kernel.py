@@ -29,7 +29,7 @@ if __name__ == '__main__':
     _append_file_text(
         f'{BASE_PATH}/modules/ConfigReader.py', FILENAME)
     _append_file_text(
-        f'{BASE_PATH}/modules/CommonMethodWrapper.py', FILENAME)
+        f'{BASE_PATH}/modules/commons/LikeWrapper.py', FILENAME)
     _append_file_text(
         f'{BASE_PATH}/modules/Outputer.py', FILENAME)
     for prefix in ['Base', 'Ensemble', 'Single', '']:
