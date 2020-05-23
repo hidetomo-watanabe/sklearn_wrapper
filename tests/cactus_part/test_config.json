@@ -36,6 +36,7 @@
         "single_model_configs": [
             {
                 "model": "keras_clf",
+                "oversampling": "random",
                 "augmentation": {
                     "rotation_range": 20,
                     "channel_shift_range": true,
