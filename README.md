@@ -4,6 +4,15 @@
 - classification/regression
 - table/image
 
+### data flow
+##### pre processing
+- feature engineering
+- validation(adversarial, no anomaly)
+
+##### pipeline
+- image augmentation
+- sampling(under, over)
+
 ### available model
 ##### classification
 - log_reg
