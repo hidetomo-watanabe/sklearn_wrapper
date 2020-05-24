@@ -3,8 +3,6 @@ from logging import getLogger
 
 import cv2
 
-from keras.preprocessing import image
-
 import numpy as np
 
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
