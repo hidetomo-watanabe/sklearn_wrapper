@@ -30,7 +30,7 @@ class ImageDataTranslater(BaseDataTranslater):
                 img = cv2.resize(
                     img, dsize=(resize_param['x'], resize_param['y']))
             # array
-            img = image.img_to_array(img)
+            # img = image.img_to_array(img)
             img = img / 255
             # for memory reduction
             img = img.astype(np.float32)
