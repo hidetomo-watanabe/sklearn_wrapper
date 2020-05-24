@@ -154,15 +154,13 @@ class Visualizer(ConfigReader, LikeWrapper):
         target = self.sample_like(target, frac=self.sample_frac)
         label = self.sample_like(label, frac=self.sample_frac)
 
-        for l in np.sort(np.unique(label)):
-            logger.info(f'label: {l}')
-            _target = target[np.where(self.ravel_like(label) == l)]
-            fig = plt.figure(figsize=(len(target), 1), dpi=100)
-            for i, _d in enumerate(_target):
-                ax = fig.add_subplot(1, len(target), i + 1)
-                ax.set_title(i + 1)
-                ax.imshow(_d)
-            plt.show()
+        fig = plt.figure(figsize=(len(target), 1), dpi=100)
+        plt.subplots_adjust(wspace=1.0)
+        for i, (_t, _l) in enumerate(zip(target, label)):
+            ax = fig.add_subplot(1, len(target), i + 1)
+            ax.set_title(f'label: {_l}')
+            ax.imshow(_t)
+        plt.show()
 
     def display_feature_importances(self, estimator, feature_columns):
         feature_importances = pd.DataFrame(
