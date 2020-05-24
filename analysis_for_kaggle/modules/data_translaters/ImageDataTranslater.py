@@ -33,7 +33,7 @@ class ImageDataTranslater(BaseDataTranslater):
             img = image.img_to_array(img)
             img = img / 255
             # for memory reduction
-            img = img.astype('float32')
+            img = img.astype(np.float32)
             return img
 
         train_df = self.train_df
@@ -46,7 +46,7 @@ class ImageDataTranslater(BaseDataTranslater):
         # Y_train
         self.Y_train = pred_df.to_numpy()
         if self.configs['pre']['train_mode'] == 'reg':
-            self.Y_train = self.Y_train.astype('float32')
+            self.Y_train = self.Y_train.astype(np.float32)
         # X_train
         self.train_ids = train_df[self.id_col].to_numpy()
         self.X_train = []

@@ -49,7 +49,7 @@ def add_ord_3_label(train_df, test_df):
     after = list(range(26))
     for df in [train_df, test_df]:
         df['ord_3_label'] = df['ord_3'].fillna(-1).replace(
-            before, after).astype('float32')
+            before, after).astype(np.float32)
     return train_df, test_df
 
 
@@ -58,7 +58,7 @@ def add_ord_4_label(train_df, test_df):
     after = list(range(26))
     for df in [train_df, test_df]:
         df['ord_4_label'] = df['ord_4'].replace(
-            before, after).astype('float32')
+            before, after).astype(np.float32)
     return train_df, test_df
 
 
@@ -75,7 +75,7 @@ def add_ord_5_1_label(train_df, test_df):
     after = list(range(52))
     for df in [train_df, test_df]:
         df['ord_5_1_label'] = df['ord_5_1'].fillna(-1).replace(
-            before, after).astype('float32')
+            before, after).astype(np.float32)
     return train_df, test_df
 
 
@@ -85,7 +85,7 @@ def add_ord_5_2_label(train_df, test_df):
     after = list(range(52))
     for df in [train_df, test_df]:
         df['ord_5_2_label'] = df['ord_5_2'].fillna(-1).replace(
-            before, after).astype('float32')
+            before, after).astype(np.float32)
     return train_df, test_df
 
 
