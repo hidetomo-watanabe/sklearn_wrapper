@@ -204,10 +204,14 @@
             {
                 "model": "keras_clf",
                 "augmentation": {
-                    "rotation_range": 20,
-                    "channel_shift_range": true,
-                    "horizontal_flip": true,
-                    "vertical_flip": true
+                    "conf": {
+                        "rotation_range": 20,
+                        "channel_shift_range": true,
+                        "horizontal_flip": true,
+                        "vertical_flip": true
+                    },
+                    "batch_size": 24,
+                    "steps": 24
                 },
                 "n_trials": 1,
                 "fit_params": {

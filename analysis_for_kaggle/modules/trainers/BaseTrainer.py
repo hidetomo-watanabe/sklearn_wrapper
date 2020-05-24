@@ -197,13 +197,10 @@ class BaseTrainer(ConfigReader, LikeWrapper):
         return estimator
 
     @classmethod
-    def _add_val_to_fit_params(
-        self, fit_params, estimator, X_test, Y_test, train_test_ratio
-    ):
+    def _add_val_to_fit_params(self, fit_params, estimator, X_test, Y_test):
         for step in estimator.steps:
             if step[1].__class__ in [Augmentor]:
-                X_test, Y_test = \
-                    step[1].fit_resample(X_test, Y_test, train_test_ratio)
+                X_test, Y_test = step[1].fit_resample(X_test, Y_test)
             elif step[1].__class__ in [KerasClassifier, KerasRegressor]:
                 fit_params[f'{step[0]}__validation_data'] = (X_test, Y_test)
             elif step[1].__class__ in [LGBMClassifier, LGBMRegressor]:
@@ -227,8 +224,7 @@ class BaseTrainer(ConfigReader, LikeWrapper):
         for train_index, test_index in indexes:
             fit_params = self._add_val_to_fit_params(
                 fit_params, estimator,
-                X_train_for_fit[test_index], Y_train_for_fit[test_index],
-                int(len(train_index) / len(test_index)))
+                X_train_for_fit[test_index], Y_train_for_fit[test_index])
             tmp_estimator = estimator
             tmp_estimator.fit(
                 X_train_for_fit[train_index], Y_train_for_fit[train_index],

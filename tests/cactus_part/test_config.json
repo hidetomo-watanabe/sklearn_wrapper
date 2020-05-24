@@ -38,10 +38,14 @@
                 "model": "keras_clf",
                 "oversampling": "random",
                 "augmentation": {
-                    "rotation_range": 20,
-                    "channel_shift_range": true,
-                    "horizontal_flip": true,
-                    "vertical_flip": true
+                    "conf": {
+                        "rotation_range": 20,
+                        "channel_shift_range": true,
+                        "horizontal_flip": true,
+                        "vertical_flip": true
+                    },
+                    "batch_size": 24,
+                    "steps": 24
                 },
                 "cv_select": "train_all",
                 "fit_params": {

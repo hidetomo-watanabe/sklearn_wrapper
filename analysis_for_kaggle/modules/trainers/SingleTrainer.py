@@ -100,7 +100,7 @@ class SingleTrainer(BaseTrainer):
             logger.info(f'augmentation: {augmentation}')
             self.base_pipeline.steps.insert(
                 0,
-                ('augmentation', Augmentor(augmentation)))
+                ('augmentation', Augmentor(**augmentation)))
 
         multiclass = model_config.get('multiclass')
         if multiclass:
