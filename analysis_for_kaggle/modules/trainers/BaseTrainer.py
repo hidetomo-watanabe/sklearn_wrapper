@@ -61,8 +61,8 @@ if 'Augmentor' not in globals():
 class MyKerasClassifier(KerasClassifier):
     def fit(
         self, x, y,
-        with_generator=False, generator=None, batch_size=None, validation_data=None,
-        **kwargs
+        with_generator=False, generator=None,
+        batch_size=None, validation_data=None, **kwargs
     ):
         if self.build_fn is None:
             self.model = self.__call__(**self.filter_sk_params(self.__call__))
@@ -91,7 +91,7 @@ class MyKerasClassifier(KerasClassifier):
         self.n_classes_ = len(self.classes_)
 
         if with_generator:
-            logger.info(f'with generator')
+            logger.info(f'with generator: {kwargs}')
             history = self.model.fit_generator(
                 generator.flow(x, y, batch_size=batch_size),
                 validation_data=generator.flow(
@@ -106,8 +106,8 @@ class MyKerasClassifier(KerasClassifier):
 class MyKerasRegressor(KerasRegressor):
     def fit(
         self, x, y,
-        with_generator=False, generator=None, batch_size=None, validation_data=None,
-        **kwargs
+        with_generator=False, generator=None,
+        batch_size=None, validation_data=None, **kwargs
     ):
         if self.build_fn is None:
             self.model = self.__call__(**self.filter_sk_params(self.__call__))
@@ -291,18 +291,14 @@ class BaseTrainer(ConfigReader, LikeWrapper):
 
         for step in estimator.steps:
             if step[1].__class__ in [MyKerasClassifier, MyKerasRegressor]:
+                fit_params[f'{step[0]}__validation_data'] = (X_test, Y_test)
                 if aug_obj:
                     fit_params[f'{step[0]}__with_generator'] = True
                     fit_params[f'{step[0]}__generator'] = aug_obj.datagen
                     fit_params[f'{step[0]}__batch_size'] = aug_obj.batch_size
                     fit_params[f'{step[0]}__steps_per_epoch'] = aug_obj.steps
-                    fit_params[f'{step[0]}__validation_data'] = \
-                        (X_test, Y_test)
                     fit_params[f'{step[0]}__validation_steps'] = aug_obj.steps
                     step = step[: aug_index] + step[aug_index + 1:]
-                else:
-                    fit_params[f'{step[0]}__validation_data'] = \
-                        (X_test, Y_test)
             elif step[1].__class__ in [LGBMClassifier, LGBMRegressor]:
                 if aug_obj:
                     X_test, Y_test = aug_obj.fit_resample(X_test, Y_test)
