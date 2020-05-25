@@ -216,7 +216,6 @@
                 "n_trials": 1,
                 "fit_params": {
                     "epochs": 3,
-                    "batch_size": 50,
                     "reduce_lr": {
                         "monitor": "loss",
                         "patience": 1,
