@@ -91,13 +91,13 @@ class MyKerasClassifier(KerasClassifier):
         self.n_classes_ = len(self.classes_)
 
         if with_generator:
-            logger.info(f'with generator: {kwargs}')
+            logger.info(f'with generator: {fit_args}')
             history = self.model.fit_generator(
                 generator.flow(x, y, batch_size=batch_size),
                 validation_data=generator.flow(
                     validation_data[0], validation_data[1],
                     batch_size=batch_size),
-                **kwargs)
+                **fit_args)
         else:
             history = self.model.fit(x, y, **fit_args)
         return history
@@ -126,13 +126,13 @@ class MyKerasRegressor(KerasRegressor):
         fit_args.update(kwargs)
 
         if with_generator:
-            logger.info(f'with generator')
+            logger.info(f'with generator: {fit_args}')
             history = self.model.fit_generator(
                 generator.flow(x, y, batch_size=batch_size),
                 validation_data=generator.flow(
                     validation_data[0], validation_data[1],
                     batch_size=batch_size),
-                **kwargs)
+                **fit_args)
         else:
             history = self.model.fit(x, y, **fit_args)
         return history
