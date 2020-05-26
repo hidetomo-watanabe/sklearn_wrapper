@@ -95,6 +95,7 @@ class MyKerasClassifier(KerasClassifier):
             fit_args['validation_steps'] = \
                 len(validation_data[0]) // batch_size
             logger.info(f'with generator: {fit_args}')
+            generator.fit(x)
             history = self.model.fit_generator(
                 generator.flow(x, y, batch_size=batch_size, seed=42),
                 validation_data=generator.flow(
@@ -133,6 +134,7 @@ class MyKerasRegressor(KerasRegressor):
             fit_args['validation_steps'] = \
                 len(validation_data[0]) // batch_size
             logger.info(f'with generator: {fit_args}')
+            generator.fit(x)
             history = self.model.fit_generator(
                 generator.flow(x, y, batch_size=batch_size, seed=42),
                 validation_data=generator.flow(
