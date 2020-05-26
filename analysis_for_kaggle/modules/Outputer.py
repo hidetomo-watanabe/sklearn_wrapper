@@ -7,8 +7,6 @@ from bert_sklearn import BertClassifier, BertRegressor
 from heamy.dataset import Dataset
 from heamy.estimator import Classifier, Regressor
 
-from keras.wrappers.scikit_learn import KerasClassifier
-
 import numpy as np
 
 import pandas as pd
@@ -21,6 +19,8 @@ if 'ConfigReader' not in globals():
     from .ConfigReader import ConfigReader
 if 'LikeWrapper' not in globals():
     from .commons.LikeWrapper import LikeWrapper
+if 'MyKerasClassifier' not in globals():
+    from .commons.MyKeras import MyKerasClassifier
 
 
 class Outputer(ConfigReader, LikeWrapper):
@@ -76,7 +76,7 @@ class Outputer(ConfigReader, LikeWrapper):
         # clf
         if train_mode == 'clf':
             # keras
-            if estimator.__class__ in [KerasClassifier] and \
+            if estimator.__class__ in [MyKerasClassifier] and \
                     Y_train.ndim == 2 and Y_train.shape[1] > 1:
                 Y_pred = estimator.predict_proba(X_target)
             # ensemble
