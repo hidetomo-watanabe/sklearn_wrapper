@@ -108,9 +108,6 @@ class TestPredict(unittest.TestCase):
     def test_cactus_part(self):
         # keras(vgg16)
         result = predict.main(f'{TEST_PATH}/cactus_part/test_config.json')
-        assert_frame_equal(
-            result['Y_pred_df'],
-            pd.read_csv(f'{TEST_PATH}/cactus_part/output.csv'))
 
     # disaster text binary classification
     def test_disaster(self):

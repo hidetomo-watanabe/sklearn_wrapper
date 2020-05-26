@@ -281,7 +281,9 @@ class BaseTrainer(ConfigReader, LikeWrapper):
         return estimator
 
     @classmethod
-    def _add_val_to_fit_params(self, fit_params, estimator, X_test, Y_test):
+    def _add_val_to_fit_params(
+        self, fit_params, estimator, train_num, X_test, Y_test
+    ):
         aug_index = None
         aug_obj = None
         for i, step in enumerate(estimator.steps):
@@ -296,8 +298,10 @@ class BaseTrainer(ConfigReader, LikeWrapper):
                     fit_params[f'{step[0]}__with_generator'] = True
                     fit_params[f'{step[0]}__generator'] = aug_obj.datagen
                     fit_params[f'{step[0]}__batch_size'] = aug_obj.batch_size
-                    fit_params[f'{step[0]}__steps_per_epoch'] = aug_obj.steps
-                    fit_params[f'{step[0]}__validation_steps'] = aug_obj.steps
+                    fit_params[f'{step[0]}__steps_per_epoch'] = \
+                        train_num // aug_obj.batch_size
+                    fit_params[f'{step[0]}__validation_steps'] = \
+                        len(X_test) // aug_obj.batch_size
                     step = step[: aug_index] + step[aug_index + 1:]
             elif step[1].__class__ in [LGBMClassifier, LGBMRegressor]:
                 if aug_obj:
@@ -321,7 +325,7 @@ class BaseTrainer(ConfigReader, LikeWrapper):
         estimator = self._trans_step_for_fit(estimator, X_train, Y_train)
         for train_index, test_index in indexes:
             fit_params = self._add_val_to_fit_params(
-                fit_params, estimator,
+                fit_params, estimator, len(train_index),
                 X_train_for_fit[test_index], Y_train_for_fit[test_index])
             tmp_estimator = estimator
             tmp_estimator.fit(

@@ -210,8 +210,7 @@
                         "horizontal_flip": true,
                         "vertical_flip": true
                     },
-                    "batch_size": 24,
-                    "steps": 24
+                    "batch_size": 24
                 },
                 "n_trials": 1,
                 "fit_params": {

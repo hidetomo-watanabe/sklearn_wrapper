@@ -4,10 +4,9 @@ import numpy as np
 
 
 class Augmentor(object):
-    def __init__(self, conf, batch_size=None, steps=None):
+    def __init__(self, conf, batch_size=None):
         self.datagen = image.ImageDataGenerator(conf)
         self.batch_size = batch_size
-        self.steps = steps
 
     def fit(self, X, y):
         self.datagen.fit(X)
@@ -15,7 +14,7 @@ class Augmentor(object):
 
     def fit_resample(self, X, y):
         batch_size = self.batch_size if self.batch_size else len(X)
-        steps = self.steps if self.steps else 1
+        steps = len(X) // batch_size
 
         self.fit(X, y)
         batch_itr = self.datagen.flow(

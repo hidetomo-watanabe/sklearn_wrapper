@@ -44,8 +44,7 @@
                         "horizontal_flip": true,
                         "vertical_flip": true
                     },
-                    "batch_size": 24,
-                    "steps": 24
+                    "batch_size": 2
                 },
                 "cv_select": "train_all",
                 "fit_params": {
