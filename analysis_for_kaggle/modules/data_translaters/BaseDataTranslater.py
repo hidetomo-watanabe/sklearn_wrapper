@@ -7,7 +7,7 @@ import pandas as pd
 logger = getLogger('predict').getChild('BaseDataTranslater')
 if 'ConfigReader' not in globals():
     from ..ConfigReader import ConfigReader
-if 'LikeMethodWrapper' not in globals():
+if 'LikeWrapper' not in globals():
     from ..commons.LikeWrapper import LikeWrapper
 
 

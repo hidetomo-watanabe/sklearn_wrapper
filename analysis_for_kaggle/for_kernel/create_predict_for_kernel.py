@@ -29,9 +29,17 @@ if __name__ == '__main__':
     _append_file_text(
         f'{BASE_PATH}/modules/ConfigReader.py', FILENAME)
     _append_file_text(
+        f'{BASE_PATH}/modules/commons/Flattener.py', FILENAME)
+    _append_file_text(
+        f'{BASE_PATH}/modules/commons/Reshaper.py', FILENAME)
+    _append_file_text(
         f'{BASE_PATH}/modules/commons/LikeWrapper.py', FILENAME)
     _append_file_text(
+        f'{BASE_PATH}/modules/commons/MyKeras.py', FILENAME)
+    _append_file_text(
         f'{BASE_PATH}/modules/Outputer.py', FILENAME)
+    _append_file_text(
+        f'{BASE_PATH}/modules/trainers/Augmentor.py', FILENAME)
     for prefix in ['Base', 'Ensemble', 'Single', '']:
         _append_file_text(
             f'{BASE_PATH}/modules/trainers/{prefix}Trainer.py', FILENAME)
