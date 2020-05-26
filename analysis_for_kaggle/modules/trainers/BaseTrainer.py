@@ -287,27 +287,30 @@ class BaseTrainer(ConfigReader, LikeWrapper):
         return estimator
 
     @classmethod
-    def _add_val_to_fit_params(self, fit_params, estimator, X_test, Y_test):
+    def _add_val_to_fit_params(self, estimator, fit_params, X_test, Y_test):
+        steps = estimator.steps
         aug_index = None
         aug_obj = None
-        for i, step in enumerate(estimator.steps):
+        for i, step in enumerate(steps):
             if step[1].__class__ in [Augmentor]:
                 aug_index = i
                 aug_obj = step[1]
 
-        for step in estimator.steps:
+        new_steps = steps
+        for step in steps:
             if step[1].__class__ in [MyKerasClassifier, MyKerasRegressor]:
                 fit_params[f'{step[0]}__validation_data'] = (X_test, Y_test)
                 if aug_obj:
                     fit_params[f'{step[0]}__with_generator'] = True
                     fit_params[f'{step[0]}__generator'] = aug_obj.datagen
                     fit_params[f'{step[0]}__batch_size'] = aug_obj.batch_size
-                    step = step[: aug_index] + step[aug_index + 1:]
+                    new_steps = steps[: aug_index] + steps[aug_index + 1:]
             elif step[1].__class__ in [LGBMClassifier, LGBMRegressor]:
                 if aug_obj:
                     X_test, Y_test = aug_obj.fit_resample(X_test, Y_test)
                 fit_params[f'{step[0]}__eval_set'] = [(X_test, Y_test)]
-        return fit_params
+        estimator.steps = new_steps
+        return estimator, fit_params
 
     @classmethod
     def calc_cv_scores_estimators(
@@ -324,8 +327,8 @@ class BaseTrainer(ConfigReader, LikeWrapper):
             self._trans_xy_for_fit(estimator, X_train, Y_train)
         estimator = self._trans_step_for_fit(estimator, X_train, Y_train)
         for train_index, test_index in indexes:
-            fit_params = self._add_val_to_fit_params(
-                fit_params, estimator,
+            estimator, fit_params = self._add_val_to_fit_params(
+                estimator, fit_params,
                 X_train_for_fit[test_index], Y_train_for_fit[test_index])
             tmp_estimator = estimator
             tmp_estimator.fit(
