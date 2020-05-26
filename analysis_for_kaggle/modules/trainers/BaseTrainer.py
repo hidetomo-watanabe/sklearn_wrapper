@@ -327,17 +327,15 @@ class BaseTrainer(ConfigReader, LikeWrapper):
             self._trans_xy_for_fit(estimator, X_train, Y_train)
         estimator = self._trans_step_for_fit(estimator, X_train, Y_train)
         for train_index, test_index in indexes:
-            estimator, fit_params = self._add_val_to_fit_params(
+            _estimator, fit_params = self._add_val_to_fit_params(
                 estimator, fit_params,
                 X_train_for_fit[test_index], Y_train_for_fit[test_index])
-            tmp_estimator = estimator
-            tmp_estimator.fit(
+            _estimator.fit(
                 X_train_for_fit[train_index], Y_train_for_fit[train_index],
                 **fit_params)
-            estimators.append(tmp_estimator)
+            estimators.append(_estimator)
             scores.append(scorer(
-                tmp_estimator,
-                X_train_for_fit[test_index], Y_train[test_index]))
+                _estimator, X_train_for_fit[test_index], Y_train[test_index]))
         return scores, estimators
 
     @classmethod
