@@ -1,3 +1,4 @@
+import copy
 import importlib
 from logging import getLogger
 
@@ -37,32 +38,36 @@ class Trainer(BaseTrainer):
         self.configs = {}
 
     @classmethod
-    def get_cv_from_json(self, cv_config):
+    def get_cvs_from_json(self, cv_config):
         if not cv_config:
-            model = KFold(
+            train_cv = KFold(
                 n_splits=3, shuffle=True, random_state=42)
-            cv = model
-            return cv
+            val_cv = copy.deepcopy(train_cv)
+            val_cv.random_state = 43
+            return train_cv, val_cv
 
         fold = cv_config['fold']
         num = cv_config['num']
         if num == 1:
             cv = 1
-            return cv
+            return cv, cv
 
         if fold == 'timeseries':
-            model = TimeSeriesSplit(n_splits=num)
+            train_cv = val_cv = TimeSeriesSplit(n_splits=num)
         elif fold == 'k':
-            model = KFold(
+            train_cv = KFold(
                 n_splits=num, shuffle=True, random_state=42)
+            val_cv = copy.deepcopy(train_cv)
+            val_cv.random_state = 43
         elif fold == 'stratifiedk':
-            model = StratifiedKFold(
+            train_cv = StratifiedKFold(
                 n_splits=num, shuffle=True, random_state=42)
+            val_cv = copy.deepcopy(train_cv)
+            val_cv.random_state = 43
         else:
             logger.error(f'NOT IMPLEMENTED CV: {fold}')
             raise Exception('NOT IMPLEMENTED')
-        cv = model
-        return cv
+        return train_cv, val_cv
 
     def _get_scorer_from_string(self, scoring):
         if scoring == 'my_scorer':
@@ -80,7 +85,8 @@ class Trainer(BaseTrainer):
 
     def get_estimator_data(self):
         output = {
-            'cv': self.cv,
+            'train_cv': self.train_cv,
+            'val_cv': self.val_cv,
             'scorer': self.scorer,
             'classes': self.classes,
             'single_estimators': self.single_estimators,
@@ -91,8 +97,9 @@ class Trainer(BaseTrainer):
     def calc_estimator_data(self):
         # configs
         model_configs = self.configs['fit']['single_model_configs']
-        self.cv = self.get_cv_from_json(self.configs['fit'].get('cv'))
-        logger.info(f'cv: {self.cv}')
+        self.train_cv, self.val_cv = \
+            self.get_cvs_from_json(self.configs['fit'].get('cv'))
+        logger.info(f'cvs: {self.train_cv} {self.val_cv}')
         logger.info('scoring: %s' % self.configs['fit']['scoring'])
         self.scorer = self._get_scorer_from_string(
             self.configs['fit']['scoring'])
@@ -108,7 +115,8 @@ class Trainer(BaseTrainer):
         single_trainer_obj.configs = self.configs
         for i, config in enumerate(model_configs):
             _score, _estimator = single_trainer_obj.calc_single_estimator(
-                config, self.scorer, self.cv, nn_func=myfunc)
+                config, self.scorer,
+                self.train_cv, self.val_cv, nn_func=myfunc)
             single_scores.append(_score)
             modelname = f'{i}_{config["model"]}'
             self.single_estimators.append(

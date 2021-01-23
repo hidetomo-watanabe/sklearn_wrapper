@@ -133,27 +133,29 @@ class SingleTrainer(BaseTrainer):
         self.params = self._to_pipeline_params(self.model, params)
         return
 
-    def _fit(self, scorer, cv, X_train, Y_train):
+    def _fit(self, scorer, train_cv, val_cv, X_train, Y_train):
         best_params = self.calc_best_params(
             self.base_pipeline, X_train, Y_train, self.params,
-            scorer, cv, self.fit_params, self.n_trials,
+            scorer, train_cv, val_cv, self.fit_params, self.n_trials,
             self.multiclass, self.undersampling)
         logger.info('best params: %s' % best_params)
+
         pipeline = self.base_pipeline
         pipeline.set_params(**best_params)
         pipeline.steps[-1] = (pipeline.steps[-1][0], self.to_second_estimator(
             pipeline.steps[-1][1], self.multiclass, self.undersampling))
+
         logger.info(f'get estimator with cv_select: {self.cv_select}')
         if self.cv_select == 'train_all':
             scores, pipelines = self.calc_cv_scores_estimators(
                 pipeline, X_train, Y_train, scorer,
-                cv=1, fit_params=self.fit_params)
+                train_cv=1, val_cv=1, fit_params=self.fit_params)
             score = scores[0]
             estimator = pipelines[0].steps[-1][1]
         elif self.cv_select in ['nearest_mean', 'all_folds']:
             scores, pipelines = self.calc_cv_scores_estimators(
                 pipeline, X_train, Y_train, scorer,
-                cv=cv, fit_params=self.fit_params)
+                train_cv=train_cv, val_cv=val_cv, fit_params=self.fit_params)
             estimators = [x.steps[-1][1] for x in pipelines]
             logger.info(f'cv model scores mean: {np.mean(scores)}')
             logger.info(f'cv model scores std: {np.std(scores)}')
@@ -195,7 +197,9 @@ class SingleTrainer(BaseTrainer):
         return pseudo_X_train, pseudo_Y_train
 
     def _fit_with_pseudo_labeling(
-        self, scorer, cv, estimator, X_train, Y_train, classes, threshold
+        self,
+        scorer, train_cv, val_cv, estimator,
+        X_train, Y_train, classes, threshold
     ):
         logger.info('fit with pseudo labeling')
         pseudo_X_train, pseudo_Y_train = self._calc_pseudo_label_data(
@@ -205,7 +209,7 @@ class SingleTrainer(BaseTrainer):
         logger.info(
             'with threshold %s, train data added %s => %s'
             % (threshold, len(Y_train), len(new_Y_train)))
-        return self._fit(scorer, cv, new_X_train, new_Y_train)
+        return self._fit(scorer, train_cv, val_cv, new_X_train, new_Y_train)
 
     def _sample_with_error(self, X_train, Y_train, estimator):
         Y_pred, _ = Outputer.predict_like(
@@ -219,7 +223,7 @@ class SingleTrainer(BaseTrainer):
         return error_X_train, error_Y_train
 
     def _fit_with_error_sampling(
-        self, scorer, cv, estimator, X_train, Y_train, score
+        self, scorer, train_cv, val_cv, estimator, X_train, Y_train, score
     ):
         logger.info('fit with error_sampling')
         new_X_train, new_Y_train = self._sample_with_error(
@@ -227,7 +231,8 @@ class SingleTrainer(BaseTrainer):
         logger.info(
             'with error_sampling, error train data is %s'
             % len(new_Y_train))
-        _score, _estimator = self._fit(scorer, cv, new_X_train, new_Y_train)
+        _score, _estimator = \
+            self._fit(scorer, train_cv, val_cv, new_X_train, new_Y_train)
 
         _single_estimators = [
             ('base', estimator),
@@ -248,7 +253,8 @@ class SingleTrainer(BaseTrainer):
     def calc_single_estimator(
         self,
         model_config, scorer=get_scorer('accuracy'),
-        cv=KFold(n_splits=3, shuffle=True, random_state=42),
+        train_cv=KFold(n_splits=3, shuffle=True, random_state=42),
+        val_cv=KFold(n_splits=3, shuffle=True, random_state=43),
         nn_func=None, X_train=None, Y_train=None
     ):
         if X_train is None:
@@ -259,7 +265,8 @@ class SingleTrainer(BaseTrainer):
 
         # fit
         logger.info('fit')
-        score, estimator = self._fit(scorer, cv, X_train, Y_train)
+        score, estimator = \
+            self._fit(scorer, train_cv, val_cv, X_train, Y_train)
         logger.info(f'score: {score}')
         logger.info(f'estimator: {estimator}')
 
@@ -279,7 +286,8 @@ class SingleTrainer(BaseTrainer):
                 classes = np.sort(np.unique(Y_train))
 
             score, estimator = self._fit_with_pseudo_labeling(
-                scorer, cv, estimator, X_train, Y_train, classes, threshold)
+                scorer, train_cv, val_cv, estimator,
+                X_train, Y_train, classes, threshold)
             logger.info(f'score: {score}')
             logger.info(f'estimator: {estimator}')
 
@@ -290,7 +298,7 @@ class SingleTrainer(BaseTrainer):
                 raise Exception('NOT IMPLEMENTED')
 
             score, estimator = self._fit_with_error_sampling(
-                scorer, cv, estimator, X_train, Y_train, score)
+                scorer, train_cv, val_cv, estimator, X_train, Y_train, score)
             logger.info(f'score: {score}')
             logger.info(f'estimator: {estimator}')
 

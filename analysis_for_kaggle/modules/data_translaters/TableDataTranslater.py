@@ -96,9 +96,12 @@ class TableDataTranslater(BaseDataTranslater):
 
     def _encode_category_with_target(self, columns):
         model_obj = TargetEncoder(cols=columns)
-        cv = Trainer.get_cv_from_json(self.configs['fit'].get('cv'))
+        # cvをずらせないので、train_cvを採用
+        cv, _ = Trainer.get_cvs_from_json(self.configs['fit'].get('cv'))
         logger.info(f'cv: {cv}')
         indexes = cv.split(self.train_df, self.pred_df)
+
+        # train
         train_encoded = []
         for train_index, pred_index in indexes:
             model_obj.fit(
@@ -109,8 +112,12 @@ class TableDataTranslater(BaseDataTranslater):
             train_encoded.append(_train_encoded)
         train_encoded = pd.concat(train_encoded)
         train_encoded.sort_index(inplace=True)
+
+        # test
+        # train全てでfit
         model_obj.fit(self.train_df[columns], self.pred_df)
         test_encoded = model_obj.transform(self.test_df[columns])
+
         return train_encoded, test_encoded
 
     def _encode_ndarray(self, model, X_train, Y_train, X_data):

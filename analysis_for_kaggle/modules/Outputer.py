@@ -28,7 +28,7 @@ class Outputer(ConfigReader, LikeWrapper):
         self,
         feature_columns, train_ids, test_ids,
         X_train, Y_train, X_test,
-        cv, scorer, classes, single_estimators, estimator,
+        train_cv, val_cv, scorer, classes, single_estimators, estimator,
         y_scaler=None, kernel=False
     ):
         self.feature_columns = feature_columns
