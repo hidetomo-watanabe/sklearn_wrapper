@@ -1,6 +1,13 @@
 {
  "cells": [
   {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# init"
+   ]
+  },
+  {
    "cell_type": "code",
    "execution_count": null,
    "metadata": {},
@@ -137,30 +144,10 @@
    ]
   },
   {
-   "cell_type": "code",
-   "execution_count": null,
+   "cell_type": "markdown",
    "metadata": {},
-   "outputs": [],
    "source": [
-    "logger.info('### PLOT X TRAIN HISTOGRAM')\n",
-    "for pred_col in visualizer_obj.pred_cols:\n",
-    "    visualizer_obj.plot_df_histograms(\n",
-    "        raw_data['train_df'],\n",
-    "        raw_data['pred_df'][pred_col].to_numpy())"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": null,
-   "metadata": {},
-   "outputs": [],
-   "source": [
-    "logger.info('### PLOT X TRAIN TEST HISTOGRAM')\n",
-    "visualizer_obj.plot_df_histograms(\n",
-    "    pd.concat([raw_data['train_df'], raw_data['test_df']]),\n",
-    "    np.concatenate(\n",
-    "        (np.zeros(train_data['X_train'].shape[0]), np.ones(train_data['X_test'].shape[0])),\n",
-    "        axis=0))"
+    "# data"
    ]
   },
   {
@@ -211,6 +198,40 @@
    ]
   },
   {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### clfのみ"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "logger.info('### PLOT X TRAIN HISTOGRAM')\n",
+    "for pred_col in visualizer_obj.pred_cols:\n",
+    "    visualizer_obj.plot_df_histograms(\n",
+    "        raw_data['train_df'],\n",
+    "        raw_data['pred_df'][pred_col].to_numpy())"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "logger.info('### PLOT X TRAIN TEST HISTOGRAM')\n",
+    "visualizer_obj.plot_df_histograms(\n",
+    "    pd.concat([raw_data['train_df'], raw_data['test_df']]),\n",
+    "    np.concatenate(\n",
+    "        (np.zeros(train_data['X_train'].shape[0]), np.ones(train_data['X_test'].shape[0])),\n",
+    "        axis=0))"
+   ]
+  },
+  {
    "cell_type": "code",
    "execution_count": null,
    "metadata": {},
@@ -250,6 +271,13 @@
    ]
   },
   {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### imageのみ"
+   ]
+  },
+  {
    "cell_type": "code",
    "execution_count": null,
    "metadata": {},
@@ -257,6 +285,13 @@
    "source": [
     "logger.info('DRAW IMAGES')\n",
     "visualizer_obj.draw_images(train_data['X_train'], train_data['Y_train'])"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# train"
    ]
   },
   {
@@ -299,6 +334,28 @@
    "source": [
     "logger.info('### GET ESTIMATOR DATA')\n",
     "estimator_data = trainer_obj.get_estimator_data()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "logger.info('### PLOT LEARNING CURVES')\n",
+    "for modelname, estimator in estimator_data['single_estimators']:\n",
+    "    title = 'learning curves: %s' % modelname\n",
+    "    visualizer_obj.plot_learning_curve(\n",
+    "        title, estimator,\n",
+    "        train_data['X_train'], train_data['Y_train'],\n",
+    "        estimator_data['scorer'], estimator_data['cv'])"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### tree系のみ"
    ]
   },
   {
@@ -365,18 +422,10 @@
    ]
   },
   {
-   "cell_type": "code",
-   "execution_count": null,
+   "cell_type": "markdown",
    "metadata": {},
-   "outputs": [],
    "source": [
-    "logger.info('### PLOT LEARNING CURVES')\n",
-    "for modelname, estimator in estimator_data['single_estimators']:\n",
-    "    title = 'learning curves: %s' % modelname\n",
-    "    visualizer_obj.plot_learning_curve(\n",
-    "        title, estimator,\n",
-    "        train_data['X_train'], train_data['Y_train'],\n",
-    "        estimator_data['scorer'], estimator_data['cv'])"
+    "# output"
    ]
   },
   {
@@ -423,6 +472,23 @@
     "        X_target=train_data['X_test'])\n",
     "    single_y_preds.append(_y_pred)\n",
     "    single_y_pred_probas.append(_y_pred_proba[:, 1])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "logger.info('### WRITE PREDICT DATA')\n",
+    "outputer_obj.write_predict_data()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### clfのみ"
    ]
   },
   {
@@ -531,16 +597,6 @@
     "visualizer_obj.plot_ndarray_histograms(\n",
     "    single_y_pred_probas, [_estimator[0] for _estimator in estimator_data['single_estimators']])"
    ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": null,
-   "metadata": {},
-   "outputs": [],
-   "source": [
-    "logger.info('### WRITE PREDICT DATA')\n",
-    "outputer_obj.write_predict_data()"
-   ]
   }
  ],
  "metadata": {
@@ -559,7 +615,7 @@
    "name": "python",
    "nbconvert_exporter": "python",
    "pygments_lexer": "ipython3",
-   "version": "3.6.10"
+   "version": "3.6.12"
   }
  },
  "nbformat": 4,
