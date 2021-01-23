@@ -1,8 +1,9 @@
 import logging.config
 import os
-import sys
 import traceback
 from logging import getLogger
+
+import fire
 
 from memory_profiler import profile
 
@@ -62,13 +63,8 @@ def main(config_path):
     return outputer_obj.get_predict_data()
 
 
-if __name__ == '__main__':
-    logger.info('# START')
-
-    if len(sys.argv) > 1:
-        config_path = sys.argv[1]
-    else:
-        config_path = f'{BASE_PATH}/configs/config.json'
+def _all(config_path=f'{BASE_PATH}/configs/config.json'):
+    logger.info(f'## config_path: {config_path}')
 
     try:
         main(config_path)
@@ -80,4 +76,8 @@ if __name__ == '__main__':
         notifier_obj.read_config_file(config_path)
         notifier_obj.notify_slack()
 
+
+if __name__ == '__main__':
+    logger.info('# START')
+    fire.Fire(_all)
     logger.info('# FINISHED')
