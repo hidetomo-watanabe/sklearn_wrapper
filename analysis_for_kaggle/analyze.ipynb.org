@@ -96,7 +96,7 @@
    "outputs": [],
    "source": [
     "from modules.Visualizer import Visualizer\n",
-    "visualizer_obj = Visualizer(sample_frac=0.5)\n",
+    "visualizer_obj = Visualizer(sample_frac=0.01)\n",
     "visualizer_obj.read_config_file(config_path)\n",
     "# visualizer_obj.read_config_text(config_text)"
    ]
@@ -129,7 +129,7 @@
    "source": [
     "logger.info('### TRAIN PROFILING')\n",
     "import pandas_profiling\n",
-    "pandas_profiling.ProfileReport(Visualizer.sample_like(raw_data['train_df'], frac=0.5))"
+    "pandas_profiling.ProfileReport(Visualizer.sample_like(raw_data['train_df'], frac=0.01))"
    ]
   },
   {
@@ -140,7 +140,7 @@
    "source": [
     "logger.info('### TEST PROFILING')\n",
     "import pandas_profiling\n",
-    "pandas_profiling.ProfileReport(Visualizer.sample_like(raw_data['test_df'], frac=0.5))"
+    "pandas_profiling.ProfileReport(Visualizer.sample_like(raw_data['test_df'], frac=0.01))"
    ]
   },
   {
@@ -198,13 +198,6 @@
    ]
   },
   {
-   "cell_type": "markdown",
-   "metadata": {},
-   "source": [
-    "### clfのみ"
-   ]
-  },
-  {
    "cell_type": "code",
    "execution_count": null,
    "metadata": {},
@@ -257,6 +250,13 @@
     "        axis=0),\n",
     "    np.concatenate((train_data['train_ids'], train_data['test_ids']), axis=0))\n",
     "display(df_2d_train_test)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### clfのみ"
    ]
   },
   {

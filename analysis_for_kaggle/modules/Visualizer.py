@@ -63,33 +63,6 @@ class Visualizer(ConfigReader, LikeWrapper):
             display(df.head())
             display(df.describe(include='all'))
 
-    def plot_ndarray_histograms(self, targets, labels, title=None):
-        ax = plt.subplot()
-        if title:
-            ax.set_title(title)
-        cmap = plt.get_cmap('tab10')
-        for i, (target, label) in enumerate(zip(targets, labels)):
-            target = self.sample_like(target, frac=self.sample_frac)
-            ax.hist(
-                target, **self.hist_params,
-                color=cmap(i), label=f'{label}')
-        ax.legend(loc="best")
-        plt.show()
-
-    def plot_df_histograms(self, df, label):
-        df = self.sample_like(df, frac=self.sample_frac)
-        label = self.sample_like(label, frac=self.sample_frac)
-
-        for key in df.keys():
-            if key == self.id_col:
-                continue
-            _targets = []
-            _labels = np.sort(np.unique(label))
-            for i, l in enumerate(_labels):
-                _targets.append(
-                    df[key][self.ravel_like(label) == l].dropna().to_numpy())
-            self.plot_ndarray_histograms(_targets, _labels, title=key)
-
     def plot_scatter_matrix(self, target, feature_columns):
         target = self.sample_like(target, frac=self.sample_frac)
 
@@ -109,9 +82,48 @@ class Visualizer(ConfigReader, LikeWrapper):
         ax.legend(loc="best")
         plt.show()
 
+    def plot_ndarray_histograms(self, targets, labels, title=None):
+        ax = plt.subplot()
+        if title:
+            ax.set_title(title)
+        cmap = plt.get_cmap('tab10')
+        for i, (target, label) in enumerate(zip(targets, labels)):
+            target = self.sample_like(target, frac=self.sample_frac)
+            ax.hist(
+                target, **self.hist_params,
+                color=cmap(i), label=f'{label}')
+        ax.legend(loc="best")
+        plt.show()
+
+    def plot_df_histograms(self, df, label):
+        df = self.sample_like(df, frac=self.sample_frac)
+        # regかつtrain/testでないときは、label統一
+        uniq_labels = np.sort(np.unique(label))
+        if self.configs['pre']['train_mode'] == 'reg':
+            if len(uniq_labels) >= 3:
+                label = np.array(['reg'] * len(label))
+        label = self.sample_like(label, frac=self.sample_frac)
+        uniq_labels = np.sort(np.unique(label))
+
+        for key in df.keys():
+            if key == self.id_col:
+                continue
+
+            _targets = []
+            for i, l in enumerate(uniq_labels):
+                _targets.append(
+                    df[key][self.ravel_like(label) == l].dropna().to_numpy())
+            self.plot_ndarray_histograms(_targets, uniq_labels, title=key)
+
     def plot_with_2_dimensions(self, target, label, target_ids):
         target = self.sample_like(target, frac=self.sample_frac)
+        # regかつtrain/testでないときは、label統一
+        uniq_labels = np.sort(np.unique(label))
+        if self.configs['pre']['train_mode'] == 'reg':
+            if len(uniq_labels) >= 3:
+                label = np.array(['reg'] * len(label))
         label = self.sample_like(label, frac=self.sample_frac)
+        uniq_labels = np.sort(np.unique(label))
         target_ids = self.sample_like(target_ids, frac=self.sample_frac)
 
         model_obj = TSNE(n_components=2, random_state=42)
@@ -122,7 +134,8 @@ class Visualizer(ConfigReader, LikeWrapper):
         ax.set_title('target')
         ax.set_xlabel('tsne_0')
         ax.set_ylabel('tsne_1')
-        for i, l in enumerate(np.sort(np.unique(label))):
+
+        for i, l in enumerate(uniq_labels):
             _target = target[np.where(self.ravel_like(label) == l)]
             ax.scatter(
                 _target[:, 0], _target[:, 1],
