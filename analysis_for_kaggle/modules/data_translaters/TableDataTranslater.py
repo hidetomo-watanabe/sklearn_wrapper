@@ -14,6 +14,7 @@ import pandas as pd
 
 import scipy.sparse as sp
 from scipy.stats import ks_2samp
+from scipy.stats.mstats import winsorize
 
 from sklearn.cluster import KMeans
 from sklearn.decomposition import NMF, PCA, TruncatedSVD
@@ -293,12 +294,16 @@ class TableDataTranslater(BaseDataTranslater):
             logger.info(f'normalize x data: {x_scaler}')
             if x_scaler == 'standard':
                 self.x_scaler = StandardScaler(with_mean=False)
+                # 外れ値対策として、1-99%に限定
+                _x_train_for_fit = \
+                    winsorize(self.X_train, limits=[0.01, 0.01]).tolist()
             elif x_scaler == 'maxabs':
                 self.x_scaler = MaxAbsScaler()
+                _x_train_for_fit = self.X_train
             else:
                 logger.error('NOT IMPLEMENTED FIT X_SCALER: %s' % x_scaler)
                 raise Exception('NOT IMPLEMENTED')
-            self.x_scaler.fit(self.X_train)
+            self.x_scaler.fit(_x_train_for_fit)
             self.X_train = self.x_scaler.transform(self.X_train)
             self.X_test = self.x_scaler.transform(self.X_test)
         else:
@@ -324,12 +329,16 @@ class TableDataTranslater(BaseDataTranslater):
             logger.info(f'normalize y data: {y_scaler}')
             if y_scaler == 'standard':
                 self.y_scaler = StandardScaler()
+                # 外れ値対策として、1-99%に限定
+                _y_train_for_fit = \
+                    winsorize(self.Y_train, limits=[0.01, 0.01]).tolist()
             elif y_scaler == 'maxabs':
                 self.y_scaler = MaxAbsScaler()
+                _y_train_for_fit = self.Y_train
             else:
                 logger.error('NOT IMPLEMENTED FIT Y_SCALER: %s' % y_scaler)
                 raise Exception('NOT IMPLEMENTED')
-            self.y_scaler.fit(self.Y_train)
+            self.y_scaler.fit(_y_train_for_fit)
             self.Y_train = self.y_scaler.transform(self.Y_train)
         else:
             self.y_scaler = None
