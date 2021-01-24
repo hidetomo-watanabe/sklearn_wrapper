@@ -1,6 +1,6 @@
 import numpy as np
 
-from sklearn.metrics.scorer import make_scorer
+from sklearn.metrics import make_scorer
 
 
 def _get_my_loss_err(Y, Y_pred):
