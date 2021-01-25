@@ -2,6 +2,7 @@ import copy
 import types
 from logging import getLogger
 
+from keras.utils import to_categorical
 from keras.wrappers.scikit_learn import KerasClassifier, KerasRegressor
 
 import numpy as np

@@ -38,6 +38,12 @@ class Visualizer(ConfigReader, LikeWrapper):
             'stacked': True,
         }
 
+    @classmethod
+    def _show_plt(self, ax, plt):
+        ax.legend(loc="best")
+        plt.tick_params(colors='white')
+        plt.show()
+
     def display_dfs(self, train_df, test_df, pred_df):
         train_df = self.sample_like(train_df, frac=self.sample_frac)
         test_df = self.sample_like(test_df, frac=self.sample_frac)
@@ -79,8 +85,7 @@ class Visualizer(ConfigReader, LikeWrapper):
             yticklabels=feature_columns,
             fmt="1.2f", annot=True, lw=0.7, cmap='YlGnBu')
         ax.set_ylim(len(feature_columns), 0)
-        ax.legend(loc="best")
-        plt.show()
+        self._show_plt(ax, plt)
 
     def plot_ndarray_histograms(self, targets, labels, title=None):
         ax = plt.subplot()
@@ -92,8 +97,7 @@ class Visualizer(ConfigReader, LikeWrapper):
             ax.hist(
                 target, **self.hist_params,
                 color=cmap(i), label=f'{label}')
-        ax.legend(loc="best")
-        plt.show()
+        self._show_plt(ax, plt)
 
     def plot_df_histograms(self, df, label):
         df = self.sample_like(df, frac=self.sample_frac)
@@ -140,8 +144,7 @@ class Visualizer(ConfigReader, LikeWrapper):
             ax.scatter(
                 _target[:, 0], _target[:, 1],
                 alpha=0.5, color=cmap(i), label=f'label: {l}')
-        ax.legend(loc="best")
-        plt.show()
+        self._show_plt(ax, plt)
 
         return pd.DataFrame(
             np.concatenate((target_ids, target, label), axis=1),
@@ -173,7 +176,7 @@ class Visualizer(ConfigReader, LikeWrapper):
             ax = fig.add_subplot(1, len(target), i + 1)
             ax.set_title(f'label: {_l}')
             ax.imshow(_t)
-        plt.show()
+        self._show_plt(ax, plt)
 
     def display_feature_importances(self, estimator, feature_columns):
         feature_importances = pd.DataFrame(
@@ -221,8 +224,7 @@ class Visualizer(ConfigReader, LikeWrapper):
         ax.plot(
             train_sizes, test_scores_mean, 'o-', color="g",
             label="Cross-validation score")
-        ax.legend(loc="best")
-        plt.show()
+        self._show_plt(ax, plt)
 
     def plot_roc(self, Y_train, Y_train_pred_proba):
         fpr, tpr, thresholds = metrics.roc_curve(
@@ -234,5 +236,4 @@ class Visualizer(ConfigReader, LikeWrapper):
         ax.set_xlabel('False Positive Rate')
         ax.set_ylabel('True Positive Rate')
         ax.plot(fpr, tpr, label=f'AUC: {auc}')
-        ax.legend(loc="best")
-        plt.show()
+        self._show_plt(ax, plt)
