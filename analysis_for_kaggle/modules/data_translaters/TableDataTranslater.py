@@ -118,6 +118,7 @@ class TableDataTranslater(BaseDataTranslater):
         # train全てでfit
         model_obj.fit(self.train_df[columns], self.pred_df)
         test_encoded = model_obj.transform(self.test_df[columns])
+        self.target_encoding_model = model_obj
 
         return train_encoded, test_encoded
 
