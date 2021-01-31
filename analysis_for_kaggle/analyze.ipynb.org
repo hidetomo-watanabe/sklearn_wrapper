@@ -96,7 +96,7 @@
    "outputs": [],
    "source": [
     "from modules.Visualizer import Visualizer\n",
-    "visualizer_obj = Visualizer(sample_frac=0.01)\n",
+    "visualizer_obj = Visualizer(sample_frac=0.01, with_xlog=False)\n",
     "visualizer_obj.read_config_file(config_path)\n",
     "# visualizer_obj.read_config_text(config_text)"
    ]
