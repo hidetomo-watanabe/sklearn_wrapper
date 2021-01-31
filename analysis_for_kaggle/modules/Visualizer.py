@@ -29,17 +29,20 @@ if 'LikeWrapper' not in globals():
 
 
 class Visualizer(ConfigReader, LikeWrapper):
-    def __init__(self, sample_frac=1.0):
+    def __init__(self, sample_frac=1.0, with_xlog=False):
         self.configs = {}
         self.sample_frac = sample_frac
+        self.with_xlog = with_xlog
         self.hist_params = {
             'alpha': 0.5,
             'density': True,
             'stacked': True,
         }
 
-    @classmethod
     def _show_plt(self, ax, plt):
+        if self.with_xlog:
+            plt.xscale('log')
+
         ax.legend(loc="best")
         plt.tick_params(colors='white')
         plt.show()
