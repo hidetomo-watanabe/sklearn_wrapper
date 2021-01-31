@@ -342,14 +342,14 @@ class BaseTrainer(ConfigReader, LikeWrapper):
                 n_trials = all_comb_num
             elif n_trials > all_comb_num:
                 logger.warning(
-                    f'N_TRIALS IS OVER MAX PATTERN THEN SET WITH MAX')
+                    'N_TRIALS IS OVER MAX PATTERN THEN SET WITH MAX')
                 n_trials = all_comb_num
             elif n_trials < 0:
                 logger.error(f'N_TRIALS SHOULD BE LARGER THAN 0: {n_trials}')
                 raise Exception('ILLEGAL VALUE')
         else:
             if n_trials is None:
-                logger.error(f'IF PARAMS HAVE DICT, N_TRIALS SHOULD BE SET')
+                logger.error('IF PARAMS HAVE DICT, N_TRIALS SHOULD BE SET')
                 raise Exception('ILLEGAL VALUE')
         logger.info(f'n_trials: {n_trials}')
 

@@ -1,5 +1,6 @@
 import copy
 import importlib
+import os
 from logging import getLogger
 
 import dill
@@ -156,16 +157,20 @@ class Trainer(BaseTrainer):
             ]
         for modelname, estimator in targets:
             output_path = self.configs['data']['output_dir']
+            _savename = f'{output_path}/{modelname}'
+
             if estimator.__class__ in [
                 NeuralNetClassifier, NeuralNetRegressor
             ]:
                 logger.warning('NOT IMPLEMENTED TORCH MODEL SAVE')
             elif hasattr(estimator, 'save'):
-                estimator.save(
-                    '%s/%s.pickle' % (output_path, modelname))
+                estimator.save(f'{_savename}.pickle')
+            # keras
+            elif hasattr(estimator, 'model'):
+                if hasattr(estimator.model, 'save'):
+                    os.makedirs(f'{_savename}', exist_ok=True)
+                    estimator.model.save(f'{_savename}')
             else:
-                with open(
-                    '%s/%s.pickle' % (output_path, modelname), 'wb'
-                ) as f:
+                with open(f'{_savename}.pickle', 'wb') as f:
                     dill.dump(estimator, f)
         return modelname
