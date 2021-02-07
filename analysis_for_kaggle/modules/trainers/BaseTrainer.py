@@ -1,7 +1,5 @@
 from logging import getLogger
 
-from bert_sklearn import BertClassifier, BertRegressor
-
 from catboost import CatBoostClassifier, CatBoostRegressor
 
 from imblearn.over_sampling import RandomOverSampler, SMOTE
@@ -144,10 +142,6 @@ class BaseTrainer(ConfigReader, LikeWrapper):
         elif model == 'torch_reg':
             return NeuralNetRegressor(
                 module=create_nn_model(), device=device, train_split=None)
-        elif model == 'bert_clf':
-            return BertClassifier()
-        elif model == 'bert_reg':
-            return BertRegressor()
         else:
             logger.error('NOT IMPLEMENTED BASE MODEL: %s' % model)
             raise Exception('NOT IMPLEMENTED')
@@ -170,8 +164,6 @@ class BaseTrainer(ConfigReader, LikeWrapper):
             if step[1].__class__ in [MyKerasClassifier]:
                 if self.ravel_like(Y_train).ndim == 1:
                     Y_train = to_categorical(Y_train)
-            elif step[1].__class__ in [BertClassifier, BertRegressor]:
-                X_train = self.ravel_like(X_train)
         Y_train = self.ravel_like(Y_train)
         return X_train, Y_train
 

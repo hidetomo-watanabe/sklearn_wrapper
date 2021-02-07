@@ -2,8 +2,6 @@ import importlib
 import math
 from logging import getLogger
 
-from bert_sklearn import BertClassifier, BertRegressor
-
 from heamy.dataset import Dataset
 from heamy.estimator import Classifier, Regressor
 
@@ -54,9 +52,6 @@ class Outputer(ConfigReader, LikeWrapper):
 
     @classmethod
     def _trans_xy_for_predict(self, estimator, X_train, Y_train, X_target):
-        if estimator.__class__ in [BertClassifier, BertRegressor]:
-            X_train = self.ravel_like(X_train)
-            X_target = self.ravel_like(X_target)
         Y_train = self.ravel_like(Y_train)
         return X_train, Y_train, X_target
 
