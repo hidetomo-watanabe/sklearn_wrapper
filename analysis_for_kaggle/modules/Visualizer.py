@@ -30,6 +30,8 @@ if 'LikeWrapper' not in globals():
 
 class Visualizer(ConfigReader, LikeWrapper):
     def __init__(self, sample_frac=1.0, with_xlog=False):
+        sns.set_style("darkgrid")
+
         self.configs = {}
         self.sample_frac = sample_frac
         self.with_xlog = with_xlog
