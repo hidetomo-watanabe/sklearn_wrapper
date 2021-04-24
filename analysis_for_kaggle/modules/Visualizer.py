@@ -190,10 +190,10 @@ class Visualizer(ConfigReader, LikeWrapper):
         display(feature_importances / np.sum(feature_importances.to_numpy()))
 
     def display_permutation_importances(
-        self, estimator, X_train, Y_train, feature_columns
+        self, estimator, X, Y, feature_columns
     ):
         perm = PermutationImportance(estimator, random_state=42).fit(
-            self.toarray_like(X_train), Y_train)
+            self.toarray_like(X), Y)
         display(eli5.explain_weights_df(perm, feature_names=feature_columns))
 
     def plot_learning_curve(
