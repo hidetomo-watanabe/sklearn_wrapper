@@ -283,7 +283,7 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "logger.info('DRAW IMAGES')\n",
+    "logger.info('### DRAW IMAGES')\n",
     "visualizer_obj.draw_images(train_data['X_train'], train_data['Y_train'])"
    ]
   },
@@ -348,7 +348,7 @@
     "    visualizer_obj.plot_learning_curve(\n",
     "        title, estimator,\n",
     "        train_data['X_train'], train_data['Y_train'],\n",
-    "        estimator_data['scorer'], estimator_data['cv'])"
+    "        estimator_data['scorer'], estimator_data['val_cv'])"
    ]
   },
   {
@@ -615,7 +615,7 @@
    "name": "python",
    "nbconvert_exporter": "python",
    "pygments_lexer": "ipython3",
-   "version": "3.6.12"
+   "version": "3.7.9"
   }
  },
  "nbformat": 4,
