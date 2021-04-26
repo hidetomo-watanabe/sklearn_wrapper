@@ -134,9 +134,10 @@ class SingleTrainer(BaseTrainer):
         return
 
     def _fit(self, scorer, train_cv, val_cv, X_train, Y_train):
+        # for param tuning, use train_cv
         best_params = self.calc_best_params(
             self.base_pipeline, X_train, Y_train, self.params,
-            scorer, train_cv, val_cv, self.fit_params, self.n_trials,
+            scorer, train_cv, self.fit_params, self.n_trials,
             self.multiclass, self.undersampling)
         logger.info('best params: %s' % best_params)
 
@@ -145,17 +146,18 @@ class SingleTrainer(BaseTrainer):
         pipeline.steps[-1] = (pipeline.steps[-1][0], self.to_second_estimator(
             pipeline.steps[-1][1], self.multiclass, self.undersampling))
 
+        # to create model, use val_cv
         logger.info(f'get estimator with cv_select: {self.cv_select}')
         if self.cv_select == 'train_all':
             scores, pipelines = self.calc_cv_scores_estimators(
                 pipeline, X_train, Y_train, scorer,
-                train_cv=1, val_cv=1, fit_params=self.fit_params)
+                cv=1, fit_params=self.fit_params)
             score = scores[0]
             estimator = pipelines[0].steps[-1][1]
         elif self.cv_select in ['nearest_mean', 'all_folds']:
             scores, pipelines = self.calc_cv_scores_estimators(
                 pipeline, X_train, Y_train, scorer,
-                train_cv=train_cv, val_cv=val_cv, fit_params=self.fit_params)
+                cv=val_cv, fit_params=self.fit_params)
             estimators = [x.steps[-1][1] for x in pipelines]
             logger.info(f'cv model scores mean: {np.mean(scores)}')
             logger.info(f'cv model scores std: {np.std(scores)}')

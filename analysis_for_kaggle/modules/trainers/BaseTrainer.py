@@ -219,47 +219,40 @@ class BaseTrainer(ConfigReader, LikeWrapper):
 
     @classmethod
     def calc_cv_scores_estimators(
-        self, estimator, X_train, Y_train, scorer, train_cv, val_cv, fit_params
+        self, estimator, X_train, Y_train, scorer, cv, fit_params
     ):
         scores = []
         estimators = []
-        if train_cv == 1:
-            train_indexes = [
+        if cv == 1:
+            indexes = [
                 [range(X_train.shape[0]), range(X_train.shape[0])]
             ]
         else:
-            train_indexes = train_cv.split(X_train, Y_train)
-        if val_cv == 1:
-            val_indexes = [
-                [range(X_train.shape[0]), range(X_train.shape[0])]
-            ]
-        else:
-            val_indexes = val_cv.split(X_train, Y_train)
+            indexes = cv.split(X_train, Y_train)
 
         X_train_for_fit, Y_train_for_fit = \
             self._trans_xy_for_fit(estimator, X_train, Y_train)
         estimator = self._trans_step_for_fit(estimator, X_train, Y_train)
-        for (train_train_index, train_val_index), (_, val_val_index) \
-                in zip(train_indexes, val_indexes):
+        for train_index, val_index in indexes:
             _estimator, fit_params = self._add_val_to_fit_params(
                 estimator, fit_params,
-                X_train_for_fit[train_val_index],
-                Y_train_for_fit[train_val_index])
+                X_train_for_fit[val_index],
+                Y_train_for_fit[val_index])
             _estimator.fit(
-                X_train_for_fit[train_train_index],
-                Y_train_for_fit[train_train_index],
+                X_train_for_fit[train_index],
+                Y_train_for_fit[train_index],
                 **fit_params)
             estimators.append(_estimator)
             scores.append(scorer(
                 _estimator,
-                X_train_for_fit[val_val_index], Y_train[val_val_index]))
+                X_train_for_fit[val_index], Y_train[val_index]))
         return scores, estimators
 
     @classmethod
     def calc_best_params(
         self,
         base_estimator, X_train, Y_train,
-        params, scorer, train_cv, val_cv, fit_params,
+        params, scorer, train_cv, fit_params,
         n_trials=None, multiclass=None, undersampling=None
     ):
         def _get_args(trial, params):
@@ -296,7 +289,7 @@ class BaseTrainer(ConfigReader, LikeWrapper):
             try:
                 scores, _ = self.calc_cv_scores_estimators(
                     estimator, X_train, Y_train,
-                    scorer, train_cv, val_cv, fit_params)
+                    scorer, train_cv, fit_params)
             except Exception as e:
                 logger.warning(e)
                 logger.warning('SET SCORE 0')

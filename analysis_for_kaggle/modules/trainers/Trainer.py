@@ -40,11 +40,14 @@ class Trainer(BaseTrainer):
 
     @classmethod
     def get_cvs_from_json(self, cv_config):
+        _train_seed = 43
+        _val_seed = 42
+
         if not cv_config:
             train_cv = KFold(
-                n_splits=3, shuffle=True, random_state=42)
+                n_splits=3, shuffle=True, random_state=_train_seed)
             val_cv = copy.deepcopy(train_cv)
-            val_cv.random_state = 43
+            val_cv.random_state = _val_seed
             return train_cv, val_cv
 
         fold = cv_config['fold']
@@ -57,14 +60,14 @@ class Trainer(BaseTrainer):
             train_cv = val_cv = TimeSeriesSplit(n_splits=num)
         elif fold == 'k':
             train_cv = KFold(
-                n_splits=num, shuffle=True, random_state=42)
+                n_splits=num, shuffle=True, random_state=_train_seed)
             val_cv = copy.deepcopy(train_cv)
-            val_cv.random_state = 43
+            val_cv.random_state = _val_seed
         elif fold == 'stratifiedk':
             train_cv = StratifiedKFold(
-                n_splits=num, shuffle=True, random_state=42)
+                n_splits=num, shuffle=True, random_state=_train_seed)
             val_cv = copy.deepcopy(train_cv)
-            val_cv.random_state = 43
+            val_cv.random_state = _val_seed
         else:
             logger.error(f'NOT IMPLEMENTED CV: {fold}')
             raise Exception('NOT IMPLEMENTED')
