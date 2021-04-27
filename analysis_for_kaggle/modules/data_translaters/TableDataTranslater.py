@@ -457,8 +457,8 @@ class TableDataTranslater(BaseDataTranslater):
                 axis=0)
             # fit
             single_trainer_obj = SingleTrainer(
-                X_train=self.X_train, Y_train=self.Y_train, X_test=self.X_test)
-            single_trainer_obj.configs = self.configs
+                X_train=self.X_train, Y_train=self.Y_train, X_test=self.X_test,
+                feature_columns=self.feature_columns, configs=self.configs)
             _, estimator = single_trainer_obj.calc_single_estimator(
                 adversarial['model_config'], X_train=X_adv, Y_train=Y_adv)
             if not hasattr(estimator, 'predict_proba'):

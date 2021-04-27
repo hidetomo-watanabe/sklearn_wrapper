@@ -115,14 +115,14 @@ class Trainer(BaseTrainer):
         single_scores = []
         self.single_estimators = []
         single_trainer_obj = SingleTrainer(
-            self.X_train, self.Y_train, self.X_test, self.kernel)
-        single_trainer_obj.configs = self.configs
-        for i, config in enumerate(model_configs):
+            self.X_train, self.Y_train, self.X_test,
+            self.feature_columns, self.configs, self.kernel)
+        for i, _config in enumerate(model_configs):
             _score, _estimator = single_trainer_obj.calc_single_estimator(
-                config, self.scorer,
+                _config, self.scorer,
                 self.train_cv, self.val_cv, nn_func=myfunc)
             single_scores.append(_score)
-            modelname = f'{i}_{config["model"]}'
+            modelname = f'{i}_{_config["model"]}'
             self.single_estimators.append(
                 (modelname, _estimator))
 
@@ -132,8 +132,7 @@ class Trainer(BaseTrainer):
             self.estimator = self.single_estimators[0][1]
         else:
             ensemble_trainer_obj = EnsembleTrainer(
-                self.X_train, self.Y_train, self.X_test)
-            ensemble_trainer_obj.configs = self.configs
+                self.X_train, self.Y_train, self.X_test, self.configs)
             self.estimator = ensemble_trainer_obj.calc_ensemble_estimator(
                 self.single_estimators,
                 weights=EnsembleTrainer.get_weights(single_scores),

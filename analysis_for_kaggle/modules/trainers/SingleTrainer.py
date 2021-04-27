@@ -29,12 +29,15 @@ if 'Outputer' not in globals():
 
 
 class SingleTrainer(BaseTrainer):
-    def __init__(self, X_train, Y_train, X_test, kernel=False):
+    def __init__(
+        self, X_train, Y_train, X_test, feature_columns, configs, kernel=False
+    ):
         self.X_train = X_train
         self.Y_train = Y_train
         self.X_test = X_test
+        self.feature_columns = feature_columns
+        self.configs = configs
         self.kernel = kernel
-        self.configs = {}
         # keras, torchのスコープ対策として、インスタンス作成時に読み込み
         # keras, torch使う時しか使わないので、evalで定義してエラー回避
         if self.kernel:
@@ -175,8 +178,7 @@ class SingleTrainer(BaseTrainer):
 
                 score = np.average(scores, weights=weights)
                 ensemble_trainer_obj = EnsembleTrainer(
-                    X_train, Y_train, self.X_test)
-                ensemble_trainer_obj.configs = self.configs
+                    X_train, Y_train, self.X_test, self.configs)
                 estimator = ensemble_trainer_obj.calc_ensemble_estimator(
                     _single_estimators, ensemble_config={'mode': 'average'},
                     weights=weights, scorer=scorer)
@@ -245,8 +247,7 @@ class SingleTrainer(BaseTrainer):
 
         score = np.average(np.array([score, _score]), weights=weights)
         ensemble_trainer_obj = EnsembleTrainer(
-            X_train, Y_train, self.X_test)
-        ensemble_trainer_obj.configs = self.configs
+            X_train, Y_train, self.X_test, configs=self.configs)
         estimator = ensemble_trainer_obj.calc_ensemble_estimator(
             _single_estimators, ensemble_config={'mode': 'average'},
             weights=weights, scorer=scorer)

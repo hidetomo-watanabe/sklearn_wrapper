@@ -20,11 +20,11 @@ if 'BaseTrainer' not in globals():
 
 
 class EnsembleTrainer(BaseTrainer):
-    def __init__(self, X_train, Y_train, X_test):
+    def __init__(self, X_train, Y_train, X_test, configs):
         self.X_train = X_train
         self.Y_train = Y_train
         self.X_test = X_test
-        self.configs = {}
+        self.configs = configs
 
     def _get_voter(self, mode, estimators, weights=None):
         if self.configs['fit']['train_mode'] == 'clf':

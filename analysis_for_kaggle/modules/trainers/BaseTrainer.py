@@ -59,7 +59,6 @@ class BaseTrainer(ConfigReader, LikeWrapper):
     def __init__(self):
         pass
 
-    @classmethod
     def get_base_estimator(self, model, create_nn_model=None):
         # keras config
         tf.random.set_seed(42)
@@ -146,7 +145,6 @@ class BaseTrainer(ConfigReader, LikeWrapper):
             logger.error('NOT IMPLEMENTED BASE MODEL: %s' % model)
             raise Exception('NOT IMPLEMENTED')
 
-    @classmethod
     def to_second_estimator(
         self, estimator, multiclass=None, undersampling=None
     ):
@@ -158,7 +156,6 @@ class BaseTrainer(ConfigReader, LikeWrapper):
         # no oversampling
         return estimator
 
-    @classmethod
     def _trans_xy_for_fit(self, estimator, X_train, Y_train):
         for step in estimator.steps:
             if step[1].__class__ in [MyKerasClassifier]:
@@ -167,7 +164,6 @@ class BaseTrainer(ConfigReader, LikeWrapper):
         Y_train = self.ravel_like(Y_train)
         return X_train, Y_train
 
-    @classmethod
     def _trans_step_for_fit(self, estimator, X_train, Y_train):
         is_categorical = False
         indexes = []
@@ -191,7 +187,6 @@ class BaseTrainer(ConfigReader, LikeWrapper):
             base += 2
         return estimator
 
-    @classmethod
     def _add_val_to_fit_params(self, estimator, fit_params, X_test, Y_test):
         steps = estimator.steps
         aug_index = None
@@ -217,7 +212,6 @@ class BaseTrainer(ConfigReader, LikeWrapper):
         estimator.steps = new_steps
         return estimator, fit_params
 
-    @classmethod
     def calc_cv_scores_estimators(
         self, estimator, X_train, Y_train, scorer, cv, fit_params
     ):
@@ -248,7 +242,6 @@ class BaseTrainer(ConfigReader, LikeWrapper):
                 X_train_for_fit[val_index], Y_train[val_index]))
         return scores, estimators
 
-    @classmethod
     def calc_best_params(
         self,
         base_estimator, X_train, Y_train,
@@ -282,10 +275,13 @@ class BaseTrainer(ConfigReader, LikeWrapper):
 
         def _objective(trial):
             args = _get_args(trial, params)
+            logger.info('  params: %s' % args)
+
             estimator = base_estimator
             estimator.set_params(**args)
             estimator = self.to_second_estimator(
                 estimator, multiclass, undersampling)
+
             try:
                 scores, _ = self.calc_cv_scores_estimators(
                     estimator, X_train, Y_train,
@@ -294,13 +290,11 @@ class BaseTrainer(ConfigReader, LikeWrapper):
                 logger.warning(e)
                 logger.warning('SET SCORE 0')
                 scores = [0]
-            score_mean = np.mean(scores)
-            score_std = np.std(scores)
-            logger.debug('  params: %s' % args)
-            logger.debug('  scores: %s' % scores)
-            logger.debug('  score mean: %s' % score_mean)
-            logger.debug('  score std: %s' % score_std)
-            return -1 * score_mean
+
+            logger.info('  scores: %s' % scores)
+            logger.info('  score mean: %s' % np.mean(scores))
+            logger.info('  score std: %s' % np.std(scores))
+            return -1 * np.mean(scores)
 
         all_comb_num = 0
         for val in params.values():
