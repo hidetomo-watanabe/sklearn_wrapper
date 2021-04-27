@@ -183,14 +183,6 @@ class Visualizer(ConfigReader, LikeWrapper):
             ax.imshow(_t)
         self._show_plt(ax, plt)
 
-    def display_feature_importances(self, estimator, feature_columns):
-        feature_importances = pd.DataFrame(
-            data=[estimator.feature_importances_], columns=feature_columns)
-        feature_importances = feature_importances.iloc[
-            :, np.argsort(feature_importances.to_numpy()[0])[::-1]]
-        display(feature_importances)
-        display(feature_importances / np.sum(feature_importances.to_numpy()))
-
     def display_permutation_importances(
         self, estimator, X, Y, feature_columns
     ):

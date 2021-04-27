@@ -352,24 +352,6 @@
    ]
   },
   {
-   "cell_type": "markdown",
-   "metadata": {},
-   "source": [
-    "### tree系のみ"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": null,
-   "metadata": {},
-   "outputs": [],
-   "source": [
-    "logger.info('### DISPLAY FEATURE IMPORTANCES')\n",
-    "visualizer_obj.display_feature_importances(\n",
-    "    estimator_data['estimator'], train_data['feature_columns'])"
-   ]
-  },
-  {
    "cell_type": "code",
    "execution_count": null,
    "metadata": {},

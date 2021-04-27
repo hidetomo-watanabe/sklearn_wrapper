@@ -13,6 +13,8 @@ import numpy as np
 
 import optuna
 
+import pandas as pd
+
 from rgf.sklearn import RGFClassifier, RGFRegressor
 
 from sklearn.ensemble import GradientBoostingClassifier
@@ -212,8 +214,21 @@ class BaseTrainer(ConfigReader, LikeWrapper):
         estimator.steps = new_steps
         return estimator, fit_params
 
+    def _get_feature_importances(self, estimator):
+        _estimator = estimator.steps[-1][1]
+        if not hasattr(_estimator, 'feature_importances_'):
+            return None
+
+        feature_importances = pd.DataFrame(
+            data=[_estimator.feature_importances_],
+            columns=self.feature_columns)
+        feature_importances = feature_importances.iloc[
+            :, np.argsort(feature_importances.to_numpy()[0])[::-1]]
+        return feature_importances / np.sum(feature_importances.to_numpy())
+
     def calc_cv_scores_estimators(
-        self, estimator, X_train, Y_train, scorer, cv, fit_params
+        self, estimator, X_train, Y_train,
+        scorer, cv, fit_params, with_importances=False
     ):
         scores = []
         estimators = []
@@ -227,7 +242,7 @@ class BaseTrainer(ConfigReader, LikeWrapper):
         X_train_for_fit, Y_train_for_fit = \
             self._trans_xy_for_fit(estimator, X_train, Y_train)
         estimator = self._trans_step_for_fit(estimator, X_train, Y_train)
-        for train_index, val_index in indexes:
+        for i, (train_index, val_index) in enumerate(indexes):
             _estimator, fit_params = self._add_val_to_fit_params(
                 estimator, fit_params,
                 X_train_for_fit[val_index],
@@ -240,6 +255,15 @@ class BaseTrainer(ConfigReader, LikeWrapper):
             scores.append(scorer(
                 _estimator,
                 X_train_for_fit[val_index], Y_train[val_index]))
+
+            # importances
+            if not with_importances:
+                continue
+
+            _feature_importances = self._get_feature_importances(_estimator)
+            if _feature_importances is not None:
+                logger.info(f'  feature importances #{i}')
+                logger.info(_feature_importances)
         return scores, estimators
 
     def calc_best_params(
@@ -291,9 +315,9 @@ class BaseTrainer(ConfigReader, LikeWrapper):
                 logger.warning('SET SCORE 0')
                 scores = [0]
 
-            logger.info('  scores: %s' % scores)
-            logger.info('  score mean: %s' % np.mean(scores))
-            logger.info('  score std: %s' % np.std(scores))
+            logger.info('    scores: %s' % scores)
+            logger.info('    score mean: %s' % np.mean(scores))
+            logger.info('    score std: %s' % np.std(scores))
             return -1 * np.mean(scores)
 
         all_comb_num = 0

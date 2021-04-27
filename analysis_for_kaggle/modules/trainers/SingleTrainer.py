@@ -154,13 +154,13 @@ class SingleTrainer(BaseTrainer):
         if self.cv_select == 'train_all':
             scores, pipelines = self.calc_cv_scores_estimators(
                 pipeline, X_train, Y_train, scorer,
-                cv=1, fit_params=self.fit_params)
+                cv=1, fit_params=self.fit_params, with_importances=True)
             score = scores[0]
             estimator = pipelines[0].steps[-1][1]
         elif self.cv_select in ['nearest_mean', 'all_folds']:
             scores, pipelines = self.calc_cv_scores_estimators(
                 pipeline, X_train, Y_train, scorer,
-                cv=val_cv, fit_params=self.fit_params)
+                cv=val_cv, fit_params=self.fit_params, with_importances=True)
             estimators = [x.steps[-1][1] for x in pipelines]
             logger.info(f'cv model scores mean: {np.mean(scores)}')
             logger.info(f'cv model scores std: {np.std(scores)}')
