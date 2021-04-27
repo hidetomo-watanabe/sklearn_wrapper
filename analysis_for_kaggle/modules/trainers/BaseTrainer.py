@@ -2,6 +2,9 @@ from logging import getLogger
 
 from catboost import CatBoostClassifier, CatBoostRegressor
 
+import eli5
+from eli5.sklearn import PermutationImportance
+
 from imblearn.over_sampling import RandomOverSampler, SMOTE
 from imblearn.under_sampling import RandomUnderSampler
 
@@ -226,6 +229,20 @@ class BaseTrainer(ConfigReader, LikeWrapper):
             :, np.argsort(feature_importances.to_numpy()[0])[::-1]]
         return feature_importances / np.sum(feature_importances.to_numpy())
 
+    def _get_permutation_importances(self, estimator, X_train, Y_train):
+        if X_train.ndim > 2:
+            return None
+
+        if len(self.feature_columns) > 50:
+            logger.warning('COLUMNS IS TOO LARGE, THEN NO PERMUTATION')
+            return None
+
+        _estimator = estimator.steps[-1][1]
+        perm = PermutationImportance(_estimator, random_state=42).fit(
+            self.toarray_like(X_train), Y_train)
+        return eli5.explain_weights_df(
+            perm, feature_names=self.feature_columns)
+
     def calc_cv_scores_estimators(
         self, estimator, X_train, Y_train,
         scorer, cv, fit_params, with_importances=False
@@ -264,6 +281,13 @@ class BaseTrainer(ConfigReader, LikeWrapper):
             if _feature_importances is not None:
                 logger.info(f'  feature importances #{i}')
                 logger.info(_feature_importances)
+
+            _perm_importances = self._get_permutation_importances(
+                _estimator,
+                X_train_for_fit[train_index], Y_train_for_fit[train_index])
+            if _perm_importances is not None:
+                logger.info(f'  permutation importances #{i}')
+                logger.info(_perm_importances)
         return scores, estimators
 
     def calc_best_params(

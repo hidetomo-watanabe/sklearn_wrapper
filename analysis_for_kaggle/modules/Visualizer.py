@@ -4,9 +4,6 @@ from IPython.display import display
 
 from dtreeviz.trees import dtreeviz
 
-import eli5
-from eli5.sklearn import PermutationImportance
-
 import matplotlib.pyplot as plt
 
 import numpy as np
@@ -182,13 +179,6 @@ class Visualizer(ConfigReader, LikeWrapper):
             ax.set_title(f'label: {_l}')
             ax.imshow(_t)
         self._show_plt(ax, plt)
-
-    def display_permutation_importances(
-        self, estimator, X, Y, feature_columns
-    ):
-        perm = PermutationImportance(estimator, random_state=42).fit(
-            self.toarray_like(X), Y)
-        display(eli5.explain_weights_df(perm, feature_names=feature_columns))
 
     def plot_learning_curve(
         self, title, estimator, X_train, Y_train, scorer, cv
