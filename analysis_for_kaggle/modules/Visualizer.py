@@ -12,6 +12,8 @@ import pandas as pd
 
 import seaborn as sns
 
+import shap
+
 from sklearn import metrics
 from sklearn.manifold import TSNE
 from sklearn.model_selection import learning_curve
@@ -212,6 +214,20 @@ class Visualizer(ConfigReader, LikeWrapper):
             train_sizes, test_scores_mean, 'o-', color="g",
             label="Cross-validation score")
         self._show_plt(ax, plt)
+
+    def display_shap(self, estimator, X_train, Y_train, feature_columns):
+        shap.initjs()
+        explainer = shap.TreeExplainer(
+            model=estimator, feature_perturbation='tree_path_dependent',
+            model_output='margin')
+        shap_values = explainer.shap_values(
+            X=X_train.toarray(), y=Y_train)
+        shap.summary_plot(
+            shap_values, X_train.toarray(),
+            feature_names=feature_columns)
+        shap.force_plot(
+            base_value=explainer.expected_value, shap_values=shap_values,
+            feature_names=feature_columns)
 
     def plot_roc(self, Y_train, Y_train_pred_proba):
         fpr, tpr, thresholds = metrics.roc_curve(

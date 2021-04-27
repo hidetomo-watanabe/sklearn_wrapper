@@ -51,6 +51,25 @@
    "metadata": {},
    "outputs": [],
    "source": [
+    "from modules.Visualizer import Visualizer\n",
+    "visualizer_obj = Visualizer(sample_frac=0.01, with_xlog=False)\n",
+    "visualizer_obj.read_config_file(config_path)\n",
+    "# visualizer_obj.read_config_text(config_text)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# data translation"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
     "from modules.data_translaters.DataTranslater import DataTranslater\n",
     "translater_obj = DataTranslater()\n",
     "translater_obj.read_config_file(config_path)\n",
@@ -90,15 +109,10 @@
    ]
   },
   {
-   "cell_type": "code",
-   "execution_count": null,
+   "cell_type": "markdown",
    "metadata": {},
-   "outputs": [],
    "source": [
-    "from modules.Visualizer import Visualizer\n",
-    "visualizer_obj = Visualizer(sample_frac=0.01, with_xlog=False)\n",
-    "visualizer_obj.read_config_file(config_path)\n",
-    "# visualizer_obj.read_config_text(config_text)"
+    "# data visualization"
    ]
   },
   {
@@ -141,13 +155,6 @@
     "logger.info('### TEST PROFILING')\n",
     "import pandas_profiling\n",
     "pandas_profiling.ProfileReport(Visualizer.sample_like(raw_data['test_df'], frac=0.01))"
-   ]
-  },
-  {
-   "cell_type": "markdown",
-   "metadata": {},
-   "source": [
-    "# data"
    ]
   },
   {
@@ -256,7 +263,7 @@
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "### clfのみ"
+    "#### clfのみ"
    ]
   },
   {
@@ -274,7 +281,7 @@
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "### imageのみ"
+    "#### imageのみ"
    ]
   },
   {
@@ -359,10 +366,13 @@
    "source": [
     "logger.info('### PLOT PARTIAL DEPENDENCE')\n",
     "from sklearn.inspection import plot_partial_dependence\n",
-    "for feature in train_data['feature_columns']:\n",
-    "    plot_partial_dependence(\n",
-    "        estimator=estimator_data['estimator'], X=train_data['X_train'].toarray(),\n",
-    "        features=[feature], feature_names=[feature])"
+    "\n",
+    "for modelname, estimator in estimator_data['single_estimators']:\n",
+    "    logger.info(f'##### {modelname}')\n",
+    "    for feature in train_data['feature_columns']:\n",
+    "        plot_partial_dependence(\n",
+    "            estimator=estimator, X=train_data['X_train'].toarray(),\n",
+    "            features=[feature], feature_names=[feature])"
    ]
   },
   {
@@ -372,23 +382,11 @@
    "outputs": [],
    "source": [
     "logger.info('### SHAP')\n",
-    "import shap\n",
-    "shap.initjs()\n",
-    "explainer = shap.TreeExplainer(\n",
-    "    model=estimator_data['estimator'], feature_perturbation='tree_path_dependent',\n",
-    "    model_output='margin')\n",
-    "shap_values = explainer.shap_values(\n",
-    "    X=train_data['X_train'].toarray(), y=train_data['Y_train'])\n",
-    "shap.summary_plot(\n",
-    "    shap_values, train_data['X_train'].toarray(),\n",
-    "    feature_names=train_data['feature_columns'])\n",
-    "# shap.summary_plot(\n",
-    "    # shap_values, train_data['X_train'].toarray(),\n",
-    "    # feature_names=train_data['feature_columns'],\n",
-    "    # plot_type=\"bar\")\n",
-    "shap.force_plot(\n",
-    "    base_value=explainer.expected_value, shap_values=shap_values,\n",
-    "    feature_names=train_data['feature_columns'])"
+    "\n",
+    "for modelname, estimator in estimator_data['single_estimators']:\n",
+    "    logger.info(f'##### {modelname}')\n",
+    "    visualizer_obj.display_shap(\n",
+    "        estimator, train_data['X_train'], train_data['Y_train'], train_data['feature_columns'])"
    ]
   },
   {
@@ -458,7 +456,7 @@
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "### clfのみ"
+    "#### clfのみ"
    ]
   },
   {
