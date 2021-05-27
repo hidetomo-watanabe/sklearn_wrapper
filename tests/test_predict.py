@@ -6,7 +6,7 @@ import pandas as pd
 from pandas.testing import assert_frame_equal
 
 BASE_PATH = \
-    os.path.dirname(os.path.abspath(__file__)) + '/../analysis_for_kaggle'
+    os.path.dirname(os.path.abspath(__file__)) + '/../sklearn_wrapper'
 sys.path.append(BASE_PATH)
 import predict
 

@@ -2,8 +2,8 @@ __pycache__
 .cache
 catboost_info
 *.ipynb
-analysis_for_kaggle/configs/config.json
-analysis_for_kaggle/for_kernel/predict_for_kernel.py
+sklearn_wrapper/configs/config.json
+sklearn_wrapper/for_kernel/predict_for_kernel.py
 outputs/*.npy
 outputs/*.csv
 outputs/*.pickle

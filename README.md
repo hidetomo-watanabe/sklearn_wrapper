@@ -1,4 +1,4 @@
-# analysis_for_kaggle
+# sklearn_wrapper
 ### overview
 - single/ensemble model
 - classification/regression
@@ -85,9 +85,9 @@
   - NeuralNetRegressor
 
 ### CUI flow
-- cp analysis_for_kaggle/configs/config.json.org configs/config.json
+- cp sklearn_wrapper/configs/config.json.org sklearn_wrapper/configs/config.json
 - **update config.json**
-- python analysis_for_kaggle/predict.py
+- python sklearn_wrapper/predict.py
 
 ### environment
 - https://github.com/hidetomo-watanabe/analysis_dockerfiles
