@@ -4,18 +4,13 @@ from logging import getLogger
 import requests
 
 logger = getLogger('predict').getChild('Notifier')
+if 'ConfigReader' not in globals():
+    from .ConfigReader import ConfigReader
 
 
-class Notifier(object):
+class Notifier(ConfigReader):
     def __init__(self):
         self.configs = {}
-
-    def read_config_file(self, path):
-        with open(path, 'r') as f:
-            self.configs = json.loads(f.read())
-
-    def read_config_text(self, text):
-        self.configs = json.loads(text)
 
     def notify_slack(self):
         mode = self.configs['notify'].get('mode')
