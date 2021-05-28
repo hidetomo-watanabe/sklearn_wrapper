@@ -47,6 +47,7 @@ class SingleTrainer(BaseTrainer):
         return {f'{pre}__{k}': v for k, v in params.items()}
 
     def _get_model_params(self, model_config, nn_func, X_train, Y_train):
+        # model
         model = model_config['model']
         logger.info('model: %s' % model)
         self.model = model
@@ -64,6 +65,7 @@ class SingleTrainer(BaseTrainer):
         self.base_pipeline = Pipeline([(self.model, self.get_base_estimator(
             model, create_nn_model=create_nn_model))])
 
+        # sampling
         undersampling = model_config.get('undersampling')
         if undersampling:
             logger.info(f'undersampling: {undersampling}')
@@ -105,6 +107,7 @@ class SingleTrainer(BaseTrainer):
                 0,
                 ('augmentation', Augmentor(**augmentation)))
 
+        # multiclass
         multiclass = model_config.get('multiclass')
         if multiclass:
             logger.info('multiclass: %s' % multiclass)
@@ -118,8 +121,7 @@ class SingleTrainer(BaseTrainer):
                 raise Exception('NOT IMPLEMENTED')
         self.multiclass = multiclass
 
-        self.cv_select = model_config.get('cv_select', 'nearest_mean')
-        self.n_trials = model_config.get('n_trials')
+        # fit_params
         fit_params = model_config.get('fit_params', {})
         if model in ['keras_clf', 'keras_reg']:
             fit_params['callbacks'] = []
@@ -132,8 +134,15 @@ class SingleTrainer(BaseTrainer):
                     EarlyStopping(**fit_params['early_stopping']))
                 del fit_params['early_stopping']
         self.fit_params = self._to_pipeline_params(self.model, fit_params)
+
+        # params
         params = model_config.get('params', {})
         self.params = self._to_pipeline_params(self.model, params)
+
+        # other
+        self.cv_select = model_config.get('cv_select', 'nearest_mean')
+        self.n_trials = model_config.get('n_trials')
+
         return
 
     def _fit(self, scorer, train_cv, val_cv, X_train, Y_train):

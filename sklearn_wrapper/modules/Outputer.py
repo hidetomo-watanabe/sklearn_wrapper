@@ -1,5 +1,4 @@
 import importlib
-import math
 from logging import getLogger
 
 from heamy.dataset import Dataset
@@ -127,7 +126,7 @@ class Outputer(ConfigReader, LikeWrapper):
 
         logger.info('inverse translate y_pred with %s' % y_pre)
         if y_pre == 'log':
-            self.Y_pred = np.array(list(map(math.exp, self.Y_pred)))
+            self.Y_pred = np.array(list(map(np.exp, self.Y_pred)))
         else:
             logger.error('NOT IMPLEMENTED FIT Y_PRE: %s' % y_pre)
             raise Exception('NOT IMPLEMENTED')
