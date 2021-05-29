@@ -24,7 +24,7 @@ class Outputer(ConfigReader, LikeWrapper):
         feature_columns, train_ids, test_ids,
         X_train, Y_train, X_test,
         train_cv, val_cv, scorer, classes, single_estimators, estimator,
-        y_scaler=None, kernel=False
+        kernel=False
     ):
         self.feature_columns = feature_columns
         self.train_ids = train_ids
@@ -32,7 +32,6 @@ class Outputer(ConfigReader, LikeWrapper):
         self.X_train = X_train
         self.Y_train = Y_train
         self.X_test = X_test
-        self.y_scaler = y_scaler
         self.classes = classes
         self.estimator = estimator
         self.kernel = kernel
@@ -90,15 +89,6 @@ class Outputer(ConfigReader, LikeWrapper):
             logger.error('TRAIN MODE SHOULD BE clf OR reg')
             raise Exception('NOT IMPLEMENTED')
         return Y_pred, Y_pred_proba
-
-    def _fix_y_scaler(self):
-        if not self.y_scaler:
-            return
-
-        logger.info('inverse translate y_pred with %s' % self.y_scaler)
-        self.Y_pred = self.y_scaler.inverse_transform(
-            self.Y_pred.reshape(-1, 1))
-        return
 
     def _fix_y_pre(self):
         y_pre = self.configs['pre'].get('y_pre')
@@ -171,7 +161,6 @@ class Outputer(ConfigReader, LikeWrapper):
             train_mode=self.configs['fit']['train_mode'],
             estimator=self.estimator, X_train=self.X_train,
             Y_train=self.Y_train, X_target=self.X_test)
-        self._fix_y_scaler()
         self._fix_y_pre()
         self._calc_base_predict_df()
         self._calc_post_predict_df()

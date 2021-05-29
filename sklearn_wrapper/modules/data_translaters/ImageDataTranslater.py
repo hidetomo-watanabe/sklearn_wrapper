@@ -1,11 +1,8 @@
-import math
 from logging import getLogger
 
 import cv2
 
 import numpy as np
-
-from sklearn.preprocessing import MinMaxScaler, StandardScaler
 
 logger = getLogger('predict').getChild('ImageDataTranslater')
 if 'BaseDataTranslater' not in globals():
@@ -71,23 +68,11 @@ class ImageDataTranslater(BaseDataTranslater):
             if y_pre:
                 logger.info('translate y_train with %s' % y_pre)
                 if y_pre == 'log':
-                    self.Y_train = np.array(list(map(math.log, self.Y_train)))
+                    self.Y_train = np.array(list(map(np.log, self.Y_train)))
                     self.Y_train = self.Y_train.reshape(-1, 1)
                 else:
                     logger.error('NOT IMPLEMENTED FIT Y_PRE: %s' % y_pre)
                     raise Exception('NOT IMPLEMENTED')
-            # scaler
-            y_scaler = self.configs['pre'].get('y_scaler')
-            logger.info(f'normalize y data: {y_scaler}')
-            if y_scaler:
-                if y_scaler == 'standard':
-                    self.y_scaler = StandardScaler()
-                elif y_scaler == 'minmax':
-                    self.y_scaler = MinMaxScaler()
-                self.y_scaler.fit(self.Y_train)
-                self.Y_train = self.y_scaler.transform(self.Y_train)
-            else:
-                self.y_scaler = None
         return
 
     def calc_train_data(self):

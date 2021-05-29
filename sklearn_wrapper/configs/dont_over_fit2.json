@@ -10,7 +10,6 @@
     },
     "pre": {
         "train_mode": "clf",
-        "y_scaler": "standard",
         "table": {
             "adhoc_df": {
                 "myfunc": "dont_over_fit2",

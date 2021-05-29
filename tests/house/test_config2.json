@@ -10,7 +10,6 @@
     "pre": {
         "train_mode": "reg",
         "y_pre": "log",
-        "y_scaler": "standard",
         "table": {
             "missing_imputation": true,
             "category_encoding": {

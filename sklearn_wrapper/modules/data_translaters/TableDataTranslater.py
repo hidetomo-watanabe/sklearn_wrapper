@@ -1,5 +1,4 @@
 import importlib
-import math
 from logging import getLogger
 
 from IPython.display import display
@@ -323,30 +322,11 @@ class TableDataTranslater(BaseDataTranslater):
         if y_pre:
             logger.info('translate y_train with %s' % y_pre)
             if y_pre == 'log':
-                self.Y_train = np.array(list(map(math.log, self.Y_train)))
+                self.Y_train = np.array(list(map(np.log, self.Y_train)))
                 self.Y_train = self.Y_train.reshape(-1, 1)
             else:
                 logger.error('NOT IMPLEMENTED FIT Y_PRE: %s' % y_pre)
                 raise Exception('NOT IMPLEMENTED')
-        # scaler
-        y_scaler = self.configs['pre'].get('y_scaler')
-        if y_scaler:
-            logger.info(f'normalize y data: {y_scaler}')
-            if y_scaler == 'standard':
-                self.y_scaler = StandardScaler()
-                # 外れ値対策として、1-99%に限定
-                _y_train_for_fit = \
-                    winsorize(self.Y_train, limits=[0.01, 0.01]).tolist()
-            elif y_scaler == 'maxabs':
-                self.y_scaler = MaxAbsScaler()
-                _y_train_for_fit = self.Y_train
-            else:
-                logger.error('NOT IMPLEMENTED FIT Y_SCALER: %s' % y_scaler)
-                raise Exception('NOT IMPLEMENTED')
-            self.y_scaler.fit(_y_train_for_fit)
-            self.Y_train = self.y_scaler.transform(self.Y_train)
-        else:
-            self.y_scaler = None
         return
 
     def _reduce_dimension(self):

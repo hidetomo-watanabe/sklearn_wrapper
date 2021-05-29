@@ -9,7 +9,6 @@
     },
     "pre": {
         "train_mode": "clf",
-        "y_scaler": "standard",
         "table": {
             "adhoc_df": {
                 "myfunc": "digit",
