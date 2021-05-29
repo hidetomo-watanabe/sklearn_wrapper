@@ -2,15 +2,14 @@ from logging import getLogger
 
 from IPython.display import display
 
-from heamy.dataset import Dataset
-from heamy.estimator import Classifier, Regressor
-from heamy.pipeline import ModelsPipeline
-
 import numpy as np
 
 import pandas as pd
 
-from sklearn.ensemble import VotingClassifier, VotingRegressor
+from sklearn.ensemble import (
+    StackingClassifier,
+    VotingClassifier, VotingRegressor
+)
 from sklearn.metrics import get_scorer
 
 
@@ -41,51 +40,19 @@ class EnsembleTrainer(BaseTrainer):
                     estimators=estimators, weights=weights, n_jobs=-1)
         return voter
 
-    def _get_pipeline(self, single_estimators):
-        # for warning
-        dataset = Dataset(
-            self.toarray_like(self.X_train),
-            self.ravel_like(self.Y_train),
-            self.toarray_like(self.X_test))
-        models = []
-        for modelname, single_estimator in single_estimators:
-            # clf
-            if self.configs['fit']['train_mode'] == 'clf':
-                models.append(
-                    Classifier(
-                        dataset=dataset, estimator=single_estimator.__class__,
-                        parameters=single_estimator.get_params(),
-                        name=modelname))
-            # reg
-            elif self.configs['fit']['train_mode'] == 'reg':
-                models.append(
-                    Regressor(
-                        dataset=dataset, estimator=single_estimator.__class__,
-                        parameters=single_estimator.get_params(),
-                        name=modelname))
-        pipeline = ModelsPipeline(*models)
-        return pipeline
-
-    def _get_stacker(self, pipeline, ensemble_config):
-        if ensemble_config['mode'] == 'stacking':
-            stack_dataset = pipeline.stack(
-                k=ensemble_config['k'], seed=42)
-        elif ensemble_config['mode'] == 'blending':
-            stack_dataset = pipeline.blend(
-                proportion=ensemble_config['proportion'], seed=42)
+    def _get_stacker(self, mode, estimators, ensemble_config):
         if self.configs['fit']['train_mode'] == 'clf':
-            stacker = Classifier(
-                dataset=stack_dataset,
-                estimator=self.get_base_estimator(
-                    ensemble_config['model']).__class__)
+            stacker = StackingClassifier(
+                estimators=estimators,
+                final_estimator=self.get_base_estimator(
+                    ensemble_config['model']),
+                n_jobs=-1)
         elif self.configs['fit']['train_mode'] == 'reg':
-            stacker = Regressor(
-                dataset=stack_dataset,
-                estimator=self.get_base_estimator(
-                    ensemble_config['model']).__class__)
-        stacker.use_cache = False
-        # default predict
-        stacker.probability = False
+            stacker = StackingRegressor(
+                estimators=estimators,
+                final_estimator=self.get_base_estimator(
+                    ensemble_config['model']),
+                n_jobs=-1)
         return stacker
 
     @classmethod
@@ -116,19 +83,16 @@ class EnsembleTrainer(BaseTrainer):
             display(pd.DataFrame(
                     weights.reshape(-1, weights.shape[0]),
                     columns=[_e[0] for _e in single_estimators]))
-            voter = self._get_voter(
+            estimator = self._get_voter(
                 ensemble_config['mode'], single_estimators, weights)
-            Y_train = self.ravel_like(Y_train)
-            voter.fit(X_train, Y_train)
-            estimator = voter
-        elif ensemble_config['mode'] in ['stacking', 'blending']:
-            pipeline = self._get_pipeline(single_estimators)
-            stacker = self._get_stacker(pipeline, ensemble_config)
-            stacker.validate(
-                k=ensemble_config['k'], scorer=scorer._score_func)
-            estimator = stacker
+        elif ensemble_config['mode'] in ['stacking']:
+            estimator = self._get_stacker(
+                ensemble_config['mode'], single_estimators, ensemble_config)
         else:
             logger.error(
                 'NOT IMPLEMENTED ENSEMBLE MODE: %s' % ensemble_config['mode'])
             raise Exception('NOT IMPLEMENTED')
+
+        Y_train = self.ravel_like(Y_train)
+        estimator.fit(X_train, Y_train)
         return estimator

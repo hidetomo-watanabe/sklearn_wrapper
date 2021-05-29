@@ -8,8 +8,6 @@ import numpy as np
 
 import pandas as pd
 
-from sklearn.ensemble import VotingClassifier
-
 
 logger = getLogger('predict').getChild('Outputer')
 if 'ConfigReader' not in globals():
@@ -73,23 +71,6 @@ class Outputer(ConfigReader, LikeWrapper):
             if estimator.__class__ in [MyKerasClassifier] and \
                     Y_train.ndim == 2 and Y_train.shape[1] > 1:
                 Y_pred = estimator.predict_proba(X_target)
-            # ensemble
-            elif estimator.__class__ in [Classifier]:
-                estimator.dataset = dataset
-                # no proba
-                estimator.probability = False
-                Y_pred = estimator.predict()
-                # proba
-                estimator.probability = True
-                # from heamy sorce code, to make Y_pred_proba multi dimension
-                estimator.problem = ''
-                Y_pred_proba = estimator.predict()
-            # voter
-            elif estimator.__class__ in [VotingClassifier]:
-                Y_pred = estimator.predict(X_target)
-                if estimator.voting == 'soft':
-                    Y_pred_proba = estimator.predict_proba(
-                        X_target)
             # single
             else:
                 Y_pred = estimator.predict(X_target)
