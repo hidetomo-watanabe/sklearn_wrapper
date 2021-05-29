@@ -46,7 +46,6 @@
                     "translate_fuga"
                 ]
             },
-            "x_scaler": "standard",
             "dimension_reduction": {
                 "n": 250,
                 "model": "pca"
@@ -102,6 +101,7 @@
         "single_model_configs": [
             {
                 "model": "log_reg",
+                "x_scaler": "standard",
                 "cv_select": "train_all",
                 "n_trials": 1,
                 "fit_params": {

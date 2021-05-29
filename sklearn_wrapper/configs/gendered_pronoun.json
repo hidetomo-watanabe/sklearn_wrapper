@@ -34,8 +34,7 @@
                 },
                 "options": [
                 ]
-            },
-            "x_scaler": "standard"
+            }
         }
     },
     "fit": {
@@ -51,6 +50,7 @@
         "single_model_configs": [
             {
                 "model": "lgb_clf",
+                "x_scaler": "standard",
                 "undersampling": "random",
                 "multiclass": "onevsrest",
                 "n_trials": 50,

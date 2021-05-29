@@ -40,7 +40,6 @@
                     }
                 ]
             },
-            "x_scaler": "standard",
             "adversarial_validation": {
                 "model_config": {
                     "model": "rf_clf",
@@ -72,6 +71,7 @@
         "single_model_configs": [
             {
                 "model": "torch_clf",
+                "x_scaler": "standard",
                 "oversampling": "smote",
                 "cv_select": "train_all",
                 "fit_params": {

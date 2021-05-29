@@ -15,6 +15,7 @@ import scipy.sparse as sp
 from sklearn.metrics import get_scorer
 from sklearn.model_selection import KFold
 from sklearn.multiclass import OneVsOneClassifier, OneVsRestClassifier
+from sklearn.preprocessing import MaxAbsScaler, StandardScaler
 
 
 logger = getLogger('predict').getChild('SingleTrainer')
@@ -106,6 +107,20 @@ class SingleTrainer(BaseTrainer):
             self.base_pipeline.steps.insert(
                 0,
                 ('augmentation', Augmentor(**augmentation)))
+
+        # x_scaler
+        x_scaler = model_config.get('x_scaler')
+        if x_scaler:
+            logger.info(f'x_scaler: {x_scaler}')
+            if x_scaler == 'standard':
+                # to-do: 外れ値対策として、1-99%に限定検討
+                # winsorize(self.X_train, limits=[0.01, 0.01]).tolist()
+                _x_scaler = StandardScaler(with_mean=False)
+            elif x_scaler == 'maxabs':
+                _x_scaler = MaxAbsScaler()
+            self.base_pipeline.steps.insert(
+                0,
+                ('x_scaler', _x_scaler))
 
         # multiclass
         multiclass = model_config.get('multiclass')

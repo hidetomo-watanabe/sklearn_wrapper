@@ -23,8 +23,7 @@
                 },
                 "options": [
                 ]
-            },
-            "x_scaler": "standard"
+            }
         }
     },
     "fit": {
@@ -40,6 +39,7 @@
         "single_model_configs": [
             {
                 "model": "keras_clf",
+                "x_scaler": "standard",
                 "keras_build": "quora",
                 "fit_params": {
                 },

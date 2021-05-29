@@ -41,7 +41,6 @@
                     }
                 ]
             },
-            "x_scaler": "standard",
             "feature_selection": true
         }
     },

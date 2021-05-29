@@ -23,8 +23,7 @@
                 },
                 "options": [
                 ]
-            },
-            "x_scaler": "standard"
+            }
         }
     },
     "fit": {
@@ -39,6 +38,7 @@
         "single_model_configs": [
             {
                 "model": "svc",
+                "x_scaler": "standard",
                 "n_trials": 5,
                 "fit_params": {
                 },

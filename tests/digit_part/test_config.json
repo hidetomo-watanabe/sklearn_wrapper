@@ -24,7 +24,6 @@
                 "options": [
                 ]
             },
-            "x_scaler": "standard",
             "dimension_reduction": {
                 "n": 100,
                 "model": "pca"

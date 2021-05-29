@@ -40,8 +40,7 @@
                         "model": "onehot"
                     }
                 ]
-            },
-            "x_scaler": "standard"
+            }
         }
     },
     "fit": {
@@ -60,6 +59,7 @@
         "single_model_configs": [
             {
                 "model": "g_nb",
+                "x_scaler": "standard",
                 "n_trials": 5,
                 "fit_params": {
                 },

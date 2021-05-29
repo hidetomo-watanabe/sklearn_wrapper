@@ -39,8 +39,7 @@
                         "model": "label"
                     }
                 ]
-            },
-            "x_scaler": "standard"
+            }
         }
     },
     "fit": {

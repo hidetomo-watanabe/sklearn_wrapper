@@ -19,7 +19,6 @@
                 "options": [
                 ]
             },
-            "x_scaler": "standard",
             "dimension_reduction": {
                 "n": 90,
                 "model": "pca"
@@ -38,6 +37,7 @@
         "single_model_configs": [
             {
                 "model": "svr",
+                "x_scaler": "standard",
                 "fit_params": {
                 },
                 "params": {

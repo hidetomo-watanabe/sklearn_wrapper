@@ -39,8 +39,7 @@
                         "model": "target"
                     }
                 ]
-            },
-            "x_scaler": "standard"
+            }
         }
     },
     "fit": {
