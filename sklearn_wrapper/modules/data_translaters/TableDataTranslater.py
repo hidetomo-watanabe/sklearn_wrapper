@@ -316,15 +316,18 @@ class TableDataTranslater(BaseDataTranslater):
 
         if model == 'ks':
             logger.info('reduce dimension with %s' % model)
+            _indexes = []
             for i, col in enumerate(self.feature_columns):
                 p_val = ks_2samp(self.X_train[:, i], self.X_test[:, i])[1]
-                if p_val < 0.1:
+                if p_val < 0.05:
                     logger.info(
                         'Kolmogorov-Smirnov not same distriburion: %s'
                         % self.feature_columns[i])
-                    self.X_train = np.delete(self.X_train, i, 1)
-                    self.X_test = np.delete(self.X_test, i, 1)
-                    del self.feature_columns[i]
+                    _indexes.append(i)
+            for i in _indexes:
+                self.X_train = np.delete(self.X_train, i, 1)
+                self.X_test = np.delete(self.X_test, i, 1)
+                del self.feature_columns[i]
             return
 
         logger.info(
