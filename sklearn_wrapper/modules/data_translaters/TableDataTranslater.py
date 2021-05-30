@@ -289,21 +289,6 @@ class TableDataTranslater(BaseDataTranslater):
             self.Y_train = self.Y_train.astype(np.float32)
         return
 
-    def _normalize_y(self):
-        if self.configs['pre']['train_mode'] != 'reg':
-            return
-        # pre
-        y_pre = self.configs['pre'].get('y_pre')
-        if y_pre:
-            logger.info('translate y_train with %s' % y_pre)
-            if y_pre == 'log':
-                self.Y_train = np.array(list(map(np.log, self.Y_train)))
-                self.Y_train = self.Y_train.reshape(-1, 1)
-            else:
-                logger.error('NOT IMPLEMENTED FIT Y_PRE: %s' % y_pre)
-                raise Exception('NOT IMPLEMENTED')
-        return
-
     def _reduce_dimension(self):
         di_config = self.configs['pre']['table'].get('dimension_reduction')
         if not di_config:
@@ -539,8 +524,9 @@ class TableDataTranslater(BaseDataTranslater):
         self._calc_base_train_data()
         self._translate_adhoc_ndarray()
         self._to_sparse()
-        self._normalize_y()
+        self._translate_y_pre()
         self._reduce_dimension()
+        # validation
         self._select_feature()
         self._extract_with_ks_validation()
         self._extract_with_adversarial_validation()

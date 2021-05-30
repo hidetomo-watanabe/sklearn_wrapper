@@ -90,7 +90,9 @@ class Outputer(ConfigReader, LikeWrapper):
             raise Exception('NOT IMPLEMENTED')
         return Y_pred, Y_pred_proba
 
-    def _fix_y_pre(self):
+    def _inverse_translate_y_pre(self):
+        if self.configs['pre']['train_mode'] != 'reg':
+            return
         y_pre = self.configs['pre'].get('y_pre')
         if not y_pre:
             return
@@ -161,7 +163,7 @@ class Outputer(ConfigReader, LikeWrapper):
             train_mode=self.configs['fit']['train_mode'],
             estimator=self.estimator, X_train=self.X_train,
             Y_train=self.Y_train, X_target=self.X_test)
-        self._fix_y_pre()
+        self._inverse_translate_y_pre()
         self._calc_base_predict_df()
         self._calc_post_predict_df()
         self._round_predict_df()

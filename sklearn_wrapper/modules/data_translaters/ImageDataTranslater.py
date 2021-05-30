@@ -60,23 +60,8 @@ class ImageDataTranslater(BaseDataTranslater):
         self.feature_columns = [img_path_col]
         return
 
-    def _normalize_data_for_model(self):
-        # y
-        if self.configs['pre']['train_mode'] == 'reg':
-            # pre
-            y_pre = self.configs['pre'].get('y_pre')
-            if y_pre:
-                logger.info('translate y_train with %s' % y_pre)
-                if y_pre == 'log':
-                    self.Y_train = np.array(list(map(np.log, self.Y_train)))
-                    self.Y_train = self.Y_train.reshape(-1, 1)
-                else:
-                    logger.error('NOT IMPLEMENTED FIT Y_PRE: %s' % y_pre)
-                    raise Exception('NOT IMPLEMENTED')
-        return
-
     def calc_train_data(self):
         self._calc_raw_data()
         self._calc_base_train_data()
-        self._normalize_data_for_model()
+        self._translate_y_pre()
         return

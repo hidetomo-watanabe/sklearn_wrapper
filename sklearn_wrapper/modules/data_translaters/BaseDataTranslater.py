@@ -86,3 +86,19 @@ class BaseDataTranslater(ConfigReader, LikeWrapper):
     def get_post_processers(self):
         output = {}
         return output
+
+    def _translate_y_pre(self):
+        if self.configs['pre']['train_mode'] != 'reg':
+            return
+        y_pre = self.configs['pre'].get('y_pre')
+        if not y_pre:
+            return
+
+        logger.info('translate y_train with %s' % y_pre)
+        if y_pre == 'log':
+            self.Y_train = np.array(list(map(np.log, self.Y_train)))
+            self.Y_train = self.Y_train.reshape(-1, 1)
+        else:
+            logger.error('NOT IMPLEMENTED FIT Y_PRE: %s' % y_pre)
+            raise Exception('NOT IMPLEMENTED')
+        return
