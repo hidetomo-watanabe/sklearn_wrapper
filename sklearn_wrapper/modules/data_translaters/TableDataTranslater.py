@@ -314,22 +314,6 @@ class TableDataTranslater(BaseDataTranslater):
         if n == 'all':
             n = self.X_train.shape[1]
 
-        if model == 'ks':
-            logger.info('reduce dimension with %s' % model)
-            _indexes = []
-            for i, col in enumerate(self.feature_columns):
-                p_val = ks_2samp(self.X_train[:, i], self.X_test[:, i])[1]
-                if p_val < 0.05:
-                    logger.info(
-                        'Kolmogorov-Smirnov not same distriburion: %s'
-                        % self.feature_columns[i])
-                    _indexes.append(i)
-            for i in _indexes:
-                self.X_train = np.delete(self.X_train, i, 1)
-                self.X_test = np.delete(self.X_test, i, 1)
-                del self.feature_columns[i]
-            return
-
         logger.info(
             'reduce dimension %s to %s with %s'
             % (self.X_train.shape[1], n, model))
@@ -399,6 +383,28 @@ class TableDataTranslater(BaseDataTranslater):
         self.X_train = self.X_train[:, features]
         self.X_test = self.X_test[:, features]
         self.feature_columns = list(np.array(self.feature_columns)[features])
+        return
+
+    def _extract_with_ks_validation(self):
+        ks = self.configs['pre']['table'].get('ks_validation')
+        if not ks:
+            return
+
+        logger.info('extract columns with Kolmogorov-Smirnov validation')
+        _indexes = []
+        for i, col in enumerate(self.feature_columns):
+            p_val = ks_2samp(
+                self.toarray_like(self.X_train)[:, i],
+                self.toarray_like(self.X_test)[:, i])[1]
+            if p_val < 0.05:
+                logger.info(
+                    'Kolmogorov-Smirnov not same distriburion: %s'
+                    % self.feature_columns[i])
+            else:
+                _indexes.append(i)
+        self.X_train = self.X_train[:, _indexes]
+        self.X_test = self.X_test[:, _indexes]
+        self.feature_columns = list(np.array(self.feature_columns)[_indexes])
         return
 
     def _extract_with_adversarial_validation(self):
@@ -536,6 +542,7 @@ class TableDataTranslater(BaseDataTranslater):
         self._normalize_y()
         self._reduce_dimension()
         self._select_feature()
+        self._extract_with_ks_validation()
         self._extract_with_adversarial_validation()
         self._extract_with_no_anomaly_validation()
         self._reshape_x_for_keras()

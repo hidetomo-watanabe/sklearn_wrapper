@@ -51,6 +51,7 @@
                 "model": "pca"
             },
             "feature_selection": true,
+            "ks_validation": true,
             "adversarial_validation": {
                 "model_config": {
                     "model": "rf_clf",
