@@ -41,7 +41,10 @@
                     }
                 ]
             },
-            "feature_selection": "boruta"
+            "feature_selection": {
+                "n": "auto",
+                "model": "boruta"
+            }
         }
     },
     "fit": {

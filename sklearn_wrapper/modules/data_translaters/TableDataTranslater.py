@@ -16,9 +16,12 @@ from scipy.stats import ks_2samp
 
 from sklearn.ensemble import IsolationForest
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.feature_selection import RFE
 from sklearn.metrics import roc_auc_score
 
 from tqdm import tqdm
+
+from xgboost import XGBClassifier
 
 logger = getLogger('predict').getChild('TableDataTranslater')
 if 'BaseDataTranslater' not in globals():
@@ -284,14 +287,20 @@ class TableDataTranslater(BaseDataTranslater):
         if not selection:
             return
 
-        if selection == 'boruta':
-            rf = RandomForestClassifier(
-                class_weight='balanced', max_depth=5, n_jobs=-1)
+        n = selection['n']
+        model = selection['model']
+        if model == 'boruta':
             selector = BorutaPy(
-                rf, n_estimators='auto', verbose=2, random_state=42)
+                estimator=RandomForestClassifier(
+                    class_weight='balanced', max_depth=5, n_jobs=-1),
+                n_estimators=n, verbose=2, random_state=42)
+        elif model == 'rfe':
+            selector = RFE(
+                estimator=XGBClassifier(random_state=42, n_jobs=-1),
+                n_features_to_select=n)
         else:
             logger.error(
-                'NOT IMPLEMENTED FEATURE SELECTION: %s' % selection)
+                'NOT IMPLEMENTED FEATURE SELECTION: %s' % model)
             raise Exception('NOT IMPLEMENTED')
 
         selector.fit(self.X_train, self.ravel_like(self.Y_train))

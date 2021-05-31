@@ -46,7 +46,10 @@
                     "translate_fuga"
                 ]
             },
-            "feature_selection": "boruta",
+            "feature_selection": {
+                "n": 10,
+                "model": "boruta"
+            },
             "ks_validation": true,
             "adversarial_validation": {
                 "model_config": {

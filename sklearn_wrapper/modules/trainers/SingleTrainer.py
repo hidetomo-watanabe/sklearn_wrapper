@@ -14,7 +14,6 @@ import scipy.sparse as sp
 
 from sklearn.cluster import KMeans
 from sklearn.decomposition import NMF, PCA, TruncatedSVD
-from sklearn.feature_selection import RFE
 from sklearn.metrics import get_scorer
 from sklearn.model_selection import KFold
 from sklearn.multiclass import OneVsOneClassifier, OneVsRestClassifier
@@ -144,13 +143,6 @@ class SingleTrainer(BaseTrainer):
                 _pipeline.append((
                     'dimension_reduction',
                     NMF(n_components=n, random_state=42)
-                ))
-            elif model == 'rfe':
-                _pipeline.append((
-                    'dimension_reduction',
-                    RFE(
-                        n_features_to_select=n,
-                        estimator=XGBClassifier(random_state=42, n_jobs=-1))
                 ))
             else:
                 logger.error(

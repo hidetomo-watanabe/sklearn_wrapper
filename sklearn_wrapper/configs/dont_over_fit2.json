@@ -60,7 +60,7 @@
                 "model": "lasso",
                 "dimension_reduction": {
                     "n": 280,
-                    "model": "rfe"
+                    "model": "pca"
                 },
                 "x_scaler": "standard",
                 "n_trials": 10,
