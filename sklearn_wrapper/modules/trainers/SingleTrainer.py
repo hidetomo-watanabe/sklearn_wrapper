@@ -47,7 +47,7 @@ class SingleTrainer(BaseTrainer):
     def _to_pipeline_params(self, pre, params):
         return {f'{pre}__{k}': v for k, v in params.items()}
 
-    def _get_model_params(self, model_config, nn_func, X_train, Y_train):
+    def _get_model_params(self, model_config):
         # model
         model = model_config['model']
         logger.info('model: %s' % model)
@@ -55,26 +55,70 @@ class SingleTrainer(BaseTrainer):
         modelname = model_config.get('modelname')
         if modelname:
             logger.info('modelname: %s' % modelname)
-        create_nn_model = None
-        if model in ['keras_clf', 'keras_reg', 'torch_clf', 'torch_reg']:
-            if self.kernel:
-                create_nn_model = self.create_nn_model
+
+        # params
+        params = model_config.get('params', {})
+        self.params = self._to_pipeline_params(self.model, params)
+
+        # fit_params
+        fit_params = model_config.get('fit_params', {})
+        if self.model in ['keras_clf', 'keras_reg']:
+            fit_params['callbacks'] = []
+            if fit_params.get('reduce_lr'):
+                fit_params['callbacks'].append(
+                    ReduceLROnPlateau(**fit_params['reduce_lr']))
+                del fit_params['reduce_lr']
+            if fit_params.get('early_stopping'):
+                fit_params['callbacks'].append(
+                    EarlyStopping(**fit_params['early_stopping']))
+                del fit_params['early_stopping']
+        self.fit_params = self._to_pipeline_params(self.model, fit_params)
+
+        # cv
+        self.cv_select = model_config.get('cv_select', 'nearest_mean')
+        self.n_trials = model_config.get('n_trials')
+
+        # multiclass
+        # final estimatorに学習後追加
+        multiclass = model_config.get('multiclass')
+        if multiclass:
+            logger.info('multiclass: %s' % multiclass)
+            if multiclass == 'onevsone':
+                multiclass = OneVsOneClassifier
+            elif multiclass == 'onevsrest':
+                multiclass = OneVsRestClassifier
             else:
-                myfunc = importlib.import_module(
-                    'modules.myfuncs.%s' % nn_func)
-                create_nn_model = myfunc.create_nn_model
-        self.base_pipeline = Pipeline([(self.model, self.get_base_estimator(
-            model, create_nn_model=create_nn_model))])
+                logger.error(
+                    f'NOT IMPLEMENTED MULTICLASS: {multiclass}')
+                raise Exception('NOT IMPLEMENTED')
+        self.multiclass = multiclass
+
+        return
+
+    def _get_base_pipeline(self, model_config, nn_func):
+        _pipeline = []
+
+        # x_scaler
+        x_scaler = model_config.get('x_scaler')
+        if x_scaler:
+            logger.info(f'x_scaler: {x_scaler}')
+            if x_scaler == 'standard':
+                # to-do: 外れ値対策として、1-99%に限定検討
+                # winsorize(self.X_train, limits=[0.01, 0.01]).tolist()
+                _x_scaler = StandardScaler(with_mean=False)
+            elif x_scaler == 'maxabs':
+                _x_scaler = MaxAbsScaler()
+            _pipeline.append(('x_scaler', _x_scaler))
 
         # sampling
         undersampling = model_config.get('undersampling')
         if undersampling:
             logger.info(f'undersampling: {undersampling}')
             if undersampling == 'random':
-                self.base_pipeline.steps.insert(
-                    0,
+                _pipeline.append(
                     ('undersampling', RandomUnderSampler(random_state=42)))
                 undersampling = None
+            # final estimatorに学習後追加
             elif undersampling == 'bagging':
                 undersampling = BalancedBaggingClassifier
             elif undersampling == 'adaboost':
@@ -89,12 +133,10 @@ class SingleTrainer(BaseTrainer):
         if oversampling:
             logger.info(f'oversampling: {oversampling}')
             if oversampling == 'random':
-                self.base_pipeline.steps.insert(
-                    0,
+                _pipeline.append(
                     ('oversampling', RandomOverSampler(random_state=42)))
             elif oversampling == 'smote':
-                self.base_pipeline.steps.insert(
-                    0,
+                _pipeline.append(
                     ('oversampling', SMOTE(random_state=42)))
             else:
                 logger.error(
@@ -104,61 +146,25 @@ class SingleTrainer(BaseTrainer):
         augmentation = model_config.get('augmentation')
         if augmentation:
             logger.info(f'augmentation: {augmentation}')
-            self.base_pipeline.steps.insert(
-                0,
+            _pipeline.append(
                 ('augmentation', Augmentor(**augmentation)))
 
-        # x_scaler
-        x_scaler = model_config.get('x_scaler')
-        if x_scaler:
-            logger.info(f'x_scaler: {x_scaler}')
-            if x_scaler == 'standard':
-                # to-do: 外れ値対策として、1-99%に限定検討
-                # winsorize(self.X_train, limits=[0.01, 0.01]).tolist()
-                _x_scaler = StandardScaler(with_mean=False)
-            elif x_scaler == 'maxabs':
-                _x_scaler = MaxAbsScaler()
-            self.base_pipeline.steps.insert(
-                0,
-                ('x_scaler', _x_scaler))
-
-        # multiclass
-        multiclass = model_config.get('multiclass')
-        if multiclass:
-            logger.info('multiclass: %s' % multiclass)
-            if multiclass == 'onevsone':
-                multiclass = OneVsOneClassifier
-            elif multiclass == 'onevsrest':
-                multiclass = OneVsRestClassifier
+        # model
+        create_nn_model = None
+        if self.model in ['keras_clf', 'keras_reg', 'torch_clf', 'torch_reg']:
+            if self.kernel:
+                create_nn_model = self.create_nn_model
             else:
-                logger.error(
-                    f'NOT IMPLEMENTED MULTICLASS: {multiclass}')
-                raise Exception('NOT IMPLEMENTED')
-        self.multiclass = multiclass
+                myfunc = importlib.import_module(
+                    'modules.myfuncs.%s' % nn_func)
+                create_nn_model = myfunc.create_nn_model
+        _pipeline.append((
+            self.model,
+            self.get_base_estimator(
+                self.model, create_nn_model=create_nn_model)
+        ))
 
-        # fit_params
-        fit_params = model_config.get('fit_params', {})
-        if model in ['keras_clf', 'keras_reg']:
-            fit_params['callbacks'] = []
-            if fit_params.get('reduce_lr'):
-                fit_params['callbacks'].append(
-                    ReduceLROnPlateau(**fit_params['reduce_lr']))
-                del fit_params['reduce_lr']
-            if fit_params.get('early_stopping'):
-                fit_params['callbacks'].append(
-                    EarlyStopping(**fit_params['early_stopping']))
-                del fit_params['early_stopping']
-        self.fit_params = self._to_pipeline_params(self.model, fit_params)
-
-        # params
-        params = model_config.get('params', {})
-        self.params = self._to_pipeline_params(self.model, params)
-
-        # other
-        self.cv_select = model_config.get('cv_select', 'nearest_mean')
-        self.n_trials = model_config.get('n_trials')
-
-        return
+        return Pipeline(_pipeline)
 
     def _fit(self, scorer, train_cv, val_cv, X_train, Y_train):
         # for param tuning, use train_cv
@@ -288,7 +294,8 @@ class SingleTrainer(BaseTrainer):
             X_train = self.X_train
         if Y_train is None:
             Y_train = self.Y_train
-        self._get_model_params(model_config, nn_func, X_train, Y_train)
+        self._get_model_params(model_config)
+        self.base_pipeline = self._get_base_pipeline(model_config, nn_func)
 
         # fit
         logger.info('fit')
