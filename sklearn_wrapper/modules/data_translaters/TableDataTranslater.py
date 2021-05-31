@@ -284,19 +284,6 @@ class TableDataTranslater(BaseDataTranslater):
             self.Y_train = self.Y_train.astype(np.float32)
         return
 
-    def _to_sparse(self):
-        if self.X_train.dtype == 'object':
-            return
-
-        if 'g_nb' not in [
-            _c['model'] for _c
-            in self.configs['fit']['single_model_configs']
-        ]:
-            logger.info('set x to sparse')
-            self.X_train = sp.csr_matrix(self.X_train)
-            self.X_test = sp.csr_matrix(self.X_test)
-        return
-
     def _reduce_dimension(self):
         di_config = self.configs['pre']['table'].get('dimension_reduction')
         if not di_config:
@@ -310,8 +297,8 @@ class TableDataTranslater(BaseDataTranslater):
         logger.info(
             'reduce dimension %s to %s with %s'
             % (self.X_train.shape[1], n, model))
-        X_train = self.toarray_like(self.X_train)
-        X_test = self.toarray_like(self.X_test)
+        X_train = self.X_train
+        X_test = self.X_test
 
         if model == 'pca':
             model_obj = PCA(n_components=n, random_state=42)
@@ -366,9 +353,7 @@ class TableDataTranslater(BaseDataTranslater):
             class_weight='balanced', max_depth=5, n_jobs=-1)
         selector = BorutaPy(
             rf, n_estimators='auto', verbose=2, random_state=42)
-        selector.fit(
-            self.toarray_like(self.X_train),
-            self.ravel_like(self.Y_train))
+        selector.fit(self.X_train, self.ravel_like(self.Y_train))
         features = selector.support_
         logger.info(
             f'select feature {self.X_train.shape[1]}'
@@ -386,9 +371,7 @@ class TableDataTranslater(BaseDataTranslater):
         logger.info('extract columns with Kolmogorov-Smirnov validation')
         _indexes = []
         for i, col in enumerate(self.feature_columns):
-            p_val = ks_2samp(
-                self.toarray_like(self.X_train)[:, i],
-                self.toarray_like(self.X_test)[:, i])[1]
+            p_val = ks_2samp(self.X_train[:, i], self.X_test[:, i])[1]
             if p_val < 0.05:
                 logger.info(
                     'Kolmogorov-Smirnov not same distriburion: %s'
@@ -452,14 +435,12 @@ class TableDataTranslater(BaseDataTranslater):
         if adversarial.get('add_column'):
             logger.info('add adversarial_test_proba column to X')
             self.feature_columns.append('adversarial_test_proba')
-            self.X_train = sp.hstack(
+            self.X_train = np.hstack(
                 (self.X_train,
-                 sp.csr_matrix(adv_train_preds.reshape(-1, 1))),
-                format='csr')
-            self.X_test = sp.hstack(
+                 np.array(adv_train_preds.reshape(-1, 1))))
+            self.X_test = np.hstack(
                 (self.X_test,
-                 sp.csr_matrix(adv_test_preds.reshape(-1, 1))),
-                format='csr')
+                 np.array(adv_test_preds.reshape(-1, 1))))
 
         threshold = adversarial.get('threshold', 0.5)
         org_len = self.X_train.shape[0]
@@ -488,14 +469,12 @@ class TableDataTranslater(BaseDataTranslater):
         if no_anomaly.get('add_column'):
             logger.info('add no_anomaly_score column to X')
             self.feature_columns.append('no_anomaly_score')
-            self.X_train = sp.hstack(
+            self.X_train = np.hstack(
                 (self.X_train,
-                 sp.csr_matrix(train_scores.reshape(-1, 1))),
-                format='csr')
-            self.X_test = sp.hstack(
+                 np.array(train_scores.reshape(-1, 1))))
+            self.X_test = np.hstack(
                 (self.X_test,
-                 sp.csr_matrix(test_scores.reshape(-1, 1))),
-                format='csr')
+                 np.array(test_scores.reshape(-1, 1))))
 
         org_len = self.X_train.shape[0]
         self.X_train = self.X_train[preds == 1]
@@ -521,6 +500,23 @@ class TableDataTranslater(BaseDataTranslater):
             raise Exception('NOT IMPLEMENTED')
         return
 
+    def _to_sparse(self):
+        sparse = self.configs['pre']['table'].get('sparse')
+        if not sparse:
+            return
+
+        if self.X_train.dtype == 'object':
+            return
+
+        if 'g_nb' not in [
+            _c['model'] for _c
+            in self.configs['fit']['single_model_configs']
+        ]:
+            logger.info('set x to sparse')
+            self.X_train = sp.csr_matrix(self.X_train)
+            self.X_test = sp.csr_matrix(self.X_test)
+        return
+
     def calc_train_data(self):
         # df
         self._calc_raw_data()
@@ -533,7 +529,6 @@ class TableDataTranslater(BaseDataTranslater):
         self._translate_adhoc_ndarray()
         self._to_float32()
         self._translate_y_pre()
-        self._to_sparse()
         self._reduce_dimension()
         # validation
         self._select_feature()
@@ -541,4 +536,5 @@ class TableDataTranslater(BaseDataTranslater):
         self._extract_with_adversarial_validation()
         self._extract_with_no_anomaly_validation()
         self._reshape_x_for_keras()
+        self._to_sparse()
         return

@@ -71,7 +71,8 @@
                 "contamination": "auto",
                 "add_column": false
             },
-            "reshape_for_keras": "lstm"
+            "reshape_for_keras": "lstm",
+            "sparse": true
         },
         "image": {
             "train_img_dir": "/path",
