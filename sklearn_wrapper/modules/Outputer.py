@@ -1,9 +1,6 @@
 import importlib
 from logging import getLogger
 
-from heamy.dataset import Dataset
-from heamy.estimator import Classifier, Regressor
-
 import numpy as np
 
 import pandas as pd
@@ -57,11 +54,6 @@ class Outputer(ConfigReader, LikeWrapper):
     ):
         X_train, Y_train, X_target = \
             self._trans_xy_for_predict(estimator, X_train, Y_train, X_target)
-        # for ensemble
-        if estimator.__class__ in [Classifier, Regressor]:
-            dataset = Dataset(
-                self.toarray_like(X_train), Y_train,
-                self.toarray_like(X_target))
 
         Y_pred_proba = None
         # clf
@@ -70,7 +62,6 @@ class Outputer(ConfigReader, LikeWrapper):
             if estimator.__class__ in [MyKerasClassifier] and \
                     Y_train.ndim == 2 and Y_train.shape[1] > 1:
                 Y_pred = estimator.predict_proba(X_target)
-            # single
             else:
                 Y_pred = estimator.predict(X_target)
                 if hasattr(estimator, 'predict_proba'):
@@ -78,13 +69,7 @@ class Outputer(ConfigReader, LikeWrapper):
                         X_target)
         # reg
         elif train_mode == 'reg':
-            # ensemble
-            if estimator.__class__ in [Regressor]:
-                estimator.dataset = dataset
-                Y_pred = estimator.predict()
-            # single
-            else:
-                Y_pred = estimator.predict(X_target)
+            Y_pred = estimator.predict(X_target)
         else:
             logger.error('TRAIN MODE SHOULD BE clf OR reg')
             raise Exception('NOT IMPLEMENTED')
