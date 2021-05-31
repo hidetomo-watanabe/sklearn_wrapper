@@ -276,17 +276,25 @@ class TableDataTranslater(BaseDataTranslater):
                 method_name)(self.X_train, self.X_test, self.feature_columns)
         return
 
-    def _to_sparse(self):
+    def _to_float32(self):
         if self.X_train.dtype != 'object':
-            if 'g_nb' not in [
-                _c['model'] for _c
-                in self.configs['fit']['single_model_configs']
-            ]:
-                logger.info('set x to sparse')
-                self.X_train = sp.csr_matrix(self.X_train.astype(np.float32))
-                self.X_test = sp.csr_matrix(self.X_test.astype(np.float32))
+            self.X_train = self.X_train.astype(np.float32)
+            self.X_test = self.X_test.astype(np.float32)
         if self.configs['pre']['train_mode'] == 'reg':
             self.Y_train = self.Y_train.astype(np.float32)
+        return
+
+    def _to_sparse(self):
+        if self.X_train.dtype == 'object':
+            return
+
+        if 'g_nb' not in [
+            _c['model'] for _c
+            in self.configs['fit']['single_model_configs']
+        ]:
+            logger.info('set x to sparse')
+            self.X_train = sp.csr_matrix(self.X_train)
+            self.X_test = sp.csr_matrix(self.X_test)
         return
 
     def _reduce_dimension(self):
@@ -523,8 +531,9 @@ class TableDataTranslater(BaseDataTranslater):
         # ndarray
         self._calc_base_train_data()
         self._translate_adhoc_ndarray()
-        self._to_sparse()
+        self._to_float32()
         self._translate_y_pre()
+        self._to_sparse()
         self._reduce_dimension()
         # validation
         self._select_feature()
