@@ -284,10 +284,16 @@ class TableDataTranslater(BaseDataTranslater):
         if not selection:
             return
 
-        rf = RandomForestClassifier(
-            class_weight='balanced', max_depth=5, n_jobs=-1)
-        selector = BorutaPy(
-            rf, n_estimators='auto', verbose=2, random_state=42)
+        if selection == 'boruta':
+            rf = RandomForestClassifier(
+                class_weight='balanced', max_depth=5, n_jobs=-1)
+            selector = BorutaPy(
+                rf, n_estimators='auto', verbose=2, random_state=42)
+        else:
+            logger.error(
+                'NOT IMPLEMENTED FEATURE SELECTION: %s' % selection)
+            raise Exception('NOT IMPLEMENTED')
+
         selector.fit(self.X_train, self.ravel_like(self.Y_train))
         features = selector.support_
         logger.info(

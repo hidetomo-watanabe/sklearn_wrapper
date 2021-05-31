@@ -59,7 +59,7 @@ class TestPredict(unittest.TestCase):
         assert_frame_equal(
             result['Y_pred_df'],
             pd.read_csv(f'{TEST_PATH}/titanic/output7.csv'))
-        # feature_selection
+        # feature_selection(boruta)
         result = predict.main(f'{TEST_PATH}/titanic/test_config8.json')
         assert_frame_equal(
             result['Y_pred_df'],
@@ -74,12 +74,12 @@ class TestPredict(unittest.TestCase):
         assert_frame_equal(
             result['Y_pred_df'],
             pd.read_csv(f'{TEST_PATH}/titanic/output10.csv'))
-        # undersampling bagging
+        # undersampling(bagging)
         result = predict.main(f'{TEST_PATH}/titanic/test_config11.json')
         assert_frame_equal(
             result['Y_pred_df'],
             pd.read_csv(f'{TEST_PATH}/titanic/output11.csv'))
-        # undersampling random
+        # undersampling(random)
         result = predict.main(f'{TEST_PATH}/titanic/test_config12.json')
         assert_frame_equal(
             result['Y_pred_df'],

@@ -46,7 +46,7 @@
                     "translate_fuga"
                 ]
             },
-            "feature_selection": true,
+            "feature_selection": "boruta",
             "ks_validation": true,
             "adversarial_validation": {
                 "model_config": {

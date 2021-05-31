@@ -41,7 +41,7 @@
                     }
                 ]
             },
-            "feature_selection": true
+            "feature_selection": "boruta"
         }
     },
     "fit": {
