@@ -109,8 +109,7 @@
                     "early_stopping_rounds": 1000
                 },
                 "params": {
-                    "metric": ["auc"],
-                    "num_rounds": [5000],
+                    "n_estimators": [5000],
                     "learning_rate": [0.05],
                     "max_depth": [3],
                     "min_data_in_leaf": [12],
