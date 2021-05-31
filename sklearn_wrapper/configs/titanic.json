@@ -32,10 +32,6 @@
                         "model": "onehot_with_test"
                     }
                 ]
-            },
-            "dimension_reduction": {
-                "n": 750,
-                "model": "pca"
             }
         }
     },
@@ -51,6 +47,10 @@
         "single_model_configs": [
             {
                 "model": "log_reg",
+                "dimension_reduction": {
+                    "n": 750,
+                    "model": "pca"
+                },
                 "x_scaler": "standard",
                 "fit_params": {
                 },

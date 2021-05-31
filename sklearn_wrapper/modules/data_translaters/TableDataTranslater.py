@@ -14,16 +14,11 @@ import pandas as pd
 import scipy.sparse as sp
 from scipy.stats import ks_2samp
 
-from sklearn.cluster import KMeans
-from sklearn.decomposition import NMF, PCA, TruncatedSVD
 from sklearn.ensemble import IsolationForest
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.feature_selection import RFE
 from sklearn.metrics import roc_auc_score
 
 from tqdm import tqdm
-
-from xgboost import XGBClassifier
 
 logger = getLogger('predict').getChild('TableDataTranslater')
 if 'BaseDataTranslater' not in globals():
@@ -284,66 +279,6 @@ class TableDataTranslater(BaseDataTranslater):
             self.Y_train = self.Y_train.astype(np.float32)
         return
 
-    def _reduce_dimension(self):
-        di_config = self.configs['pre']['table'].get('dimension_reduction')
-        if not di_config:
-            return
-
-        n = di_config['n']
-        model = di_config['model']
-        if n == 'all':
-            n = self.X_train.shape[1]
-
-        logger.info(
-            'reduce dimension %s to %s with %s'
-            % (self.X_train.shape[1], n, model))
-        X_train = self.X_train
-        X_test = self.X_test
-
-        if model == 'pca':
-            model_obj = PCA(n_components=n, random_state=42)
-            model_obj.fit(X_train)
-            ratios = model_obj.explained_variance_ratio_
-            logger.info('pca_ratio sum: %s' % sum(ratios))
-            if len(np.unique(ratios)) != len(ratios):
-                logger.warning(
-                    'PCA VARIANCE RATIO IS NOT UNIQUE, SO NOT REPRODUCIBLE')
-            # logger.info('pca_ratio: %s' % ratios)
-        elif model == 'svd':
-            model_obj = TruncatedSVD(n_components=n, random_state=42)
-            model_obj.fit(X_train)
-            logger.info('svd_ratio sum: %s' % sum(
-                model_obj.explained_variance_ratio_))
-            logger.info('svd_ratio: %s' % model_obj.explained_variance_ratio_)
-        elif model == 'kmeans':
-            model_obj = KMeans(n_clusters=n, random_state=42, n_jobs=-1)
-            model_obj.fit(X_train)
-            logger.info(
-                'kmeans inertia_: %s' % model_obj.inertia_)
-        elif model == 'nmf':
-            model_obj = NMF(n_components=n, random_state=42)
-            model_obj.fit(X_train)
-            logger.info(
-                'nmf reconstruction_err_: %s' % model_obj.reconstruction_err_)
-        elif model == 'rfe':
-            # for warning
-            Y_train = self.ravel_like(self.Y_train)
-            model_obj = RFE(
-                n_features_to_select=n,
-                estimator=XGBClassifier(random_state=42, n_jobs=-1))
-            model_obj.fit(X_train, Y_train)
-        else:
-            logger.error(
-                'NOT IMPLEMENTED DIMENSION REDUCTION MODEL: %s' % model)
-            raise Exception('NOT IMPLEMENTED')
-
-        self.X_train = model_obj.transform(X_train)
-        self.X_test = model_obj.transform(X_test)
-        self.feature_columns = list(map(
-            lambda x: '%s_%d' % (model, x), range(n)))
-        self.dimension_reduction_model = model_obj
-        return
-
     def _select_feature(self):
         selection = self.configs['pre']['table'].get('feature_selection')
         if not selection:
@@ -460,8 +395,7 @@ class TableDataTranslater(BaseDataTranslater):
         if not contamination and int(contamination) != 0:
             contamination = 'auto'
         isf = IsolationForest(
-            contamination=contamination,
-            behaviour='new', random_state=42, n_jobs=-1)
+            contamination=contamination, random_state=42, n_jobs=-1)
         preds = isf.fit_predict(self.X_train, self.Y_train)
         train_scores = isf.decision_function(self.X_train)
         test_scores = isf.decision_function(self.X_test)
@@ -529,7 +463,6 @@ class TableDataTranslater(BaseDataTranslater):
         self._translate_adhoc_ndarray()
         self._to_float32()
         self._translate_y_pre()
-        self._reduce_dimension()
         # validation
         self._select_feature()
         self._extract_with_ks_validation()

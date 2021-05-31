@@ -18,10 +18,6 @@
                 },
                 "options": [
                 ]
-            },
-            "dimension_reduction": {
-                "n": 100,
-                "model": "pca"
             }
         }
     },
@@ -38,6 +34,10 @@
         "single_model_configs": [
             {
                 "model": "keras_reg",
+                "dimension_reduction": {
+                    "n": 100,
+                    "model": "pca"
+                },
                 "x_scaler": "standard",
                 "cv_select": "train_all",
                 "fit_params": {

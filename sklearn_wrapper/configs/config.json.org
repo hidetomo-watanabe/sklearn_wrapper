@@ -46,10 +46,6 @@
                     "translate_fuga"
                 ]
             },
-            "dimension_reduction": {
-                "n": 250,
-                "model": "pca"
-            },
             "feature_selection": true,
             "ks_validation": true,
             "adversarial_validation": {
@@ -152,6 +148,10 @@
             },
             {
                 "model": "lgb_clf",
+                "dimension_reduction": {
+                    "n": 250,
+                    "model": "pca"
+                },
                 "multiclass": false,
                 "n_trials": 1,
                 "fit_params": {

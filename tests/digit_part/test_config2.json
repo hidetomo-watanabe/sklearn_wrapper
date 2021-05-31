@@ -17,16 +17,9 @@
                 ]
             },
             "missing_imputation": true,
-            "category_encoding": {
-                "default": {
-                    "model": "onehot"
-                },
-                "options": [
-                ]
-            },
-            "dimension_reduction": {
-                "n": 100,
-                "model": "pca"
+            "no_anomaly_validation": {
+                "contamination": 0.5,
+                "add_column": false
             },
             "reshape_for_keras": "lstm"
         }
@@ -50,7 +43,7 @@
                 "model": "keras_clf",
                 "cv_select": "train_all",
                 "fit_params": {
-                    "epochs": 3,
+                    "epochs": 1,
                     "batch_size": 50
                 },
                 "params": {

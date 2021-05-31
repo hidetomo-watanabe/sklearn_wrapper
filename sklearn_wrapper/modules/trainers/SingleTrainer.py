@@ -12,6 +12,9 @@ import numpy as np
 
 import scipy.sparse as sp
 
+from sklearn.cluster import KMeans
+from sklearn.decomposition import NMF, PCA, TruncatedSVD
+from sklearn.feature_selection import RFE
 from sklearn.metrics import get_scorer
 from sklearn.model_selection import KFold
 from sklearn.multiclass import OneVsOneClassifier, OneVsRestClassifier
@@ -95,7 +98,7 @@ class SingleTrainer(BaseTrainer):
 
         return
 
-    def _get_base_pipeline(self, model_config, nn_func):
+    def _get_base_pipeline(self, model_config, nn_func, X_train):
         _pipeline = []
 
         # x_scaler
@@ -104,11 +107,57 @@ class SingleTrainer(BaseTrainer):
             logger.info(f'x_scaler: {x_scaler}')
             if x_scaler == 'standard':
                 # to-do: 外れ値対策として、1-99%に限定検討
-                # winsorize(self.X_train, limits=[0.01, 0.01]).tolist()
+                # winsorize(X_train, limits=[0.01, 0.01]).tolist()
                 _x_scaler = StandardScaler(with_mean=False)
             elif x_scaler == 'maxabs':
                 _x_scaler = MaxAbsScaler()
             _pipeline.append(('x_scaler', _x_scaler))
+
+        # dimension_reduction
+        di_reduction = model_config.get('dimension_reduction')
+        if di_reduction:
+            n = di_reduction['n']
+            model = di_reduction['model']
+            if n == 'all':
+                n = X_train.shape[1]
+            logger.info(
+                'dimension_reduction: %s to %s with %s'
+                % (X_train.shape[1], n, model))
+
+            if model == 'pca':
+                # pca ratioがuniqueでないと、再現性ない場合あり
+                _pipeline.append((
+                    'dimension_reduction',
+                    PCA(n_components=n, random_state=42)
+                ))
+            elif model == 'svd':
+                _pipeline.append((
+                    'dimension_reduction',
+                    TruncatedSVD(n_components=n, random_state=42)
+                ))
+            elif model == 'kmeans':
+                _pipeline.append((
+                    'dimension_reduction',
+                    KMeans(n_clusters=n, random_state=42, n_jobs=-1)
+                ))
+            elif model == 'nmf':
+                _pipeline.append((
+                    'dimension_reduction',
+                    NMF(n_components=n, random_state=42)
+                ))
+            elif model == 'rfe':
+                _pipeline.append((
+                    'dimension_reduction',
+                    RFE(
+                        n_features_to_select=n,
+                        estimator=XGBClassifier(random_state=42, n_jobs=-1))
+                ))
+            else:
+                logger.error(
+                    'NOT IMPLEMENTED DIMENSION REDUCTION MODEL: %s' % model)
+                raise Exception('NOT IMPLEMENTED')
+            self.feature_columns = list(map(
+                lambda x: '%s_%d' % (model, x), range(n)))
 
         # sampling
         undersampling = model_config.get('undersampling')
@@ -295,7 +344,8 @@ class SingleTrainer(BaseTrainer):
         if Y_train is None:
             Y_train = self.Y_train
         self._get_model_params(model_config)
-        self.base_pipeline = self._get_base_pipeline(model_config, nn_func)
+        self.base_pipeline = \
+            self._get_base_pipeline(model_config, nn_func, X_train)
 
         # fit
         logger.info('fit')

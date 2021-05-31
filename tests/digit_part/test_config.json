@@ -23,10 +23,6 @@
                 },
                 "options": [
                 ]
-            },
-            "dimension_reduction": {
-                "n": 100,
-                "model": "pca"
             }
         }
     },
@@ -46,6 +42,10 @@
         "single_model_configs": [
             {
                 "model": "lgb_clf",
+                "dimension_reduction": {
+                    "n": 100,
+                    "model": "pca"
+                },
                 "fit_params": {
                 },
                 "params": {
