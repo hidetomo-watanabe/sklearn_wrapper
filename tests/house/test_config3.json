@@ -17,8 +17,7 @@
                 },
                 "options": [
                 ]
-            },
-            "missing_imputation": "mean"
+            }
         }
     },
     "fit": {
@@ -33,11 +32,12 @@
         "single_model_configs": [
             {
                 "model": "svr",
+                "missing_imputation": "mean",
+                "x_scaler": "standard",
                 "dimension_reduction": {
                     "n": 90,
                     "model": "pca"
                 },
-                "x_scaler": "standard",
                 "fit_params": {
                 },
                 "params": {
@@ -49,11 +49,12 @@
             },
             {
                 "model": "svr",
+                "missing_imputation": "mean",
+                "x_scaler": "standard",
                 "dimension_reduction": {
                     "n": 90,
                     "model": "pca"
                 },
-                "x_scaler": "standard",
                 "fit_params": {
                 },
                 "params": {

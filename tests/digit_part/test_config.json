@@ -22,8 +22,7 @@
                 },
                 "options": [
                 ]
-            },
-            "missing_imputation": "mean"
+            }
         }
     },
     "fit": {
@@ -42,6 +41,7 @@
         "single_model_configs": [
             {
                 "model": "lgb_clf",
+                "missing_imputation": "mean",
                 "dimension_reduction": {
                     "n": 100,
                     "model": "pca"

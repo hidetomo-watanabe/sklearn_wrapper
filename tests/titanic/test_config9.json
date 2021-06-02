@@ -38,8 +38,7 @@
                         "model": "target"
                     }
                 ]
-            },
-            "missing_imputation": "mean"
+            }
         }
     },
     "fit": {
@@ -58,6 +57,7 @@
         "single_model_configs": [
             {
                 "model": "lgb_clf",
+                "missing_imputation": "mean",
                 "fit_params": {
                     "eval_metric": "accuracy",
                     "early_stopping_rounds": 10

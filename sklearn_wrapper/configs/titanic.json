@@ -31,8 +31,7 @@
                         "model": "onehot_with_test"
                     }
                 ]
-            },
-            "missing_imputation": "mean"
+            }
         }
     },
     "fit": {
@@ -47,6 +46,7 @@
         "single_model_configs": [
             {
                 "model": "log_reg",
+                "missing_imputation": "mean",
                 "dimension_reduction": {
                     "n": 750,
                     "model": "pca"

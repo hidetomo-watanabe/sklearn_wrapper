@@ -22,8 +22,7 @@
                 },
                 "options": [
                 ]
-            },
-            "missing_imputation": "mean"
+            }
         }
     },
     "fit": {
@@ -39,8 +38,9 @@
         "single_model_configs": [
             {
                 "model": "keras_clf",
-                "x_scaler": "standard",
                 "keras_build": "quora",
+                "missing_imputation": "mean",
+                "x_scaler": "standard",
                 "fit_params": {
                 },
                 "params": {

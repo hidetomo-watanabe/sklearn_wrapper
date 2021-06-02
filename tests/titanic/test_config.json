@@ -40,7 +40,6 @@
                     }
                 ]
             },
-            "missing_imputation": "mean",
             "sparse": true
         }
     },
@@ -60,6 +59,7 @@
         "single_model_configs": [
             {
                 "model": "gbdt_clf",
+                "missing_imputation": "mean",
                 "fit_params": {
                 },
                 "params": {

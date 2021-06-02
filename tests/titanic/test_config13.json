@@ -39,8 +39,7 @@
                         "model": "onehot"
                     }
                 ]
-            },
-            "missing_imputation": "mean"
+            }
         }
     },
     "fit": {
@@ -59,6 +58,7 @@
         "single_model_configs": [
             {
                 "model": "g_nb",
+                "missing_imputation": "mean",
                 "x_scaler": "standard",
                 "n_trials": 5,
                 "fit_params": {

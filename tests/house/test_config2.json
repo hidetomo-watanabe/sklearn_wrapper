@@ -17,8 +17,7 @@
                 },
                 "options": [
                 ]
-            },
-            "missing_imputation": "mean"
+            }
         }
     },
     "fit": {
@@ -34,11 +33,12 @@
         "single_model_configs": [
             {
                 "model": "keras_reg",
+                "missing_imputation": "mean",
+                "x_scaler": "standard",
                 "dimension_reduction": {
                     "n": 100,
                     "model": "pca"
                 },
-                "x_scaler": "standard",
                 "cv_select": "train_all",
                 "fit_params": {
                     "epochs": 3,

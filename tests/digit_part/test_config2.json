@@ -16,7 +16,6 @@
                     "add_image_id"
                 ]
             },
-            "missing_imputation": "mean",
             "no_anomaly_validation": {
                 "contamination": 0.5,
                 "add_column": false

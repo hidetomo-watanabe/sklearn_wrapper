@@ -24,7 +24,6 @@
                 "options": [
                 ]
             },
-            "missing_imputation": "mean",
             "adversarial_validation": {
                 "model_config": {
                     "model": "g_mix",
@@ -58,11 +57,12 @@
         "single_model_configs": [
             {
                 "model": "lasso",
+                "missing_imputation": "mean",
+                "x_scaler": "standard",
                 "dimension_reduction": {
                     "n": 280,
                     "model": "pca"
                 },
-                "x_scaler": "standard",
                 "n_trials": 10,
                 "fit_params": {
                 },

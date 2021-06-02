@@ -39,8 +39,7 @@
                         "model": "onehot"
                     }
                 ]
-            },
-            "missing_imputation": "mean"
+            }
         }
     },
     "fit": {
@@ -59,6 +58,7 @@
         "single_model_configs": [
             {
                 "model": "gbdt_clf",
+                "missing_imputation": "mean",
                 "fit_params": {
                 },
                 "params": {
@@ -68,6 +68,7 @@
             },
             {
                 "model": "gbdt_clf",
+                "missing_imputation": "mean",
                 "fit_params": {
                 },
                 "params": {

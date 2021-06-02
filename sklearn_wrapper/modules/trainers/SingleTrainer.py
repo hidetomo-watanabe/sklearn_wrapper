@@ -14,6 +14,7 @@ import scipy.sparse as sp
 
 from sklearn.cluster import KMeans
 from sklearn.decomposition import NMF, PCA, TruncatedSVD
+from sklearn.impute import SimpleImputer
 from sklearn.metrics import get_scorer
 from sklearn.model_selection import KFold
 from sklearn.multiclass import OneVsOneClassifier, OneVsRestClassifier
@@ -99,6 +100,15 @@ class SingleTrainer(BaseTrainer):
 
     def _get_base_pipeline(self, model_config, nn_func, X_train):
         _pipeline = []
+
+        # imputation
+        imputation = model_config.get('missing_imputation')
+        if imputation:
+            logger.info(f'missing_imputation: {imputation}')
+            _pipeline.append((
+                'missing_imputation',
+                SimpleImputer(missing_values=np.nan, strategy=imputation)
+            ))
 
         # x_scaler
         x_scaler = model_config.get('x_scaler')
