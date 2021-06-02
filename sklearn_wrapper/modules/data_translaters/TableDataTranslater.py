@@ -332,7 +332,7 @@ class TableDataTranslater(BaseDataTranslater):
                 raise Exception('NOT IMPLEMENTED')
 
             # create data
-            X_adv = sp.vstack((X_train, X_test), format='csr')
+            X_adv = np.vstack((X_train, X_test))
             Y_adv = np.concatenate(
                 (np.zeros(X_train.shape[0]), np.ones(X_test.shape[0])),
                 axis=0)
