@@ -24,7 +24,6 @@
                 "Hoge",
                 "Foo"
             ],
-            "missing_imputation": true,
             "category_encoding": {
                 "default": {
                     "model": "onehot"
@@ -46,6 +45,7 @@
                     "translate_fuga"
                 ]
             },
+            "missing_imputation": "mean",
             "feature_selection": {
                 "n": 10,
                 "model": "boruta"

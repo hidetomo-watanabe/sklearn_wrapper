@@ -17,7 +17,6 @@
                     "translate_target2int"
                 ]
             },
-            "missing_imputation": true,
             "category_encoding": {
                 "default": {
                     "model": "onehot"
@@ -25,6 +24,7 @@
                 "options": [
                 ]
             },
+            "missing_imputation": "mean",
             "adversarial_validation": {
                 "model_config": {
                     "model": "g_mix",

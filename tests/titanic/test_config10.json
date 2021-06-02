@@ -26,7 +26,6 @@
                 "Cabin",
                 "Embarked"
             ],
-            "missing_imputation": true,
             "category_encoding": {
                 "default": {
                     "model": "onehot"
@@ -40,7 +39,8 @@
                         "model": "onehot"
                     }
                 ]
-            }
+            },
+            "missing_imputation": "mean"
         }
     },
     "fit": {

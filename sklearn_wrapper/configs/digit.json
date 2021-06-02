@@ -16,14 +16,14 @@
                     "add_image_id"
                 ]
             },
-            "missing_imputation": true,
             "category_encoding": {
                 "default": {
                     "model": "onehot"
                 },
                 "options": [
                 ]
-            }
+            },
+            "missing_imputation": "mean"
         }
     },
     "fit": {

@@ -25,7 +25,6 @@
                 "Cabin",
                 "Embarked"
             ],
-            "missing_imputation": true,
             "category_encoding": {
                 "default": {
                     "model": "label"
@@ -39,7 +38,8 @@
                         "model": "label"
                     }
                 ]
-            }
+            },
+            "missing_imputation": "mean"
         }
     },
     "fit": {

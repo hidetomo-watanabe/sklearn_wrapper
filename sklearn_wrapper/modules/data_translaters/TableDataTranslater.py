@@ -17,6 +17,7 @@ from scipy.stats import ks_2samp
 from sklearn.ensemble import IsolationForest
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_selection import RFE
+from sklearn.impute import SimpleImputer
 from sklearn.metrics import roc_auc_score
 
 from tqdm import tqdm
@@ -67,27 +68,6 @@ class TableDataTranslater(BaseDataTranslater):
         logger.info('delete: %s' % trans_del)
         self.train_df.drop(trans_del, axis=1, inplace=True)
         self.test_df.drop(trans_del, axis=1, inplace=True)
-        return
-
-    def _impute_missing_value_with_mean(self):
-        trans_missing = self.configs['pre']['table'].get('missing_imputation')
-        if not trans_missing:
-            return
-
-        for column, dtype in tqdm(self.test_df.dtypes.items()):
-            if column in [self.id_col]:
-                continue
-            if (not self.train_df[column].isna().any()) \
-                    and (not self.test_df[column].isna().any()):
-                continue
-            if dtype == 'object':
-                logger.warning(
-                    'OBJECT MISSING IS NOT BE IMPUTED: %s' % column)
-                continue
-            logger.info('impute missing with mean: %s' % column)
-            column_mean = self.train_df[column].mean()
-            self.train_df.fillna({column: column_mean}, inplace=True)
-            self.test_df.fillna({column: column_mean}, inplace=True)
         return
 
     def _encode_category_with_target(self, columns):
@@ -282,6 +262,17 @@ class TableDataTranslater(BaseDataTranslater):
             self.Y_train = self.Y_train.astype(np.float32)
         return
 
+    def _impute_missing_value(self):
+        imputation = self.configs['pre']['table'].get('missing_imputation')
+        if not imputation:
+            return
+
+        model_obj = SimpleImputer(missing_values=np.nan, strategy=imputation)
+        model_obj.fit(self.X_train)
+        self.X_train = model_obj.transform(self.X_train)
+        self.X_test = model_obj.transform(self.X_test)
+        return
+
     def _select_feature(self):
         selection = self.configs['pre']['table'].get('feature_selection')
         if not selection:
@@ -471,7 +462,6 @@ class TableDataTranslater(BaseDataTranslater):
         self._calc_raw_data()
         self._translate_adhoc_df()
         self._delete_columns()
-        self._impute_missing_value_with_mean()
         self._encode_category()
         # ndarray
         self._calc_base_train_data()
@@ -479,10 +469,12 @@ class TableDataTranslater(BaseDataTranslater):
         self._to_float32()
         self._translate_y_pre()
         # validation
+        self._impute_missing_value()
         self._select_feature()
         self._extract_with_ks_validation()
         self._extract_with_adversarial_validation()
         self._extract_with_no_anomaly_validation()
+        # format
         self._reshape_x_for_keras()
         self._to_sparse()
         return

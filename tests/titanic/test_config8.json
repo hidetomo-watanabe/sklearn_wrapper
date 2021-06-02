@@ -26,7 +26,6 @@
                 "Cabin",
                 "Embarked"
             ],
-            "missing_imputation": true,
             "category_encoding": {
                 "default": {
                     "model": "onehot"
@@ -41,6 +40,7 @@
                     }
                 ]
             },
+            "missing_imputation": "mean",
             "feature_selection": {
                 "n": "auto",
                 "model": "boruta"

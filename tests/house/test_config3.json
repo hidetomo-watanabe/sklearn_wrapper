@@ -11,14 +11,14 @@
         "train_mode": "reg",
         "y_pre": "log",
         "table": {
-            "missing_imputation": true,
             "category_encoding": {
                 "default": {
                     "model": "onehot"
                 },
                 "options": [
                 ]
-            }
+            },
+            "missing_imputation": "mean"
         }
     },
     "fit": {
