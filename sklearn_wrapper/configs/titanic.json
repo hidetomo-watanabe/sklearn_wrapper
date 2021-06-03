@@ -20,7 +20,7 @@
             },
             "category_encoding": {
                 "default": {
-                    "model": "onehot_with_test"
+                    "model": "onehot"
                 },
                 "options": [
                     {
@@ -28,7 +28,7 @@
                             "Pclass",
                             "FamilyStatus"
                         ],
-                        "model": "onehot_with_test"
+                        "model": "onehot"
                     }
                 ]
             }
@@ -48,7 +48,7 @@
                 "model": "log_reg",
                 "missing_imputation": "mean",
                 "dimension_reduction": {
-                    "n": 750,
+                    "n": 500,
                     "model": "pca"
                 },
                 "x_scaler": "standard",

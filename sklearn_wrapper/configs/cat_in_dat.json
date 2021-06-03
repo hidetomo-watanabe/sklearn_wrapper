@@ -30,7 +30,7 @@
             ],
             "category_encoding": {
                 "default": {
-                    "model": "onehot_with_test"
+                    "model": "onehot"
                 },
                 "options": [
                     {
@@ -41,7 +41,7 @@
                             "day",
                             "month"
                         ],
-                        "model": "onehot_with_test"
+                        "model": "onehot"
                     }
                 ]
             }

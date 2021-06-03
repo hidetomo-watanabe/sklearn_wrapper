@@ -75,11 +75,8 @@ class BaseDataTranslater(ConfigReader, LikeWrapper):
 
     def get_pre_processers(self):
         output = {}
-        if hasattr(self, 'dimension_reduction_model'):
-            output['dimension_reduction_model'] = \
-                self.dimension_reduction_model
-        if hasattr(self, 'target_encoding_model'):
-            output['target_encoding_model'] = \
+        if hasattr(self, 'encoding_model'):
+            output['encoding_model'] = \
                 self.target_encoding_model
         return output
 

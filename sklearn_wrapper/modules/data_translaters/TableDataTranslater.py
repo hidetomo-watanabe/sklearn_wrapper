@@ -69,9 +69,8 @@ class TableDataTranslater(BaseDataTranslater):
         self.test_df.drop(trans_del, axis=1, inplace=True)
         return
 
-    def _encode_category_with_target(self, columns):
-        model_obj = TargetEncoder(cols=columns)
-        # cvをずらせないので、train_cvを採用
+    def _encode_category_with_cv(self, model_obj, columns):
+        # train_cvを採用
         cv, _ = Trainer.get_cvs_from_json(self.configs['fit'].get('cv'))
         logger.info(f'cv: {cv}')
         indexes = cv.split(self.train_df, self.pred_df)
@@ -90,15 +89,17 @@ class TableDataTranslater(BaseDataTranslater):
 
         # test
         # train全てでfit
+        # to-do: fitのみpipeline対応検討
         model_obj.fit(self.train_df[columns], self.pred_df)
         test_encoded = model_obj.transform(self.test_df[columns])
-        self.target_encoding_model = model_obj
+        # pre_processers用
+        self.encoding_model = model_obj
 
         return train_encoded, test_encoded
 
-    def _encode_ndarray(self, model, X_train, Y_train, X_data):
+    def _encode_ndarray(self, model, X_train, target):
         df = pd.DataFrame(data=X_train, columns=['x'])
-        encoded = X_data
+        encoded = target
         if model == 'count':
             mapping = df.groupby('x')['x'].count()
             only_test = 0
@@ -125,14 +126,16 @@ class TableDataTranslater(BaseDataTranslater):
         test_encoded = []
         feature_names = []
         for column in tqdm(columns):
+            # 一時的に欠損値補完
             self.train_df.fillna({column: 'REPLACED_NAN'}, inplace=True)
             self.test_df.fillna({column: 'REPLACED_NAN'}, inplace=True)
+
             _train_encoded = self._encode_ndarray(
                 model, self.train_df[column].to_numpy(),
-                self.pred_df.to_numpy(), self.train_df[column].to_numpy())
+                self.train_df[column].to_numpy())
             _test_encoded = self._encode_ndarray(
                 model, self.train_df[column].to_numpy(),
-                self.pred_df.to_numpy(), self.test_df[column].to_numpy())
+                self.test_df[column].to_numpy())
             train_encoded.append(_train_encoded)
             test_encoded.append(_test_encoded)
             feature_names.append(f'{column}_{model}')
@@ -146,25 +149,17 @@ class TableDataTranslater(BaseDataTranslater):
         if model in [
             'onehot', 'onehot_with_test', 'label', 'label_with_test', 'target'
         ]:
-            if model == 'target':
-                train_encoded, test_encoded = \
-                    self._encode_category_with_target(columns)
-            else:
-                if model in ['onehot', 'onehot_with_test']:
-                    model_obj = OneHotEncoder(cols=columns, use_cat_names=True)
-                elif model in ['label', 'label_with_test']:
-                    model_obj = OrdinalEncoder(cols=columns)
-                if model in ['onehot_with_test', 'label_with_test']:
-                    model_obj.fit(
-                        pd.concat(
-                            [self.train_df[columns], self.test_df[columns]],
-                            ignore_index=True
-                        ))
-                else:
-                    model_obj.fit(self.train_df[columns], self.pred_df)
-                train_encoded = model_obj.transform(
-                    self.train_df[columns], self.pred_df)
-                test_encoded = model_obj.transform(self.test_df[columns])
+            if model == 'onehot':
+                model_obj = OneHotEncoder(cols=columns, use_cat_names=True)
+            elif model == 'label':
+                model_obj = OrdinalEncoder(cols=columns)
+            elif model == 'target':
+                model_obj = TargetEncoder(cols=columns)
+
+            # data leak対策
+            train_encoded, test_encoded = \
+                self._encode_category_with_cv(model_obj, columns)
+
             # rename
             rename_mapping = {}
             for column in columns:
@@ -211,8 +206,6 @@ class TableDataTranslater(BaseDataTranslater):
             drop_columns.extend(config['columns'])
             logger.info('encoding model: %s' % config['model'])
             logger.info('encode category: %s' % config['columns'])
-            if 'with_test' in config['model']:
-                logger.warning('IN DATA PREPROCESSING, USING TEST DATA')
             self._encode_category_single(config['model'], config['columns'])
         drop_columns = list(set(drop_columns))
 
@@ -299,7 +292,7 @@ class TableDataTranslater(BaseDataTranslater):
 
         logger.info('extract columns with Kolmogorov-Smirnov validation')
         _indexes = []
-        for i, col in enumerate(self.feature_columns):
+        for i, col in tqdm(enumerate(self.feature_columns)):
             p_val = ks_2samp(self.X_train[:, i], self.X_test[:, i])[1]
             if p_val < 0.05:
                 logger.info(
