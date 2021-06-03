@@ -99,7 +99,6 @@ class TableDataTranslater(BaseDataTranslater):
 
     def _encode_ndarray(self, model, X_train, target):
         df = pd.DataFrame(data=X_train, columns=['x'])
-        encoded = target
         if model == 'count':
             mapping = df.groupby('x')['x'].count()
             only_test = 0
@@ -114,6 +113,7 @@ class TableDataTranslater(BaseDataTranslater):
             logger.error('NOT IMPLEMENTED CATEGORY ENCODING: %s' % model)
             raise Exception('NOT IMPLEMENTED')
 
+        encoded = target
         for i in mapping.index:
             encoded = np.where(encoded == i, mapping[i], encoded)
         encoded = np.where(
@@ -169,26 +169,19 @@ class TableDataTranslater(BaseDataTranslater):
         else:
             train_encoded, test_encoded = \
                 self._encode_category_with_ndarray(model, columns)
-
-        # merge
-        self.train_df = pd.merge(
-            self.train_df, train_encoded,
-            left_index=True, right_index=True)
-        self.test_df = pd.merge(
-            self.test_df, test_encoded,
-            left_index=True, right_index=True)
-        return
+        return train_encoded, test_encoded
 
     def _encode_category(self):
         trans_category = self.configs['pre']['table'].get('category_encoding')
         if not trans_category:
             return
 
-        # default columns
+        # option columns
         option_columns = []
         for option in trans_category['options']:
             option_columns.extend(option['columns'])
         option_columns = list(set(option_columns))
+        # default columns
         default_columns = []
         for column, dtype in self.test_df.dtypes.items():
             if column in [self.id_col]:
@@ -200,18 +193,25 @@ class TableDataTranslater(BaseDataTranslater):
             default_columns.append(column)
 
         # encode
-        drop_columns = []
         trans_category['default']['columns'] = default_columns
         for config in trans_category['options'] + [trans_category['default']]:
-            drop_columns.extend(config['columns'])
             logger.info('encoding model: %s' % config['model'])
             logger.info('encode category: %s' % config['columns'])
-            self._encode_category_single(config['model'], config['columns'])
-        drop_columns = list(set(drop_columns))
+            train_encoded, test_encoded = \
+                self._encode_category_single(
+                    config['model'], config['columns'])
 
-        # drop
-        self.train_df.drop(drop_columns, axis=1, inplace=True)
-        self.test_df.drop(drop_columns, axis=1, inplace=True)
+            # merge
+            self.train_df = pd.merge(
+                self.train_df, train_encoded,
+                left_index=True, right_index=True)
+            self.test_df = pd.merge(
+                self.test_df, test_encoded,
+                left_index=True, right_index=True)
+
+            # drop
+            self.train_df.drop(config['columns'], axis=1, inplace=True)
+            self.test_df.drop(config['columns'], axis=1, inplace=True)
         return
 
     def _calc_base_train_data(self):
