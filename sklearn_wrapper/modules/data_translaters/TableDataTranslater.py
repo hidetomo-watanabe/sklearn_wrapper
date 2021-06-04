@@ -5,7 +5,12 @@ from IPython.display import display
 
 from boruta import BorutaPy
 
-from category_encoders import OneHotEncoder, OrdinalEncoder, TargetEncoder
+from category_encoders import (
+    CountEncoder,
+    OneHotEncoder,
+    OrdinalEncoder,
+    TargetEncoder
+)
 
 import numpy as np
 
@@ -97,78 +102,29 @@ class TableDataTranslater(BaseDataTranslater):
 
         return train_encoded, test_encoded
 
-    def _encode_ndarray(self, model, X_train, target):
-        df = pd.DataFrame(data=X_train, columns=['x'])
+    def _encode_category_single(self, model, columns):
         if model == 'count':
-            mapping = df.groupby('x')['x'].count()
-            only_test = 0
-        elif model == 'freq':
-            mapping = df.groupby('x')['x'].count() / len(df)
-            only_test = 0
-        elif model == 'rank':
-            mapping = df.groupby('x')['x'].count().rank(
-                ascending=False)
-            only_test = -1
+            model_obj = CountEncoder(cols=columns)
+        elif model == 'onehot':
+            model_obj = OneHotEncoder(cols=columns, use_cat_names=True)
+        elif model == 'label':
+            model_obj = OrdinalEncoder(cols=columns)
+        elif model == 'target':
+            model_obj = TargetEncoder(cols=columns)
         else:
             logger.error('NOT IMPLEMENTED CATEGORY ENCODING: %s' % model)
             raise Exception('NOT IMPLEMENTED')
 
-        encoded = target
-        for i in mapping.index:
-            encoded = np.where(encoded == i, mapping[i], encoded)
-        encoded = np.where(
-            ~np.in1d(encoded, list(mapping.index)), only_test, encoded)
-        encoded = encoded.reshape(-1, 1)
-        return encoded
+        # data leak対策
+        train_encoded, test_encoded = \
+            self._encode_category_with_cv(model_obj, columns)
 
-    def _encode_category_with_ndarray(self, model, columns):
-        train_encoded = []
-        test_encoded = []
-        feature_names = []
-        for column in tqdm(columns):
-            # 一時的に欠損値補完
-            self.train_df.fillna({column: 'REPLACED_NAN'}, inplace=True)
-            self.test_df.fillna({column: 'REPLACED_NAN'}, inplace=True)
-
-            _train_encoded = self._encode_ndarray(
-                model, self.train_df[column].to_numpy(),
-                self.train_df[column].to_numpy())
-            _test_encoded = self._encode_ndarray(
-                model, self.train_df[column].to_numpy(),
-                self.test_df[column].to_numpy())
-            train_encoded.append(_train_encoded)
-            test_encoded.append(_test_encoded)
-            feature_names.append(f'{column}_{model}')
-        train_encoded = pd.DataFrame(
-            np.concatenate(train_encoded, axis=1), columns=feature_names)
-        test_encoded = pd.DataFrame(
-            np.concatenate(test_encoded, axis=1), columns=feature_names)
-        return train_encoded, test_encoded
-
-    def _encode_category_single(self, model, columns):
-        if model in [
-            'onehot', 'onehot_with_test', 'label', 'label_with_test', 'target'
-        ]:
-            if model == 'onehot':
-                model_obj = OneHotEncoder(cols=columns, use_cat_names=True)
-            elif model == 'label':
-                model_obj = OrdinalEncoder(cols=columns)
-            elif model == 'target':
-                model_obj = TargetEncoder(cols=columns)
-
-            # data leak対策
-            train_encoded, test_encoded = \
-                self._encode_category_with_cv(model_obj, columns)
-
-            # rename
-            rename_mapping = {}
-            for column in columns:
-                rename_mapping[column] = f'{column}_{model}'
-            train_encoded.rename(columns=rename_mapping, inplace=True)
-            test_encoded.rename(columns=rename_mapping, inplace=True)
-        else:
-            train_encoded, test_encoded = \
-                self._encode_category_with_ndarray(model, columns)
+        # rename
+        rename_mapping = {}
+        for column in columns:
+            rename_mapping[column] = f'{column}_{model}'
+        train_encoded.rename(columns=rename_mapping, inplace=True)
+        test_encoded.rename(columns=rename_mapping, inplace=True)
         return train_encoded, test_encoded
 
     def _encode_category(self):
