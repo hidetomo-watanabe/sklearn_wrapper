@@ -22,6 +22,10 @@ from sklearn.preprocessing import MaxAbsScaler, StandardScaler
 
 
 logger = getLogger('predict').getChild('SingleTrainer')
+if 'Flattener' not in globals():
+    from ..commons.Flattener import Flattener
+if 'Reshaper' not in globals():
+    from ..commons.Reshaper import Reshaper
 if 'BaseTrainer' not in globals():
     from .BaseTrainer import BaseTrainer
 if 'EnsembleTrainer' not in globals():
@@ -98,6 +102,51 @@ class SingleTrainer(BaseTrainer):
 
         return
 
+    def _add_sampling_to_pipeline(self, pipeline, model_config, X_train):
+        undersampling = model_config.get('undersampling')
+        oversampling = model_config.get('oversampling')
+
+        # 形式エラー対策 pre
+        if (undersampling and undersampling == 'random') or oversampling:
+            pipeline.append(('flattener', Flattener()))
+
+        # pipeline
+        undersampling_clf = None
+        if undersampling:
+            logger.info(f'undersampling: {undersampling}')
+            if undersampling == 'random':
+                pipeline.append(
+                    ('undersampling', RandomUnderSampler(random_state=42)))
+            # final estimatorに学習後追加
+            elif undersampling == 'bagging':
+                undersampling_clf = BalancedBaggingClassifier
+            elif undersampling == 'adaboost':
+                undersampling_clf = RUSBoostClassifier
+            else:
+                logger.error(
+                    f'NOT IMPLEMENTED UNDERSAMPLING: {undersampling}')
+                raise Exception('NOT IMPLEMENTED')
+
+        if oversampling:
+            logger.info(f'oversampling: {oversampling}')
+            if oversampling == 'random':
+                pipeline.append(
+                    ('oversampling', RandomOverSampler(random_state=42)))
+            elif oversampling == 'smote':
+                pipeline.append(
+                    ('oversampling', SMOTE(random_state=42)))
+            else:
+                logger.error(
+                    f'NOT IMPLEMENTED OVERSAMPLING: {oversampling}')
+                raise Exception('NOT IMPLEMENTED')
+
+        # 形式エラー対策 post
+        if (undersampling and undersampling == 'random') or oversampling:
+            _is_categorical = (self.model == 'keras_clf')
+            pipeline.append(
+                ('reshaper', Reshaper(X_train.shape[1:], _is_categorical)))
+        return pipeline, undersampling_clf
+
     def _get_base_pipeline(self, model_config, nn_func, X_train):
         _pipeline = []
 
@@ -162,38 +211,10 @@ class SingleTrainer(BaseTrainer):
                 lambda x: '%s_%d' % (model, x), range(n)))
 
         # sampling
-        undersampling = model_config.get('undersampling')
-        if undersampling:
-            logger.info(f'undersampling: {undersampling}')
-            if undersampling == 'random':
-                _pipeline.append(
-                    ('undersampling', RandomUnderSampler(random_state=42)))
-                undersampling = None
-            # final estimatorに学習後追加
-            elif undersampling == 'bagging':
-                undersampling = BalancedBaggingClassifier
-            elif undersampling == 'adaboost':
-                undersampling = RUSBoostClassifier
-            else:
-                logger.error(
-                    f'NOT IMPLEMENTED UNDERSAMPLING: {undersampling}')
-                raise Exception('NOT IMPLEMENTED')
-        self.undersampling = undersampling
+        _pipeline, self.undersampling = \
+            self._add_sampling_to_pipeline(_pipeline, model_config, X_train)
 
-        oversampling = model_config.get('oversampling')
-        if oversampling:
-            logger.info(f'oversampling: {oversampling}')
-            if oversampling == 'random':
-                _pipeline.append(
-                    ('oversampling', RandomOverSampler(random_state=42)))
-            elif oversampling == 'smote':
-                _pipeline.append(
-                    ('oversampling', SMOTE(random_state=42)))
-            else:
-                logger.error(
-                    f'NOT IMPLEMENTED OVERSAMPLING: {oversampling}')
-                raise Exception('NOT IMPLEMENTED')
-
+        # augmentation
         augmentation = model_config.get('augmentation')
         if augmentation:
             logger.info(f'augmentation: {augmentation}')
@@ -348,6 +369,7 @@ class SingleTrainer(BaseTrainer):
         self._get_model_params(model_config)
         self.base_pipeline = \
             self._get_base_pipeline(model_config, nn_func, X_train)
+        logger.info(f'base_pipeline: {self.base_pipeline}')
 
         # fit
         logger.info('fit')

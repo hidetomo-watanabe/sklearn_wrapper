@@ -5,9 +5,6 @@ from catboost import CatBoostClassifier, CatBoostRegressor
 import eli5
 from eli5.sklearn import PermutationImportance
 
-from imblearn.over_sampling import RandomOverSampler, SMOTE
-from imblearn.under_sampling import RandomUnderSampler
-
 from keras.utils.np_utils import to_categorical
 
 from lightgbm import LGBMClassifier, LGBMRegressor
@@ -46,10 +43,6 @@ from xgboost import XGBClassifier, XGBRegressor
 logger = getLogger('predict').getChild('BaseTrainer')
 if 'ConfigReader' not in globals():
     from ..ConfigReader import ConfigReader
-if 'Flattener' not in globals():
-    from ..commons.Flattener import Flattener
-if 'Reshaper' not in globals():
-    from ..commons.Reshaper import Reshaper
 if 'LikeWrapper' not in globals():
     from ..commons.LikeWrapper import LikeWrapper
 if 'MyKerasClassifier' not in globals():
@@ -169,29 +162,6 @@ class BaseTrainer(ConfigReader, LikeWrapper):
         Y_train = self.ravel_like(Y_train)
         return X_train, Y_train
 
-    def _trans_step_for_fit(self, estimator, X_train, Y_train):
-        is_categorical = False
-        indexes = []
-        for i, step in enumerate(estimator.steps):
-            if step[1].__class__ in [
-                RandomUnderSampler, RandomOverSampler, SMOTE
-            ]:
-                indexes.append(i)
-            elif step[1].__class__ in [MyKerasClassifier]:
-                if self.ravel_like(Y_train).ndim == 1:
-                    is_categorical = True
-
-        base = 0
-        for i in indexes:
-            estimator.steps.insert(
-                i + base,
-                ('flattener', Flattener()))
-            estimator.steps.insert(
-                i + base + 2,
-                ('reshaper', Reshaper(X_train.shape[1:], is_categorical)))
-            base += 2
-        return estimator
-
     def _add_val_to_fit_params(self, estimator, fit_params, X_test, Y_test):
         steps = estimator.steps
         aug_index = None
@@ -258,7 +228,6 @@ class BaseTrainer(ConfigReader, LikeWrapper):
 
         X_train_for_fit, Y_train_for_fit = \
             self._trans_xy_for_fit(estimator, X_train, Y_train)
-        estimator = self._trans_step_for_fit(estimator, X_train, Y_train)
         for i, (train_index, val_index) in enumerate(indexes):
             _estimator, fit_params = self._add_val_to_fit_params(
                 estimator, fit_params,
