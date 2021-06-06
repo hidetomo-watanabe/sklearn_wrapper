@@ -197,7 +197,10 @@
    "source": [
     "logger.info('### TRAIN SCATTER MATRIX')\n",
     "visualizer_obj.plot_scatter_matrix(\n",
-    "    np.concatenate([train_data['X_train'].toarray(), train_data['Y_train']], axis=1),\n",
+    "    np.concatenate([\n",
+    "        visualizer_obj.toarray_like(train_data['X_train']),\n",
+    "        train_data['Y_train']\n",
+    "    ], axis=1),\n",
     "    train_data['feature_columns'] + visualizer_obj.pred_cols)"
    ]
   },
@@ -209,7 +212,7 @@
    "source": [
     "logger.info('### TEST SCATTER MATRIX')\n",
     "visualizer_obj.plot_scatter_matrix(\n",
-    "    train_data['X_test'].toarray(),\n",
+    "    visualizer_obj.toarray_like(train_data['X_test']),\n",
     "    train_data['feature_columns'])"
    ]
   },
@@ -221,7 +224,10 @@
    "source": [
     "logger.info('### PLOT TRAIN CORRCOEF')\n",
     "visualizer_obj.plot_corrcoef(\n",
-    "    np.concatenate((train_data['X_train'].toarray(), train_data['Y_train']), axis=1),\n",
+    "    np.concatenate([\n",
+    "        visualizer_obj.toarray_like(train_data['X_train']),\n",
+    "        train_data['Y_train']\n",
+    "    ], axis=1),\n",
     "    train_data['feature_columns'] + visualizer_obj.pred_cols)"
    ]
   },
@@ -233,7 +239,9 @@
    "source": [
     "logger.info('### PLOT TEST CORRCOEF')\n",
     "visualizer_obj.plot_corrcoef(\n",
-    "    train_data['X_test'].toarray(), train_data['feature_columns'])"
+    "    visualizer_obj.toarray_like(train_data['X_test']),\n",
+    "    train_data['feature_columns']\n",
+    ")"
    ]
   },
   {
@@ -271,7 +279,10 @@
    "source": [
     "logger.info('### PLOT X TRAIN WITH 2 DIMENSIONS')\n",
     "df_2d_train = visualizer_obj.plot_with_2_dimensions(\n",
-    "    train_data['X_train'].toarray(), train_data['Y_train'], train_data['train_ids'])\n",
+    "    visualizer_obj.toarray_like(train_data['X_train']),\n",
+    "    train_data['Y_train'],\n",
+    "    train_data['train_ids']\n",
+    ")\n",
     "display(df_2d_train)"
    ]
   },
@@ -283,7 +294,10 @@
    "source": [
     "logger.info('### PLOT X TRAIN TEST WITH 2 DIMENSIONS')\n",
     "df_2d_train_test = visualizer_obj.plot_with_2_dimensions(\n",
-    "    np.concatenate((train_data['X_train'].toarray(), train_data['X_test'].toarray()), axis=0),\n",
+    "    np.concatenate((\n",
+    "        visualizer_obj.toarray_like(train_data['X_train']),\n",
+    "        visualizer_obj.toarray_like(train_data['X_test'])\n",
+    "    ), axis=0),\n",
     "    np.concatenate(\n",
     "        (np.zeros(train_data['X_train'].shape[0]), np.ones(train_data['X_test'].shape[0])),\n",
     "        axis=0),\n",
@@ -306,7 +320,9 @@
    "source": [
     "logger.info('### VISUALIZE DECISION TREE')\n",
     "visualizer_obj.visualize_decision_tree(\n",
-    "    train_data['X_train'].toarray(), train_data['Y_train'], train_data['feature_columns'])"
+    "    visualizer_obj.toarray_like(train_data['X_train']),\n",
+    "    train_data['Y_train'],\n",
+    "    train_data['feature_columns'])"
    ]
   },
   {
@@ -403,7 +419,8 @@
     "    logger.info(f'##### {modelname}')\n",
     "    for feature in train_data['feature_columns']:\n",
     "        plot_partial_dependence(\n",
-    "            estimator=estimator, X=train_data['X_train'].toarray(),\n",
+    "            estimator=estimator,\n",
+    "            X=visualizer_obj.toarray_like(train_data['X_train']),\n",
     "            features=[feature], feature_names=[feature])"
    ]
   },
@@ -511,10 +528,14 @@
     "logger.info('### PLOT X TRAIN WITH 2 DIMENSIONS')\n",
     "logger.info('### Y_train')\n",
     "df_2d_train_y_train = visualizer_obj.plot_with_2_dimensions(\n",
-    "    train_data['X_train'].toarray(), train_data['Y_train'], train_data['train_ids'])\n",
+    "    visualizer_obj.toarray_like(train_data['X_train']),\n",
+    "    train_data['Y_train'],\n",
+    "    train_data['train_ids'])\n",
     "logger.info('### Y_train_pred')\n",
     "df_2d_train_y_train_pred = visualizer_obj.plot_with_2_dimensions(\n",
-    "    train_data['X_train'].toarray(), Y_train_pred, train_data['train_ids'])\n",
+    "    visualizer_obj.toarray_like(train_data['X_train']),\n",
+    "    Y_train_pred,\n",
+    "    train_data['train_ids'])\n",
     "display(df_2d_train_y_train_pred)"
    ]
   },
@@ -528,7 +549,8 @@
     "logger.info('### Y_train')\n",
     "error_index = np.where(train_data['Y_train'].reshape(-1,) != Y_train_pred)\n",
     "df_2d_train_y_train_error = visualizer_obj.plot_with_2_dimensions(\n",
-    "    train_data['X_train'].toarray()[error_index], train_data['Y_train'][error_index],\n",
+    "    visualizer_obj.toarray_like(train_data['X_train'])[error_index],\n",
+    "    train_data['Y_train'][error_index],\n",
     "    train_data['train_ids'][error_index])\n",
     "display(df_2d_train_y_train_error)"
    ]
