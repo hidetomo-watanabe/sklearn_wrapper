@@ -64,6 +64,9 @@ class BaseDataTranslater(ConfigReader, LikeWrapper):
         logger.info(f'Y_train shape: {self.Y_train.shape}')
         logger.info(f'X_test shape: {self.X_test.shape}')
         output = {
+            'train_df': self.train_df,
+            'test_df': self.test_df,
+            'pred_df': self.pred_df,
             'feature_columns': self.feature_columns,
             'train_ids': self.train_ids,
             'test_ids': self.test_ids,

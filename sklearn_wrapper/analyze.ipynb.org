@@ -131,7 +131,7 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "logger.info('### DISPLAY DFS')\n",
+    "logger.info('### DISPLAY RAW DFS')\n",
     "visualizer_obj.display_dfs(raw_data['train_df'], raw_data['test_df'], raw_data['pred_df'])"
    ]
   },
@@ -141,7 +141,7 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "logger.info('### TRAIN PROFILING')\n",
+    "logger.info('### TRAIN RAW PROFILING')\n",
     "import pandas_profiling\n",
     "pandas_profiling.ProfileReport(Visualizer.sample_like(raw_data['train_df'], frac=0.01))"
    ]
@@ -152,9 +152,41 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "logger.info('### TEST PROFILING')\n",
+    "logger.info('### TEST RAW PROFILING')\n",
     "import pandas_profiling\n",
     "pandas_profiling.ProfileReport(Visualizer.sample_like(raw_data['test_df'], frac=0.01))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "logger.info('### DISPLAY DFS')\n",
+    "visualizer_obj.display_dfs(train_data['train_df'], train_data['test_df'], train_data['pred_df'])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "logger.info('### TRAIN PROFILING')\n",
+    "import pandas_profiling\n",
+    "pandas_profiling.ProfileReport(Visualizer.sample_like(train_data['train_df'], frac=0.01))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "logger.info('### TEST PROFILING')\n",
+    "import pandas_profiling\n",
+    "pandas_profiling.ProfileReport(Visualizer.sample_like(train_data['test_df'], frac=0.01))"
    ]
   },
   {
