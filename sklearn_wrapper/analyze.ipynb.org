@@ -52,7 +52,7 @@
    "outputs": [],
    "source": [
     "from modules.Visualizer import Visualizer\n",
-    "visualizer_obj = Visualizer(sample_frac=0.01, with_xlog=False)\n",
+    "visualizer_obj = Visualizer(sample_frac=1, with_xlog=False)\n",
     "visualizer_obj.read_config_file(config_path)\n",
     "# visualizer_obj.read_config_text(config_text)"
    ]
@@ -121,8 +121,8 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "logger.info('### GET RAW DATA')\n",
-    "raw_data = translater_obj.get_raw_data()"
+    "logger.info('### GET DF DATA')\n",
+    "df_data = translater_obj.get_df_data()"
    ]
   },
   {
@@ -132,7 +132,7 @@
    "outputs": [],
    "source": [
     "logger.info('### DISPLAY RAW DFS')\n",
-    "visualizer_obj.display_dfs(raw_data['train_df'], raw_data['test_df'], raw_data['pred_df'])"
+    "visualizer_obj.display_dfs(df_data['raw_train_df'], df_data['raw_test_df'], df_data['raw_pred_df'])"
    ]
   },
   {
@@ -143,7 +143,7 @@
    "source": [
     "logger.info('### TRAIN RAW PROFILING')\n",
     "import pandas_profiling\n",
-    "pandas_profiling.ProfileReport(Visualizer.sample_like(raw_data['train_df'], frac=0.01))"
+    "pandas_profiling.ProfileReport(Visualizer.sample_like(df_data['raw_train_df'], frac=0.01))"
    ]
   },
   {
@@ -154,7 +154,7 @@
    "source": [
     "logger.info('### TEST RAW PROFILING')\n",
     "import pandas_profiling\n",
-    "pandas_profiling.ProfileReport(Visualizer.sample_like(raw_data['test_df'], frac=0.01))"
+    "pandas_profiling.ProfileReport(Visualizer.sample_like(df_data['raw_test_df'], frac=0.01))"
    ]
   },
   {
@@ -164,7 +164,7 @@
    "outputs": [],
    "source": [
     "logger.info('### DISPLAY DFS')\n",
-    "visualizer_obj.display_dfs(train_data['train_df'], train_data['test_df'], train_data['pred_df'])"
+    "visualizer_obj.display_dfs(df_data['train_df'], df_data['test_df'], df_data['pred_df'])"
    ]
   },
   {
@@ -175,7 +175,7 @@
    "source": [
     "logger.info('### TRAIN PROFILING')\n",
     "import pandas_profiling\n",
-    "pandas_profiling.ProfileReport(Visualizer.sample_like(train_data['train_df'], frac=0.01))"
+    "pandas_profiling.ProfileReport(Visualizer.sample_like(df_data['train_df'], frac=0.01))"
    ]
   },
   {
@@ -186,7 +186,7 @@
    "source": [
     "logger.info('### TEST PROFILING')\n",
     "import pandas_profiling\n",
-    "pandas_profiling.ProfileReport(Visualizer.sample_like(train_data['test_df'], frac=0.01))"
+    "pandas_profiling.ProfileReport(Visualizer.sample_like(df_data['test_df'], frac=0.01))"
    ]
   },
   {
@@ -253,8 +253,8 @@
     "logger.info('### PLOT X TRAIN HISTOGRAM')\n",
     "for pred_col in visualizer_obj.pred_cols:\n",
     "    visualizer_obj.plot_df_histograms(\n",
-    "        train_data['train_df'],\n",
-    "        train_data['pred_df'][pred_col].to_numpy())"
+    "        df_data['train_df'],\n",
+    "        df_data['pred_df'][pred_col].to_numpy())"
    ]
   },
   {
@@ -265,7 +265,7 @@
    "source": [
     "logger.info('### PLOT X TRAIN TEST HISTOGRAM')\n",
     "visualizer_obj.plot_df_histograms(\n",
-    "    pd.concat([train_data['train_df'], train_data['test_df']]),\n",
+    "    pd.concat([df_data['train_df'], df_data['test_df']]),\n",
     "    np.concatenate(\n",
     "        (np.zeros(train_data['X_train'].shape[0]), np.ones(train_data['X_test'].shape[0])),\n",
     "        axis=0))"

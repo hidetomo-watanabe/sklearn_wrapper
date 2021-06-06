@@ -27,8 +27,8 @@ class DataTranslater(ConfigReader):
         self.translater.__dict__.update(self.__dict__)
         return
 
-    def get_raw_data(self):
-        return self.translater.get_raw_data()
+    def get_df_data(self):
+        return self.translater.get_df_data()
 
     def calc_train_data(self):
         return self.translater.calc_train_data()

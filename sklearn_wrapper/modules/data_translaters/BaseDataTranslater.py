@@ -33,11 +33,14 @@ class BaseDataTranslater(ConfigReader, LikeWrapper):
         self.raw_test_df = self.test_df.copy()
         return
 
-    def get_raw_data(self):
+    def get_df_data(self):
         output = {
-            'train_df': self.raw_train_df,
-            'test_df': self.raw_test_df,
-            'pred_df': self.raw_pred_df,
+            'raw_train_df': self.raw_train_df,
+            'raw_test_df': self.raw_test_df,
+            'raw_pred_df': self.raw_pred_df,
+            'train_df': self.train_df,
+            'test_df': self.test_df,
+            'pred_df': self.pred_df,
         }
         return output
 
@@ -64,9 +67,6 @@ class BaseDataTranslater(ConfigReader, LikeWrapper):
         logger.info(f'Y_train shape: {self.Y_train.shape}')
         logger.info(f'X_test shape: {self.X_test.shape}')
         output = {
-            'train_df': self.train_df,
-            'test_df': self.test_df,
-            'pred_df': self.pred_df,
             'feature_columns': self.feature_columns,
             'train_ids': self.train_ids,
             'test_ids': self.test_ids,
