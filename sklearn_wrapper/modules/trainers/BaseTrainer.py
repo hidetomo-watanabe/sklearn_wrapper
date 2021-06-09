@@ -220,6 +220,7 @@ class BaseTrainer(ConfigReader, LikeWrapper):
         scores = []
         estimators = []
         if cv == 1:
+            logger.warning('TRAIN = VAL SINCE CV=1')
             indexes = [
                 [range(X_train.shape[0]), range(X_train.shape[0])]
             ]
@@ -311,7 +312,10 @@ class BaseTrainer(ConfigReader, LikeWrapper):
             logger.info('    scores: %s' % scores)
             logger.info('    score mean: %s' % np.mean(scores))
             logger.info('    score std: %s' % np.std(scores))
-            return -1 * np.mean(scores)
+            logger.info('    score max: %s' % np.max(scores))
+            logger.info('    score min: %s' % np.min(scores))
+            # データリーク対策のために、holdoutを想定してminを採用
+            return -1 * np.min(scores)
 
         all_comb_num = 0
         for val in params.values():
