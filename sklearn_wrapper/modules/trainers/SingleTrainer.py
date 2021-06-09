@@ -264,8 +264,10 @@ class SingleTrainer(BaseTrainer):
                 pipeline, X_train, Y_train, scorer,
                 cv=val_cv, fit_params=self.fit_params, with_importances=True)
             estimators = pipelines
-            logger.info(f'cv model scores mean: {np.mean(scores)}')
-            logger.info(f'cv model scores std: {np.std(scores)}')
+            logger.info(f'cv model score mean: {np.mean(scores)}')
+            logger.info(f'cv model score std: {np.std(scores)}')
+            logger.info(f'cv model score max: {np.max(scores)}')
+            logger.info(f'cv model score min: {np.min(scores)}')
             if self.cv_select == 'min':
                 _min_index = np.array(scores).argmin()
                 score = scores[_min_index]
