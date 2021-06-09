@@ -82,7 +82,7 @@ class SingleTrainer(BaseTrainer):
         self.fit_params = self._to_pipeline_params(self.model, fit_params)
 
         # cv
-        self.cv_select = model_config.get('cv_select', 'nearest_mean')
+        self.cv_select = model_config.get('cv_select', 'min')
         self.n_trials = model_config.get('n_trials')
 
         # multiclass
@@ -259,18 +259,17 @@ class SingleTrainer(BaseTrainer):
                 cv=1, fit_params=self.fit_params, with_importances=True)
             score = scores[0]
             estimator = pipelines[0]
-        elif self.cv_select in ['nearest_mean', 'all_folds']:
+        elif self.cv_select in ['min', 'all_folds']:
             scores, pipelines = self.calc_cv_scores_estimators(
                 pipeline, X_train, Y_train, scorer,
                 cv=val_cv, fit_params=self.fit_params, with_importances=True)
             estimators = pipelines
             logger.info(f'cv model scores mean: {np.mean(scores)}')
             logger.info(f'cv model scores std: {np.std(scores)}')
-            if self.cv_select == 'nearest_mean':
-                nearest_index \
-                    = np.abs(np.array(scores) - np.mean(scores)).argmin()
-                score = scores[nearest_index]
-                estimator = estimators[nearest_index]
+            if self.cv_select == 'min':
+                _min_index = np.array(scores).argmin()
+                score = scores[_min_index]
+                estimator = estimators[_min_index]
             elif self.cv_select == 'all_folds':
                 _single_estimators = []
                 for i, _estimator in enumerate(estimators):
