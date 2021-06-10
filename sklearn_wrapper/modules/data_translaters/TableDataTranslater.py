@@ -82,14 +82,16 @@ class TableDataTranslater(BaseDataTranslater):
 
         # train
         train_encoded = []
-        for train_index, pred_index in indexes:
+        for train_index, val_index in indexes:
             model_obj.fit(
                 self.train_df.loc[train_index][columns],
                 self.pred_df.loc[train_index])
             _train_encoded = model_obj.transform(
-                self.train_df.loc[pred_index][columns])
+                self.train_df.loc[val_index][columns])
             train_encoded.append(_train_encoded)
         train_encoded = pd.concat(train_encoded)
+        # onehotとlabelでのnan対策
+        train_encoded = train_encoded.fillna(-1)
         train_encoded.sort_index(inplace=True)
 
         # test
