@@ -71,6 +71,7 @@ class Visualizer(ConfigReader, LikeWrapper):
         for label, df in [('train', train_df), ('test', test_df)]:
             logger.info('%s:' % label)
             display(df.head())
+            display(df.info())
             display(df.describe(include='all'))
 
     def plot_scatter_matrix(self, target, feature_columns):
