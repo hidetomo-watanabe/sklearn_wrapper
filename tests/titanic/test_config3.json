@@ -13,13 +13,13 @@
             "adhoc_df": {
                 "myfunc": "titanic",
                 "methods": [
-                    "translate_honorific_title",
+                    "translate_title",
                     "translate_age",
-                    "translate_familystatus"
+                    "translate_familysize"
                 ]
             },
             "deletion": [
-                "HonorificTitle",
+                "Title",
                 "Name",
                 "Ticket",
                 "Fare",
@@ -33,7 +33,7 @@
                 "options": [
                     {
                         "columns": [
-                            "FamilyStatus"
+                            "FamilySize"
                         ],
                         "model": "onehot"
                     }

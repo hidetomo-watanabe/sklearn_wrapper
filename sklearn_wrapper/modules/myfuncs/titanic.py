@@ -1,104 +1,107 @@
-import math
-
 from keras.layers.core import Dense
 from keras.models import Sequential
+
+import numpy as np
+
+import pandas as pd
 
 import torch.nn.functional as F
 from torch import nn
 
 
-def translate_honorific_title(train_df, test_df):
+def translate_title(train_df, test_df):
     #######################################
-    # name => honorific title
+    # name => title
     #######################################
-    train_values = []
-    test_values = []
-    for i, val in enumerate(train_df['Name'].to_numpy()):
-        title = val.split(',')[1].split('.')[0].strip()
-        if title in ['Mr', 'Mrs', 'Miss', 'Master']:
-            train_values.append(title)
-        else:
-            train_values.append('Other')
-    for i, val in enumerate(test_df['Name'].to_numpy()):
-        title = val.split(',')[1].split('.')[0].strip()
-        if title in ['Mr', 'Mrs', 'Miss', 'Master']:
-            test_values.append(title)
-        else:
-            test_values.append('Other')
-    train_df['HonorificTitle'] = train_values
-    test_df['HonorificTitle'] = test_values
+    for df in [train_df, test_df]:
+        df['Title'] = 'Other'
+        for i, val in enumerate(df['Name'].to_numpy()):
+            title = val.split(',')[1].split('.')[0].strip()
+            if title in ['Mr', 'Mrs', 'Miss', 'Master']:
+                df['Title'].to_numpy()[i] = title
     return train_df, test_df
 
 
 def translate_age(train_df, test_df):
     #######################################
-    # no age => mean grouped Mr, Mrs, Miss
+    # no age => median grouped by title, pclass
+    # binning 10
     #######################################
-    # get honorific title => age mean
-    t2m = {}
-    tmp = train_df.groupby('HonorificTitle')['Age']
-    for key in tmp.indices.keys():
-        t2m[key] = tmp.mean()[key]
-    # age range
+    _2median = train_df.groupby(['Title', 'Pclass'])['Age'].median()
     for df in [train_df, test_df]:
         for i, val in enumerate(df['Age'].to_numpy()):
-            if math.isnan(val):
-                df['Age'].to_numpy()[i] = \
-                    t2m[df['HonorificTitle'].to_numpy()[i]]
+            if not np.isnan(val):
+                continue
+
+            _t = df['Title'].to_numpy()[i]
+            _p = df['Pclass'].to_numpy()[i]
+            # pclassがない場合
+            if _2median[_t].get(_p):
+                df['Age'].to_numpy()[i] = _2median[_t][_p]
+            else:
+                df['Age'].to_numpy()[i] = _2median[_t].mean()
+    for df in [train_df, test_df]:
+        df['Age'] = pd.qcut(
+            df['Age'], 10, duplicates='drop', labels=False)
     return train_df, test_df
 
 
 def translate_fare(train_df, test_df):
     #######################################
-    # no fare => mean grouped by pclass
+    # no fare => median pclass=3, sibsp=0, parch=0
+    # binning 13
     #######################################
+    p2median = train_df.groupby(['Pclass', 'SibSp', 'Parch'])['Fare'].median()
     for df in [train_df, test_df]:
         for i, val in enumerate(df['Fare'].to_numpy()):
-            if math.isnan(val):
-                df['Fare'].to_numpy()[i] = \
-                    train_df.groupby('Pclass')['Fare'].mean()[
-                        df['Pclass'].to_numpy()[i]]
+            if not np.isnan(val):
+                continue
+
+            df['Fare'].to_numpy()[i] = p2median[3][0][0]
+    for df in [train_df, test_df]:
+        df['Fare'] = pd.qcut(
+            df['Fare'], 13, duplicates='drop', labels=False)
     return train_df, test_df
 
 
-def translate_familystatus(train_df, test_df):
+def translate_embarked(train_df, test_df):
     #######################################
-    # sibsp + parch == 0 => no family(0)
-    # survive vs no survive in same familyname
-    # => more survive(1) or less survive(2)
-    # delete sibsp, parch
-    # categorize after
+    # no embarked => S
     #######################################
-    # get family name
-    train_df['FamilyName'] = [''] * len(train_df['Name'].to_numpy())
-    for i, val in enumerate(train_df['Name'].to_numpy()):
-        train_df['FamilyName'].to_numpy()[i] = val.split(',')[0]
-    # get family name => family status
-    n2s = {}
-    tmp = train_df.groupby('FamilyName')['Survived']
-    for key in tmp.indices.keys():
-        survived_num = tmp.sum()[key]
-        no_survived_num = tmp.count()[key] - survived_num
-        if survived_num > no_survived_num:
-            n2s[key] = 1
-        else:
-            n2s[key] = 2
-    # main
     for df in [train_df, test_df]:
-        df['FamilyStatus'] = [0] * len(df['Name'].to_numpy())
-        for i, val in enumerate(df['Name'].to_numpy()):
-            family_name = val.split(',')[0]
-            # no family
-            if df['SibSp'].to_numpy()[i] + df['Parch'].to_numpy()[i] == 0:
+        for i, val in enumerate(df['Embarked'].to_numpy()):
+            if isinstance(val, str):
                 continue
-            # any family
-            if family_name in n2s:
-                df['FamilyStatus'].to_numpy()[i] = n2s[family_name]
-        # del sibsp, parch
-        del df['SibSp']
-        del df['Parch']
-    # del family name
-    del train_df['FamilyName']
+            df['Embarked'].to_numpy()[i] = 'S'
+    return train_df, test_df
+
+
+def translate_familysize(train_df, test_df):
+    #######################################
+    # sibsp + parch + 1
+    # grouping 1, 2-4, 5-6, 7-11
+    #######################################
+    for df in [train_df, test_df]:
+        df['FamilySize'] = df['SibSp'] + df['Parch'] + 1
+        df['FamilySize'] = df['FamilySize'].replace([1], 'Alone')
+        df['FamilySize'] = df['FamilySize'].replace([2, 3, 4], 'Small')
+        df['FamilySize'] = df['FamilySize'].replace([5, 6], 'Medium')
+        df['FamilySize'] = df['FamilySize'].replace([7, 8, 9, 10, 11], 'Large')
+    return train_df, test_df
+
+
+def translate_deck(train_df, test_df):
+    #######################################
+    # cabin[0], missing is M, T is A
+    # grouping ABC, DE, FG
+    #######################################
+    for df in [train_df, test_df]:
+        df['Deck'] = df['Cabin'].apply(
+            lambda x: x[0] if isinstance(x, str) else 'M')
+        df.loc[df['Deck'] == 'T', 'Deck'] = 'A'
+        df['Deck'] = df['Deck'].replace(['A', 'B', 'C'], 'ABC')
+        df['Deck'] = df['Deck'].replace(['D', 'E'], 'DE')
+        df['Deck'] = df['Deck'].replace(['F', 'G'], 'FG')
     return train_df, test_df
 
 
@@ -121,7 +124,7 @@ def _create_nn_model():
 
 
 def create_nn_model():
-    input_dim = 7
+    input_dim = 10
 
     class Net(nn.Module):
         def __init__(self):

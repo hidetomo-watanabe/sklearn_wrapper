@@ -13,9 +13,9 @@
             "adhoc_df": {
                 "myfunc": "titanic",
                 "methods": [
-                    "translate_honorific_title",
+                    "translate_title",
                     "translate_age",
-                    "translate_familystatus"
+                    "translate_familysize"
                 ]
             },
             "deletion": [
@@ -33,7 +33,7 @@
                     {
                         "columns": [
                             "Pclass",
-                            "FamilyStatus"
+                            "FamilySize"
                         ],
                         "model": "target"
                     }
