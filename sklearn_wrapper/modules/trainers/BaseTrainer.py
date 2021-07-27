@@ -15,6 +15,8 @@ import optuna
 
 import pandas as pd
 
+from pytorch_tabnet.tab_model import TabNetClassifier, TabNetRegressor
+
 from rgf.sklearn import RGFClassifier, RGFRegressor
 
 from sklearn.ensemble import GradientBoostingClassifier
@@ -139,6 +141,10 @@ class BaseTrainer(ConfigReader, LikeWrapper):
         elif model == 'torch_reg':
             return NeuralNetRegressor(
                 module=create_nn_model(), device=device, train_split=None)
+        elif model == 'tabnet_clf':
+            return TabNetClassifier()
+        elif model == 'tabnet_reg':
+            return TabNetRegressor()
         else:
             logger.error('NOT IMPLEMENTED BASE MODEL: %s' % model)
             raise Exception('NOT IMPLEMENTED')
@@ -180,7 +186,10 @@ class BaseTrainer(ConfigReader, LikeWrapper):
                     fit_params[f'{step[0]}__generator'] = aug_obj.datagen
                     fit_params[f'{step[0]}__batch_size'] = aug_obj.batch_size
                     new_steps = steps[: aug_index] + steps[aug_index + 1:]
-            elif step[1].__class__ in [LGBMClassifier, LGBMRegressor]:
+            elif step[1].__class__ in [
+                LGBMClassifier, LGBMRegressor,
+                TabNetClassifier, TabNetRegressor
+            ]:
                 if aug_obj:
                     X_test, Y_test = aug_obj.fit_resample(X_test, Y_test)
                 fit_params[f'{step[0]}__eval_set'] = [(X_test, Y_test)]
@@ -208,6 +217,10 @@ class BaseTrainer(ConfigReader, LikeWrapper):
             return None
 
         _estimator = estimator.steps[-1][1]
+        if not hasattr(_estimator, 'score'):
+            logger.warning('NO SCORE METHOD, THEN NO PERMUTATION')
+            return None
+
         perm = PermutationImportance(_estimator, random_state=42).fit(
             self.toarray_like(X_train), Y_train)
         return eli5.explain_weights_df(

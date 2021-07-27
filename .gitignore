@@ -1,6 +1,9 @@
 __pycache__
 .cache
+
 catboost_info
+.models
+
 *.ipynb
 sklearn_wrapper/configs/config.json
 sklearn_wrapper/for_kernel/predict_for_kernel.py

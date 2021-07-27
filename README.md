@@ -49,6 +49,8 @@
   - KerasClassifier
 - torch_clf
   - NeuralNetClassifier
+- tabnet_clf
+  - TabNetClassifier
 
 ##### regression
 - linear_reg
@@ -83,6 +85,8 @@
   - KerasRegressor
 - torch_reg
   - NeuralNetRegressor
+- tabnet_reg
+  - TabNetRegressor
 
 ### CUI flow
 - cp sklearn_wrapper/configs/config.json.org sklearn_wrapper/configs/config.json

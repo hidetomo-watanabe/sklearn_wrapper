@@ -49,7 +49,7 @@
             "fold": "stratifiedk",
             "num": 3
         },
-        "modelname": "tmp_titanic13",
+        "modelname": "tmp_titanic14",
         "ensemble_model_config": {
             "mode": "stacking",
             "model": "log_reg",
@@ -57,14 +57,11 @@
         },
         "single_model_configs": [
             {
-                "model": "g_nb",
+                "model": "tabnet_clf",
                 "missing_imputation": "mean",
-                "x_scaler": "standard",
-                "n_trials": 5,
                 "fit_params": {
                 },
                 "params": {
-                    "var_smoothing": {"type": "float", "from": 0.0000000001, "to": 0.000001}
                 }
             }
         ]
