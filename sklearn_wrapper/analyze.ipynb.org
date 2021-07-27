@@ -433,9 +433,10 @@
     "logger.info('### SHAP')\n",
     "\n",
     "for modelname, estimator in estimator_data['single_estimators']:\n",
+    "    _estimator = estimator.steps[0][1]  # change properly\n",
     "    logger.info(f'##### {modelname}')\n",
     "    visualizer_obj.display_shap(\n",
-    "        estimator, train_data['X_train'], train_data['Y_train'], train_data['feature_columns'])"
+    "        _estimator, train_data['X_train'], train_data['Y_train'], train_data['feature_columns'])"
    ]
   },
   {

@@ -45,7 +45,6 @@ class Visualizer(ConfigReader, LikeWrapper):
             plt.xscale('log')
 
         ax.legend(loc="best")
-        plt.tick_params(colors='white')
         plt.show()
 
     def display_dfs(self, train_df, test_df, pred_df):
@@ -222,13 +221,21 @@ class Visualizer(ConfigReader, LikeWrapper):
             model=estimator, feature_perturbation='tree_path_dependent',
             model_output='margin')
         shap_values = explainer.shap_values(
-            X=X_train.toarray(), y=Y_train)
-        shap.summary_plot(
-            shap_values, X_train.toarray(),
-            feature_names=feature_columns)
+            X=self.toarray_like(X_train), y=Y_train)
+        for _label, _s_val in enumerate(shap_values):
+            logger.info(f'label: {_label}')
+            shap.summary_plot(
+                _s_val, self.toarray_like(X_train),
+                feature_names=feature_columns)
+
+        """
+        label = 1
+        n = 0  # select sample
+        logger.info(f'label: {label}, n: {n}')
         shap.force_plot(
-            base_value=explainer.expected_value, shap_values=shap_values,
-            feature_names=feature_columns)
+            explainer.expected_value[label], shap_values[label][n, :],
+            feature_names=feature_columns, link='logit', matplotlib=True)
+        """
 
     def plot_roc(self, Y_train, Y_train_pred_proba):
         fpr, tpr, thresholds = metrics.roc_curve(
