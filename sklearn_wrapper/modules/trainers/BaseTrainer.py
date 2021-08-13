@@ -209,6 +209,9 @@ class BaseTrainer(ConfigReader, LikeWrapper):
         return feature_importances / np.sum(feature_importances.to_numpy())
 
     def _get_permutation_importances(self, estimator, X_train, Y_train):
+        if not self.configs['fit'].get('permutation'):
+            return None
+
         if X_train.ndim > 2:
             return None
 
