@@ -162,10 +162,16 @@ class BaseTrainer(ConfigReader, LikeWrapper):
 
     def _trans_xy_for_fit(self, estimator, X_train, Y_train):
         for step in estimator.steps:
+            # keras clf is categorical
             if step[1].__class__ in [MyKerasClassifier]:
                 if self.ravel_like(Y_train).ndim == 1:
                     Y_train = to_categorical(Y_train)
-        Y_train = self.ravel_like(Y_train)
+                    break
+            # tabnet reg is no ravel
+            elif step[1].__class__ in [TabNetRegressor]:
+                break
+        else:
+            Y_train = self.ravel_like(Y_train)
         return X_train, Y_train
 
     def _add_val_to_fit_params(self, estimator, fit_params, X_test, Y_test):
