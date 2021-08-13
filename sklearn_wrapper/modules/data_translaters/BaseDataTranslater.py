@@ -96,8 +96,7 @@ class BaseDataTranslater(ConfigReader, LikeWrapper):
 
         logger.info('translate y_train with %s' % y_pre)
         if y_pre == 'log':
-            self.Y_train = np.array(list(map(np.log, self.Y_train)))
-            self.Y_train = self.Y_train.reshape(-1, 1)
+            self.Y_train = np.log(self.Y_train)
         else:
             logger.error('NOT IMPLEMENTED FIT Y_PRE: %s' % y_pre)
             raise Exception('NOT IMPLEMENTED')
