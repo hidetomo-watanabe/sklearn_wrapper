@@ -82,9 +82,20 @@ class Visualizer(ConfigReader, LikeWrapper):
     def plot_corrcoef(self, target, feature_columns):
         target = self.sample_like(target, frac=self.sample_frac)
 
+        _corrcoef = np.corrcoef(target, rowvar=False)
+        over_30_indexes = np.argwhere(np.abs(_corrcoef) >= 0.3)
+        logger.info('corrcoef over 0.3:')
+        for i1, i2 in over_30_indexes:
+            # only half
+            if i1 >= i2:
+                continue
+            logger.info(
+                f'{feature_columns[i1]} vs {feature_columns[i2]}'
+                f' is {_corrcoef[i1][i2]}')
+        return
         fig, ax = plt.subplots(figsize=(10, 10))
         sns.heatmap(
-            np.corrcoef(target, rowvar=False),
+            _corrcoef,
             xticklabels=feature_columns,
             yticklabels=feature_columns,
             fmt="1.2f", annot=True, lw=0.7, cmap='YlGnBu')
