@@ -13,6 +13,10 @@ from skorch import NeuralNetClassifier, NeuralNetRegressor
 
 
 logger = getLogger('predict').getChild('Trainer')
+if 'MyKerasClassifier' not in globals():
+    from ..commons.MyKeras import MyKerasClassifier
+if 'MyKerasRegressor' not in globals():
+    from ..commons.MyKeras import MyKerasRegressor
 if 'BaseTrainer' not in globals():
     from .BaseTrainer import BaseTrainer
 if 'SingleTrainer' not in globals():
@@ -99,6 +103,7 @@ class Trainer(BaseTrainer):
 
     def calc_estimator_data(self):
         # configs
+        modelname = self.configs['fit'].get('modelname', 'tmp_model')
         model_configs = self.configs['fit']['single_model_configs']
         self.train_cv, self.val_cv = \
             self.get_cvs_from_json(self.configs['fit'].get('cv'))
@@ -121,9 +126,9 @@ class Trainer(BaseTrainer):
                 _config, self.scorer,
                 self.train_cv, self.val_cv, nn_func=myfunc)
             single_scores.append(_score)
-            modelname = f'{i}_{_config["model"]}'
+            _modelname = f'{modelname}_{i}_{_config["model"]}'
             self.single_estimators.append(
-                (modelname, _estimator))
+                (_modelname, _estimator))
 
         # ensemble
         if len(self.single_estimators) == 1:
@@ -156,16 +161,26 @@ class Trainer(BaseTrainer):
             targets = self.single_estimators + [
                 (modelname, self.estimator)
             ]
-        for modelname, estimator in targets:
-            output_path = self.configs['data']['output_dir']
-            _savename = f'{output_path}/{modelname}'
 
+        def _dump(estimator, savename):
             if hasattr(estimator, 'steps'):
                 if estimator.steps[-1][1].__class__ in [
                     NeuralNetClassifier, NeuralNetRegressor
                 ]:
                     logger.warning('NOT IMPLEMENTED TORCH MODEL SAVE')
-            else:
-                with open(f'{_savename}.pickle', 'wb') as f:
-                    dill.dump(estimator, f)
+                    return
+                if estimator.steps[-1][1].__class__ in [
+                    MyKerasClassifier, MyKerasRegressor
+                ]:
+                    logger.warning('NOT IMPLEMENTED KEREAS MODEL SAVE')
+                    return
+
+            with open(f'{savename}.pickle', 'wb') as f:
+                dill.dump(estimator, f)
+            return
+
+        for modelname, estimator in targets:
+            output_path = self.configs['data']['output_dir']
+            _savename = f'{output_path}/{modelname}'
+            _dump(estimator, _savename)
         return modelname
