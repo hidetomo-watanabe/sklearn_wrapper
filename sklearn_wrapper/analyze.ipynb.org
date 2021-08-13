@@ -250,6 +250,17 @@
    "metadata": {},
    "outputs": [],
    "source": [
+    "logger.info('### PLOT Y TRAIN HISTOGRAM')\n",
+    "visualizer_obj.plot_ndarray_histograms(\n",
+    "    [train_data['Y_train']], ['y'])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
     "logger.info('### PLOT X TRAIN HISTOGRAM')\n",
     "for pred_col in visualizer_obj.pred_cols:\n",
     "    visualizer_obj.plot_df_histograms(\n",
