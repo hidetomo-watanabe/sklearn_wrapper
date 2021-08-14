@@ -188,12 +188,12 @@ class BaseTrainer(ConfigReader, LikeWrapper):
         if not aug_index:
             return estimator, fit_params
 
-        fit_params[f'{steps[-1][0]}__with_generator'] = True
-        fit_params[f'{steps[-1][0]}__generator'] = aug_obj.datagen
-        fit_params[f'{steps[-1][0]}__batch_size'] = aug_obj.batch_size
-
-        # to-do: fix org pipeline
-        estimator.steps = steps[: aug_index] + steps[aug_index + 1:]
+        # excepting keras, as it is pipeline
+        if steps[-1][1].__class__ in [MyKerasClassifier, MyKerasRegressor]:
+            fit_params[f'{steps[-1][0]}__with_generator'] = True
+            fit_params[f'{steps[-1][0]}__generator'] = aug_obj.datagen
+            fit_params[f'{steps[-1][0]}__batch_size'] = aug_obj.batch_size
+            estimator.steps = steps[: aug_index] + steps[aug_index + 1:]
 
         return estimator, fit_params
 
