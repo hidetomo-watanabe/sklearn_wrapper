@@ -355,6 +355,12 @@ class BaseTrainer(ConfigReader, LikeWrapper):
             if _perm_importances is not None:
                 logger.info(f'  permutation importances #{i}')
                 logger.info(_perm_importances)
+
+        logger.info('    scores: %s' % scores)
+        logger.info('    score mean: %s' % np.mean(scores))
+        logger.info('    score std: %s' % np.std(scores))
+        logger.info('    score max: %s' % np.max(scores))
+        logger.info('    score min: %s' % np.min(scores))
         return scores, pipelines
 
     def calc_best_params(
@@ -406,11 +412,6 @@ class BaseTrainer(ConfigReader, LikeWrapper):
                 logger.warning('SET SCORE 0')
                 scores = [0]
 
-            logger.info('    scores: %s' % scores)
-            logger.info('    score mean: %s' % np.mean(scores))
-            logger.info('    score std: %s' % np.std(scores))
-            logger.info('    score max: %s' % np.max(scores))
-            logger.info('    score min: %s' % np.min(scores))
             # データリーク対策のために、holdoutを想定してminを採用
             return -1 * np.min(scores)
 
@@ -453,6 +454,6 @@ class BaseTrainer(ConfigReader, LikeWrapper):
         study = optuna.create_study()
         study.optimize(_objective, n_trials=n_trials)
         best_params = study.best_params
-        best_score_mean = -1 * study.best_trial.value
-        logger.info('best score mean: %s' % best_score_mean)
+        best_score_min = -1 * study.best_trial.value
+        logger.info('best score min: %s' % best_score_min)
         return best_params
