@@ -242,6 +242,15 @@
                     "max_epochs": [3],
                     "batch_size": [50]
                 }
+            },
+            {
+                "model": "tabnet_clf",
+                "n_trials": 1,
+                "fit_params": {
+                    "eval_metric": ["auc"],
+                },
+                "params": {
+                }
             }
         ],
         "permutation": false
