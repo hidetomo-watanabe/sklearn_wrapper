@@ -255,16 +255,16 @@ class SingleTrainer(BaseTrainer):
         # to create model, use val_cv
         logger.info(f'get estimator with cv_select: {self.cv_select}')
         if self.cv_select == 'train_all':
-            scores, pipelines = self.calc_cv_scores_estimators(
+            scores, pipelines = self.calc_cv_scores_pipelines(
                 pipeline, X_train, Y_train, scorer,
                 cv=1, fit_params=self.fit_params, with_importances=True)
             score = scores[0]
-            estimator = pipelines[0]
+            pipeline = pipelines[0]
+            estimator = pipeline
         elif self.cv_select in ['min', 'all_folds']:
-            scores, pipelines = self.calc_cv_scores_estimators(
+            scores, pipelines = self.calc_cv_scores_pipelines(
                 pipeline, X_train, Y_train, scorer,
                 cv=val_cv, fit_params=self.fit_params, with_importances=True)
-            estimators = pipelines
             logger.info(f'cv model score mean: {np.mean(scores)}')
             logger.info(f'cv model score std: {np.std(scores)}')
             logger.info(f'cv model score max: {np.max(scores)}')
@@ -272,19 +272,20 @@ class SingleTrainer(BaseTrainer):
             if self.cv_select == 'min':
                 _min_index = np.array(scores).argmin()
                 score = scores[_min_index]
-                estimator = estimators[_min_index]
+                pipeline = pipelines[_min_index]
+                estimator = pipeline
             elif self.cv_select == 'all_folds':
-                _single_estimators = []
-                for i, _estimator in enumerate(estimators):
-                    _single_estimators.append(
-                        (f'{i}_fold', _estimator))
+                _single_pipelines = []
+                for i, _pipeline in enumerate(pipelines):
+                    _single_pipelines.append(
+                        (f'{i}_fold', _pipeline))
                 weights = EnsembleTrainer.get_weights(scores)
 
                 score = np.average(scores, weights=weights)
                 ensemble_trainer_obj = EnsembleTrainer(
                     X_train, Y_train, self.X_test, self.configs)
                 estimator = ensemble_trainer_obj.calc_ensemble_estimator(
-                    _single_estimators, ensemble_config={'mode': 'average'},
+                    _single_pipelines, ensemble_config={'mode': 'average'},
                     weights=weights, scorer=scorer)
         else:
             logger.error(f'NOT IMPLEMENTED CV SELECT: {self.cv_select}')

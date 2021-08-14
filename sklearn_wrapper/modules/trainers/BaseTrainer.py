@@ -161,8 +161,8 @@ class BaseTrainer(ConfigReader, LikeWrapper):
         # no oversampling
         return estimator
 
-    def _trans_xy_for_fit(self, estimator, X_train, Y_train):
-        for step in estimator.steps:
+    def _trans_xy_for_fit(self, pipeline, X_train, Y_train):
+        for step in pipeline.steps:
             # keras clf is categorical
             if step[1].__class__ in [MyKerasClassifier]:
                 if self.ravel_like(Y_train).ndim == 1:
@@ -175,8 +175,8 @@ class BaseTrainer(ConfigReader, LikeWrapper):
             Y_train = self.ravel_like(Y_train)
         return X_train, Y_train
 
-    def _add_augmentor_to_fit_params(self, estimator, fit_params):
-        steps = estimator.steps
+    def _add_augmentor_to_fit_params(self, pipeline, fit_params):
+        steps = pipeline.steps
 
         aug_index = None
         aug_obj = None
@@ -186,31 +186,31 @@ class BaseTrainer(ConfigReader, LikeWrapper):
                 aug_obj = step[1]
 
         if not aug_index:
-            return estimator, fit_params
+            return pipeline, fit_params
 
         # excepting keras, as it is pipeline
         if steps[-1][1].__class__ in [MyKerasClassifier, MyKerasRegressor]:
             fit_params[f'{steps[-1][0]}__with_generator'] = True
             fit_params[f'{steps[-1][0]}__generator'] = aug_obj.datagen
             fit_params[f'{steps[-1][0]}__batch_size'] = aug_obj.batch_size
-            estimator.steps = steps[: aug_index] + steps[aug_index + 1:]
+            pipeline.steps = steps[: aug_index] + steps[aug_index + 1:]
 
-        return estimator, fit_params
+        return pipeline, fit_params
 
-    def _add_eval_to_fit_params(self, estimator, fit_params, X_test, Y_test):
+    def _add_eval_to_fit_params(self, pipeline, fit_params, X_test, Y_test):
         # transform X_test to eval_X_test
         # drop fit_resample step
-        eval_steps = [(x[1], x[2]) for x in estimator._iter()]
+        eval_steps = [(x[1], x[2]) for x in pipeline._iter()]
         # only model
         if len(eval_steps) == 1:
             eval_X_test = X_test
         else:
-            pre_estimator = copy.deepcopy(estimator)
+            pre_pipeline = copy.deepcopy(pipeline)
             # drop model step
-            pre_estimator.steps = eval_steps[:-1]
-            eval_X_test = pre_estimator.fit_transform(X_test)
+            pre_pipeline.steps = eval_steps[:-1]
+            eval_X_test = pre_pipeline.fit_transform(X_test)
 
-        steps = estimator.steps
+        steps = pipeline.steps
         if steps[-1][1].__class__ in [MyKerasClassifier, MyKerasRegressor]:
             fit_params[f'{steps[-1][0]}__validation_data'] = \
                 (eval_X_test, Y_test)
@@ -222,8 +222,8 @@ class BaseTrainer(ConfigReader, LikeWrapper):
                 [(eval_X_test, Y_test)]
         return fit_params
 
-    def _get_feature_importances(self, estimator):
-        _estimator = estimator.steps[-1][1]
+    def _get_feature_importances(self, pipeline):
+        _estimator = pipeline.steps[-1][1]
         if not hasattr(_estimator, 'feature_importances_'):
             return None
 
@@ -234,7 +234,7 @@ class BaseTrainer(ConfigReader, LikeWrapper):
             :, np.argsort(feature_importances.to_numpy()[0])[::-1]]
         return feature_importances / np.sum(feature_importances.to_numpy())
 
-    def _get_permutation_importances(self, estimator, X_train, Y_train):
+    def _get_permutation_importances(self, pipeline, X_train, Y_train):
         if not self.configs['fit'].get('permutation'):
             return None
 
@@ -245,7 +245,7 @@ class BaseTrainer(ConfigReader, LikeWrapper):
             logger.warning('COLUMNS IS TOO LARGE, THEN NO PERMUTATION')
             return None
 
-        _estimator = estimator.steps[-1][1]
+        _estimator = pipeline.steps[-1][1]
         if not hasattr(_estimator, 'score'):
             logger.warning('NO SCORE METHOD, THEN NO PERMUTATION')
             return None
@@ -255,12 +255,12 @@ class BaseTrainer(ConfigReader, LikeWrapper):
         return eli5.explain_weights_df(
             perm, feature_names=self.feature_columns)
 
-    def calc_cv_scores_estimators(
-        self, estimator, X_train, Y_train,
+    def calc_cv_scores_pipelines(
+        self, pipeline, X_train, Y_train,
         scorer, cv, fit_params, with_importances=False
     ):
         scores = []
-        estimators = []
+        pipelines = []
         if cv == 1:
             logger.warning('TRAIN = VAL SINCE CV=1')
             indexes = [
@@ -270,44 +270,44 @@ class BaseTrainer(ConfigReader, LikeWrapper):
             indexes = cv.split(X_train, Y_train)
 
         X_train_for_fit, Y_train_for_fit = \
-            self._trans_xy_for_fit(estimator, X_train, Y_train)
+            self._trans_xy_for_fit(pipeline, X_train, Y_train)
         for i, (train_index, val_index) in enumerate(indexes):
-            _estimator = copy.deepcopy(estimator)
-            _estimator, fit_params = \
-                self._add_augmentor_to_fit_params(_estimator, fit_params)
+            _pipeline = copy.deepcopy(pipeline)
+            _pipeline, fit_params = \
+                self._add_augmentor_to_fit_params(_pipeline, fit_params)
             fit_params = self._add_eval_to_fit_params(
-                _estimator, fit_params,
+                _pipeline, fit_params,
                 X_train_for_fit[val_index],
                 Y_train_for_fit[val_index])
-            _estimator.fit(
+            _pipeline.fit(
                 X_train_for_fit[train_index],
                 Y_train_for_fit[train_index],
                 **fit_params)
-            estimators.append(_estimator)
+            pipelines.append(_pipeline)
             scores.append(scorer(
-                _estimator,
+                _pipeline,
                 X_train_for_fit[val_index], Y_train[val_index]))
 
             # importances
             if not with_importances:
                 continue
 
-            _feature_importances = self._get_feature_importances(_estimator)
+            _feature_importances = self._get_feature_importances(_pipeline)
             if _feature_importances is not None:
                 logger.info(f'  feature importances #{i}')
                 logger.info(_feature_importances)
 
             _perm_importances = self._get_permutation_importances(
-                _estimator,
+                _pipeline,
                 X_train_for_fit[train_index], Y_train_for_fit[train_index])
             if _perm_importances is not None:
                 logger.info(f'  permutation importances #{i}')
                 logger.info(_perm_importances)
-        return scores, estimators
+        return scores, pipelines
 
     def calc_best_params(
         self,
-        base_estimator, X_train, Y_train,
+        base_pipeline, X_train, Y_train,
         params, scorer, train_cv, fit_params,
         n_trials=None, multiclass=None, undersampling=None
     ):
@@ -340,14 +340,14 @@ class BaseTrainer(ConfigReader, LikeWrapper):
             args = _get_args(trial, params)
             logger.info('  params: %s' % args)
 
-            estimator = base_estimator
-            estimator.set_params(**args)
-            estimator = self.to_second_estimator(
-                estimator, multiclass, undersampling)
+            pipeline = base_pipeline
+            pipeline.set_params(**args)
+            pipeline = self.to_second_estimator(
+                pipeline, multiclass, undersampling)
 
             try:
-                scores, _ = self.calc_cv_scores_estimators(
-                    estimator, X_train, Y_train,
+                scores, _ = self.calc_cv_scores_pipelines(
+                    pipeline, X_train, Y_train,
                     scorer, train_cv, fit_params)
             except Exception as e:
                 logger.warning(e)
