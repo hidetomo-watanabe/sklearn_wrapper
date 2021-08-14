@@ -39,7 +39,8 @@
                     "model": "pca"
                 },
                 "fit_params": {
-                    "eval_metric": ["rmse"]
+                    "eval_metric": ["rmse"],
+                    "max_epochs": 30
                 },
                 "params": {
                 }

@@ -60,6 +60,7 @@
                 "model": "tabnet_clf",
                 "missing_imputation": "mean",
                 "fit_params": {
+                    "max_epochs": 30
                 },
                 "params": {
                 }

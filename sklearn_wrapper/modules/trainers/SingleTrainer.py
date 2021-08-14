@@ -373,6 +373,7 @@ class SingleTrainer(BaseTrainer):
         self.base_pipeline = \
             self._get_base_pipeline(model_config, nn_func, X_train)
         logger.info(f'base_pipeline: {self.base_pipeline}')
+        logger.info(f'fit_params: {self.fit_params}')
 
         # fit
         logger.info('fit')

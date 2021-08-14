@@ -16,6 +16,7 @@ import optuna
 
 import pandas as pd
 
+from pytorch_tabnet.pretraining import TabNetPretrainer
 from pytorch_tabnet.tab_model import TabNetClassifier, TabNetRegressor
 
 from rgf.sklearn import RGFClassifier, RGFRegressor
@@ -197,29 +198,67 @@ class BaseTrainer(ConfigReader, LikeWrapper):
 
         return pipeline, fit_params
 
-    def _add_eval_to_fit_params(self, pipeline, fit_params, X_test, Y_test):
-        # transform X_test to eval_X_test
+    def _preprocess_x(self, pipeline, X):
         # drop fit_resample step
-        eval_steps = [(x[1], x[2]) for x in pipeline._iter()]
+        transform_steps = [(x[1], x[2]) for x in pipeline._iter()]
         # only model
-        if len(eval_steps) == 1:
-            eval_X_test = X_test
+        if len(transform_steps) == 1:
+            return X
         else:
             pre_pipeline = copy.deepcopy(pipeline)
             # drop model step
-            pre_pipeline.steps = eval_steps[:-1]
-            eval_X_test = pre_pipeline.fit_transform(X_test)
+            pre_pipeline.steps = transform_steps[:-1]
+            return pre_pipeline.fit_transform(X)
 
+    def _add_eval_to_fit_params(self, pipeline, fit_params, X_val, Y_val):
         steps = pipeline.steps
+
+        if steps[-1][1].__class__ not in [
+            MyKerasClassifier, MyKerasRegressor,
+            LGBMClassifier, LGBMRegressor,
+            TabNetClassifier, TabNetRegressor,
+        ]:
+            return fit_params
+
+        eval_X_val = self._preprocess_x(pipeline, X_val)
         if steps[-1][1].__class__ in [MyKerasClassifier, MyKerasRegressor]:
             fit_params[f'{steps[-1][0]}__validation_data'] = \
-                (eval_X_test, Y_test)
+                (eval_X_val, Y_val)
         elif steps[-1][1].__class__ in [
             LGBMClassifier, LGBMRegressor,
-            TabNetClassifier, TabNetRegressor
+            TabNetClassifier, TabNetRegressor,
         ]:
             fit_params[f'{steps[-1][0]}__eval_set'] = \
-                [(eval_X_test, Y_test)]
+                [(eval_X_val, Y_val)]
+        return fit_params
+
+    def _add_tabnet_unsupervised_model_to_fit_params(
+        self, pipeline, fit_params, X_train, X_val
+    ):
+        steps = pipeline.steps
+
+        if steps[-1][1].__class__ not in [
+            TabNetClassifier, TabNetRegressor,
+        ]:
+            return fit_params
+
+        eval_X_train = self._preprocess_x(pipeline, X_train)
+        eval_X_val = self._preprocess_x(pipeline, X_val)
+
+        logger.info('tabnet unsupervised pre-training')
+        _uns_fit_params = {}
+        for k, v in fit_params.items():
+            if f'{steps[-1][0]}__' not in k:
+                continue
+            if 'from_unsupervised' in k or 'eval' in k:
+                continue
+
+            _uns_fit_params[k.replace(f'{steps[-1][0]}__', '')] = v
+        unsupervised_model = TabNetPretrainer()
+        unsupervised_model.fit(
+            X_train=eval_X_train, eval_set=[eval_X_val], **_uns_fit_params)
+
+        fit_params[f'{steps[-1][0]}__from_unsupervised'] = unsupervised_model
         return fit_params
 
     def _get_feature_importances(self, pipeline):
@@ -272,13 +311,22 @@ class BaseTrainer(ConfigReader, LikeWrapper):
         X_train_for_fit, Y_train_for_fit = \
             self._trans_xy_for_fit(pipeline, X_train, Y_train)
         for i, (train_index, val_index) in enumerate(indexes):
+            # cvごとに依存させないため、deepcopy
             _pipeline = copy.deepcopy(pipeline)
+
+            # update fit_params
             _pipeline, fit_params = \
                 self._add_augmentor_to_fit_params(_pipeline, fit_params)
             fit_params = self._add_eval_to_fit_params(
                 _pipeline, fit_params,
                 X_train_for_fit[val_index],
                 Y_train_for_fit[val_index])
+            fit_params = self._add_tabnet_unsupervised_model_to_fit_params(
+                _pipeline, fit_params,
+                X_train_for_fit[train_index],
+                X_train_for_fit[val_index])
+
+            # fit
             _pipeline.fit(
                 X_train_for_fit[train_index],
                 Y_train_for_fit[train_index],
