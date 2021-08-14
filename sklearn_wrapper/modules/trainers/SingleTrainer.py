@@ -145,6 +145,7 @@ class SingleTrainer(BaseTrainer):
             _is_categorical = (self.model == 'keras_clf')
             pipeline.append(
                 ('reshaper', Reshaper(X_train.shape[1:], _is_categorical)))
+
         return pipeline, undersampling_clf
 
     def _get_base_pipeline(self, model_config, nn_func, X_train):

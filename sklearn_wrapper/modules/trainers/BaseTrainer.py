@@ -1,3 +1,4 @@
+import copy
 from logging import getLogger
 
 from catboost import CatBoostClassifier, CatBoostRegressor
@@ -174,8 +175,9 @@ class BaseTrainer(ConfigReader, LikeWrapper):
             Y_train = self.ravel_like(Y_train)
         return X_train, Y_train
 
-    def _add_val_to_fit_params(self, estimator, fit_params, X_test, Y_test):
+    def _add_augmentor_to_fit_params(self, estimator, fit_params):
         steps = estimator.steps
+
         aug_index = None
         aug_obj = None
         for i, step in enumerate(steps):
@@ -183,24 +185,42 @@ class BaseTrainer(ConfigReader, LikeWrapper):
                 aug_index = i
                 aug_obj = step[1]
 
-        new_steps = steps
-        for step in steps:
-            if step[1].__class__ in [MyKerasClassifier, MyKerasRegressor]:
-                fit_params[f'{step[0]}__validation_data'] = (X_test, Y_test)
-                if aug_obj:
-                    fit_params[f'{step[0]}__with_generator'] = True
-                    fit_params[f'{step[0]}__generator'] = aug_obj.datagen
-                    fit_params[f'{step[0]}__batch_size'] = aug_obj.batch_size
-                    new_steps = steps[: aug_index] + steps[aug_index + 1:]
-            elif step[1].__class__ in [
-                LGBMClassifier, LGBMRegressor,
-                TabNetClassifier, TabNetRegressor
-            ]:
-                if aug_obj:
-                    X_test, Y_test = aug_obj.fit_resample(X_test, Y_test)
-                fit_params[f'{step[0]}__eval_set'] = [(X_test, Y_test)]
-        estimator.steps = new_steps
+        if not aug_index:
+            return estimator, fit_params
+
+        fit_params[f'{steps[-1][0]}__with_generator'] = True
+        fit_params[f'{steps[-1][0]}__generator'] = aug_obj.datagen
+        fit_params[f'{steps[-1][0]}__batch_size'] = aug_obj.batch_size
+
+        # to-do: fix org pipeline
+        estimator.steps = steps[: aug_index] + steps[aug_index + 1:]
+
         return estimator, fit_params
+
+    def _add_eval_to_fit_params(self, estimator, fit_params, X_test, Y_test):
+        # transform X_test to eval_X_test
+        # drop fit_resample step
+        eval_steps = [(x[1], x[2]) for x in estimator._iter()]
+        # only model
+        if len(eval_steps) == 1:
+            eval_X_test = X_test
+        else:
+            pre_estimator = copy.deepcopy(estimator)
+            # drop model step
+            pre_estimator.steps = eval_steps[:-1]
+            eval_X_test = pre_estimator.fit_transform(X_test)
+
+        steps = estimator.steps
+        if steps[-1][1].__class__ in [MyKerasClassifier, MyKerasRegressor]:
+            fit_params[f'{steps[-1][0]}__validation_data'] = \
+                (eval_X_test, Y_test)
+        elif steps[-1][1].__class__ in [
+            LGBMClassifier, LGBMRegressor,
+            TabNetClassifier, TabNetRegressor
+        ]:
+            fit_params[f'{steps[-1][0]}__eval_set'] = \
+                [(eval_X_test, Y_test)]
+        return fit_params
 
     def _get_feature_importances(self, estimator):
         _estimator = estimator.steps[-1][1]
@@ -252,8 +272,10 @@ class BaseTrainer(ConfigReader, LikeWrapper):
         X_train_for_fit, Y_train_for_fit = \
             self._trans_xy_for_fit(estimator, X_train, Y_train)
         for i, (train_index, val_index) in enumerate(indexes):
-            _estimator, fit_params = self._add_val_to_fit_params(
-                estimator, fit_params,
+            _estimator, fit_params = \
+                self._add_augmentor_to_fit_params(estimator, fit_params)
+            fit_params = self._add_eval_to_fit_params(
+                _estimator, fit_params,
                 X_train_for_fit[val_index],
                 Y_train_for_fit[val_index])
             _estimator.fit(
