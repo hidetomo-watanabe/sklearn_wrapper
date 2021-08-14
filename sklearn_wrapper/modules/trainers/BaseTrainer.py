@@ -272,8 +272,9 @@ class BaseTrainer(ConfigReader, LikeWrapper):
         X_train_for_fit, Y_train_for_fit = \
             self._trans_xy_for_fit(estimator, X_train, Y_train)
         for i, (train_index, val_index) in enumerate(indexes):
+            _estimator = copy.deepcopy(estimator)
             _estimator, fit_params = \
-                self._add_augmentor_to_fit_params(estimator, fit_params)
+                self._add_augmentor_to_fit_params(_estimator, fit_params)
             fit_params = self._add_eval_to_fit_params(
                 _estimator, fit_params,
                 X_train_for_fit[val_index],
