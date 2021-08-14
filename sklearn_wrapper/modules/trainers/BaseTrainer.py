@@ -198,19 +198,22 @@ class BaseTrainer(ConfigReader, LikeWrapper):
 
         return pipeline, fit_params
 
-    def _preprocess_x(self, pipeline, X):
+    def _preprocess_x(self, pipeline, X_train, X_val):
         # drop fit_resample step
         transform_steps = [(x[1], x[2]) for x in pipeline._iter()]
         # only model
         if len(transform_steps) == 1:
-            return X
+            return X_val
         else:
             pre_pipeline = copy.deepcopy(pipeline)
             # drop model step
             pre_pipeline.steps = transform_steps[:-1]
-            return pre_pipeline.fit_transform(X)
+            pre_pipeline.fit(X_train)
+            return pre_pipeline.transform(X_val)
 
-    def _add_eval_to_fit_params(self, pipeline, fit_params, X_val, Y_val):
+    def _add_eval_to_fit_params(
+        self, pipeline, fit_params, X_train, X_val, Y_val
+    ):
         steps = pipeline.steps
 
         if steps[-1][1].__class__ not in [
@@ -220,7 +223,7 @@ class BaseTrainer(ConfigReader, LikeWrapper):
         ]:
             return fit_params
 
-        eval_X_val = self._preprocess_x(pipeline, X_val)
+        eval_X_val = self._preprocess_x(pipeline, X_train, X_val)
         if steps[-1][1].__class__ in [MyKerasClassifier, MyKerasRegressor]:
             fit_params[f'{steps[-1][0]}__validation_data'] = \
                 (eval_X_val, Y_val)
@@ -242,8 +245,8 @@ class BaseTrainer(ConfigReader, LikeWrapper):
         ]:
             return fit_params
 
-        eval_X_train = self._preprocess_x(pipeline, X_train)
-        eval_X_val = self._preprocess_x(pipeline, X_val)
+        eval_X_train = self._preprocess_x(pipeline, X_train, X_train)
+        eval_X_val = self._preprocess_x(pipeline, X_train, X_val)
 
         logger.info('tabnet unsupervised pre-training')
         _uns_fit_params = {}
@@ -319,6 +322,7 @@ class BaseTrainer(ConfigReader, LikeWrapper):
                 self._add_augmentor_to_fit_params(_pipeline, fit_params)
             fit_params = self._add_eval_to_fit_params(
                 _pipeline, fit_params,
+                X_train_for_fit[train_index],
                 X_train_for_fit[val_index],
                 Y_train_for_fit[val_index])
             fit_params = self._add_tabnet_unsupervised_model_to_fit_params(
