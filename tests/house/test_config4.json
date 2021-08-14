@@ -1,0 +1,53 @@
+{
+    "data": {
+        "train_path": "./tests/house/train.csv",
+        "test_path": "./tests/house/test.csv",
+        "output_dir": "./outputs",
+        "type": "table",
+        "pred_cols": ["SalePrice"],
+        "id_col": "Id"
+    },
+    "pre": {
+        "train_mode": "reg",
+        "y_pre": "log",
+        "table": {
+            "category_encoding": {
+                "default": {
+                    "model": "onehot"
+                },
+                "options": [
+                ]
+            }
+        }
+    },
+    "fit": {
+        "train_mode": "reg",
+        "scoring": "neg_mean_squared_error",
+        "modelname": "tmp_house4",
+        "ensemble_model_config": {
+            "mode": "average",
+            "model": "linear_reg",
+            "k": 10
+        },
+        "single_model_configs": [
+            {
+                "model": "tabnet_reg",
+                "missing_imputation": "mean",
+                "x_scaler": "standard",
+                "dimension_reduction": {
+                    "n": 30,
+                    "model": "pca"
+                },
+                "fit_params": {
+                    "eval_metric": ["rmse"]
+                },
+                "params": {
+                }
+            }
+        ]
+    },
+    "post": false,
+    "notify": {
+        "slack": "https://hooks.slack.com/services/hogehoge"
+    }
+}

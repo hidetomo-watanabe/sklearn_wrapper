@@ -98,6 +98,8 @@ class TestPredict(unittest.TestCase):
         result = predict.main(f'{TEST_PATH}/house/test_config2.json')
         # ensemble(vote)
         result = predict.main(f'{TEST_PATH}/house/test_config3.json')
+        # tabnet
+        result = predict.main(f'{TEST_PATH}/house/test_config4.json')
 
     # digit_part table multi lable classification
     def test_digit_part(self):
