@@ -218,6 +218,7 @@ class BaseTrainer(ConfigReader, LikeWrapper):
 
         if steps[-1][1].__class__ not in [
             MyKerasClassifier, MyKerasRegressor,
+            XGBClassifier, XGBRegressor,
             LGBMClassifier, LGBMRegressor,
             TabNetClassifier, TabNetRegressor,
         ]:
@@ -228,6 +229,7 @@ class BaseTrainer(ConfigReader, LikeWrapper):
             fit_params[f'{steps[-1][0]}__validation_data'] = \
                 (eval_X_val, Y_val)
         elif steps[-1][1].__class__ in [
+            XGBClassifier, XGBRegressor,
             LGBMClassifier, LGBMRegressor,
             TabNetClassifier, TabNetRegressor,
         ]:
